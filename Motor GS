@@ -604,7 +604,7 @@ function APS_panel() {
   if (ult >= 2) {
     var desde = Math.max(2, ult - 599);
     var filas = sh.getRange(desde, 1, ult - desde + 1, 6).getValues();
-    for (var i = filas.length - 1; i >= 0 && eventos.length < 25; i--) {
+    for (var i = filas.length - 1; i >= 0 && eventos.length < 40; i--) {
       var v = filas[i], mod = String(v[2]), acc = String(v[3]), ref = String(v[4]), det = String(v[5]), actor = String(v[1]);
       var ctx = (mod === 'APS' ? apsMapa : (mod === 'PLD' ? pldMapa : null));
       if (!ctx || !ctx[ref]) continue;

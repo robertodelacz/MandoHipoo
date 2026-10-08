@@ -967,11 +967,52 @@
     .hm-bc.pld .hm-reg { background: #e5f5f7; } .hm-bc.pld .hm-reg:hover { background: #d3edf0; }
     .hm-card-sub { border-top: none; }
     .hm-fh { border-bottom: none; box-shadow: 0 1px 0 rgba(26, 34, 74, .06); } .hm-ff { border-top: none; box-shadow: 0 -1px 0 rgba(26, 34, 74, .06); }
-    .hm-logo { padding: 12px 34px; border-radius: 18px; }
-    .hm-logo img { height: auto; width: 320px; max-width: 62vw; max-height: 110px; }
-    .sp-logo img { height: auto; width: 440px; max-width: 78vw; max-height: 170px; }
-    @media (max-width: 560px) { .hm-logo img { width: 230px; height: auto; } .hm-logo { padding: 10px 22px; } .sp-logo img { width: 300px; height: auto; } }
+    .hm-logo { padding: 16px 34px; border-radius: 18px; }
+    .hm-logo img { height: auto; width: 300px; max-width: 62vw; max-height: none; }
+    .sp-logo { padding: 30px 56px; border-radius: 26px; }
+    .sp-logo img { height: auto; width: 460px; max-width: 74vw; max-height: none; }
+    @media (max-width: 560px) { .hm-logo img { width: 210px; height: auto; } .hm-logo { padding: 12px 22px; } .sp-logo img { width: 280px; height: auto; } .sp-logo { padding: 22px 30px; } }
 
+
+    /* ═══ Panel lateral de novedades ═══ */
+    .hm-cols { display: block; }
+    .hm-tr { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .hm-novbtn { display: inline-flex; align-items: center; gap: 9px; border: none; cursor: pointer; border-radius: 999px; padding: 8px 16px 8px 12px; background: #fff; color: #1a224a; font: 800 13px 'Montserrat', sans-serif; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .5); transition: transform .15s; }
+    .hm-novbtn:hover { transform: translateY(-2px); }
+    .hm-novbtn .ic svg { width: 19px; height: 19px; display: block; color: #364494; }
+    .hm-novbtn b { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; display: none; place-items: center; background: #d92d3f; color: #fff; font-size: 11.5px; }
+    .hm-novbtn b.on { display: grid; animation: hmPop .4s; }
+    .hm-side { position: fixed; top: 0; right: 0; bottom: 0; z-index: 60; width: 390px; max-width: 100vw; display: flex; flex-direction: column; background: #fff; box-shadow: -24px 0 60px -24px rgba(13, 18, 43, .55); transform: translateX(105%); transition: transform .38s cubic-bezier(.3, .8, .25, 1); visibility: hidden; }
+    .hm.nov-on .hm-side { transform: none; visibility: visible; }
+    .hm-sh { flex: none; padding: 20px 20px 14px; color: #fff; background: radial-gradient(120% 140% at 100% 0%, #3d4fb0 0%, transparent 60%), linear-gradient(120deg, #364494, #1a224a); }
+    .hm-sh-t { display: flex; align-items: center; gap: 12px; }
+    .hm-sh-i { flex: none; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; background: rgba(255, 255, 255, .14); color: #bff3f8; }
+    .hm-sh-i svg { width: 23px; height: 23px; }
+    .hm-sh b { display: block; font: 600 24px/1.1 'Fraunces', Georgia, serif; }
+    .hm-sh small { display: block; margin-top: 2px; font-size: 12px; color: #b7c2ee; }
+    .hm-sx { margin-left: auto; flex: none; width: 34px; height: 34px; border: none; border-radius: 50%; cursor: pointer; background: rgba(255, 255, 255, .14); color: #fff; font-size: 14px; }
+    .hm-sx:hover { background: rgba(255, 255, 255, .26); }
+    .hm-sh-m { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+    .hm-sh .hm-pill { display: inline-flex; align-items: center; gap: 7px; font: 800 10.5px 'Inter', sans-serif; letter-spacing: 1px; text-transform: uppercase; padding: 5px 11px; border-radius: 999px; }
+    .hm-sh .hm-pill i { width: 7px; height: 7px; border-radius: 50%; animation: hmPulse 2s infinite; }
+    .hm-sh .hm-new { display: none; font: 800 11px 'Montserrat', sans-serif; color: #fff; background: #d92d3f; border-radius: 999px; padding: 4px 11px; } .hm-sh .hm-new.on { display: inline-block; }
+    .hm-sh .hm-pill { color: #3be8a5; background: rgba(59, 232, 165, .14); } .hm-sh .hm-pill i { background: #3be8a5; }
+    .hm-sh .hm-pill.off { color: #ffd28a; background: rgba(255, 176, 59, .16); } .hm-sh .hm-pill.off i { background: #ffb03b; }
+    .hm-sh .hm-new { margin-left: 0; }
+    .hm-side .hm-fl { flex: 1; max-height: none; padding: 4px 0 12px; background: #fff; }
+    .hm-dia { position: sticky; top: 0; z-index: 2; padding: 12px 20px 7px; font: 800 10.5px 'Montserrat', sans-serif; letter-spacing: 1.8px; text-transform: uppercase; color: #5a6488; background: linear-gradient(#fff 75%, rgba(255, 255, 255, 0)); }
+    .hm-side .hm-ff { flex: none; padding: 12px 20px; background: #f4f7fc; }
+    .hm-side .hm-ev { padding-left: 22px; padding-right: 20px; }
+    .hm-scrim { position: fixed; inset: 0; z-index: 59; background: rgba(13, 18, 43, .5); opacity: 0; pointer-events: none; transition: opacity .3s; }
+    @media (min-width: 1200px) {
+      .hm { transition: padding-right .38s cubic-bezier(.3, .8, .25, 1); }
+      .hm.nov-on { padding-right: 390px; }
+      body.nov-open #ayBtn { right: 410px; } body.nov-open #hmToast { right: 410px; } body.nov-open #ayNota { right: 478px; }
+    }
+    @media (max-width: 1199px) {
+      .hm.nov-on .hm-scrim { opacity: 1; pointer-events: auto; }
+      body.nov-open #ayBtn, body.nov-open #ayNota { display: none !important; }
+    }
     /* ═══ Ayuda («?»): botón flotante, menú, recorrido y reporte ═══ */
     #ayBtn { position: fixed; right: 20px; bottom: 20px; z-index: 880; width: 58px; height: 58px; border-radius: 50%; border: none; cursor: pointer; background: linear-gradient(145deg, #4256c4, #2b377a); color: #fff; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 30px; line-height: 1; display: grid; place-items: center; box-shadow: 0 14px 30px -8px rgba(26, 34, 74, .6), 0 0 0 4px rgba(255, 255, 255, .9); transition: transform .18s, box-shadow .18s; }
     #ayBtn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 20px 36px -10px rgba(26, 34, 74, .65), 0 0 0 4px #fff; }
@@ -1018,6 +1059,19 @@
     .ay-acc { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
     .ay-ok { text-align: center; padding: 10px 6px 4px; } .ay-ok .chk { width: 68px; height: 68px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; background: #e3f6ee; color: #0f9d6e; } .ay-ok .chk svg { width: 34px; height: 34px; }
     .ay-ok .fol { display: inline-block; margin: 6px 0 14px; padding: 6px 14px; border-radius: 999px; background: #eef2fb; font: 800 13px 'Montserrat', sans-serif; letter-spacing: 1px; color: #364494; }
+
+    #ayTip { overflow: visible; padding: 18px 20px 16px; }
+    #ayTip .ay-th { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    #ayTip .ay-ti { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(145deg, #e3e8fb, #cfd8f6); color: #364494; }
+    #ayTip .ay-ti svg { width: 22px; height: 22px; }
+    #ayTip h5 { margin: 0 0 6px; }
+    #ayTip .pts i.hecho { background: #8fe1ea; }
+    .ay-flecha { position: absolute; width: 16px; height: 16px; background: #fff; transform: rotate(45deg); border-radius: 3px; }
+    #ayTip[data-lado="derecha"] .ay-flecha { left: -7px; } #ayTip[data-lado="izquierda"] .ay-flecha { right: -7px; }
+    #ayTip[data-lado="abajo"] .ay-flecha { top: -7px; } #ayTip[data-lado="arriba"] .ay-flecha { bottom: -7px; } #ayTip[data-lado="ninguno"] .ay-flecha { display: none; }
+    .ay-para ol { margin: 6px 0 8px; padding-left: 20px; } .ay-para li { margin: 3px 0; } .ay-para small { display: block; color: #4f747a; font-size: 11.5px; line-height: 1.45; }
+    .ay-para b:first-child { display: block; font: 800 12px 'Montserrat', sans-serif; letter-spacing: .5px; color: #1a224a; }
+    @media (max-width: 560px) { #ayTip .pie { flex-wrap: wrap; } #ayTip .pts { flex: 1 0 100%; margin: 0 0 10px; } #ayTip .ay-b { padding: 10px 15px; } #ayTip .ay-b.pri { margin-left: auto; } }
     #hmToast { bottom: 92px; }
     @media (max-width: 560px) { #ayBtn { right: 14px; bottom: 14px; width: 54px; height: 54px; } #ayMenu { right: 14px; bottom: 80px; } #ayNota { right: 76px; bottom: 22px; } .ay-tipos { grid-template-columns: 1fr; } .ay-card { padding: 22px 18px 18px; } }
     /* Pantallas claras (contratos APS y revisión): superficie propia, por encima del video y su capa oscura de fondo */
@@ -1074,7 +1128,8 @@
     <div class="hm-in">
       <div class="hm-top">
         <div class="hm-brand"><span class="hm-logo" id="hmLogo"></span><span class="hm-sep"></span><span class="hm-sys">Mesa de control inmobiliaria</span></div>
-        <div class="hm-live" id="hmLive" title="La información se actualiza sola"><i></i><b>En vivo</b><span id="hmLiveT">conectando…</span></div>
+        <div class="hm-tr"><button type="button" class="hm-novbtn" id="hmNovBtn" aria-controls="hmSide" aria-expanded="false"><span class="ic"></span><span>Novedades</span><b id="hmNovN">0</b></button>
+          <div class="hm-live" id="hmLive" title="La información se actualiza sola"><i></i><b>En vivo</b><span id="hmLiveT">conectando…</span></div></div>
       </div>
       <p class="hm-fecha" id="hmFecha"></p>
       <h1 id="inicioSaludo">¡Bienvenido!</h1>
@@ -1089,14 +1144,19 @@
       <section>
         <div id="inicioTarjetas"></div>
       </section>
-      <aside class="hm-feed" aria-label="Novedades en vivo">
-        <div class="hm-fh"><b>Novedades</b><span class="hm-pill" id="hmPill"><i></i>En vivo</span><span class="hm-new" id="hmNew">0</span></div>
-        <ul class="hm-fl" id="hmFeed"></ul>
-        <div class="hm-ff"><span id="hmFeedPie">Se actualiza sola cada pocos segundos</span><button type="button" id="hmLeer" disabled>Marcar como leídas</button></div>
-      </aside>
     </div>
     <div class="hm-pie">Hipoo · Financiera Cualli — Mesa de control</div>
   </main>
+  <div class="hm-scrim" id="hmScrim"></div>
+  <aside class="hm-side" id="hmSide" aria-label="Novedades en vivo" aria-hidden="true">
+    <div class="hm-sh">
+      <div class="hm-sh-t"><span class="hm-sh-i"></span><div><b>Novedades</b><small>Historial de actividad</small></div>
+        <button type="button" class="hm-sx" id="hmSideX" aria-label="Cerrar novedades">✕</button></div>
+      <div class="hm-sh-m"><span class="hm-pill" id="hmPill"><i></i>En vivo</span><span class="hm-new" id="hmNew">0</span></div>
+    </div>
+    <ul class="hm-fl" id="hmFeed"></ul>
+    <div class="hm-ff"><span id="hmFeedPie">Se actualiza sola</span><button type="button" id="hmLeer" disabled>Marcar como leídas</button></div>
+  </aside>
 </div>
 <div id="hmToast" role="status" aria-live="polite"></div>
 
@@ -1414,6 +1474,36 @@
 <? } ?>
 
 <script>
+/* Logo de Hipoo: el archivo trae mucho margen blanco alrededor, por eso el logo se veía diminuto dentro de su caja. Se recorta ese margen
+   (en el navegador, sin tocar el archivo) para que el logo ocupe todo el ancho que se le da. Si algo falla, se usa la imagen tal cual. */
+window.HIPOO_LOGO = <?!= JSON.stringify(APS_logoDataUri_()).replace(/</g, '\\u003c') ?>;
+window.LOGO_SRC = window.HIPOO_LOGO || '';
+(function () {
+  function aplicar(src) { window.LOGO_SRC = src; var a = document.querySelectorAll('img[data-logo]'); for (var i = 0; i < a.length; i++) { a[i].src = src; } }
+  function recorta(src, cors) {
+    var im = new Image(); if (cors) im.crossOrigin = 'anonymous';
+    im.onload = function () {
+      try {
+        var w = im.naturalWidth, h = im.naturalHeight; if (!w || !h) return;
+        var c = document.createElement('canvas'); c.width = w; c.height = h; var x = c.getContext('2d'); x.drawImage(im, 0, 0);
+        var d = x.getImageData(0, 0, w, h).data, x0 = w, y0 = h, x1 = -1, y1 = -1;
+        for (var yy = 0; yy < h; yy++) for (var xx = 0; xx < w; xx++) {
+          var k = (yy * w + xx) * 4;
+          if (d[k + 3] > 24 && !(d[k] > 242 && d[k + 1] > 242 && d[k + 2] > 242)) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+        }
+        if (x1 <= x0 || y1 <= y0) return;
+        var m = Math.round(Math.max(x1 - x0, y1 - y0) * 0.04); x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(w - 1, x1 + m); y1 = Math.min(h - 1, y1 + m);
+        var cw = x1 - x0 + 1, ch = y1 - y0 + 1; if (cw > w * 0.92 && ch > h * 0.92) return;      // ya venía recortado
+        var o = document.createElement('canvas'); o.width = cw; o.height = ch; o.getContext('2d').drawImage(c, x0, y0, cw, ch, 0, 0, cw, ch);
+        aplicar(o.toDataURL('image/png'));
+      } catch (e) { /* imagen de otro origen o sin permiso de lectura: se queda como está */ }
+    };
+    im.src = src;
+  }
+  if (window.HIPOO_LOGO) recorta(window.HIPOO_LOGO, false); else recorta('https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000', true);
+})();
+</script>
+<script>
   // Lógica funcional de la interfaz conectada al Backend de Apps Script
   var config = {
     vendedorRegimen: 'PF',
@@ -1689,7 +1779,7 @@
     var visto = false; try { visto = window.sessionStorage.getItem('hm_splash') === '1'; } catch (e) { visto = false; }
     if (visto || /[?&]modulo=/.test(window.location.search)) { sp.parentNode.removeChild(sp); return; }
     try { window.sessionStorage.setItem('hm_splash', '1'); } catch (e) { /* sin almacenamiento: se verá en cada carga, sin problema */ }
-    document.getElementById('spLogo').innerHTML = '<img src="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000" alt="Hipoo" onerror="respaldoLogo(this)">';
+    document.getElementById('spLogo').innerHTML = '<img data-logo src="' + (window.LOGO_SRC || 'https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000') + '" alt="Hipoo" onerror="respaldoLogo(this)">';
     document.body.classList.add('splash-on');
     var reducido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, cerrado = false;
     function cerrar() { if (cerrado) return; cerrado = true; sp.classList.add('out'); document.body.classList.remove('splash-on'); setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900); }
@@ -1702,6 +1792,7 @@
   function irA(s) {
     if (s === 'consola') s = 'revaps';
     window.PANTALLA = s;
+    setTimeout(function () { if (typeof novSync === 'function') novSync(); }, 0);
     if (typeof ayFin === 'function') { ayFin(); ayMenu(false); ayCerrarRep(); }
     if (window.APS_UI && APS_UI.cerrarModales) APS_UI.cerrarModales();      // una ventana ampliada no debe quedarse abierta al cambiar de pantalla
     var destino = (s === 'inicio') ? 'pantalla-inicio' : CONTENEDOR[s];
@@ -1741,18 +1832,22 @@
   var PENDIENTES = { aps: 0, pld: 0 };      // por revisar (los llena el panel en vivo); 0 = ningún aviso
   var HM = { panel: null, ahoraSrv: '', t0: 0, visto: '', errores: 0, cargando: false, prev: {}, vistos: {}, primera: true, ultimoOk: 0 };
   var IC = {
-    pld: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.4 3 8 7.5 9.5 4.5-1.500 7.500-5.100 7.500-9.500V6z"/><path d="m8.800 12 2.400 2.400 4-4.800"/></svg>',
-    aps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.500 11 12 4l8.500 7"/><path d="M5.500 9.500V20h13V9.500"/><path d="M10 20v-5.500h4V20"/></svg>',
-    revaps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="m9 15 2 2 4-4.500"/></svg>',
-    revpld: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>',
-    tablero: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
-    go: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
-    ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.500 4.500 4.500L19 7.500"/></svg>',
-    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v7M12 17.500v.5"/></svg>',
-    bad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
-    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12M12 6l6 6-6 6"/></svg>',
-    campana: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17V11a6 6 0 1 1 12 0v6l1.500 2h-15zM10 21h4"/></svg>',
-    alerta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.500 20h19z"/><path d="M12 10v4.500M12 17.500v.5"/></svg>'
+    pld: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 5.9v5.5c0 4.3 2.9 7.7 7 9.4 4.1-1.7 7-5.1 7-9.4V5.9z" fill="currentColor" fill-opacity=".16"/><path d="m8.6 12.1 2.5 2.5 4.4-4.9"/></svg>',
+    aps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 11.4 12 4.8l7.8 6.6V19a1.5 1.5 0 0 1-1.5 1.5H5.7A1.5 1.5 0 0 1 4.2 19z" fill="currentColor" fill-opacity=".16"/><path d="M2.8 12.2 12 4.4l9.2 7.8"/><path d="M10 20.5v-4.6a2 2 0 0 1 4 0v4.6"/></svg>',
+    revaps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h7L18.5 8.5v11a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1z" fill="currentColor" fill-opacity=".16"/><path d="M13.5 3.5v5h5"/><path d="m9.1 14.4 2 2 3.8-4"/></svg>',
+    revpld: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5H6.5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-14a1 1 0 0 0-1-1h-2" fill="currentColor" fill-opacity=".16"/><rect x="8.5" y="3" width="7" height="3.4" rx="1.2" fill="#fff" fill-opacity=".0"/><path d="M9 11h6M9 14.5h6M9 18h3.5"/></svg>',
+    tablero: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="3.8" height="8" rx="1" fill="currentColor" fill-opacity=".16"/><rect x="10.1" y="4.5" width="3.8" height="15.5" rx="1" fill="currentColor" fill-opacity=".16"/><rect x="16.2" y="9" width="3.8" height="11" rx="1" fill="currentColor" fill-opacity=".16"/><path d="M3 20.5h18"/></svg>',
+    go: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.500"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v7.500M12 17.500v.5"/></svg>',
+    bad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7 7 17"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v6M12 7v.5"/></svg>',
+    campana: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.500V11a6 6 0 1 1 12 0v5.500l1.500 1.500h-15z" fill="currentColor" fill-opacity=".16"/><path d="M10 20.500a2.200 2.200 0 0 0 4 0"/></svg>',
+    alerta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.800 2.700 19.800a1 1 0 0 0 .9 1.500h16.800a1 1 0 0 0 .9-1.500z" fill="currentColor" fill-opacity=".16"/><path d="M12 10v4.500M12 17.500v.4"/></svg>',
+    ayuda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".16"/><path d="M9.600 9.500a2.500 2.500 0 1 1 3.600 2.200c-.8.4-1.200 1-1.200 1.800M12 17v.3"/></svg>',
+    guia: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".16"/><path d="m15.600 8.400-2 5.200-5.200 2 2-5.200z"/></svg>',
+    lista: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3" fill="currentColor" fill-opacity=".16"/><path d="M8 9h8M8 12.500h8M8 16h4.500"/></svg>',
+    monitor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.500" width="18" height="12" rx="2" fill="currentColor" fill-opacity=".16"/><path d="M8.500 20h7M12 16.500V20"/></svg>'
   };
   function hmEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function almacen(op, k, v) { try { return op === 'get' ? window.localStorage.getItem(k) : window.localStorage.setItem(k, v); } catch (e) { return null; } }
@@ -1763,7 +1858,7 @@
     var b = document.createElement('b'); b.innerHTML = 'hipoo<i>.mx</i>'; img.parentNode.replaceChild(b, img);
   }
   window.respaldoLogo = respaldoLogo;
-  function logoHtml(grande) { return '<img src="' + LOGO_URL + '" alt="Hipoo" onerror="respaldoLogo(this)">'; }
+  function logoHtml(grande) { return '<img data-logo src="' + (window.LOGO_SRC || LOGO_URL) + '" alt="Hipoo" onerror="respaldoLogo(this)">'; }
   function tarjeta(id, titulo, texto, o) {
     o = o || {};
     var badge = o.badge ? '<span class="hm-badge">' + (o.badge > 99 ? '99+' : o.badge) + '</span>' : '';
@@ -1860,16 +1955,47 @@
   }
   function evId(e) { return e.fecha + '|' + e.modulo + '|' + e.id + '|' + e.titulo; }
   function esNuevo(e) { return e.fecha > HM.visto; }
+  /* Panel lateral: en pantallas grandes arranca abierto (se recuerda lo que elija cada quien); en chicas es un cajón que se abre con el botón «Novedades». */
+  function novAbierto() { return document.getElementById('pantalla-inicio').classList.contains('nov-on'); }
+  function novSync() {
+    var inicio = document.getElementById('pantalla-inicio'), on = novAbierto() && inicio.style.display !== 'none';
+    document.body.classList.toggle('nov-open', on);
+    document.getElementById('hmSide').setAttribute('aria-hidden', on ? 'false' : 'true');
+    document.getElementById('hmNovBtn').setAttribute('aria-expanded', on ? 'true' : 'false');
+  }
+  function novAbre(v, recordar) {
+    document.getElementById('pantalla-inicio').classList.toggle('nov-on', !!v); novSync();
+    if (recordar !== false && window.innerWidth >= 1200) almacen('set', 'hm_nov', v ? '1' : '0');
+  }
+  (function novInicio() {
+    var g = almacen('get', 'hm_nov');
+    document.getElementById('pantalla-inicio').classList.toggle('nov-on', window.innerWidth >= 1200 && g !== '0'); novSync();
+    document.getElementById('hmNovBtn').querySelector('.ic').innerHTML = IC.campana;
+    document.querySelector('.hm-sh-i').innerHTML = IC.campana;
+    document.getElementById('hmNovBtn').addEventListener('click', function () { novAbre(!novAbierto()); });
+    document.getElementById('hmSideX').addEventListener('click', function () { novAbre(false); });
+    document.getElementById('hmScrim').addEventListener('click', function () { novAbre(false, false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && novAbierto() && window.innerWidth < 1200 && !(window.AY && AY.pasos.length)) novAbre(false, false); });
+  })();
+  function etiquetaDia(d) {
+    var hoy = String(HM.ahoraSrv || '').slice(0, 10) || d, p = function (iso) { var m = iso.split('-'); return new Date(+m[0], +m[1] - 1, +m[2]); };
+    var dif = Math.round((p(hoy) - p(d)) / 86400000);
+    if (dif <= 0) return 'Hoy'; if (dif === 1) return 'Ayer';
+    var t = p(d).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }); return t.charAt(0).toUpperCase() + t.slice(1);
+  }
   function pintaFeed() {
     var ul = document.getElementById('hmFeed'), P = HM.panel, btn = document.getElementById('hmLeer'), nuevo = document.getElementById('hmNew');
     if (!USUARIO.email) return;
     if (!P) { ul.innerHTML = '<li class="hm-vacio">Cargando novedades…</li>'; return; }
     var ev = P.eventos, n = ev.filter(esNuevo).length;
     nuevo.textContent = n + (n === 1 ? ' nueva' : ' nuevas'); nuevo.classList.toggle('on', n > 0); btn.disabled = n === 0;
+    var nb = document.getElementById('hmNovN'); if (nb) { nb.textContent = n > 99 ? '99+' : n; nb.classList.toggle('on', n > 0); }
     if (!ev.length) { ul.innerHTML = '<li class="hm-vacio">' + IC.campana + '<br>Todo en orden: por ahora no hay novedades.<br>Aquí aparecerá, en cuanto ocurra, cada contrato enviado, aprobado o con observaciones.</li>'; actualizaNavNov(); return; }
+    var ultimoDia = '';
     ul.innerHTML = ev.map(function (e) {
-      var fresh = HM.recien && HM.recien[evId(e)];
-      return '<li class="hm-ev t-' + e.tono + (esNuevo(e) ? ' nuevo' : '') + (fresh ? ' fresh' : '') + '" data-ev="' + hmEsc(e.modulo + '|' + e.id) + '"><span class="dot">' + (IC[e.tono] || IC.info) + '</span><div class="tx"><b>' + hmEsc(e.titulo) + '</b><p>' + hmEsc(e.texto) + '</p><time>' + hmEsc(relTiempo(e.fecha)) + '</time></div></li>';
+      var fresh = HM.recien && HM.recien[evId(e)], dia = e.fecha.slice(0, 10), cab = '';
+      if (dia !== ultimoDia) { ultimoDia = dia; cab = '<li class="hm-dia">' + hmEsc(etiquetaDia(dia)) + '</li>'; }
+      return cab + '<li class="hm-ev t-' + e.tono + (esNuevo(e) ? ' nuevo' : '') + (fresh ? ' fresh' : '') + '" data-ev="' + hmEsc(e.modulo + '|' + e.id) + '"><span class="dot">' + (IC[e.tono] || IC.info) + '</span><div class="tx"><b>' + hmEsc(e.titulo) + '</b><p>' + hmEsc(e.texto) + '</p><time>' + hmEsc(relTiempo(e.fecha)) + '</time></div></li>';
     }).join('');
     actualizaNavNov();
   }
@@ -1967,52 +2093,71 @@
     ayEl('ayOpTour').style.display = (window.PANTALLA || 'inicio') === 'inicio' ? '' : 'none';
     if (abrir) { almacen('set', 'ay_visto', '1'); var p = m.querySelector('.ay-op:not([style*="none"])'); if (p) p.focus(); }
   }
+  function ayVisible(e) { return !!(e && e.getClientRects().length); }
   function ayPasos() {
     var q = function (sel) { return document.querySelector('#pantalla-inicio ' + sel); }, P = [], coord = USUARIO.rol === 'coordinador';
-    P.push({ el: q('.hm-hero .hm-in'), t: 'Tu pantalla principal', x: 'Desde aquí llegas a todo. Arriba ves quién eres y tu rol (' + (coord ? 'Coordinación' : 'Asesor') + '), que define lo que puedes hacer.' });
-    P.push({ el: ayEl('hmLive'), t: 'Se actualiza sola', x: 'Esta luz verde indica que la información está en vivo: no necesitas recargar la página. Si se pone ámbar, está reconectando.' });
-    P.push({ el: q('.hm-bc.aps'), t: 'Generar contrato APS', x: 'Aquí capturas el Aviso de Prestación de Servicios paso a paso. Al terminar lo envías a revisión de la coordinación. «Ver mis registros» abre todos tus contratos y su estado.' });
-    P.push({ el: q('.hm-bc.pld'), t: 'Generar documento Pre PLD', x: 'Crea el Pre-Aviso PLD de una operación, agrega pagos a una operación que ya existe o consulta los documentos que ya hiciste.' });
-    P.push({ el: q('.hm-kpi'), t: 'Tus números de un vistazo', x: 'Cuántos contratos tienes en borrador, en revisión y aprobados' + (coord ? ' (de todo el equipo)' : '') + '. Toca cualquier cuadro para ir directo a esa lista.' });
-    var k2 = document.querySelectorAll('#pantalla-inicio .hm-kpi')[1]; if (k2) P.push({ el: k2, t: 'Pre PLD: su avance', x: 'Lo mismo para Pre PLD. En rojo aparece lo que ' + (coord ? 'ya observaste y espera corrección' : 'la coordinación te regresó con observaciones y debes corregir') + '.' });
+    P.push({ el: function () { return q('.hm-hero .hm-in'); }, ic: 'guia', t: 'Tu pantalla principal', x: 'Desde aquí llegas a todo. Arriba ves quién eres y tu rol (' + (coord ? 'Coordinación' : 'Asesor') + '), que define lo que puedes hacer.' });
+    P.push({ el: function () { return ayEl('hmLive'); }, ic: 'monitor', t: 'Se actualiza sola', x: 'La luz verde indica que la información está en vivo: no necesitas recargar la página. Si se pone ámbar, está reconectando.' });
+    P.push({ el: function () { return q('.hm-bc.aps'); }, ic: 'aps', t: 'Generar contrato APS', x: 'Aquí capturas el Aviso de Prestación de Servicios paso a paso. Al terminar lo envías a revisión de la coordinación. «Ver mis registros» abre todos tus contratos y su estado.' });
+    P.push({ el: function () { return q('.hm-bc.pld'); }, ic: 'pld', t: 'Generar documento Pre PLD', x: 'Crea el Pre-Aviso PLD de una operación, agrega pagos a una operación que ya existe o consulta los documentos que ya hiciste.' });
+    P.push({ el: function () { return q('.hm-kpi'); }, ic: 'lista', t: 'Tus números de un vistazo', x: 'Cuántos contratos tienes en borrador, en revisión y aprobados' + (coord ? ' (de todo el equipo)' : '') + '. Toca cualquier cuadro para ir directo a esa lista.' });
+    P.push({ el: function () { return document.querySelectorAll('#pantalla-inicio .hm-kpi')[1]; }, ic: 'pld', t: 'Pre PLD: su avance', x: 'Lo mismo para Pre PLD. En rojo aparece lo que ' + (coord ? 'ya observaste y espera corrección' : 'la coordinación te regresó con observaciones y debes corregir') + '.' });
     if (coord) {
-      var cr = q('.hm-card [data-ir="revaps"]'); if (cr) P.push({ el: cr.parentNode, t: 'Revisión de contratos APS', x: 'Tu bandeja: revisas cada contrato, corriges lo necesario y lo apruebas. El globo naranja indica cuántos esperan revisión.' });
-      var cp = q('.hm-card [data-ir="revpld"]'); if (cp) P.push({ el: cp.parentNode, t: 'Revisión de Pre PLD', x: 'Aquí ves los documentos enviados, puedes marcarlos como revisados o regresarlos con observaciones.' });
-      var ct = q('.hm-card [data-ir="tablero"]'); if (ct) P.push({ el: ct.parentNode, t: 'Tablero Hipoo', x: 'Indicadores de la actividad inmobiliaria.' });
+      P.push({ el: function () { var b = q('.hm-card [data-ir="revaps"]'); return b && b.parentNode; }, ic: 'revaps', t: 'Revisión de contratos APS', x: 'Tu bandeja: revisas cada contrato, corriges lo necesario y lo apruebas. El globo naranja indica cuántos esperan revisión.' });
+      P.push({ el: function () { var b = q('.hm-card [data-ir="revpld"]'); return b && b.parentNode; }, ic: 'revpld', t: 'Revisión de Pre PLD', x: 'Aquí ves los documentos enviados, puedes marcarlos como revisados o regresarlos con observaciones.' });
+      P.push({ el: function () { var b = q('.hm-card [data-ir="tablero"]'); return b && b.parentNode; }, ic: 'tablero', t: 'Tablero Hipoo', x: 'Indicadores de la actividad inmobiliaria.' });
     }
-    P.push({ el: q('.hm-feed'), t: 'Novedades en vivo', x: 'Cada vez que un contrato se envía, se aprueba, se cancela o recibe observaciones, aparece aquí al instante. Las nuevas traen la etiqueta NUEVO.' });
-    P.push({ el: ayEl('hmLeer'), t: 'Marcar como leídas', x: 'Cuando ya las viste, presiona este botón y la lista se limpia de etiquetas NUEVO.' });
-    P.push({ el: ayEl('ayBtn'), t: 'Este botón «?»', x: 'Siempre está a la mano: te repite este recorrido o te deja reportar cualquier problema en un minuto.', fijo: true });
-    return P.filter(function (p) { return p.el && p.el.offsetParent !== null || (p.el && p.fijo); });
+    P.push({ el: function () { return ayEl('hmSide'); }, fijo: true, antes: function () { if (!novAbierto()) novAbre(true, false); }, ic: 'campana', t: 'Novedades en vivo', x: 'Cada vez que un contrato se envía, se aprueba, se cancela o recibe observaciones, aparece aquí al instante, con su historial por día. Las nuevas traen la etiqueta NUEVO. Con el botón «Novedades» de arriba lo abres o lo cierras.' });
+    P.push({ el: function () { return ayEl('hmLeer'); }, fijo: true, ic: 'ok', t: 'Marcar como leídas', x: 'Cuando ya las viste, presiona este botón y la lista se limpia de etiquetas NUEVO.' });
+    P.push({ el: function () { return ayEl('ayBtn'); }, fijo: true, ic: 'ayuda', t: 'Este botón «?»', x: 'Siempre está a la mano: te repite este recorrido o te deja reportar cualquier problema en un minuto.' });
+    return P;
   }
   function ayTour() {
-    ayMenu(false); AY.pasos = ayPasos(); if (!AY.pasos.length) return; AY.paso = 0;
+    ayMenu(false); AY.pasos = ayPasos().filter(function (p) { if (p.antes) return true; try { return ayVisible(p.el()); } catch (e) { return false; } }); if (!AY.pasos.length) return; AY.paso = 0;
     document.body.classList.add('ay-tour'); ayEl('ayVel').classList.add('on'); ayEl('ayLuz').style.display = ''; ayEl('ayTip').style.display = '';
     ayPaso(0);
   }
   function ayPaso(i) {
     var p = AY.pasos[i]; if (!p) return ayFin(); AY.paso = i;
-    if (p.fijo) { ayEl('ayBtn').style.display = 'grid'; document.body.classList.remove('ay-tour'); ayEl('ayBtn').style.zIndex = 893; }
-    else { ayEl('ayBtn').style.zIndex = ''; document.body.classList.add('ay-tour'); }
-    var r0 = p.el.getBoundingClientRect(), alto = window.innerHeight;
-    if (!p.fijo && (r0.top < 70 || r0.bottom > alto - 40)) { window.scrollTo({ top: Math.max(0, window.scrollY + r0.top - Math.max(90, (alto - Math.min(r0.height, alto * .55)) / 3)), behavior: 'smooth' }); }
-    var n = AY.pasos.length, pts = AY.pasos.map(function (_, j) { return '<i' + (j === i ? ' class="on"' : '') + '></i>'; }).join('');
-    ayEl('ayTip').innerHTML = '<small>Paso ' + (i + 1) + ' de ' + n + '</small><h5>' + hmEsc(p.t) + '</h5><p>' + hmEsc(p.x) + '</p><div class="pie"><span class="pts">' + pts + '</span>' +
+    if (p.antes) p.antes();
+    var el = p.el();
+    if (!ayVisible(el)) { if (i < AY.pasos.length - 1) return ayPaso(i + 1); return ayFin(); }
+    var esBoton = el.id === 'ayBtn';
+    document.body.classList.toggle('ay-tour', !esBoton); ayEl('ayBtn').style.zIndex = esBoton ? 893 : '';
+    if (!p.fijo) {                                                                       // se lleva el elemento a una zona cómoda de la pantalla (salto directo, sin esperar animaciones)
+      var r0 = el.getBoundingClientRect(), H = window.innerHeight, y = r0.height > H * .62 ? r0.top - 96 : r0.top - (H - r0.height) / 2;
+      window.scrollTo({ top: Math.max(0, window.scrollY + y), behavior: 'instant' });
+    }
+    var n = AY.pasos.length, pts = AY.pasos.map(function (_, j) { return '<i' + (j === i ? ' class="on"' : (j < i ? ' class="hecho"' : '')) + '></i>'; }).join('');
+    ayEl('ayTip').innerHTML = '<span class="ay-flecha"></span><div class="ay-th"><span class="ay-ti">' + (IC[p.ic] || IC.info) + '</span><small>Paso ' + (i + 1) + ' de ' + n + '</small></div><h5>' + hmEsc(p.t) + '</h5><p>' + hmEsc(p.x) + '</p><div class="pie"><span class="pts">' + pts + '</span>' +
       '<button type="button" class="ay-b" data-ay="salir">Salir</button>' + (i ? '<button type="button" class="ay-b" data-ay="ant">Atrás</button>' : '') +
       '<button type="button" class="ay-b pri" data-ay="sig">' + (i === n - 1 ? 'Terminar' : 'Siguiente') + '</button></div>';
-    clearTimeout(AY.h); AY.h = setTimeout(ayColoca, p.fijo ? 30 : 420);
-    ayColoca();
+    ayColoca(); requestAnimationFrame(ayColoca); clearTimeout(AY.h); AY.h = setTimeout(ayColoca, 420);      // el panel lateral tarda en deslizarse: se vuelve a colocar al terminar
   }
   function ayColoca() {
-    var p = AY.pasos[AY.paso]; if (!p || !p.el) return;
-    var r = p.el.getBoundingClientRect(), m = 8, luz = ayEl('ayLuz'), tip = ayEl('ayTip'), W = window.innerWidth, H = window.innerHeight;
+    var p = AY.pasos[AY.paso]; if (!p) return; var el = p.el(); if (!ayVisible(el)) return;
+    var r = el.getBoundingClientRect(), m = 8, luz = ayEl('ayLuz'), tip = ayEl('ayTip'), W = window.innerWidth, H = window.innerHeight, G = 18, B = 12;
     luz.style.left = (r.left - m) + 'px'; luz.style.top = (r.top - m) + 'px'; luz.style.width = (r.width + m * 2) + 'px'; luz.style.height = (r.height + m * 2) + 'px';
-    luz.style.borderRadius = p.fijo ? '50%' : '18px';
-    var tw = tip.offsetWidth, th = tip.offsetHeight, x, y;
-    if (r.bottom + th + 24 < H) y = r.bottom + m + 14; else if (r.top - th - 24 > 0) y = r.top - m - 14 - th; else y = Math.max(12, H - th - 14);
-    x = Math.min(Math.max(12, r.left + r.width / 2 - tw / 2), W - tw - 12);
-    if (y === H - th - 14 || (y < r.bottom && y + th > r.top)) { x = r.left > W / 2 ? Math.max(12, r.left - tw - 20) : Math.min(W - tw - 12, r.right + 20); }
-    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+    luz.style.borderRadius = el.id === 'ayBtn' ? '50%' : '18px';
+    var tw = tip.offsetWidth, th = tip.offsetHeight, lado = '', x = 0, y = 0;
+    var cabe = {
+      derecha: r.right + m + G + tw <= W - B && true, izquierda: r.left - m - G - tw >= B,
+      abajo: r.bottom + m + G + th <= H - B, arriba: r.top - m - G - th >= B
+    };
+    var orden = (r.width > W * .55 || el.id === 'hmSide') ? ['abajo', 'arriba', 'izquierda', 'derecha'] : ['derecha', 'izquierda', 'abajo', 'arriba'];
+    if (el.id === 'hmSide' || el.id === 'hmLeer') orden = ['izquierda'];
+    if (el.id === 'ayBtn') orden = ['arriba', 'izquierda'];
+    for (var k = 0; k < orden.length; k++) { if (cabe[orden[k]]) { lado = orden[k]; break; } }
+    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    if (lado === 'derecha') { x = r.right + m + G; y = cy - th / 2; }
+    else if (lado === 'izquierda') { x = r.left - m - G - tw; y = (el.id === 'hmSide' || el.id === 'hmLeer') ? Math.min(Math.max(B, cy - th / 2), H - th - B) : cy - th / 2; }
+    else if (lado === 'abajo') { x = cx - tw / 2; y = r.bottom + m + G; }
+    else if (lado === 'arriba') { x = cx - tw / 2; y = r.top - m - G - th; }
+    else { x = (W - tw) / 2; y = H - th - 20; }                                          // no cabe junto al elemento: tarjeta fija abajo al centro (siempre visible)
+    x = Math.min(Math.max(B, x), W - tw - B); y = Math.min(Math.max(B, y), H - th - B);
+    tip.style.left = x + 'px'; tip.style.top = y + 'px'; tip.setAttribute('data-lado', lado || 'ninguno');
+    var fl = tip.querySelector('.ay-flecha');
+    if (fl) { if (lado === 'derecha' || lado === 'izquierda') { fl.style.top = Math.min(Math.max(22, cy - y - 8), th - 38) + 'px'; fl.style.left = ''; } else { fl.style.left = Math.min(Math.max(22, cx - x - 8), tw - 38) + 'px'; fl.style.top = ''; } }
   }
   function ayFin() {
     clearTimeout(AY.h); document.body.classList.remove('ay-tour'); ayEl('ayBtn').style.zIndex = ''; ayEl('ayBtn').style.display = '';
@@ -2026,7 +2171,7 @@
       '<div class="ay-tipos" id="ayTipos">' + AY_TIPOS.map(function (t, i) { return '<button type="button" class="ay-tipo' + (i === 0 ? ' on' : '') + '" data-tipo="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>' +
       '<label for="ayMsg">¿Qué sucedió?</label><textarea id="ayMsg" maxlength="1500" placeholder="Ej.: Estaba en «' + hmEsc(pant) + '», le di clic a Ampliar y ya no pude cerrar la ventana."></textarea>' +
       '<div class="ay-meta"><span id="ayMin">Escribe al menos 10 caracteres</span><span id="ayCnt">0 / 1500</span></div>' +
-      '<div class="ay-para">📨 Se enviará a <b>Lizbeth (coordinación)</b> y a <b>sistemas</b>, junto con la pantalla donde estabas y datos técnicos básicos de tu navegador. Te llegará un acuse con folio a ' + hmEsc(USUARIO.email) + '.</div>' +
+      '<div class="ay-para"><b>¿Qué sucede con tu reporte?</b><ol><li>Se registra con un número de folio.</li><li>Lo reciben la Coordinación y el área de Sistemas para su atención.</li><li>Recibes un acuse de recibo en <u>' + hmEsc(USUARIO.email) + '</u>; si se requiere más información, te contactarán por ese medio.</li></ol><small>De forma automática se adjunta la pantalla en la que te encuentras y datos técnicos básicos del navegador. No se envía información de tus contratos.</small></div>' +
       '<div class="ay-err" id="ayErr"></div><div class="ay-acc"><button type="button" class="ay-b" data-ay="cerrarRep">Cancelar</button><button type="button" class="ay-b pri" id="ayEnviar" data-ay="enviar">Enviar reporte</button></div>';
     ayEl('ayRep').classList.add('on'); setTimeout(function () { var t = ayEl('ayMsg'); if (t) t.focus(); }, 60);
   }
