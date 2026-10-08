@@ -1,0 +1,275 @@
+<!-- CONSOLA DE COORDINACIÓN · solo se entrega a la administradora (ver APS_incluir) -->
+<style>
+#con-root{--primary:#35B7C5;--bg-card:#364494;--text-dim:#B2B2B2;--text-soft:#D6DAEE;--bg-dark:#1a224a;--bg-input:#232d61;--border-dark:#0d122b;--ok:#10b981;--err:#ef4444;--warn:#f59e0b}
+#con-root .cx{max-width:1280px;margin:0 auto;padding:26px 22px 60px;color:#fff;font-family:'Inter',system-ui,sans-serif;position:relative;z-index:1}
+#con-root .cx-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;background:var(--border-dark);border:2px solid var(--primary);border-radius:14px;padding:16px 22px;box-shadow:6px 6px 0 rgba(0,0,0,.35)}
+#con-root .cx-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:32px;color:var(--primary);text-shadow:2px 2px 0 var(--border-dark);letter-spacing:.5px}
+#con-root .cx-sub{font-size:12px;color:var(--text-soft);margin-top:4px}
+#con-root .cx-user{font-size:12px;font-weight:700;color:#dbe3ff;background:rgba(0,0,0,.28);border:1px solid rgba(53,183,197,.5);padding:7px 14px;border-radius:999px}
+#con-root .cx-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+#con-root .cx-chip{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:var(--bg-input);border:2px solid rgba(178,178,178,.5);border-radius:999px;color:var(--text-soft);font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+#con-root .cx-chip:hover{border-color:var(--primary);color:#fff}
+#con-root .cx-chip.on{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark)}
+#con-root .cx-chip .n{background:rgba(0,0,0,.35);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px}
+#con-root .cx-chip.on .n{background:var(--border-dark);color:#fff}
+#con-root .cx-btn{display:inline-block;border:2px solid var(--text-dim);background:transparent;color:#fff;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;line-height:1.2}
+#con-root .cx-btn:hover{border-color:var(--primary)}
+#con-root .cx-btn.pri{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark)}
+#con-root .cx-btn.ok{border-color:var(--ok);color:#7ff0c3}
+#con-root .cx-btn.warn{border-color:var(--warn);color:#ffd28a}
+#con-root .cx-btn.danger{border-color:#ff6b6b;color:#ffb3b3}
+#con-root .cx-btn.danger:hover{background:#4a1414;border-color:#ff8a8a;color:#fff}
+#con-root .cx-btn:disabled{opacity:.4;cursor:not-allowed}
+#con-root .cx-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:22px}
+#con-root .cx-kpi{background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:16px;box-shadow:6px 6px 0 rgba(0,0,0,.5);cursor:pointer;text-align:left;color:#fff;font-family:'Inter',sans-serif}
+#con-root .cx-kpi:hover{transform:translate(-2px,-2px)}
+#con-root .cx-kpi b{display:block;font-family:'Montserrat',sans-serif;font-size:36px;line-height:1.1}
+#con-root .cx-kpi span{font-size:12px;color:#dbe3ff;font-weight:600}
+#con-root .cx-kpi.al{border-color:var(--warn)}
+#con-root .cx-kpi.mal{border-color:var(--err)}
+#con-root .cx-kpi small{display:block;color:var(--text-soft);font-size:11px;margin-top:4px}
+#con-root .cx-grid2{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:980px){#con-root .cx-grid2{grid-template-columns:1fr 1fr}}
+#con-root .cx-panel{background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
+#con-root .cx-panel h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;margin-bottom:12px}
+#con-root .cx-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+#con-root .cx-search{flex:1;min-width:200px;background:var(--bg-input);border:2px solid var(--text-dim);border-radius:8px;padding:10px 14px;color:#fff;font-size:13px;font-weight:600;font-family:'Inter',sans-serif}
+#con-root .cx-search:focus{outline:none;border-color:var(--primary)}
+#con-root .cx-wrap{overflow-x:auto}
+#con-root table.cx-tb{width:100%;border-collapse:collapse;font-size:12.5px}
+#con-root table.cx-tb th{text-align:left;color:#8fe3ec;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:8px;border-bottom:2px solid rgba(53,183,197,.4);white-space:nowrap}
+#con-root table.cx-tb td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.1);vertical-align:top}
+#con-root table.cx-tb td.ac{white-space:nowrap}
+#con-root table.cx-tb td.ac .cx-btn{margin:0 4px 4px 0}
+#con-root .cx-est{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;border:2px solid var(--border-dark);white-space:nowrap}
+#con-root .cx-est.e-BORRADOR,#con-root .cx-est.e-SIN_ENVIAR,#con-root .cx-est.e-SIN_TERMINAR{background:#cbd5e1;color:#1e293b}
+#con-root .cx-est.e-COMPLETO{background:#7dd3fc;color:#0c2a3d}
+#con-root .cx-est.e-EN_REVISION{background:var(--warn);color:#3b2600}
+#con-root .cx-est.e-OBSERVADO{background:var(--err);color:#fff}
+#con-root .cx-est.e-APROBADO,#con-root .cx-est.e-REVISADO{background:var(--ok);color:#06281c}
+#con-root .cx-flag{display:inline-block;margin-top:4px;font-size:10.5px;font-weight:800;color:#ffd28a;border:1px solid var(--warn);border-radius:6px;padding:1px 6px}
+#con-root .cx-dim{color:var(--text-soft);font-size:11.5px}
+#con-root .cx-note{font-size:12.5px;color:#dbe3ff;line-height:1.5;background:rgba(0,0,0,.25);border:1px solid rgba(53,183,197,.4);border-radius:8px;padding:12px 14px}
+#con-root .cx-empty{color:var(--text-soft);font-size:13px;padding:8px 0}
+#con-root .cx-li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:12.5px}
+#con-root .cx-li:last-child{border-bottom:0}
+#con-root .cx-modal{position:fixed;inset:0;background:rgba(13,18,43,.92);z-index:60;display:none;overflow:auto;padding:20px}
+#con-root .cx-modal.open{display:block}
+#con-root .cx-box{max-width:860px;margin:0 auto;background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:22px}
+#con-root .cx-busy{position:fixed;inset:0;background:rgba(8,11,28,.97);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:80;display:none;align-items:center;justify-content:center}
+#con-root .cx-busy.on{display:flex}
+#con-root .cx-busy-card{display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--bg-card);border:3px solid var(--primary);border-radius:16px;padding:32px 44px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
+#con-root .cx-busy-card span{font-weight:800;color:#fff;font-size:14px;font-family:'Inter',sans-serif}
+#con-root .cx-spin{width:32px;height:32px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--primary);border-radius:50%;animation:cxgira .75s linear infinite}
+@keyframes cxgira{to{transform:rotate(360deg)}}
+#con-root .cx-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:var(--ok);color:#06281c;border:3px solid var(--border-dark);border-radius:10px;padding:12px 18px;font-weight:800;font-size:13px;z-index:90;transition:all .25s;max-width:90vw}
+#con-root .cx-toast.show{opacity:1;transform:translate(-50%,0)}
+#con-root .cx-toast.err{background:var(--err);color:#fff}
+#con-root .cx-tab-abrir{text-align:center;padding:48px 24px}
+#con-root .cx-tab-abrir .ic{font-size:52px;margin-bottom:10px}
+#con-root .cx-tab-abrir .cx-note{max-width:520px;margin:0 auto 20px}
+#con-root .cx-btn.big{font-size:15px;padding:14px 26px;margin-top:6px}
+#con-root .cx-doc{display:inline-block;margin:4px 4px 0 0;font-size:10.5px;font-weight:800;color:#9be7ee;border:1px solid var(--primary);border-radius:6px;padding:1px 6px;text-decoration:none}
+#con-root .cx-kpis.mini{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-bottom:16px}
+#con-root .cx-kpis.mini .cx-kpi b{font-size:26px}
+#con-root .cx-kpis.mini .cx-kpi{padding:12px}
+</style>
+<div id="con-root">
+<div class="cx">
+  <div class="cx-head">
+    <div><div class="cx-title" data-r="titulo">Revisión</div><div class="cx-sub" data-r="sub"></div></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="cx-user" data-r="user"></span><button type="button" class="cx-btn" data-a="refrescar">↻ Actualizar</button></div>
+  </div>
+  <div class="cx-tabs" data-r="tabs"></div>
+  <div data-r="vista"></div>
+</div>
+<div class="cx-modal" data-r="modal"><div class="cx-box"><div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:14px"><b data-r="modalTit"></b><button type="button" class="cx-btn" data-a="cerrar">Cerrar ✕</button></div><div data-r="modalBody"></div></div></div>
+<div class="cx-busy" data-r="busy"><div class="cx-busy-card"><div class="cx-spin"></div><span data-r="busyTxt">Procesando…</span></div></div>
+<div class="cx-toast" data-r="toast"></div>
+
+</div>
+<script>
+/* ═══ REVISIÓN DE LA COORDINACIÓN (solo administradores) ═══
+   Dos secciones que se abren desde la pantalla de bienvenida:
+     CON.abrir('aps') → contratos APS: estatus, bitácora, alertas de ajustes/vigencias, Google Docs y PDF
+     CON.abrir('pld') → Pre PLD: documentos enviados a revisión, bitácora de modificaciones y auditoría */
+(function () {
+  'use strict';
+  var ROOT = document.getElementById('con-root');
+  function q(k) { return ROOT.querySelector('[data-r="' + k + '"]'); }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  var ESTA = { SIN_TERMINAR: 'Guardado sin terminar', COMPLETO: 'Completado', EN_REVISION: 'En revisión', APROBADO: 'Aprobado' };
+  var ESTP = { SIN_ENVIAR: 'Sin enviar', EN_REVISION: 'En revisión', OBSERVADO: 'Observado', REVISADO: 'Revisado' };
+  var SECCIONES = {
+    aps: { titulo: 'Revisión de contratos APS', sub: 'Estatus de cada contrato · Google Docs · PDF · alertas · auditoría', tabs: [['aps', '🗂️ Contratos'], ['alertas', '⏰ Alertas'], ['aud', '🧾 Auditoría']] },
+    pld: { titulo: 'Revisión de Pre PLD', sub: 'Documentos enviados a revisión · quién los generó · bitácora de modificaciones · auditoría', tabs: [['pld', '📋 Revisión'], ['aud', '🧾 Auditoría']] }
+  };
+  var st = { seccion: 'aps', vista: 'aps', fa: 'revision', fp: 'revision', textoA: '', textoP: '', textoU: '', aps: [], admin: '' }, tmr = null;
+
+  function toast(m, err) { var t = q('toast'); t.textContent = m; t.className = 'cx-toast show' + (err ? ' err' : ''); clearTimeout(toast._t); toast._t = setTimeout(function () { t.className = 'cx-toast'; }, err ? 7000 : 3000); }
+  function busy(on, txt) { q('busy').className = 'cx-busy' + (on ? ' on' : ''); if (txt) q('busyTxt').textContent = txt; }
+  /* Nunca se queda "cargando" para siempre: si el servidor no contesta en 25 s (Apps Script puede tardar mucho,
+     sobre todo en el primer arranque), se libera la pantalla solo, con aviso para reintentar — sin tener que
+     refrescar la página. */
+  function srv(fn, args, ok, txt) {
+    if (!(typeof google !== 'undefined' && google.script && google.script.run)) { toast('Solo disponible dentro de la aplicación de Apps Script.', true); return; }
+    busy(true, txt || 'Cargando…');
+    var listo = false;
+    var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); toast('El servidor está tardando más de lo normal. Vuelve a intentarlo.', true); }, 25000);
+    var r = google.script.run
+      .withSuccessHandler(function (x) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); ok(x); })
+      .withFailureHandler(function (e) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); toast(String((e && e.message) || e).replace(/^Error:\s*/, ''), true); });
+    r[fn].apply(r, args);
+  }
+  function corto(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+  function tabs() { q('tabs').innerHTML = SECCIONES[st.seccion].tabs.map(function (v) { return '<button type="button" class="cx-chip' + (st.vista === v[0] ? ' on' : '') + '" data-t="' + v[0] + '">' + v[1] + '</button>'; }).join(''); }
+  function cargar() {
+    tabs();
+    if (st.vista === 'aps') return vAps();
+    if (st.vista === 'alertas') return vAlertas();
+    if (st.vista === 'pld') return vPld();
+    return vAud();
+  }
+  function abrir(seccion, filtro) {
+    st.seccion = seccion; st.vista = SECCIONES[seccion].tabs[0][0];
+    if (seccion === 'aps' && filtro) st.fa = filtro;
+    if (seccion === 'pld' && filtro) st.fp = filtro;
+    q('titulo').textContent = SECCIONES[seccion].titulo; q('sub').textContent = SECCIONES[seccion].sub;
+    if (!st.admin && window.USUARIO) { st.admin = window.USUARIO.email; q('user').textContent = st.admin + ' · Coordinación'; }   // ya viene de la carga de la página: sin llamada nueva al servidor (evita 2 llamadas a la vez con la de abajo)
+    cargar();
+  }
+
+  /* ── Contratos APS ── */
+  var FA = [['todos', 'Todos', null], ['sin_terminar', 'Guardados sin terminar', 'SIN_TERMINAR'], ['completos', 'Completados', 'COMPLETO'], ['revision', 'En revisión', 'EN_REVISION'],
+    ['aprobados', 'Aprobados', 'APROBADO'], ['docs', '📝 Con Docs generado', 'DOCS']];
+  function vAps() { srv('APS_listar', ['todos'], function (rows) { st.aps = rows; pintaAps(); }); }
+  function coincide(r, est) { return !est || (est === 'DOCS' ? !!r.docUrl : r.estadoUI === est); }
+  function pintaAps() {
+    var t = st.textoA.toLowerCase().trim();
+    var act = FA.filter(function (x) { return x[0] === st.fa; })[0], est = act ? act[2] : null;
+    var rows = st.aps.filter(function (r) { return coincide(r, est) && (!t || [r.id, r.propietarios, r.inmueble, r.asesor].join(' ').toLowerCase().indexOf(t) >= 0); });
+    q('vista').innerHTML = '<div class="cx-panel"><div class="cx-tabs">' + FA.map(function (x) {
+        return '<button type="button" class="cx-chip' + (st.fa === x[0] ? ' on' : '') + '" data-fa="' + x[0] + '">' + x[1] + ' <span class="n">' + st.aps.filter(function (r) { return coincide(r, x[2]); }).length + '</span></button>'; }).join('') + '</div>' +
+      '<div class="cx-tools"><input class="cx-search" data-s="a" placeholder="Buscar por ID, propietario, inmueble o asesor…" value="' + esc(st.textoA) + '"></div>' +
+      (rows.length ? '<div class="cx-wrap"><table class="cx-tb"><thead><tr><th>ID</th><th>Estatus</th><th>Propietarios</th><th>Tipo</th><th>Inmueble</th><th>Asesor</th><th>Actualizado</th><th></th></tr></thead><tbody>' +
+        rows.map(function (r) {
+          var doc = r.docUrl ? '<a class="cx-doc" href="' + esc(r.docUrl) + '" target="_blank" rel="noopener" title="Generado ' + esc(r.docFecha) + '">📝 Docs generado</a>' : '';
+          return '<tr><td>' + esc(r.id) + '</td><td><span class="cx-est e-' + r.estadoUI + '">' + ESTA[r.estadoUI] + '</span>' + (r.estado === 'BORRADOR' && r.pendientes > 0 ? '<div class="cx-dim">faltan ' + r.pendientes + ' dato' + (r.pendientes === 1 ? '' : 's') + '</div>' : '') + '<div>' + doc + '</div>' +
+            '</td><td>' + esc(r.propietarios) + '</td><td>' + esc(r.tipo) + '</td><td>' + esc(corto(r.inmueble, 70)) + '</td><td>' + esc(r.asesor) + '</td><td>' + esc(r.actualizado) + '</td>' +
+            '<td class="ac"><button type="button" class="cx-btn pri" data-open="' + esc(r.id) + '">' + (r.estado === 'EN_REVISION' ? 'Revisar' : 'Abrir') + '</button>' +
+            (r.estado === 'APROBADO' && r.pdfUrl ? '<a class="cx-btn ok" href="' + esc(r.pdfUrl) + '" target="_blank" rel="noopener">👁 Ver PDF</a>' : '') + (r.estado === 'APROBADO' ? '<button type="button" class="cx-btn ok" data-pdf="' + esc(r.id) + '">⬇ Descargar</button>' : '') +
+            (r.docUrl ? '<button type="button" class="cx-btn" data-docs="' + esc(r.id) + '" data-regen="1" title="Genera una versión nueva con los datos actuales">↻ Docs</button>' : '<button type="button" class="cx-btn" data-docs="' + esc(r.id) + '" title="Descarga el contrato en Google Docs">📝 Google Docs</button>') +
+            '<button type="button" class="cx-btn danger" data-del="' + esc(r.id) + '" title="Eliminar de forma permanente">🗑️ Eliminar</button></td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="cx-empty">No hay contratos en esta vista.</div>') + '</div>';
+  }
+  function vAlertas() {
+    srv('CONSOLA_resumen', [], function (r) {
+      var a = r.aps;
+      function lista(items, vacio, fila) { return items.length ? items.map(fila).join('') : '<div class="cx-empty">' + vacio + '</div>'; }
+      q('vista').innerHTML = '<div class="cx-kpis mini">' + [['Sin terminar', a.SIN_TERMINAR, 'sin_terminar'], ['Completados', a.COMPLETO, 'completos'], ['En revisión', a.EN_REVISION, 'revision'], ['Aprobados', a.APROBADO, 'aprobados'], ['Con Docs', a.conDocs, 'docs']].map(function (k) {
+          return '<button type="button" class="cx-kpi" data-goaps="' + k[2] + '"><b>' + k[1] + '</b><span>' + k[0] + '</span></button>'; }).join('') + '</div>' +
+        '<div class="cx-grid2"><div class="cx-panel"><h3>Ajustes de precio en los próximos 30 días</h3>' + lista(r.ajustesProximos, 'Sin ajustes próximos.', function (x) {
+          return '<div class="cx-li"><span><b>' + esc(x.fecha) + '</b> · ' + esc(corto(x.propietarios, 40)) + '<br><span class="cx-dim">' + esc(x.id) + '</span></span><b>$' + esc(x.monto) + '</b></div>'; }) + '</div>' +
+        '<div class="cx-panel"><h3>Vigencias por vencer (30 días) o recién vencidas</h3>' + lista(r.vigenciasPorVencer, 'Sin vigencias próximas.', function (x) {
+          return '<div class="cx-li"><span><b>' + esc(x.vence) + '</b> · ' + esc(x.tipo) + ' · ' + esc(corto(x.propietarios, 36)) + '<br><span class="cx-dim">' + esc(x.id) + (x.vencido ? ' · VENCIDA' : '') + '</span></span><button type="button" class="cx-btn" data-open="' + esc(x.id) + '">Abrir</button></div>'; }) + '</div></div>';
+    });
+  }
+
+  /* ── Pre PLD ── */
+  var FP = [['revision', 'Por revisar'], ['observados', 'Observados'], ['revisados', 'Revisados'], ['sin_enviar', 'Sin enviar'], ['todos', 'Todos'], ['mods', 'Modificaciones']];
+  function vPld() {
+    var head = '<div class="cx-panel"><div class="cx-tabs">' + FP.map(function (x) { return '<button type="button" class="cx-chip' + (st.fp === x[0] ? ' on' : '') + '" data-fp="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>' +
+      '<div class="cx-tools"><input class="cx-search" data-s="p" placeholder="Buscar por documento, operación, asociado o quien lo generó…" value="' + esc(st.textoP) + '"' + (st.fp === 'mods' ? ' disabled' : '') + '></div>';
+    if (st.fp === 'mods') {
+      srv('PLD_modificaciones', [], function (rows) {
+        q('vista').innerHTML = head + (rows.length ? '<div class="cx-wrap"><table class="cx-tb"><thead><tr><th>Fecha</th><th>Documento</th><th>Operación</th><th>Usuario</th><th>Detalle</th></tr></thead><tbody>' +
+          rows.map(function (r) { return '<tr><td>' + esc(r.fecha) + '</td><td>' + esc(corto(r.nombre, 50)) + '</td><td>' + esc(r.operacion) + '</td><td>' + esc(r.usuario) + '</td><td>' + esc(r.detalle) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="cx-empty">Sin modificaciones registradas.</div>') + '</div>';
+      }); return;
+    }
+    srv('PLD_listar', [st.fp, st.textoP], function (rows) {
+      q('vista').innerHTML = head + (rows.length ? '<div class="cx-wrap"><table class="cx-tb"><thead><tr><th>Generado</th><th>Documento</th><th>Operación / asociados</th><th>Lo generó</th><th>Estatus</th><th>Envío / revisión</th><th></th></tr></thead><tbody>' +
+        rows.map(function (r) {
+          return '<tr><td>' + esc(r.creado) + '</td><td>' + esc(corto(r.nombre, 44)) + '</td><td><b>' + esc(r.operacion) + '</b><div class="cx-dim">' + esc(r.asociados) + '</div></td><td>' + esc(r.creador) + '</td>' +
+            '<td><span class="cx-est e-' + r.estado + '">' + ESTP[r.estado] + '</span>' + (r.modificadoDespues ? '<div class="cx-flag">⚠ modificado después</div>' : '') + '</td>' +
+            '<td class="cx-dim">' + (r.fechaEnvio ? 'Enviado ' + esc(r.fechaEnvio) + '<br>' : '') + (r.fechaRevision ? esc(r.revisadoPor) + ' · ' + esc(r.fechaRevision) : '') + (r.comentario ? '<br>“' + esc(corto(r.comentario, 70)) + '”' : '') + '</td>' +
+            '<td class="ac"><a class="cx-btn pri" href="' + esc(r.url) + '" target="_blank" rel="noopener">Abrir doc</a>' +
+            (r.estado === 'EN_REVISION' ? '<button type="button" class="cx-btn ok" data-rev="' + esc(r.id) + '">✓ Revisado</button><button type="button" class="cx-btn warn" data-obs="' + esc(r.id) + '">Observar</button>' : '') +
+            '<button type="button" class="cx-btn" data-his="' + esc(r.id) + '" data-nom="' + esc(r.nombre) + '">Historial</button></td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="cx-empty">No hay documentos en esta vista.</div>') + '</div>';
+    });
+  }
+
+  /* ── Auditoría (del módulo de la sección abierta) ── */
+  function vAud() {
+    var modulo = st.seccion === 'pld' ? 'PLD' : 'APS';
+    srv('CONSOLA_auditoria', [st.textoU, modulo], function (rows) {
+      q('vista').innerHTML = '<div class="cx-panel"><div class="cx-tools"><input class="cx-search" data-s="u" placeholder="Buscar por usuario, acción, referencia…" value="' + esc(st.textoU) + '"></div>' +
+        '<div class="cx-note" style="margin-bottom:12px">Registro de quién hizo qué. Todo se ejecuta con la cuenta dueña del sistema, así que este registro es la evidencia de quién actuó.</div>' +
+        (rows.length ? '<div class="cx-wrap"><table class="cx-tb"><thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Referencia</th><th>Detalle</th></tr></thead><tbody>' +
+          rows.map(function (r) { return '<tr><td>' + esc(r.fecha) + '</td><td>' + esc(r.usuario) + '</td><td>' + esc(r.accion) + '</td><td>' + esc(r.ref) + '</td><td>' + esc(corto(r.detalle, 90)) + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="cx-empty">Sin movimientos.</div>') + '</div>';
+    });
+  }
+
+  /* ── Acciones ── */
+  function abrirAps(id) { if (window.irA) window.irA('aps'); if (window.APS_UI && APS_UI.abrir) APS_UI.abrir(id); }
+  function descargaPdf(id) {
+    srv('APS_obtenerPdf', [id], function (r) {
+      var a = document.createElement('a'); a.href = 'data:application/pdf;base64,' + r.base64; a.download = r.nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a); toast('Descarga iniciada: ' + r.nombre);
+    }, 'Preparando PDF…');
+  }
+  function docs(id, regen) {
+    if (regen && !window.confirm('Se generará una versión nueva del documento en Google Docs con los datos actuales del contrato. ¿Continuar?')) return;
+    srv('APS_docEditable', [id], function (r) { window.open(r.url, '_blank', 'noopener'); toast('Documento generado en Google Docs.'); vAps(); }, 'Generando el documento en Google Docs…');
+  }
+  function eliminarContrato(id) {
+    if (!window.confirm('¿Eliminar el contrato ' + id + ' de forma permanente? Esto no se puede deshacer.')) return;
+    srv('APS_eliminar', [id], function () { toast('Contrato eliminado.'); vAps(); }, 'Eliminando…');
+  }
+  function historial(id, nombre) {
+    srv('PLD_historial', [id], function (h) {
+      q('modalTit').textContent = 'Historial · ' + nombre;
+      q('modalBody').innerHTML = '<h3 style="margin-bottom:8px">Modificaciones del documento</h3>' + (h.modificaciones.length ? '<table class="cx-tb"><thead><tr><th>Fecha</th><th>Usuario</th><th>Detalle</th></tr></thead><tbody>' + h.modificaciones.map(function (m) { return '<tr><td>' + esc(m.fecha) + '</td><td>' + esc(m.usuario) + '</td><td>' + esc(m.detalle) + '</td></tr>'; }).join('') + '</tbody></table>' : '<div class="cx-empty">Sin modificaciones registradas.</div>') +
+        '<h3 style="margin:16px 0 8px">Movimientos de revisión</h3>' + (h.eventos.length ? '<table class="cx-tb"><thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead><tbody>' + h.eventos.map(function (m) { return '<tr><td>' + esc(m.fecha) + '</td><td>' + esc(m.usuario) + '</td><td>' + esc(m.accion) + '</td><td>' + esc(m.detalle) + '</td></tr>'; }).join('') + '</tbody></table>' : '<div class="cx-empty">Sin movimientos.</div>');
+      q('modal').classList.add('open');
+    }, 'Cargando historial…');
+  }
+  function revisar(id) {
+    var nota = window.prompt('Nota opcional para el asesor (puedes dejarla vacía):', ''); if (nota === null) return;
+    srv('PLD_marcarRevisado', [id, nota], function () { toast('Marcado como revisado.'); vPld(); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Guardando…');
+  }
+  function observar(id) {
+    var c = window.prompt('¿Qué debe corregir el asesor?', ''); if (c === null) return;
+    if (!String(c).trim()) { toast('Escribe qué debe corregir.', true); return; }
+    srv('PLD_observar', [id, c], function () { toast('Observación enviada al asesor.'); vPld(); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Guardando…');
+  }
+
+  /* ── Eventos ── */
+  ROOT.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var g = function (k) { return b.getAttribute(k); };
+    if (g('data-t')) { st.vista = g('data-t'); cargar(); }
+    else if (g('data-fa')) { st.fa = g('data-fa'); pintaAps(); }
+    else if (g('data-goaps')) { st.fa = g('data-goaps'); st.vista = 'aps'; cargar(); }
+    else if (g('data-fp')) { st.fp = g('data-fp'); vPld(); }
+    else if (g('data-open')) abrirAps(g('data-open'));
+    else if (g('data-pdf')) descargaPdf(g('data-pdf'));
+    else if (g('data-docs')) docs(g('data-docs'), !!g('data-regen'));
+    else if (g('data-del')) eliminarContrato(g('data-del'));
+    else if (g('data-his')) historial(g('data-his'), g('data-nom'));
+    else if (g('data-rev')) revisar(g('data-rev'));
+    else if (g('data-obs')) observar(g('data-obs'));
+    else if (g('data-a') === 'cerrar') q('modal').classList.remove('open');
+    else if (g('data-a') === 'refrescar') cargar();
+  });
+  ROOT.addEventListener('input', function (e) {
+    var s = e.target.getAttribute && e.target.getAttribute('data-s'); if (!s) return;
+    var v = e.target.value; clearTimeout(tmr);
+    if (s === 'a') { st.textoA = v; pintaAps(); var el = ROOT.querySelector('[data-s="a"]'); if (el) { el.focus(); el.setSelectionRange(v.length, v.length); } return; }
+    tmr = setTimeout(function () {
+      if (s === 'p') { st.textoP = v; vPld(); } else { st.textoU = v; vAud(); }
+      setTimeout(function () { var el = ROOT.querySelector('[data-s="' + s + '"]'); if (el) { el.focus(); el.setSelectionRange(v.length, v.length); } }, 400);
+    }, 450);
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ROOT.offsetParent !== null) q('modal').classList.remove('open'); });
+  window.CON = { abrir: abrir };
+})();
+
+</script>
