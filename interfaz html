@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* ── Paleta Institucional ── */
+      --primary: #35B7C5;      /* Cyan Institucional */
+      --bg-card: #364494;      /* Azul Institucional */
+      --text-dim: #B2B2B2;     /* Gris Institucional */
+      
+      /* Colores de apoyo */
+      --bg-dark: #1a224a;      /* Azul marino muy oscuro para el fondo */
+      --bg-input: #232d61;     /* Tono intermedio para inputs */
+      --text-main: #ffffff;    /* Blanco */
+      --border-dark: #0d122b;  /* Azul casi negro para sombras sólidas */
+      
+      /* Elementos estructurales (Neo-brutalismo) */
+      --border-width: 3px;
+      --shadow-solid: 6px 6px 0px var(--primary);
+      --shadow-solid-dark: 4px 4px 0px var(--border-dark);
+      --radius: 12px;
+      --transition: 0.15s ease-out;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    /* ── Background ── */
+    .bg-video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .bg-video video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #1a224a; 
+    }
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 0%, rgba(26, 34, 74, 0.95) 100%);
+      z-index: 0;
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1140px; 
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo-container {
+      background: #eaeaea;
+      padding: 5px 20px; 
+      border-radius: 12px;
+      width: fit-content; 
+      margin: 0 auto 24px auto;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      display: block; 
+    }
+
+    .header-logo {
+      width: 180px; 
+      height: auto; 
+      display: block;
+    }
+
+    .header h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 52px;
+      color: var(--primary);
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0px var(--border-dark);
+      margin-bottom: 12px;
+    }
+
+    .header p {
+      color: var(--text-main);
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--border-dark);
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--primary);
+    }
+
+    /* ── Selector de Modo ── */
+    .mode-switch {
+      display: flex;
+      gap: 12px;
+      max-width: 720px;
+      margin: 0 auto 32px auto;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 14px 16px;
+      background: var(--bg-input);
+      border: 2px solid var(--text-dim);
+      border-radius: 10px;
+      color: var(--text-dim);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all 0.15s ease-out;
+    }
+
+    .mode-btn:hover {
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .mode-btn.active {
+      background: var(--primary);
+      border-color: var(--border-dark);
+      color: var(--border-dark);
+      box-shadow: 4px 4px 0px var(--border-dark);
+      transform: translate(-1px, -1px);
+    }
+
+    /* ── ESTRUCTURA EN DOS COLUMNAS INDEPENDIENTES ── */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 900px) {
+      .main-layout {
+        grid-template-columns: 1fr 390px;
+        align-items: start;
+      }
+      .sidebar-column {
+        position: sticky;
+        top: 24px; 
+      }
+    }
+
+    /* ── Layout modo "Agregar Pago" (una sola columna, ancho medio) ── */
+    .layout-pago {
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* ── Cards del Formulario ── */
+    .card {
+      background: var(--bg-card);
+      border: var(--border-width) solid var(--primary);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 8px 8px 0px rgba(0,0,0,0.5);
+      transition: transform var(--transition);
+    }
+
+    .card:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 10px 10px 0px rgba(0,0,0,0.6);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      border-bottom: 2px dashed rgba(53, 183, 197, 0.4);
+      padding-bottom: 16px;
+    }
+
+    .icon-box {
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      border: 2px solid var(--border-dark);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 3px 3px 0px var(--border-dark);
+      flex-shrink: 0;
+    }
+
+    .icon-img {
+      width: 24px; 
+      height: 24px;
+      object-fit: contain; 
+    }
+
+    .icon-emoji {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .card-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      color: #ffffff;
+      text-shadow: 1px 1px 0px var(--border-dark);
+    }
+
+    .card-header .subtitle {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: var(--text-dim);
+      display: block;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    /* ── Forms ── */
+    .field-group { margin-bottom: 20px; }
+    .field-group:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .input-text {
+      width: 100%;
+      background: var(--bg-input);
+      border: 2px solid var(--text-dim);
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .input-text:focus {
+      outline: none;
+      background: var(--bg-dark);
+      border-color: var(--primary);
+      box-shadow: 4px 4px 0px rgba(53, 183, 197, 0.3);
+      transform: translate(-2px, -2px);
+    }
+
+    /* ── Controles ── */
+    .regime-toggle {
+      display: flex;
+      gap: 12px;
+    }
+
+    .regime-btn {
+      flex: 1;
+      border: 2px solid var(--text-dim);
+      background: var(--bg-input);
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: var(--text-dim);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .regime-btn:hover {
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .regime-btn.active {
+      background: var(--primary);
+      border-color: var(--border-dark);
+      color: var(--border-dark);
+      box-shadow: 3px 3px 0px var(--border-dark);
+      transform: translate(-1px, -1px);
+    }
+
+    /* ── Stepper y Botón Borrar ── */
+    .stepper-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      background: var(--bg-input);
+      border: 2px solid var(--text-dim);
+      border-radius: 8px;
+      width: fit-content;
+      overflow: hidden;
+    }
+
+    .stepper-btn {
+      width: 48px;
+      height: 44px;
+      border: none;
+      background: transparent;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .stepper-btn:hover { background: var(--primary); color: #000; }
+
+    .stepper-value {
+      width: 60px;
+      text-align: center;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      border-left: 2px solid var(--text-dim);
+      border-right: 2px solid var(--text-dim);
+      padding: 8px 0;
+      color: var(--primary);
+    }
+
+    .btn-clear-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 48px;
+      padding: 0 16px;
+      background: var(--bg-input);
+      border: 2px solid var(--text-dim);
+      border-radius: 8px;
+      color: var(--text-dim);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-clear-count:hover {
+      border-color: #ef4444; 
+      color: #ef4444;
+      background: var(--bg-dark);
+      box-shadow: 3px 3px 0px var(--border-dark);
+      transform: translate(-1px, -1px);
+    }
+
+    .btn-clear-count:active {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0px var(--border-dark);
+    }
+
+    /* ── Acceso y Protección ── */
+    .email-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .email-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-input);
+      border: 1px solid var(--text-dim);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .email-chip .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 5px var(--primary);
+    }
+
+    .info-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 8px;
+      background: rgba(53, 183, 197, 0.1);
+      border-left: 4px solid var(--primary);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-top: 20px;
+      line-height: 1.5;
+    }
+
+    .info-note .icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ── RESUMEN DINÁMICO TEXTUAL (Estilo Neo-brutalista) ── */
+    .summary-card {
+      background: var(--bg-card);
+      border: var(--border-width) solid var(--primary);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 8px 8px 0px rgba(0,0,0,0.5);
+      margin-bottom: 24px;
+    }
+
+    .summary-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      border-bottom: 2px dashed rgba(53, 183, 197, 0.4);
+      padding-bottom: 12px;
+    }
+
+    .summary-head h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      color: #ffffff;
+      text-shadow: 1px 1px 0px var(--border-dark);
+    }
+
+    .summary-head span {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .summary-head span::before {
+      content: '';
+      width: 8px; height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 5px #10b981;
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-tile {
+      background: var(--bg-input);
+      border: 2px solid var(--text-dim);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      transition: all var(--transition);
+    }
+
+    .stat-tile:hover {
+      border-color: var(--primary);
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0px var(--border-dark);
+    }
+
+    .stat-tile span {
+      display: block;
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stat-tile strong {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      color: #ffffff;
+      display: inline-block; 
+    }
+
+    /* Caja del resumen en texto */
+    .stat-text-summary {
+      background: var(--bg-dark);
+      border: 2px solid var(--text-dim);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-main);
+      text-align: center;
+    }
+
+    .stat-text-summary strong {
+      color: var(--primary);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    /* Animación del Resumen */
+    @keyframes bump {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); color: var(--primary); }
+      100% { transform: scale(1); }
+    }
+    .bump { animation: bump 0.4s ease-out; }
+    
+    @keyframes bumpBox {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); border-color: var(--primary); box-shadow: 4px 4px 0px var(--primary); }
+      100% { transform: scale(1); }
+    }
+    .bumpBox { animation: bumpBox 0.4s ease-out; }
+
+    /* ── Panel de Ayuda Fijo Abierto ── */
+    .help-panel {
+      background: #eef4f8; 
+      border: 2px solid var(--primary);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 6px 6px 0px rgba(0,0,0,0.4);
+    }
+
+    .help-panel h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: #364494; 
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .help-panel h3::before {
+      content: '💡';
+      font-size: 28px;
+    }
+
+    .help-panel-content {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #1a224a; 
+    }
+
+    .help-panel-content ul {
+      margin-left: 18px;
+      margin-top: 10px;
+    }
+
+    .help-panel-content li {
+      margin-bottom: 12px;
+    }
+
+    .help-panel-content strong {
+      color: #0d122b;
+    }
+
+    /* ── Botón Guía Operativa ── */
+    .btn-guide {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px 16px;
+      background: var(--bg-input);
+      border: 2px dashed var(--primary);
+      color: var(--primary);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s ease-out;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .btn-guide:hover {
+      background: var(--primary);
+      color: var(--border-dark);
+      border-style: solid;
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0px var(--border-dark);
+    }
+
+    /* ── Botón Principal de Acción ── */
+    .btn-main {
+      width: 100%;
+      padding: 18px;
+      background: var(--primary);
+      border: var(--border-width) solid var(--border-dark);
+      border-radius: 10px;
+      color: var(--border-dark);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px; 
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.1s;
+      box-shadow: var(--shadow-solid-dark);
+      margin-bottom: 10px;
+    }
+
+    .btn-main:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px var(--border-dark);
+      background: #4de0f0;
+    }
+
+    .btn-main:active { 
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px var(--border-dark);
+    }
+
+    .btn-main:disabled {
+      background: var(--text-dim);
+      border-color: var(--bg-input);
+      color: var(--bg-dark);
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Status ── */
+    .status {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 700;
+      border: var(--border-width) solid var(--border-dark);
+      display: none;
+      box-shadow: var(--shadow-solid-dark);
+      margin-bottom: 24px;
+    }
+
+    .status.loading { display: block; background: var(--primary); color: var(--border-dark); }
+    .status.success { display: block; background: #10b981; color: #ffffff; }
+    .status.error { display: block; background: #ef4444; color: #ffffff; }
+    
+    .status a {
+      color: #ffffff;
+      background: var(--border-dark);
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      border: 2px solid transparent;
+      margin-top: 10px;
+      display: inline-block;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px;
+      transition: all 0.15s ease-out;
+    }
+
+    .status a:hover {
+      background: #ffffff;
+      color: var(--border-dark);
+      border-color: var(--border-dark);
+    }
+
+    /* ── Botón Nueva Operación ── */
+    .btn-reset {
+      background: #364494;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      margin-top: 12px;
+      display: block;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    
+    .btn-reset:hover {
+      background: #ffffff;
+      color: #35B7C5; 
+    }
+      
+    /* ── Animación Reloj ── */
+    .clock-spinner {
+      position: relative;
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--border-dark);
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+    
+    .clock-spinner::before,
+    .clock-spinner::after {
+      content: '';
+      position: absolute;
+      background-color: var(--border-dark);
+      bottom: 50%;
+      left: 50%;
+      transform-origin: bottom center;
+      border-radius: 2px;
+    }
+    
+    .clock-spinner::before {
+      width: 2.5px;
+      height: 7px;
+      margin-left: -1.25px;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    .clock-spinner::after {
+      width: 2.5px;
+      height: 4px;
+      margin-left: -1.25px;
+      animation: spin 4s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Bienvenida y navegación entre pantallas ── */
+    .barra-nav { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 18px; background: rgba(13, 18, 43, 0.94); border-bottom: 3px solid var(--primary); }
+    .nav-volver { background: var(--primary); color: var(--border-dark); border: 3px solid var(--border-dark); border-radius: 10px; padding: 9px 16px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 13px; cursor: pointer; box-shadow: 3px 3px 0px var(--border-dark); }
+    .nav-volver:hover { transform: translate(-1px, -1px); }
+    .nav-titulo { flex: 1; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; color: #fff; }
+    .nav-usuario { font-size: 12px; font-weight: 700; color: #dbe3ff; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(53, 183, 197, 0.5); padding: 6px 12px; border-radius: 999px; }
+    .nav-pend { display: flex; align-items: center; gap: 6px; background: #ffb03b; color: #1a1200; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 12.5px; padding: 7px 14px; border: none; border-radius: 999px; cursor: pointer; animation: pulsoAtencion 2.2s ease-in-out infinite; }
+    .nav-pend:hover { filter: brightness(1.08); }
+    @keyframes pulsoAtencion { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 176, 59, 0.55); } 50% { box-shadow: 0 0 0 7px rgba(255, 176, 59, 0); } }
+    .inicio { position: relative; z-index: 1; max-width: 1020px; margin: 0 auto; padding: 34px 22px 60px; }
+    .inicio-cab { text-align: center; margin-bottom: 8px; }
+    .inicio h1 { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 42px; color: var(--primary); text-shadow: 3px 3px 0px var(--border-dark); margin: 6px 0 12px; }
+    .inicio-quien { display: inline-block; font-size: 13px; font-weight: 700; color: #fff; background: var(--border-dark); border: 2px solid var(--primary); padding: 7px 18px; border-radius: 999px; }
+    .inicio h2 { display: inline-block; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; color: #fff; background: var(--border-dark); border: 2px solid var(--primary); padding: 7px 18px; border-radius: 999px; margin: 28px 0 14px; letter-spacing: 0.5px; }
+    .inicio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; }
+    .inicio-card { position: relative; text-align: left; background: var(--bg-card); border: 3px solid var(--primary); border-radius: 14px; padding: 26px; cursor: pointer; color: #fff; box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.5); transition: all 0.12s; font-family: 'Inter', sans-serif; }
+    .inicio-card:hover { transform: translate(-3px, -3px); box-shadow: 11px 11px 0px rgba(0, 0, 0, 0.5); }
+    .inicio-card .ic { font-size: 44px; line-height: 1; margin-bottom: 12px; }
+    .inicio-card b { display: block; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 19px; margin-bottom: 8px; }
+    .inicio-card span { display: block; font-size: 13px; color: #eef1ff; line-height: 1.5; }
+    .inicio-card.coord { border-color: #ffd28a; }
+    .inicio-card.off { cursor: not-allowed; background: #2c3878; border: 3px dashed #9aa6d8; }
+    .inicio-card.off:hover { transform: none; box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.5); }
+    .inicio-card .aviso { margin-top: 12px; color: #ffd28a; font-weight: 700; background: var(--border-dark); border: 2px solid #ffd28a; border-radius: 10px; padding: 8px 12px; }
+    .inicio-card-wrap { display: flex; flex-direction: column; box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.5); border-radius: 14px; transition: all 0.12s; }
+    .inicio-card-wrap:hover { transform: translate(-3px, -3px); box-shadow: 11px 11px 0px rgba(0, 0, 0, 0.5); }
+    .inicio-card-wrap .inicio-card { border-radius: 14px 14px 0 0; box-shadow: none; }
+    .inicio-card-wrap .inicio-card:hover { transform: none; box-shadow: none; }   /* el hover lo hace el wrapper completo, tarjeta + pestaña juntas */
+    .inicio-misreg { display: block; width: 100%; text-align: left; background: var(--primary); color: var(--border-dark); border: 3px solid var(--border-dark); border-top: none; border-radius: 0 0 11px 11px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 13px; padding: 11px 26px; cursor: pointer; }
+    .inicio-misreg:hover { filter: brightness(1.08); }
+    .badge-pend { position: absolute; top: -12px; right: -12px; background: #ff5c5c; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 13px; min-width: 27px; height: 27px; padding: 0 5px; border-radius: 999px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg-card); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45); }
+    .inicio-warn { display: block; margin: 0 0 24px; padding: 16px 22px; background: var(--border-dark); border: 3px solid #ffb03b; border-radius: 14px; box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.45); animation: pulsoAtencion 2.2s ease-in-out infinite; }
+    .inicio-warn .iw-top { display: flex; align-items: center; gap: 10px; color: #ffd28a; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 17px; margin-bottom: 13px; }
+    .inicio-warn .ic { font-size: 24px; }
+    .inicio-warn .iw-items { display: flex; flex-wrap: wrap; gap: 10px; }
+    .iw-btn { display: inline-block; background: #ffb03b; color: #1a1200; border: none; border-radius: 999px; padding: 10px 20px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13.5px; cursor: pointer; transition: all 0.12s; }
+    .iw-btn b { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 17px; margin-right: 6px; }
+    .iw-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.35); }
+    .inicio-pie { margin-top: 30px; text-align: center; }
+    .inicio-pie span { display: inline-block; font-size: 12.5px; font-weight: 600; color: #fff; background: var(--border-dark); border: 1px solid var(--primary); padding: 7px 16px; border-radius: 999px; }
+    /* Legibilidad del Pre PLD: solo el color de los textos grises (los bordes no cambian) */
+    .card-header .subtitle, .stat-tile span { color: #D6DAEE; }
+    label { color: #55D3E0; }
+
+    /* ── Fondo en el celular: el video (y sobre todo su miniatura de portada, pensada para verse como logo
+       pequeño, no como fondo de pantalla completa) tarda o a veces no carga en datos móviles, y mientras tanto
+       se ve enorme y deformada. En pantallas chicas mejor no usar el video: un degradado fijo, sin ese parpadeo
+       ni el gasto de datos/batería. En escritorio no cambia nada. */
+    @media (max-width: 899px) {
+      .bg-video { display: none !important; }
+      body { background: radial-gradient(circle at 50% -5%, #2c3878 0%, var(--bg-dark) 55%, var(--border-dark) 100%); background-attachment: fixed; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-video">
+  <video autoplay loop muted playsinline webkit-playsinline loop poster="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000">
+    <source src="https://videos.pexels.com/video-files/31737798/13522392_2560_1440_30fps.mp4" type="video/mp4">
+  </video>
+</div>
+<div class="bg-overlay"></div>
+
+<? var ADM = APS_esAdmin(); var AUT = APS_puedeGenerarAps(); ?>
+<!-- ══════════════════ BARRA DE NAVEGACIÓN (aparece al elegir una opción; regresa a la bienvenida) ══════════════════ -->
+<div class="barra-nav" id="barra-nav" style="display:none;">
+  <button type="button" class="nav-volver" onclick="irA('inicio')">← Inicio</button>
+  <span class="nav-titulo" id="navTitulo"></span>
+  <button type="button" class="nav-pend" id="navPend" style="display:none;"></button>
+  <span class="nav-usuario" id="navUsuario"></span>
+</div>
+
+<!-- ══════════════════ PANTALLA DE BIENVENIDA ══════════════════ -->
+<div id="pantalla-inicio" class="inicio">
+  <div class="inicio-cab">
+    <div class="logo-container">
+      <img src="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000" alt="Financiera Cualli" class="header-logo">
+    </div>
+    <h1 id="inicioSaludo">¡Bienvenido!</h1>
+    <div class="inicio-quien" id="inicioQuien"></div>
+  </div>
+  <div id="inicioTarjetas"></div>
+  <div class="inicio-pie"><span>Elige una opción: verás solo esa pantalla. Puedes volver a esta pantalla con «← Inicio».</span></div>
+</div>
+
+<!-- ══════════════════ MÓDULO: PRE PLD ══════════════════ -->
+<div id="modulo-pld" style="display:none;">
+<div class="app-container">
+  
+  <header class="header">
+    <div class="logo-container">
+      <img src="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000" alt="Financiera Cualli" class="header-logo">
+    </div>
+    <h1>Generador Pre-Aviso PLD</h1>
+    <p>Operativa Institucional y Cumplimiento</p>
+  </header>
+
+  <div class="mode-switch">
+    <button class="mode-btn active" id="btnModoNueva" onclick="setMode('nueva', this)">🆕 Nueva Operación</button>
+    <button class="mode-btn" id="btnModoPago" onclick="setMode('pago', this)">➕ Agregar Pago a Operación Existente</button>
+    <button class="mode-btn" id="btnModoRev" onclick="setMode('revision', this)">📋 Mis Pre PLD y revisión</button>
+  </div>
+
+  <!-- ══════════════════ MODO: NUEVA OPERACIÓN ══════════════════ -->
+  <div id="modoNueva">
+  <div class="main-layout">
+    
+    <div class="form-column">
+      
+      <!-- Card Datos de Operación -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/6014/6014206.png" alt="Operación" class="icon-img">
+          </div>
+          <div>
+            <h2>Datos de la Operación</h2>
+            <span class="subtitle">Nombre de la operación y asociados responsables</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Nombre de la Operación</label>
+          <input type="text" class="input-text" id="txtOperacion" placeholder="Ej: Venta Lote 14 Col. Del Valle">
+        </div>
+        <div class="field-group">
+          <label>Asociado Responsable - Vendedor-Lado 1</label>
+          <input type="text" class="input-text" id="txtAsocLado1" placeholder="Nombre del asociado Lado 1">
+        </div>
+        <div class="field-group">
+          <label>Asociado Responsable - Comprador-Lado 2</label>
+          <input type="text" class="input-text" id="txtAsocLado2" placeholder="Nombre del asociado Lado 2">
+        </div>
+      </div>
+
+      <!-- Card Vendedor -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/4757/4757347.png" alt="Venta" class="icon-img">
+          </div>
+          <div>
+            <h2>Vendedor (Lado 1)</h2>
+            <span class="subtitle">Régimen y cantidad de vendedores</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Régimen del Vendedor</label>
+          <div class="regime-toggle">
+            <button class="regime-btn active" onclick="setRegime('vendedor','PF',this)">Persona Física</button>
+            <button class="regime-btn" onclick="setRegime('vendedor','PM',this)">Persona Moral</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Cantidad de Vendedores</label>
+          <div class="stepper-row">
+            <div class="stepper">
+              <button class="stepper-btn" onclick="adjustCount('vendedor',-1)">−</button>
+              <div class="stepper-value" id="countVendedor">1</div>
+              <button class="stepper-btn" onclick="adjustCount('vendedor',1)">+</button>
+            </div>
+            <button type="button" class="btn-clear-count" onclick="clearCount('vendedor')" aria-label="Borrar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;"><path d="M19 6 5 20M5 6l14 14"/></svg>
+              Borrar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Comprador -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-box">
+             <img src="https://cdn-icons-png.magnific.com/512/5764/5764035.png?ga=GA1.1.1372457637.1778013504" alt="Compra" class="icon-img">
+          </div>
+          <div>
+            <h2>Comprador (Lado 2)</h2>
+            <span class="subtitle">Régimen y cantidad de compradores</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Régimen del Comprador</label>
+          <div class="regime-toggle">
+            <button class="regime-btn active" onclick="setRegime('comprador','PF',this)">Persona Física</button>
+            <button class="regime-btn" onclick="setRegime('comprador','PM',this)">Persona Moral</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Cantidad de Compradores</label>
+          <div class="stepper-row">
+            <div class="stepper">
+              <button class="stepper-btn" onclick="adjustCount('comprador',-1)">−</button>
+              <div class="stepper-value" id="countComprador">1</div>
+              <button class="stepper-btn" onclick="adjustCount('comprador',1)">+</button>
+            </div>
+            <button type="button" class="btn-clear-count" onclick="clearCount('comprador')" aria-label="Borrar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;"><path d="M19 6 5 20M5 6l14 14"/></svg>
+              Borrar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Pagos -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-box">
+             <img src="https://cdn-icons-png.magnific.com/512/4523/4523470.png?ga=GA1.1.1372457637.1778013504" alt="Pagos" class="icon-img">
+          </div>
+          <div>
+            <h2>Pagos / Liquidación</h2>
+            <span class="subtitle">Cantidad de pagos o anticipos de la operación</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Número de Pagos</label>
+          <div class="stepper-row">
+            <div class="stepper">
+              <button class="stepper-btn" onclick="adjustCount('pagos',-1)">−</button>
+              <div class="stepper-value" id="countPagos">1</div>
+              <button class="stepper-btn" onclick="adjustCount('pagos',1)">+</button>
+            </div>
+            <button type="button" class="btn-clear-count" onclick="clearCount('pagos')" aria-label="Borrar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;"><path d="M19 6 5 20M5 6l14 14"/></svg>
+              Borrar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Acceso -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon-box">
+             <img src="https://cdn-icons-png.magnific.com/512/1069/1069900.png?ga=GA1.1.1372457637.1778013504" alt="Acceso" class="icon-img">
+          </div>
+          <div>
+            <h2>Acceso y Protección</h2>
+            <span class="subtitle">El archivo se compartirá automáticamente con:</span>
+          </div>
+        </div>
+        <div class="email-chips">
+          <div class="email-chip"><span class="dot"></span> oficialdecumplimiento@cualli.mx</div>
+        </div>
+        <div class="info-note">
+          <span class="icon">ℹ️</span>
+          <span>El archivo se generará con protecciones: los títulos, secciones y menús no podrán ser modificados. Solo las celdas de captura estarán habilitadas para edición.</span>
+        </div>
+      </div>
+
+      <button class="btn-main" id="btnGenerar" onclick="generarPreAviso()">
+        GENERAR PRE-AVISO PLD
+      </button>
+
+      <div id="statusMsg" class="status"></div>
+
+    </div>
+    
+    <div class="sidebar-column">
+      
+      <!-- Resumen Dinámico Textual -->
+      <div class="summary-card">
+        <div class="summary-head">
+          <h3>Resumen del Documento a Generar</h3>
+          <span>En vivo</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat-tile">
+            <span>Vendedor (L1)</span>
+            <strong id="prevVendedor">1 Persona Física</strong>
+          </div>
+          <div class="stat-tile">
+            <span>Comprador (L2)</span>
+            <strong id="prevComprador">1 Persona Física</strong>
+          </div>
+          <div class="stat-tile">
+            <span>Total Pagos</span>
+            <strong id="prevPagos">1</strong>
+          </div>
+        </div>
+
+        <!-- Texto dinámico en lugar de barras visuales -->
+        <div class="stat-text-summary" id="resumenDetalle">
+          La operación se configurará para <strong>1 Vendedor (Persona Física)</strong> y <strong>1 Comprador (Persona Física)</strong>, liquidándose mediante <strong>1 pago único</strong>.
+        </div>
+      </div>
+
+      <!-- Ayuda -->
+      <div class="help-panel">
+        <h3>¿Cómo utilizar este sistema?</h3>
+        <div class="help-panel-content">
+          <p>Sigue estos pasos para generar correctamente el documento del <strong>Pre-Aviso PLD</strong> antes de la captura final:</p>
+          <ul>
+            <li><strong>Nombre de la Operación:</strong> En este campo deberás colocar la direccion de la propiedad o el nombre para identificar la operacion (ej. Venta Lote 14) y nombra a los asesores responsables tanto del Comprador como del Vendedor. Estos campos son estrictamente obligatorios.</li>
+            <li><strong>Bloques Vendedor y Comprador (Lado 1 y 2):</strong> Define el Régimen Fiscal y la cantidad exacta de Vendedores y Compradores. El sistema generará por cada seleccion el bloque correspondiente (ejemplo: 2 Vendedores Persona Física, 1 Comprador Persona Moral) de datos y requerimientos por cada uno.</li>
+            <li><strong>Liquidación:</strong> Selecciona en cuántos pagos o exhibiciones se formalizará la operación para generar las secciones y listar los pagos correspondientes. Si más adelante surge un pago adicional no contemplado, no generes un documento nuevo: usa "➕ Agregar Pago a Operación Existente" arriba.</li>
+            <li><strong>Generar:</strong> Se creará un documento de Google Sheets. Tendras que capturar los campos en rojo; la estructura, reglas y fórmulas estarán bloqueadas por el área de PLD.</li>
+          </ul>
+          
+          <a href="https://drive.google.com/file/d/18NbXuOl5Ft9kONYxwybro_7U9borwZvt/view?usp=drive_link" target="_blank" class="btn-guide">
+            📖 ABRIR GUÍA OPERATIVA DE CONSULTA
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  </div>
+  <!-- ══════════════════ FIN MODO: NUEVA OPERACIÓN ══════════════════ -->
+
+
+  <!-- ══════════════════ MODO: AGREGAR PAGO ══════════════════ -->
+  <div id="modoPago" class="layout-pago" style="display:none;">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box">
+          <span class="icon-emoji">➕</span>
+        </div>
+        <div>
+          <h2>Agregar Pago a Operación Existente</h2>
+          <span class="subtitle">Inserta uno o varios pagos nuevos directamente en el mismo documento — sin duplicarlo</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Link o ID del Documento de la Operación</label>
+        <input type="text" class="input-text" id="txtLinkOperacion" placeholder="Pega aquí el link de Google Sheets de la operación">
+      </div>
+
+      <div class="field-group">
+        <label>Cantidad de Pagos a Agregar</label>
+        <div class="stepper-row">
+          <div class="stepper">
+            <button class="stepper-btn" onclick="adjustCountPago(-1)">−</button>
+            <div class="stepper-value" id="countPagoExtra">1</div>
+            <button class="stepper-btn" onclick="adjustCountPago(1)">+</button>
+          </div>
+          <button type="button" class="btn-clear-count" onclick="clearCountPago()" aria-label="Borrar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;"><path d="M19 6 5 20M5 6l14 14"/></svg>
+            Borrar
+          </button>
+        </div>
+      </div>
+
+      <div class="info-note">
+        <span class="icon">ℹ️</span>
+        <span>El sistema verifica que el documento sea un Pre-Aviso PLD válido, genera un respaldo automático (uno solo, sin importar cuántos pagos agregues de una vez) e inserta los bloques siguientes sin tocar la información ya capturada. Solo funciona en documentos generados con esta versión del sistema.</span>
+      </div>
+    </div>
+
+    <button class="btn-main" id="btnAgregarPago" onclick="agregarPago()">
+      VERIFICAR Y AGREGAR PAGO(S)
+    </button>
+
+    <div id="statusMsgPago" class="status"></div>
+
+  </div>
+  <!-- ══════════════════ FIN MODO: AGREGAR PAGO ══════════════════ -->
+
+  <!-- ══════════════════ MODO: MIS PRE PLD Y REVISIÓN ══════════════════ -->
+  <div id="modoRevision" style="display:none;">
+<?!= APS_incluir('PLD_Revision') ?>
+  </div>
+  <!-- ══════════════════ FIN MODO: MIS PRE PLD Y REVISIÓN ══════════════════ -->
+
+
+</div>
+</div>
+<!-- ══════════════════ FIN MÓDULO PRE PLD ══════════════════ -->
+
+<? if (AUT) { ?><!-- ══════════════════ MÓDULO: CONTRATO APS (Hipoo) — solo asesores autorizados y coordinación ══════════════════ -->
+<div id="modulo-aps" style="display:none;">
+<?!= APS_incluir('APS_Nucleo') ?>
+<?!= APS_incluir('APS_Modulo') ?>
+</div>
+<? } ?>
+
+<? if (ADM) { ?><!-- ══════════════════ SECCIONES DE REVISIÓN: SOLO PARA LA COORDINACIÓN ══════════════════ -->
+<div id="modulo-consola" style="display:none;">
+<?!= APS_incluir('APS_Consola') ?>
+</div>
+<div id="modulo-tablero" style="display:none;">
+<?!= APS_incluir('APS_Tablero') ?>
+</div>
+<? } ?>
+
+<script>
+  // Lógica funcional de la interfaz conectada al Backend de Apps Script
+  var config = {
+    vendedorRegimen: 'PF',
+    vendedorCount: 1,
+    compradorRegimen: 'PF',
+    compradorCount: 1,
+    pagosCount: 1
+  };
+
+  function setMode(modo, btn) {
+    document.querySelectorAll('.mode-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('modoNueva').style.display = (modo === 'nueva') ? '' : 'none';
+    document.getElementById('modoPago').style.display = (modo === 'pago') ? '' : 'none';
+    document.getElementById('modoRevision').style.display = (modo === 'revision') ? '' : 'none';
+    if (modo === 'revision' && window.PLDREV) { PLDREV.cargar(); }
+  }
+
+  function setRegime(side, regime, btn) {
+    var buttons = btn.parentElement.querySelectorAll('.regime-btn');
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (side === 'vendedor') config.vendedorRegimen = regime;
+    else config.compradorRegimen = regime;
+    updatePreview();
+  }
+
+  function countLimits(field) {
+    return { min: 1, max: (field === 'pagos') ? 10 : 20 };
+  }
+
+  function adjustCount(field, delta) {
+    var limits = countLimits(field);
+    var key = field + 'Count';
+    config[key] = Math.max(limits.min, Math.min(limits.max, config[key] + delta));
+    document.getElementById('count' + capitalize(field)).textContent = config[key];
+    updatePreview();
+  }
+
+  function clearCount(field) {
+    var limits = countLimits(field);
+    config[field + 'Count'] = limits.min;
+    
+    var el = document.getElementById('count' + capitalize(field));
+    el.textContent = limits.min;
+    
+    bump(el);
+    updatePreview();
+  }
+
+  function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function bump(el) {
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
+
+  function bumpBox(el) {
+    el.classList.remove('bumpBox');
+    void el.offsetWidth;
+    el.classList.add('bumpBox');
+  }
+
+  function updatePreview() {
+    // Manejo de singulares y plurales
+    var regSingular = { 'PF': 'Persona Física', 'PM': 'Persona Moral' };
+    var regPlural = { 'PF': 'Personas Físicas', 'PM': 'Personas Morales' };
+    
+    var elVendedor = document.getElementById('prevVendedor');
+    var elComprador = document.getElementById('prevComprador');
+    var elPagos = document.getElementById('prevPagos');
+    var elResumen = document.getElementById('resumenDetalle');
+    
+    // 1. Textos para los cuadros pequeños (tiles)
+    var txtVendedor = config.vendedorCount + ' ' + (config.vendedorCount === 1 ? regSingular[config.vendedorRegimen] : regPlural[config.vendedorRegimen]);
+    var txtComprador = config.compradorCount + ' ' + (config.compradorCount === 1 ? regSingular[config.compradorRegimen] : regPlural[config.compradorRegimen]);
+
+    if (elVendedor.textContent !== txtVendedor) { elVendedor.textContent = txtVendedor; bump(elVendedor); }
+    if (elComprador.textContent !== txtComprador) { elComprador.textContent = txtComprador; bump(elComprador); }
+    if (elPagos.textContent !== String(config.pagosCount)) { elPagos.textContent = config.pagosCount; bump(elPagos); }
+
+    // 2. Construcción del resumen textual detallado
+    var vLabel = config.vendedorCount === 1 ? regSingular[config.vendedorRegimen] : regPlural[config.vendedorRegimen];
+    var cLabel = config.compradorCount === 1 ? regSingular[config.compradorRegimen] : regPlural[config.compradorRegimen];
+    
+    var vText = config.vendedorCount + (config.vendedorCount === 1 ? ' Vendedor (' : ' Vendedores (') + vLabel + ')';
+    var cText = config.compradorCount + (config.compradorCount === 1 ? ' Comprador (' : ' Compradores (') + cLabel + ')';
+    var pText = config.pagosCount === 1 ? '1 pago único' : config.pagosCount + ' pagos';
+
+    var htmlResumen = "La operación se configurará para <strong>" + vText + "</strong> y <strong>" + cText + "</strong>, liquidándose mediante <strong>" + pText + "</strong>.";
+
+    // Actualizamos el DOM solo si cambió para disparar la animación
+    if (elResumen.innerHTML !== htmlResumen) {
+      elResumen.innerHTML = htmlResumen;
+      bumpBox(elResumen);
+    }
+  }
+
+  function resetForm() {
+    document.getElementById('txtOperacion').value = '';
+    document.getElementById('txtAsocLado1').value = '';
+    document.getElementById('txtAsocLado2').value = '';
+    
+    config.vendedorRegimen = 'PF';
+    config.vendedorCount = 1;
+    config.compradorRegimen = 'PF';
+    config.compradorCount = 1;
+    config.pagosCount = 1;
+
+    var botonesRegimen = document.querySelectorAll('.regime-btn');
+    botonesRegimen.forEach(b => b.classList.remove('active'));
+    
+    var gruposToggle = document.querySelectorAll('.regime-toggle');
+    gruposToggle.forEach(grupo => {
+      grupo.querySelector('.regime-btn').classList.add('active');
+    });
+
+    document.getElementById('countVendedor').textContent = 1;
+    document.getElementById('countComprador').textContent = 1;
+    document.getElementById('countPagos').textContent = 1;
+
+    updatePreview();
+    
+    var elStatus = document.getElementById('statusMsg');
+    elStatus.style.display = 'none';
+    elStatus.className = 'status'; 
+    
+    setTimeout(() => { elStatus.style.display = ''; }, 50); 
+  }
+
+  function generarPreAviso() {
+    var operacion = document.getElementById('txtOperacion').value.trim();
+    var asocL1 = document.getElementById('txtAsocLado1').value.trim();
+    var asocL2 = document.getElementById('txtAsocLado2').value.trim();
+
+    if (!operacion || !asocL1 || !asocL2) {
+      showStatus('error', '⚠️ FALTA INFORMACIÓN: Debes llenar el nombre de la operación y ambos asociados responsables para continuar.');
+      return;
+    }
+    
+    showStatus('loading', '<div class="clock-spinner"></div> PROCESANDO: Generando archivo protegido...');
+    document.getElementById('btnGenerar').disabled = true;
+
+    if (typeof google !== 'undefined' && google.script) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          document.getElementById('btnGenerar').disabled = false;
+          if (res.success) {
+            showStatus('success', 
+              '✅ ¡LISTO! Documento generado e inscrito en Bitácora.<br>' + 
+              '<a href="'+res.url+'" target="_blank">ABRIR PRE-AVISO PLD</a>' + 
+              '<button type="button" class="btn-reset" onclick="PLDREV.enviar(\'' + res.id + '\', this)">📤 ENVIAR A REVISIÓN</button>' + 
+              '<button onclick="resetForm()" class="btn-reset">NUEVA OPERACIÓN</button>'
+            );
+          } else {
+            showStatus('error', '💥 ERROR: ' + res.message);
+          }
+        })
+        .withFailureHandler(function(err) {
+          document.getElementById('btnGenerar').disabled = false;
+          showStatus('error', '💥 ERROR CRÍTICO: ' + err.message);
+        })
+        .generarPreAvisoPLD({
+          operacion: operacion,
+          asociadoLado1: asocL1, 
+          asociadoLado2: asocL2, 
+          ...config
+        });
+    } else {
+      setTimeout(() => {
+        document.getElementById('btnGenerar').disabled = false;
+        showStatus('error', '💥 ENTORNO LOCAL: Script requiere ejecución desde Google Workspace.');
+      }, 1500);
+    }
+  }
+
+  function showStatus(type, html) {
+    var el = document.getElementById('statusMsg');
+    el.className = 'status ' + type;
+    el.innerHTML = html;
+  }
+
+  // ── Modo: Agregar Pago a Operación Existente ──
+
+  var cantidadPagoExtra = 1;
+
+  function adjustCountPago(delta) {
+    cantidadPagoExtra = Math.max(1, Math.min(9, cantidadPagoExtra + delta));
+    document.getElementById('countPagoExtra').textContent = cantidadPagoExtra;
+  }
+
+  function clearCountPago() {
+    cantidadPagoExtra = 1;
+    var el = document.getElementById('countPagoExtra');
+    el.textContent = 1;
+    bump(el);
+  }
+
+  function agregarPago() {
+    var link = document.getElementById('txtLinkOperacion').value.trim();
+
+    if (!link) {
+      showStatusPago('error', '⚠️ Pega el link o ID del documento de la operación.');
+      return;
+    }
+
+    var etiquetaCarga = cantidadPagoExtra === 1
+      ? 'VERIFICANDO DOCUMENTO Y AGREGANDO PAGO...'
+      : 'VERIFICANDO DOCUMENTO Y AGREGANDO ' + cantidadPagoExtra + ' PAGOS...';
+    showStatusPago('loading', '<div class="clock-spinner"></div> ' + etiquetaCarga);
+    document.getElementById('btnAgregarPago').disabled = true;
+
+    if (typeof google !== 'undefined' && google.script) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          document.getElementById('btnAgregarPago').disabled = false;
+          if (res.success) {
+            var mensajeExito = res.cantidadAgregada === 1
+              ? 'Se agregó el Pago ' + res.numeroPago + ' a la operación.'
+              : 'Se agregaron los Pagos ' + res.primerNumeroPago + ' a ' + res.numeroPago + ' a la operación.';
+            showStatusPago('success',
+              '✅ ¡LISTO! ' + mensajeExito + '<br>' +
+              '<a href="' + res.url + '" target="_blank">ABRIR DOCUMENTO</a>' +
+              '<button onclick="resetPagoForm()" class="btn-reset">AGREGAR OTRO PAGO</button>'
+            );
+          } else {
+            showStatusPago('error', '💥 ' + res.message);
+          }
+        })
+        .withFailureHandler(function(err) {
+          document.getElementById('btnAgregarPago').disabled = false;
+          showStatusPago('error', '💥 ERROR CRÍTICO: ' + err.message);
+        })
+        .agregarPagoAOperacion(link, cantidadPagoExtra);
+    } else {
+      setTimeout(() => {
+        document.getElementById('btnAgregarPago').disabled = false;
+        showStatusPago('error', '💥 ENTORNO LOCAL: Script requiere ejecución desde Google Workspace.');
+      }, 1500);
+    }
+  }
+
+  function showStatusPago(type, html) {
+    var el = document.getElementById('statusMsgPago');
+    el.className = 'status ' + type;
+    el.innerHTML = html;
+  }
+
+  function resetPagoForm() {
+    document.getElementById('txtLinkOperacion').value = '';
+    clearCountPago();
+    var el = document.getElementById('statusMsgPago');
+    el.style.display = 'none';
+    el.className = 'status';
+    setTimeout(() => { el.style.display = ''; }, 50);
+  }
+
+  updatePreview();
+</script>
+
+<script>
+  // ── Bienvenida y navegación: el usuario elige y ve SOLO esa pantalla ──
+  var USUARIO = <?!= APS_usuarioJson() ?>;
+  var TABLERO_URL = <?!= APS_tableroUrlJson() ?>;      // solo trae valor si el usuario es coordinador Y ya está configurado
+  var TITULOS = { pld: 'Generar documento Pre PLD', aps: 'Generar contrato APS', revpld: 'Revisión de Pre PLD', revaps: 'Revisión de contratos APS', tablero: 'Tablero Hipoo' };
+  var CONTENEDOR = { pld: 'modulo-pld', aps: 'modulo-aps', revpld: 'modulo-consola', revaps: 'modulo-consola', tablero: 'modulo-tablero' };
+  function hayPantalla(s) { return !!document.getElementById(CONTENEDOR[s]); }
+  function irA(s) {
+    if (s === 'consola') s = 'revaps';
+    var destino = (s === 'inicio') ? 'pantalla-inicio' : CONTENEDOR[s];
+    if (!destino || !document.getElementById(destino)) return;               // pantalla no disponible para este usuario
+    ['pantalla-inicio', 'modulo-pld', 'modulo-aps', 'modulo-consola', 'modulo-tablero'].forEach(function (id) {
+      var el = document.getElementById(id); if (el) { el.style.display = (id === destino) ? '' : 'none'; }
+    });
+    document.getElementById('barra-nav').style.display = (s === 'inicio') ? 'none' : '';
+    document.getElementById('navTitulo').textContent = TITULOS[s] || '';
+    document.getElementById('navUsuario').textContent = USUARIO.nombre || USUARIO.email;
+    actualizaNavPend();
+    window.scrollTo(0, 0);
+    if (s === 'aps' && window.APS_UI) { APS_UI.activar(); }
+    if (s === 'revaps' && window.CON) { CON.abrir('aps'); }
+    if (s === 'revpld' && window.CON) { CON.abrir('pld'); }
+    if (s === 'tablero' && window.TAB) { TAB.activar(); }
+  }
+  // El tablero es OTRA aplicación web de Google; Google no permite mostrarla dentro de esta página (protección propia de Google contra clickjacking).
+  // Por eso el botón, cuando ya está configurado, lleva directo a su pestaña — un solo clic, sin pantalla intermedia solo para repetir el mismo botón.
+  function abrirTarjeta(id) {
+    if (id === 'tablero' && TABLERO_URL) { window.open(TABLERO_URL, '_blank', 'noopener'); return; }
+    irA(id);
+  }
+  function setModulo(m) { irA(m); }
+  // Insignia "🔔 N pendientes" en la barra de arriba: a diferencia del aviso de la bienvenida, esta SIGUE al
+  // coordinador a cualquier pantalla (revisando un contrato, generando un Pre PLD, etc.) — no hay que volver al
+  // inicio para acordarse de que algo espera revisión.
+  function actualizaNavPend() {
+    var el = document.getElementById('navPend'); if (!el) return;
+    var pTot = (PENDIENTES.aps || 0) + (PENDIENTES.pld || 0);
+    if (USUARIO.rol === 'coordinador' && pTot > 0) {
+      el.style.display = ''; el.textContent = '🔔 ' + pTot + ' pendiente' + (pTot === 1 ? '' : 's');
+      el.onclick = function () { irA(PENDIENTES.aps > 0 ? 'revaps' : 'revpld'); };
+    } else el.style.display = 'none';
+  }
+  function tarjeta(id, icono, titulo, texto, o) {
+    o = o || {};
+    var badge = o.badge ? '<span class="badge-pend">' + (o.badge > 99 ? '99+' : o.badge) + '</span>' : '';
+    var boton = '<button type="button" class="inicio-card' + (o.coord ? ' coord' : '') + (o.off ? ' off' : '') + '" data-ir="' + id + '"' + (o.off ? ' disabled' : '') + '>' + badge +
+      '<div class="ic">' + icono + '</div><b>' + titulo + '</b><span>' + texto + '</span>' + (o.aviso ? '<span class="aviso">' + o.aviso + '</span>' : '') + '</button>';
+    // Acceso directo y llamativo a "mis registros" de este módulo, pegado como una pestañita al pie de la tarjeta —
+    // para que el asesor no tenga que entrar primero y buscar la pestaña correspondiente adentro.
+    if (!o.misRegistros) return boton;
+    return '<div class="inicio-card-wrap">' + boton + '<button type="button" class="inicio-misreg" data-misreg="' + id + '">📂 Ver mis registros</button></div>';
+  }
+  var PENDIENTES = { aps: 0, pld: 0 };      // conteo de pendientes por revisar; la coordinación lo llena al entrar (ver más abajo) — 0 = ningún aviso todavía
+  function pintaInicio() {
+    var host = document.getElementById('inicioTarjetas');
+    if (!USUARIO.email) {
+      document.getElementById('inicioQuien').textContent = 'No se pudo identificar tu cuenta';
+      host.innerHTML = '<div class="inicio-pie"><span>Abre esta página con tu cuenta corporativa de Google (Cualli, Fractio o Hipoo).</span></div>'; return;
+    }
+    var coord = USUARIO.rol === 'coordinador', aps = USUARIO.puedeAps;
+    var saludo = USUARIO.genero === 'f' ? 'Bienvenida' : (USUARIO.genero === 'm' ? 'Bienvenido' : 'Bienvenido/a');    // 'm'/'f' vienen del servidor (columna "Género" o, si no está, una adivinanza por el nombre)
+    document.getElementById('inicioSaludo').textContent = USUARIO.nombre ? '¡' + saludo + ', ' + USUARIO.nombre.split(' ')[0] + '!' : '¡' + saludo + '!';
+    document.getElementById('inicioQuien').textContent = USUARIO.email + (coord ? ' · Coordinación' : '');
+    var h = '';
+    var pAps = PENDIENTES.aps, pPld = PENDIENTES.pld, pTot = pAps + pPld;
+    if (coord && hayPantalla('revaps') && pTot > 0) {          // lo primero que ve la coordinación, antes que cualquier otra cosa — siempre visible si hay algo pendiente
+      h += '<div class="inicio-warn"><div class="iw-top"><span class="ic">⚠️</span><b>Tienes pendientes por revisar</b></div><div class="iw-items">' +
+        (pAps ? '<button type="button" class="iw-btn" data-ir="revaps"><b>' + pAps + '</b> contrato' + (pAps === 1 ? '' : 's') + ' APS</button>' : '') +
+        (pPld ? '<button type="button" class="iw-btn" data-ir="revpld"><b>' + pPld + '</b> Pre PLD</button>' : '') + '</div></div>';
+    }
+    h += '<h2>¿Qué deseas hacer?</h2><div class="inicio-grid">' +
+      tarjeta('pld', '🛡️', 'Generar documento Pre PLD', 'Crea el Pre-Aviso PLD de una operación inmobiliaria, agrega pagos a una operación existente o consulta tus documentos.', { misRegistros: true }) +
+      tarjeta('aps', '🏠', 'Generar contrato APS', 'Aviso de Prestación de Servicios de Corretaje Inmobiliario de Hipoo: captura los datos y envíalo a revisión.',
+        aps ? { misRegistros: true } : { off: true, aviso: 'No tienes autorización para generar contratos APS. Solicítala a la coordinación.' }) + '</div>';
+    if (coord && hayPantalla('revaps')) {
+      h += '<h2>Coordinación</h2><div class="inicio-grid">' +
+        tarjeta('revaps', '🗂️', 'Revisión de contratos APS', 'Estatus de cada contrato (sin terminar, completado, en revisión, aprobado), Google Docs, PDF, alertas y auditoría.', { coord: true, badge: pAps }) +
+        tarjeta('revpld', '📋', 'Revisión de Pre PLD', 'Documentos enviados a revisión, quién los generó, observaciones, bitácora de modificaciones y auditoría.', { coord: true, badge: pPld }) +
+        (hayPantalla('tablero') ? tarjeta('tablero', '📊', 'Tablero Hipoo', 'Indicadores de la actividad inmobiliaria.' + (TABLERO_URL ? ' Se abre en una pestaña nueva.' : ''), { coord: true }) : '') + '</div>';
+    }
+    host.innerHTML = h;
+  }
+  document.getElementById('inicioTarjetas').addEventListener('click', function (e) {
+    var m = e.target.closest('[data-misreg]'); if (m) { irMisRegistros(m.getAttribute('data-misreg')); return; }
+    var b = e.target.closest('button[data-ir]'); if (b && !b.disabled) { abrirTarjeta(b.getAttribute('data-ir')); }
+  });
+  // Desde la tarjeta de inicio: entra al módulo y, de una vez, abre la pestaña/lista de "mis registros" en vez de
+  // dejar a la persona en el formulario en blanco de "nuevo registro".
+  function irMisRegistros(id) {
+    irA(id);
+    if (id === 'aps' && window.APS_UI && APS_UI.misRegistros) APS_UI.misRegistros();
+    else if (id === 'pld') { var btn = document.getElementById('btnModoRev'); if (btn) setMode('revision', btn); }
+  }
+  pintaInicio();
+  // Enlace directo desde un correo (ej. "Registro aprobado ..."): si la URL trae ?modulo=aps&id=XXX, se abre esa
+  // pantalla y ese contrato en particular de una vez, en lugar de dejar a la persona en el menú de inicio para
+  // que lo busque. Si el parámetro no aplica o no hay acceso a esa pantalla, se queda en el inicio sin romper nada.
+  (function () {
+    try {
+      var qp = new URLSearchParams(window.location.search);
+      var modulo = qp.get('modulo'), id = qp.get('id');
+      if (modulo && hayPantalla(modulo)) {
+        irA(modulo);
+        if (id && modulo === 'aps' && window.APS_UI) APS_UI.abrir(id);
+      }
+    } catch (e) { /* URL sin parámetros válidos: sin problema, se queda en inicio */ }
+  })();
+  <? if (ADM) { ?>
+  // Avisa de una vez, al entrar, si hay contratos APS o Pre PLD esperando revisión, sin que la coordinación tenga que
+  // abrir cada sección para enterarse. Va envuelto en el "if (ADM)" del servidor: a un asesor ni se le manda este código.
+  function refrescarPendientes() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return;
+    google.script.run.withSuccessHandler(function (r) {
+      PENDIENTES = { aps: (r && r.aps && r.aps.EN_REVISION) || 0, pld: (r && r.pld && r.pld.EN_REVISION) || 0 };
+      pintaInicio(); actualizaNavPend();
+    }).withFailureHandler(function () { /* sin aviso si no se pudo consultar */ }).CONSOLA_resumen();
+  }
+  window.APS_refrescarPendientes = refrescarPendientes;   // con.js y APS_Modulo lo llaman tras aprobar / marcar revisado / observar, para que el número baje sin recargar la página
+  refrescarPendientes();
+  <? } ?>
+</script>
+</body>
+</html>
