@@ -866,6 +866,34 @@
     .hm-card .aviso { display: block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--warn); }
     .hm-badge { position: absolute; top: 12px; right: 12px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; display: grid; place-items: center; background: #e0a100; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; box-shadow: 0 0 0 4px #fff; }
 
+    /* Acciones principales: grandes, de alto contraste y con letra amplia (pensadas para leerse y tocarse sin esfuerzo) */
+    .hm-big { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 22px; margin-bottom: 26px; }
+    .hm-bc { position: relative; background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: 28px 28px 24px; box-shadow: 0 1px 2px rgba(26, 34, 74, .05), 0 22px 46px -14px rgba(26, 34, 74, .3); overflow: hidden; animation: hmRise .6s both; }
+    .hm-bc:nth-child(2) { animation-delay: .08s; }
+    .hm-bc::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 7px; background: linear-gradient(90deg, #364494, #35B7C5); }
+    .hm-bc.pld::before { background: linear-gradient(90deg, #0f8594, #35B7C5); }
+    .hm-bc-h { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+    .hm-bc .hm-ico { width: 72px; height: 72px; border-radius: 20px; background: linear-gradient(145deg, #e3e8fb, #cfd8f6); color: #364494; }
+    .hm-bc.pld .hm-ico { background: linear-gradient(145deg, #dff5f8, #bfe9ef); color: #0f8594; }
+    .hm-bc .hm-ico svg { width: 38px; height: 38px; }
+    .hm-bc h3 { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 25px; line-height: 1.15; color: var(--ink); margin: 0; letter-spacing: -.3px; }
+    .hm-bc p { font-size: 16px; line-height: 1.55; color: #3d476e; margin: 0 0 22px; }
+    .hm-cta { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 66px; border: none; border-radius: 16px; cursor: pointer; background: #364494; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: .2px; border-bottom: 5px solid #35B7C5; box-shadow: 0 12px 24px -10px rgba(54, 68, 148, .7); transition: transform .15s, box-shadow .15s, background .15s; }
+    .hm-cta svg { width: 26px; height: 26px; flex: none; transition: transform .15s; }
+    .hm-cta:hover { background: #2b377a; transform: translateY(-2px); box-shadow: 0 18px 28px -12px rgba(54, 68, 148, .75); }
+    .hm-cta:hover svg { transform: translateX(5px); }
+    .hm-cta:focus-visible, .hm-reg:focus-visible { outline: 4px solid #ffb03b; outline-offset: 3px; }
+    .hm-bc.pld .hm-cta { background: #0f8594; border-bottom-color: #1a224a; box-shadow: 0 12px 24px -10px rgba(15, 133, 148, .7); }
+    .hm-bc.pld .hm-cta:hover { background: #0b6f7c; }
+    .hm-reg { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 54px; margin-top: 12px; background: #fff; color: #364494; border: 2px solid #b9c6e4; border-radius: 14px; cursor: pointer; font-weight: 700; font-size: 16.5px; transition: background .15s, border-color .15s; }
+    .hm-bc.pld .hm-reg { color: #0b6f7c; }
+    .hm-reg:hover { background: #f4f7fc; border-color: #364494; }
+    .hm-bc.off { background: #f1f4fa; }
+    .hm-bc.off .hm-cta { background: #c4cce2; color: #5a6488; border-bottom-color: #aab4d1; box-shadow: none; cursor: not-allowed; }
+    .hm-bc.off .hm-cta:hover { transform: none; }
+    .hm-bc .aviso { display: block; margin-top: 14px; font-size: 14.5px; font-weight: 700; color: var(--warn); }
+    .hm-bc .hm-nota { display: inline-flex; align-items: center; gap: 8px; margin: -8px 0 18px; font-size: 14px; font-weight: 700; color: #9a6700; background: var(--warn-bg); padding: 6px 12px; border-radius: 999px; }
+    @media (max-width: 560px) { .hm-big { grid-template-columns: 1fr; } .hm-bc { padding: 22px 18px 20px; } .hm-bc h3 { font-size: 22px; } .hm-cta { font-size: 18px; min-height: 62px; } }
     .hm-feed { position: sticky; top: 16px; background: #fff; border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 1px 2px rgba(26, 34, 74, .05), 0 18px 40px -16px rgba(26, 34, 74, .25); overflow: hidden; }
     .hm-fh { display: flex; align-items: center; gap: 10px; padding: 16px 18px 14px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #fff, var(--soft)); }
     .hm-fh b { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; }
@@ -978,6 +1006,7 @@
     </div>
   </header>
   <main class="hm-main">
+    <section class="hm-big" id="hmPrincipal" aria-label="Acciones principales"></section>
     <section class="hm-kpis" id="hmKpis" aria-label="Resumen"></section>
     <div id="hmAviso"></div>
     <div class="hm-cols">
@@ -1645,6 +1674,18 @@
     var sub = o.misRegistros ? '<button type="button" class="hm-card-sub" data-misreg="' + id + '"><span>Ver mis registros</span><span>→</span></button>' : '';
     return '<div class="hm-card' + (o.coord ? ' coord' : '') + (o.off ? ' off' : '') + '">' + badge + main + sub + '</div>';
   }
+  function grande(id, titulo, texto, boton, permitido, aviso) {
+    var nota = '';
+    var P = HM.panel;
+    if (permitido && P && USUARIO.rol !== 'coordinador') {
+      if (id === 'aps' && P.aps.borradores > 0) nota = P.aps.borradores + (P.aps.borradores === 1 ? ' borrador sin terminar' : ' borradores sin terminar');
+      if (id === 'pld' && P.pld && P.pld.observados > 0) nota = P.pld.observados + (P.pld.observados === 1 ? ' documento por corregir' : ' documentos por corregir');
+    }
+    return '<div class="hm-bc ' + id + (permitido ? '' : ' off') + '"><div class="hm-bc-h"><span class="hm-ico">' + IC[id] + '</span><h3>' + titulo + '</h3></div><p>' + texto + '</p>' +
+      (nota ? '<span class="hm-nota">' + IC.alerta.replace('<svg', '<svg width="18" height="18"') + nota + '</span>' : '') +
+      '<button type="button" class="hm-cta" data-ir="' + id + '"' + (permitido ? '' : ' disabled') + '><span>' + boton + '</span>' + (permitido ? IC.go : '') + '</button>' +
+      (permitido ? '<button type="button" class="hm-reg" data-misreg="' + id + '">📂 Ver mis registros</button>' : '<span class="aviso">' + aviso + '</span>') + '</div>';
+  }
   function pintaInicio() {
     var host = document.getElementById('inicioTarjetas');
     document.getElementById('hmLogo').innerHTML = logoHtml();
@@ -1662,10 +1703,10 @@
     var f = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
     document.getElementById('hmFecha').textContent = f;
     var pAps = PENDIENTES.aps, pPld = PENDIENTES.pld;
-    var h = '<h2>¿Qué deseas hacer?</h2><div class="hm-acc dos">' +
-      tarjeta('pld', 'Generar documento Pre PLD', 'Crea el Pre-Aviso PLD de una operación, agrega pagos o consulta tus documentos.', { misRegistros: true }) +
-      tarjeta('aps', 'Generar contrato APS', 'Aviso de Prestación de Servicios de Corretaje de Hipoo: captura los datos y envíalo a revisión.',
-        aps ? { misRegistros: true } : { off: true, aviso: 'No tienes autorización para generar contratos APS. Solicítala a la coordinación.' }) + '</div>';
+    document.getElementById('hmPrincipal').innerHTML =
+      grande('aps', 'Generar contrato APS', 'Aviso de Prestación de Servicios de Corretaje de Hipoo. Captura los datos paso a paso y envíalo a revisión.', 'Generar contrato APS', aps, 'No tienes autorización para generar contratos APS. Solicítala a la coordinación.') +
+      grande('pld', 'Generar documento Pre PLD', 'Crea el Pre-Aviso PLD de una operación, agrega pagos a una operación existente o consulta tus documentos.', 'Generar Pre PLD', true);
+    var h = '';
     if (coord && hayPantalla('revaps')) {
       h += '<h2>Coordinación</h2><div class="hm-acc dos">' +
         tarjeta('revaps', 'Revisión de contratos APS', 'Estatus de cada contrato, Google Docs, PDF, alertas y auditoría.', { coord: true, badge: pAps }) +
