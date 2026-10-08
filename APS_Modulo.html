@@ -9,7 +9,7 @@
 #aps-root .hdr-l{display:flex;align-items:center;gap:14px;min-width:0}
 #aps-root .hdr .logo-container{margin:0;padding:4px 12px;border-radius:10px;box-shadow:none}
 #aps-root .hdr .header-logo{width:auto;height:30px}
-#aps-root .hdr h1{font-family:'Montserrat',sans-serif;font-weight:800;font-size:20px;line-height:1.1;color:#fff;letter-spacing:.2px;text-shadow:none;margin:0}
+#aps-root .hdr h1{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:24px;line-height:1.1;color:#fff;letter-spacing:.2px;text-shadow:none;margin:0}
 #aps-root .hdr p{color:#cfe9ee;font-size:12px;font-weight:500;background:none;border:0;padding:0;margin:3px 0 0;display:block;border-radius:0}
 #aps-root .userbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin:0}
 #aps-root .user-chip{font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:6px 12px;border-radius:999px}
@@ -187,6 +187,10 @@
 @media(max-width:600px){#aps-root .app{padding:14px 12px 80px}#aps-root .card{padding:18px}#aps-root .hdr{padding:12px 14px}#aps-root .row-item{flex-direction:column;align-items:stretch}#aps-root .btn-mini{align-self:flex-start}#aps-root .actions .btn-main,#aps-root .actions .btn-sec{flex:1}}
 /* Si alguien intenta imprimir la página (Ctrl+P), el módulo no sale en papel: el contrato solo se imprime desde el PDF aprobado */
 @media print{#aps-root{display:none!important}}
+#aps-root .card h2,#aps-root .reg-box h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.2px}
+#aps-root .btn-main{border-bottom:3px solid var(--primary)}
+#aps-root .hdr::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px;-webkit-mask-image:linear-gradient(100deg,#000,transparent 70%);mask-image:linear-gradient(100deg,#000,transparent 70%)}
+#aps-root .hdr{position:relative;overflow:hidden}#aps-root .hdr>*{position:relative;z-index:1}
 </style>
 <style id="aps_docCss"></style>
 <div id="aps-root">
@@ -913,7 +917,10 @@
   
   $('aps_docCss').textContent = D.css(null, { sinPagina: true });
   var activado = false;
-  function activar() { if (!activado) { activado = true; iniciarServidor(); } refresh(true); fitPreview(); }
+  function activar() {
+    if (!activado) { activado = true; iniciarServidor(); var hl = ROOT.querySelector('.hdr .header-logo'); if (hl && window.HM_LOGO) hl.src = window.HM_LOGO; }
+    refresh(true); fitPreview();
+  }
   window.APS_UI = { activar: activar, abrir: abrirRegistro, misRegistros: abrirRegistros, cargar: cargar, estado: function () { return S; }, pendientes: function () { return ISS.slice(); }, ir: goStep, step: function () { return STEP; } };
   if (IN_GAS) { $('aps_btnPrint').style.display = 'none'; $('aps_modalPrint').style.display = 'none'; $('aps_sinPdf').style.display = ''; }      // el PDF solo lo ve la coordinación (se muestran al identificar)
   if (IN_GAS) ROOT.querySelector('.ejs').style.display = 'none';       // datos de ejemplo: solo coordinador (se muestran al identificar)

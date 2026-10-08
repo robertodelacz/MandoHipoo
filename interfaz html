@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
   <style>
     :root {
       /* ── Paleta Institucional ── */
@@ -749,46 +749,177 @@
       to { transform: rotate(360deg); }
     }
 
-    /* ── Bienvenida y navegación entre pantallas ── */
-    .barra-nav { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 18px; background: rgba(13, 18, 43, 0.94); border-bottom: 3px solid var(--primary); }
-    .nav-volver { background: var(--primary); color: var(--border-dark); border: 3px solid var(--border-dark); border-radius: 10px; padding: 9px 16px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 13px; cursor: pointer; box-shadow: 3px 3px 0px var(--border-dark); }
-    .nav-volver:hover { transform: translate(-1px, -1px); }
-    .nav-titulo { flex: 1; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; color: #fff; }
-    .nav-usuario { font-size: 12px; font-weight: 700; color: #dbe3ff; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(53, 183, 197, 0.5); padding: 6px 12px; border-radius: 999px; }
-    .nav-pend { display: flex; align-items: center; gap: 6px; background: #ffb03b; color: #1a1200; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 12.5px; padding: 7px 14px; border: none; border-radius: 999px; cursor: pointer; animation: pulsoAtencion 2.2s ease-in-out infinite; }
-    .nav-pend:hover { filter: brightness(1.08); }
+    /* ═══════════ NAVEGACIÓN (cuando se está dentro de un módulo) ═══════════ */
+    .barra-nav { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 22px; background: linear-gradient(100deg, #364494 0%, #2b377a 100%); border-bottom: 4px solid var(--primary); box-shadow: 0 6px 20px rgba(13, 18, 43, .28); }
+    .nav-volver { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #364494; border: none; border-radius: 10px; padding: 9px 16px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12.5px; letter-spacing: .2px; cursor: pointer; transition: transform .15s, box-shadow .15s; }
+    .nav-volver:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0, 0, 0, .25); }
+    .nav-titulo { flex: 1; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; color: #fff; letter-spacing: .2px; }
+    .nav-usuario { font-size: 12px; font-weight: 600; color: #dbe3ff; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .22); padding: 6px 13px; border-radius: 999px; }
+    .nav-pend, .nav-nov { display: inline-flex; align-items: center; gap: 6px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; padding: 7px 14px; border: none; border-radius: 999px; cursor: pointer; }
+    .nav-pend { background: #ffb03b; color: #1a1200; animation: pulsoAtencion 2.2s ease-out infinite; }
+    .nav-nov { background: rgba(53, 183, 197, .18); color: #bff3f8; border: 1px solid rgba(53, 183, 197, .55); }
+    .nav-pend:hover, .nav-nov:hover { filter: brightness(1.1); }
     @keyframes pulsoAtencion { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 176, 59, 0.55); } 50% { box-shadow: 0 0 0 7px rgba(255, 176, 59, 0); } }
-    .inicio { position: relative; z-index: 1; max-width: 1020px; margin: 0 auto; padding: 34px 22px 60px; }
-    .inicio-cab { text-align: center; margin-bottom: 8px; }
-    .inicio h1 { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 42px; color: var(--primary); text-shadow: 3px 3px 0px var(--border-dark); margin: 6px 0 12px; }
-    .inicio-quien { display: inline-block; font-size: 13px; font-weight: 700; color: #fff; background: var(--border-dark); border: 2px solid var(--primary); padding: 7px 18px; border-radius: 999px; }
-    .inicio h2 { display: inline-block; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; color: #fff; background: var(--border-dark); border: 2px solid var(--primary); padding: 7px 18px; border-radius: 999px; margin: 28px 0 14px; letter-spacing: 0.5px; }
-    .inicio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; }
-    .inicio-card { position: relative; text-align: left; background: var(--bg-card); border: 3px solid var(--primary); border-radius: 14px; padding: 26px; cursor: pointer; color: #fff; box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.5); transition: all 0.12s; font-family: 'Inter', sans-serif; }
-    .inicio-card:hover { transform: translate(-3px, -3px); box-shadow: 11px 11px 0px rgba(0, 0, 0, 0.5); }
-    .inicio-card .ic { font-size: 44px; line-height: 1; margin-bottom: 12px; }
-    .inicio-card b { display: block; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 19px; margin-bottom: 8px; }
-    .inicio-card span { display: block; font-size: 13px; color: #eef1ff; line-height: 1.5; }
-    .inicio-card.coord { border-color: #ffd28a; }
-    .inicio-card.off { cursor: not-allowed; background: #2c3878; border: 3px dashed #9aa6d8; }
-    .inicio-card.off:hover { transform: none; box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.5); }
-    .inicio-card .aviso { margin-top: 12px; color: #ffd28a; font-weight: 700; background: var(--border-dark); border: 2px solid #ffd28a; border-radius: 10px; padding: 8px 12px; }
-    .inicio-card-wrap { display: flex; flex-direction: column; box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.5); border-radius: 14px; transition: all 0.12s; }
-    .inicio-card-wrap:hover { transform: translate(-3px, -3px); box-shadow: 11px 11px 0px rgba(0, 0, 0, 0.5); }
-    .inicio-card-wrap .inicio-card { border-radius: 14px 14px 0 0; box-shadow: none; }
-    .inicio-card-wrap .inicio-card:hover { transform: none; box-shadow: none; }   /* el hover lo hace el wrapper completo, tarjeta + pestaña juntas */
-    .inicio-misreg { display: block; width: 100%; text-align: left; background: var(--primary); color: var(--border-dark); border: 3px solid var(--border-dark); border-top: none; border-radius: 0 0 11px 11px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 13px; padding: 11px 26px; cursor: pointer; }
-    .inicio-misreg:hover { filter: brightness(1.08); }
-    .badge-pend { position: absolute; top: -12px; right: -12px; background: #ff5c5c; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 13px; min-width: 27px; height: 27px; padding: 0 5px; border-radius: 999px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg-card); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45); }
-    .inicio-warn { display: block; margin: 0 0 24px; padding: 16px 22px; background: var(--border-dark); border: 3px solid #ffb03b; border-radius: 14px; box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.45); animation: pulsoAtencion 2.2s ease-in-out infinite; }
-    .inicio-warn .iw-top { display: flex; align-items: center; gap: 10px; color: #ffd28a; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 17px; margin-bottom: 13px; }
-    .inicio-warn .ic { font-size: 24px; }
-    .inicio-warn .iw-items { display: flex; flex-wrap: wrap; gap: 10px; }
-    .iw-btn { display: inline-block; background: #ffb03b; color: #1a1200; border: none; border-radius: 999px; padding: 10px 20px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13.5px; cursor: pointer; transition: all 0.12s; }
-    .iw-btn b { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 17px; margin-right: 6px; }
-    .iw-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.35); }
-    .inicio-pie { margin-top: 30px; text-align: center; }
-    .inicio-pie span { display: inline-block; font-size: 12.5px; font-weight: 600; color: #fff; background: var(--border-dark); border: 1px solid var(--primary); padding: 7px 16px; border-radius: 999px; }
+
+    /* ═══════════ SPLASH ═══════════ */
+    body.splash-on { overflow: hidden; }
+    #splash { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; cursor: pointer;
+      background: radial-gradient(120% 90% at 50% 0%, #364494 0%, #232d61 48%, #11163a 100%); transition: transform .75s cubic-bezier(.77, 0, .18, 1), opacity .5s .25s; }
+    #splash.out { transform: translateY(-102%); opacity: .6; pointer-events: none; }
+    #splash::before { content: ""; position: absolute; inset: 0; opacity: .5; background-image: linear-gradient(rgba(53, 183, 197, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(53, 183, 197, .07) 1px, transparent 1px); background-size: 46px 46px; -webkit-mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 70%); mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 70%); }
+    .sp-logo { position: relative; background: #fff; border-radius: 18px; padding: 16px 34px; box-shadow: 0 24px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(255, 255, 255, .5); animation: spIn .9s cubic-bezier(.2, .9, .25, 1) both; }
+    .sp-logo img { display: block; height: 54px; width: auto; }
+    .sp-logo b { display: block; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 38px; color: #364494; letter-spacing: -.5px; }
+    .sp-logo b i { color: #0f8594; font-style: normal; }
+    .sp-tag { position: relative; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 6px; text-transform: uppercase; color: #bff3f8; animation: spUp .8s .45s both; }
+    .sp-bar { position: relative; width: 190px; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .14); overflow: hidden; animation: spUp .6s .6s both; }
+    .sp-bar::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, #35B7C5, #fff); transform: translateX(-100%); animation: spBar 1.5s .7s cubic-bezier(.5, 0, .2, 1) forwards; }
+    @keyframes spIn { from { opacity: 0; transform: translateY(18px) scale(.94); } to { opacity: 1; transform: none; } }
+    @keyframes spUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes spBar { to { transform: translateX(0); } }
+
+    /* ═══════════ PANTALLA PRINCIPAL ═══════════ */
+    .hm { --ink: #1a224a; --navy: #364494; --teal: #0f8594; --cy: #35B7C5; --muted: #5a6488; --line: #dbe2ef; --soft: #f4f7fc; --ok: #0f9d6e; --ok-bg: #e3f6ee; --warn: #9a6700; --warn-bg: #fff4d6; --err: #d92d3f; --err-bg: #fdecee;
+      position: relative; z-index: 2; min-height: 100vh; background: var(--soft); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    .hm *, .hm *::before, .hm *::after { box-sizing: border-box; }
+    .hm button { font-family: inherit; }
+    .hm-hero { position: relative; overflow: hidden; color: #fff; background: radial-gradient(90% 140% at 100% 0%, #3d4fb0 0%, transparent 55%), linear-gradient(115deg, #364494 0%, #232d61 60%, #1a224a 100%); border-bottom: 5px solid var(--cy); padding: 22px 28px 112px; }
+    .hm-sky { position: absolute; right: -10px; bottom: -6px; width: min(560px, 70%); height: 78%; opacity: .2; pointer-events: none; }
+    .hm-hero::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px); background-size: 44px 44px; -webkit-mask-image: linear-gradient(100deg, #000 0%, transparent 65%); mask-image: linear-gradient(100deg, #000 0%, transparent 65%); pointer-events: none; }
+    .hm-in { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; }
+    .hm-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
+    .hm-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .hm-logo { background: #fff; border-radius: 12px; padding: 6px 14px; display: inline-flex; align-items: center; box-shadow: 0 6px 18px rgba(0, 0, 0, .22); }
+    .hm-logo img { height: 28px; width: auto; display: block; }
+    .hm-logo b { font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 22px; color: #364494; letter-spacing: -.3px; }
+    .hm-logo b i { color: #0f8594; font-style: normal; }
+    .hm-sep { width: 1px; height: 26px; background: rgba(255, 255, 255, .3); }
+    .hm-sys { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 2.6px; text-transform: uppercase; color: #bff3f8; }
+    .hm-live { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; color: #dbe3ff; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .22); padding: 7px 14px; border-radius: 999px; backdrop-filter: blur(6px); }
+    .hm-live i { width: 8px; height: 8px; border-radius: 50%; background: #3be8a5; box-shadow: 0 0 0 0 rgba(59, 232, 165, .6); animation: hmPulse 2s infinite; }
+    .hm-live b { font-family: 'Montserrat', sans-serif; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; font-size: 10.5px; color: #fff; }
+    .hm-live.off i { background: #ffb03b; animation: none; }
+    @keyframes hmPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 232, 165, .55); } 70% { box-shadow: 0 0 0 9px rgba(59, 232, 165, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 232, 165, 0); } }
+    .hm-fecha { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #8fe1ea; margin: 0 0 10px; }
+    .hm h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: clamp(30px, 4.6vw, 50px); line-height: 1.08; letter-spacing: -.8px; margin: 0 0 16px; color: #fff; text-shadow: none; }
+    .hm h1 em { font-style: italic; font-weight: 500; color: #7be0ea; }
+    .hm-quien { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: #dbe3ff; }
+    .hm-rol { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase; color: #11163a; background: #7be0ea; padding: 4px 11px; border-radius: 999px; }
+    .hm-rol.coord { background: #ffd28a; }
+
+    .hm-main { position: relative; z-index: 3; max-width: 1180px; margin: -76px auto 0; padding: 0 28px 56px; }
+    .hm-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 20px; }
+    .hm-kpi { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 20px 20px 18px; box-shadow: 0 1px 2px rgba(26, 34, 74, .05), 0 18px 40px -12px rgba(26, 34, 74, .22); animation: hmRise .6s both; }
+    .hm-kpi:nth-child(2) { animation-delay: .08s; }
+    @keyframes hmRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    .hm-kh { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .hm-ico { flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: #e8f6f8; color: var(--teal); }
+    .hm-ico svg { width: 22px; height: 22px; }
+    .hm-kh b { display: block; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; color: var(--ink); }
+    .hm-kh small { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .hm-cells { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 10px; }
+    .hm-cell { position: relative; text-align: left; background: var(--soft); border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px 12px; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s; }
+    .hm-cell:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -10px rgba(26, 34, 74, .35); border-color: #b9c6e4; }
+    .hm-cell::before { content: ""; position: absolute; left: 14px; top: 0; width: 26px; height: 3px; border-radius: 0 0 3px 3px; background: var(--c, #9aa6d8); }
+    .hm-cell .n { display: block; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 38px; line-height: 1; letter-spacing: -1px; color: var(--ink); font-variant-numeric: tabular-nums; margin: 6px 0 7px; }
+    .hm-cell .l { display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); line-height: 1.25; }
+    .hm-cell.t-ok { --c: var(--ok); } .hm-cell.t-warn { --c: #e0a100; } .hm-cell.t-bad { --c: var(--err); } .hm-cell.t-info { --c: var(--cy); } .hm-cell.t-mute { --c: #9aa6d8; }
+    .hm-cell.hot { background: var(--warn-bg); border-color: #f0d68a; }
+    .hm-cell.hot .n { color: #7a5200; }
+    .hm-cell.hot.t-bad { background: var(--err-bg); border-color: #f3b9c0; } .hm-cell.hot.t-bad .n { color: #a3192a; }
+    .hm-cell.flash { animation: hmFlash 1.2s; }
+    @keyframes hmFlash { 0% { box-shadow: 0 0 0 0 rgba(53, 183, 197, .7); } 100% { box-shadow: 0 0 0 14px rgba(53, 183, 197, 0); } }
+    .hm-sk .n { color: transparent; background: linear-gradient(90deg, #e6ecf7 25%, #f4f7fc 50%, #e6ecf7 75%); background-size: 200% 100%; animation: hmSk 1.2s infinite; border-radius: 8px; width: 46px; }
+    @keyframes hmSk { to { background-position: -200% 0; } }
+
+    .hm-aviso { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; padding: 14px 18px; border-radius: 16px; background: var(--warn-bg); border: 1px solid #f0d68a; color: #5c3f00; }
+    .hm-aviso svg { width: 22px; height: 22px; flex: none; }
+    .hm-aviso b { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; }
+    .hm-aviso .hm-av-b { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+    .hm-aviso button { background: #1a224a; color: #fff; border: none; border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: 12.5px; cursor: pointer; transition: transform .15s; }
+    .hm-aviso button:hover { transform: translateY(-1px); }
+    .hm-aviso button b { color: #7be0ea; margin-right: 5px; }
+
+    .hm-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: 22px; align-items: start; }
+    .hm h2 { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 2.2px; text-transform: uppercase; color: var(--muted); margin: 6px 0 14px; background: none; border: none; padding: 0; display: block; }
+    .hm-acc { display: grid; gap: 14px; margin-bottom: 26px; }
+    .hm-acc.dos { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .hm-card { position: relative; background: #fff; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: 0 1px 2px rgba(26, 34, 74, .04); transition: transform .18s, box-shadow .18s, border-color .18s; }
+    .hm-card:hover { transform: translateY(-3px); box-shadow: 0 16px 34px -14px rgba(26, 34, 74, .35); border-color: #b9c6e4; }
+    .hm-card-main { display: flex; align-items: flex-start; gap: 14px; width: 100%; text-align: left; background: none; border: none; padding: 18px 18px 16px; cursor: pointer; color: inherit; }
+    .hm-card .hm-ico { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(145deg, #e8f6f8, #d3eef2); }
+    .hm-card .hm-ico svg { width: 24px; height: 24px; }
+    .hm-card-t { flex: 1; min-width: 0; }
+    .hm-card-t b { display: block; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15.5px; color: var(--ink); margin-bottom: 4px; }
+    .hm-card-t span { display: block; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+    .hm-go { align-self: center; flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); color: var(--navy); transition: background .18s, color .18s, transform .18s; }
+    .hm-go svg { width: 15px; height: 15px; }
+    .hm-card:hover .hm-go { background: var(--navy); color: #fff; transform: translateX(3px); }
+    .hm-card-sub { display: flex; align-items: center; justify-content: space-between; width: 100%; background: var(--soft); border: none; border-top: 1px solid var(--line); padding: 11px 18px; font-weight: 700; font-size: 12.5px; color: var(--teal); cursor: pointer; transition: background .15s; }
+    .hm-card-sub:hover { background: #e8f6f8; }
+    .hm-card.coord .hm-ico { background: linear-gradient(145deg, #fff1d1, #ffe3a3); color: #8a5a00; }
+    .hm-card.coord::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #ffb03b; }
+    .hm-card.off { background: #f1f4fa; }
+    .hm-card.off:hover { transform: none; box-shadow: none; border-color: var(--line); }
+    .hm-card.off .hm-card-main { cursor: not-allowed; }
+    .hm-card.off .hm-ico { background: #e4e9f4; color: #8c97b6; }
+    .hm-card .aviso { display: block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--warn); }
+    .hm-badge { position: absolute; top: 12px; right: 12px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; display: grid; place-items: center; background: #e0a100; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; box-shadow: 0 0 0 4px #fff; }
+
+    .hm-feed { position: sticky; top: 16px; background: #fff; border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 1px 2px rgba(26, 34, 74, .05), 0 18px 40px -16px rgba(26, 34, 74, .25); overflow: hidden; }
+    .hm-fh { display: flex; align-items: center; gap: 10px; padding: 16px 18px 14px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #fff, var(--soft)); }
+    .hm-fh b { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; }
+    .hm-fh .hm-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--ok); background: var(--ok-bg); padding: 4px 10px; border-radius: 999px; }
+    .hm-fh .hm-pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); animation: hmPulse2 2s infinite; }
+    @keyframes hmPulse2 { 0% { box-shadow: 0 0 0 0 rgba(15, 157, 110, .5); } 70% { box-shadow: 0 0 0 7px rgba(15, 157, 110, 0); } 100% { box-shadow: 0 0 0 0 rgba(15, 157, 110, 0); } }
+    .hm-fh .hm-pill.off { color: var(--warn); background: var(--warn-bg); } .hm-fh .hm-pill.off i { background: #e0a100; animation: none; }
+    .hm-fh .hm-new { margin-left: auto; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 11px; color: #fff; background: var(--err); border-radius: 999px; padding: 3px 9px; display: none; }
+    .hm-fh .hm-new.on { display: inline-block; animation: hmPop .4s; }
+    @keyframes hmPop { from { transform: scale(.4); } to { transform: none; } }
+    .hm-fl { list-style: none; margin: 0; padding: 6px 0; max-height: min(560px, 62vh); overflow: auto; }
+    .hm-ev { position: relative; display: flex; gap: 13px; padding: 12px 18px 12px 20px; cursor: pointer; transition: background .15s; }
+    .hm-ev:hover { background: var(--soft); }
+    .hm-ev::before { content: ""; position: absolute; left: 35px; top: 46px; bottom: -12px; width: 2px; background: var(--line); }
+    .hm-ev:last-child::before { display: none; }
+    .hm-ev .dot { position: relative; z-index: 1; flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--cy); box-shadow: 0 0 0 4px #fff; }
+    .hm-ev .dot svg { width: 16px; height: 16px; }
+    .hm-ev.t-ok .dot { background: var(--ok); } .hm-ev.t-warn .dot { background: #e0a100; } .hm-ev.t-bad .dot { background: var(--err); }
+    .hm-ev .tx { min-width: 0; flex: 1; }
+    .hm-ev .tx b { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink); font-weight: 700; }
+    .hm-ev .tx p { margin: 3px 0 4px; font-size: 12.5px; line-height: 1.45; color: #46507a; overflow-wrap: anywhere; }
+    .hm-ev .tx time { font-size: 11.5px; color: #8590b0; font-weight: 600; }
+    .hm-ev.nuevo { background: linear-gradient(90deg, #e8f6f8, transparent 85%); }
+    .hm-ev.nuevo .tx b::after { content: "NUEVO"; font-size: 9px; letter-spacing: 1px; font-weight: 800; color: #fff; background: var(--teal); padding: 2px 6px; border-radius: 999px; }
+    .hm-ev.fresh { animation: hmSlide .7s both; }
+    @keyframes hmSlide { from { opacity: 0; transform: translateX(18px); background: #c9f0f4; } to { opacity: 1; transform: none; } }
+    .hm-vacio { padding: 34px 24px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .hm-vacio svg { width: 38px; height: 38px; color: #b9c6e4; margin-bottom: 8px; }
+    .hm-ff { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 18px; border-top: 1px solid var(--line); background: var(--soft); font-size: 11.5px; color: #7a85a8; }
+    .hm-ff button { background: none; border: none; color: var(--teal); font-weight: 700; font-size: 12px; cursor: pointer; padding: 4px 0; }
+    .hm-ff button:disabled { color: #b0b9d2; cursor: default; }
+    .hm-pie { text-align: center; margin-top: 36px; font-size: 12px; color: #8590b0; }
+    #hmToast { position: fixed; right: 20px; bottom: 20px; z-index: 900; display: flex; gap: 12px; align-items: flex-start; max-width: 360px; background: #1a224a; color: #fff; border-radius: 14px; padding: 14px 16px; box-shadow: 0 20px 44px rgba(13, 18, 43, .45); border-left: 4px solid var(--cy, #35B7C5); font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.4; cursor: pointer; transform: translateY(24px); opacity: 0; pointer-events: none; transition: transform .35s, opacity .35s; }
+    #hmToast.on { transform: none; opacity: 1; pointer-events: auto; }
+    #hmToast b { display: block; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 13px; margin-bottom: 2px; }
+    #hmToast span { color: #cfd7f5; }
+    @media (max-width: 920px) {
+      .hm-cols { grid-template-columns: 1fr; }
+      .hm-feed { position: static; order: -1; }
+      .hm-fl { max-height: 340px; }
+    }
+    @media (max-width: 560px) {
+      .hm-hero { padding: 16px 16px 100px; } .hm-main { padding: 0 14px 40px; margin-top: -64px; }
+      .hm-top { margin-bottom: 26px; } .hm-sys, .hm-sep { display: none; }
+      .hm-kpis { grid-template-columns: 1fr; } .hm-cell .n { font-size: 32px; }
+      #hmToast { left: 14px; right: 14px; max-width: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hm *, #splash, #splash * { animation-duration: .01s !important; animation-delay: 0s !important; transition-duration: .01s !important; }
+    }
+    /* Pantallas claras (contratos APS y revisión): superficie propia, por encima del video y su capa oscura de fondo */
+    #modulo-aps, #modulo-consola, #modulo-tablero { position: relative; z-index: 2; min-height: calc(100vh - 62px); background: linear-gradient(180deg, #dfe6f4 0, #f4f7fc 340px); padding: 22px 14px 48px; }
+    @media (max-width: 560px) { #modulo-aps, #modulo-consola, #modulo-tablero { padding: 10px 0 36px; } }
+    @media print { #splash, .hm, .barra-nav { display: none !important; } }
     /* Legibilidad del Pre PLD: solo el color de los textos grises (los bordes no cambian) */
     .card-header .subtitle, .stat-tile span { color: #D6DAEE; }
     label { color: #55D3E0; }
@@ -813,26 +944,56 @@
 <div class="bg-overlay"></div>
 
 <? var ADM = APS_esAdmin(); var AUT = APS_puedeGenerarAps(); ?>
+<!-- ══════════════════ SPLASH DE BIENVENIDA (una vez por sesión) ══════════════════ -->
+<div id="splash" aria-hidden="true">
+  <div class="sp-logo"><span id="spLogo"></span></div>
+  <div class="sp-tag">Mesa de control</div>
+  <div class="sp-bar"></div>
+</div>
+
 <!-- ══════════════════ BARRA DE NAVEGACIÓN (aparece al elegir una opción; regresa a la bienvenida) ══════════════════ -->
 <div class="barra-nav" id="barra-nav" style="display:none;">
   <button type="button" class="nav-volver" onclick="irA('inicio')">← Inicio</button>
   <span class="nav-titulo" id="navTitulo"></span>
+  <button type="button" class="nav-nov" id="navNov" style="display:none;"></button>
   <button type="button" class="nav-pend" id="navPend" style="display:none;"></button>
   <span class="nav-usuario" id="navUsuario"></span>
 </div>
 
-<!-- ══════════════════ PANTALLA DE BIENVENIDA ══════════════════ -->
-<div id="pantalla-inicio" class="inicio">
-  <div class="inicio-cab">
-    <div class="logo-container">
-      <img src="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000" alt="Financiera Cualli" class="header-logo">
+<!-- ══════════════════ PANTALLA PRINCIPAL ══════════════════ -->
+<div id="pantalla-inicio" class="hm">
+  <header class="hm-hero">
+    <svg class="hm-sky" viewBox="0 0 560 300" fill="none" stroke="#7be0ea" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10 300V190h58v110M68 300V120l52-20v200M120 300V60h74v240M194 300V150h50v150M244 300V40l62-22v282M306 300V130h64v170M370 300V90h56v210M426 300V170h60v130M486 300V110h64v190"/>
+      <path d="M134 90h46M134 120h46M134 150h46M134 180h46M134 210h46M134 240h46M258 70h34M258 100h34M258 130h34M258 160h34M258 190h34M258 220h34M384 120h28M384 150h28M384 180h28M384 210h28M500 140h36M500 170h36M500 200h36M500 230h36"/>
+    </svg>
+    <div class="hm-in">
+      <div class="hm-top">
+        <div class="hm-brand"><span class="hm-logo" id="hmLogo"></span><span class="hm-sep"></span><span class="hm-sys">Mesa de control inmobiliaria</span></div>
+        <div class="hm-live" id="hmLive" title="La información se actualiza sola"><i></i><b>En vivo</b><span id="hmLiveT">conectando…</span></div>
+      </div>
+      <p class="hm-fecha" id="hmFecha"></p>
+      <h1 id="inicioSaludo">¡Bienvenido!</h1>
+      <div class="hm-quien"><span class="hm-rol" id="hmRol"></span><span id="inicioQuien"></span></div>
     </div>
-    <h1 id="inicioSaludo">¡Bienvenido!</h1>
-    <div class="inicio-quien" id="inicioQuien"></div>
-  </div>
-  <div id="inicioTarjetas"></div>
-  <div class="inicio-pie"><span>Elige una opción: verás solo esa pantalla. Puedes volver a esta pantalla con «← Inicio».</span></div>
+  </header>
+  <main class="hm-main">
+    <section class="hm-kpis" id="hmKpis" aria-label="Resumen"></section>
+    <div id="hmAviso"></div>
+    <div class="hm-cols">
+      <section>
+        <div id="inicioTarjetas"></div>
+      </section>
+      <aside class="hm-feed" aria-label="Novedades en vivo">
+        <div class="hm-fh"><b>Novedades</b><span class="hm-pill" id="hmPill"><i></i>En vivo</span><span class="hm-new" id="hmNew">0</span></div>
+        <ul class="hm-fl" id="hmFeed"></ul>
+        <div class="hm-ff"><span id="hmFeedPie">Se actualiza sola cada pocos segundos</span><button type="button" id="hmLeer" disabled>Marcar como leídas</button></div>
+      </aside>
+    </div>
+    <div class="hm-pie">Hipoo · Financiera Cualli — Mesa de control</div>
+  </main>
 </div>
+<div id="hmToast" role="status" aria-live="polite"></div>
 
 <!-- ══════════════════ MÓDULO: PRE PLD ══════════════════ -->
 <div id="modulo-pld" style="display:none;">
@@ -1401,6 +1562,20 @@
 <script>
   // ── Bienvenida y navegación: el usuario elige y ve SOLO esa pantalla ──
   var USUARIO = <?!= APS_usuarioJson() ?>;
+  var HM_LOGO = <?!= JSON.stringify(APS_logoDataUri_()).replace(/</g, '\\u003c') ?>;      // logo de Hipoo (vacío si no se pudo leer: la pantalla usa un rótulo de texto)
+
+  // Splash de bienvenida: una sola vez por sesión del navegador, y nunca si se entra por un enlace directo de un correo.
+  (function () {
+    var sp = document.getElementById('splash'); if (!sp) return;
+    var visto = false; try { visto = window.sessionStorage.getItem('hm_splash') === '1'; } catch (e) { visto = false; }
+    if (visto || /[?&]modulo=/.test(window.location.search)) { sp.parentNode.removeChild(sp); return; }
+    try { window.sessionStorage.setItem('hm_splash', '1'); } catch (e) { /* sin almacenamiento: se verá en cada carga, sin problema */ }
+    document.getElementById('spLogo').innerHTML = HM_LOGO ? '<img src="' + HM_LOGO + '" alt="Hipoo" style="display:block;height:54px;width:auto">' : '<b style="display:block;font:700 38px Fraunces,Georgia,serif;color:#364494;letter-spacing:-.5px">hipoo<i style="color:#0f8594;font-style:normal">.mx</i></b>';
+    document.body.classList.add('splash-on');
+    var reducido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, cerrado = false;
+    function cerrar() { if (cerrado) return; cerrado = true; sp.classList.add('out'); document.body.classList.remove('splash-on'); setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900); }
+    sp.addEventListener('click', cerrar); setTimeout(cerrar, reducido ? 400 : 2300);
+  })();
   var TABLERO_URL = <?!= APS_tableroUrlJson() ?>;      // solo trae valor si el usuario es coordinador Y ya está configurado
   var TITULOS = { pld: 'Generar documento Pre PLD', aps: 'Generar contrato APS', revpld: 'Revisión de Pre PLD', revaps: 'Revisión de contratos APS', tablero: 'Tablero Hipoo' };
   var CONTENEDOR = { pld: 'modulo-pld', aps: 'modulo-aps', revpld: 'modulo-consola', revaps: 'modulo-consola', tablero: 'modulo-tablero' };
@@ -1417,6 +1592,7 @@
     document.getElementById('navUsuario').textContent = USUARIO.nombre || USUARIO.email;
     actualizaNavPend();
     window.scrollTo(0, 0);
+    if (s === 'inicio' && window.refrescarPanel) refrescarPanel();
     if (s === 'aps' && window.APS_UI) { APS_UI.activar(); }
     if (s === 'revaps' && window.CON) { CON.abrir('aps'); }
     if (s === 'revpld' && window.CON) { CON.abrir('pld'); }
@@ -1440,48 +1616,181 @@
       el.onclick = function () { irA(PENDIENTES.aps > 0 ? 'revaps' : 'revpld'); };
     } else el.style.display = 'none';
   }
-  function tarjeta(id, icono, titulo, texto, o) {
-    o = o || {};
-    var badge = o.badge ? '<span class="badge-pend">' + (o.badge > 99 ? '99+' : o.badge) + '</span>' : '';
-    var boton = '<button type="button" class="inicio-card' + (o.coord ? ' coord' : '') + (o.off ? ' off' : '') + '" data-ir="' + id + '"' + (o.off ? ' disabled' : '') + '>' + badge +
-      '<div class="ic">' + icono + '</div><b>' + titulo + '</b><span>' + texto + '</span>' + (o.aviso ? '<span class="aviso">' + o.aviso + '</span>' : '') + '</button>';
-    // Acceso directo y llamativo a "mis registros" de este módulo, pegado como una pestañita al pie de la tarjeta —
-    // para que el asesor no tenga que entrar primero y buscar la pestaña correspondiente adentro.
-    if (!o.misRegistros) return boton;
-    return '<div class="inicio-card-wrap">' + boton + '<button type="button" class="inicio-misreg" data-misreg="' + id + '">📂 Ver mis registros</button></div>';
+  var PENDIENTES = { aps: 0, pld: 0 };      // por revisar (los llena el panel en vivo); 0 = ningún aviso
+  var HM = { panel: null, ahoraSrv: '', t0: 0, visto: '', errores: 0, cargando: false, prev: {}, vistos: {}, primera: true, ultimoOk: 0 };
+  var IC = {
+    pld: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.4 3 8 7.5 9.5 4.5-1.500 7.500-5.100 7.500-9.500V6z"/><path d="m8.800 12 2.400 2.400 4-4.800"/></svg>',
+    aps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.500 11 12 4l8.500 7"/><path d="M5.500 9.500V20h13V9.500"/><path d="M10 20v-5.500h4V20"/></svg>',
+    revaps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="m9 15 2 2 4-4.500"/></svg>',
+    revpld: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>',
+    tablero: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+    go: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.500 4.500 4.500L19 7.500"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v7M12 17.500v.5"/></svg>',
+    bad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12M12 6l6 6-6 6"/></svg>',
+    campana: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17V11a6 6 0 1 1 12 0v6l1.500 2h-15zM10 21h4"/></svg>',
+    alerta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.500 20h19z"/><path d="M12 10v4.500M12 17.500v.5"/></svg>'
+  };
+  function hmEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function almacen(op, k, v) { try { return op === 'get' ? window.localStorage.getItem(k) : window.localStorage.setItem(k, v); } catch (e) { return null; } }
+  function logoHtml(grande) {
+    return HM_LOGO ? '<img src="' + HM_LOGO + '" alt="Hipoo">' : '<b>hipoo<i>.mx</i></b>';
   }
-  var PENDIENTES = { aps: 0, pld: 0 };      // conteo de pendientes por revisar; la coordinación lo llena al entrar (ver más abajo) — 0 = ningún aviso todavía
+  function tarjeta(id, titulo, texto, o) {
+    o = o || {};
+    var badge = o.badge ? '<span class="hm-badge">' + (o.badge > 99 ? '99+' : o.badge) + '</span>' : '';
+    var main = '<button type="button" class="hm-card-main" data-ir="' + id + '"' + (o.off ? ' disabled' : '') + '><span class="hm-ico">' + IC[id] + '</span><span class="hm-card-t"><b>' + titulo + '</b><span>' + texto + '</span>' +
+      (o.aviso ? '<span class="aviso">' + o.aviso + '</span>' : '') + '</span>' + (o.off ? '' : '<span class="hm-go">' + IC.go + '</span>') + '</button>';
+    var sub = o.misRegistros ? '<button type="button" class="hm-card-sub" data-misreg="' + id + '"><span>Ver mis registros</span><span>→</span></button>' : '';
+    return '<div class="hm-card' + (o.coord ? ' coord' : '') + (o.off ? ' off' : '') + '">' + badge + main + sub + '</div>';
+  }
   function pintaInicio() {
     var host = document.getElementById('inicioTarjetas');
+    document.getElementById('hmLogo').innerHTML = logoHtml();
     if (!USUARIO.email) {
       document.getElementById('inicioQuien').textContent = 'No se pudo identificar tu cuenta';
-      host.innerHTML = '<div class="inicio-pie"><span>Abre esta página con tu cuenta corporativa de Google (Cualli, Fractio o Hipoo).</span></div>'; return;
+      document.getElementById('hmKpis').innerHTML = ''; document.getElementById('hmFeed').innerHTML = '';
+      host.innerHTML = '<div class="hm-vacio">Abre esta página con tu cuenta corporativa de Google (Cualli, Fractio o Hipoo).</div>'; return;
     }
     var coord = USUARIO.rol === 'coordinador', aps = USUARIO.puedeAps;
     var saludo = USUARIO.genero === 'f' ? 'Bienvenida' : (USUARIO.genero === 'm' ? 'Bienvenido' : 'Bienvenido/a');    // 'm'/'f' vienen del servidor (columna "Género" o, si no está, una adivinanza por el nombre)
-    document.getElementById('inicioSaludo').textContent = USUARIO.nombre ? '¡' + saludo + ', ' + USUARIO.nombre.split(' ')[0] + '!' : '¡' + saludo + '!';
-    document.getElementById('inicioQuien').textContent = USUARIO.email + (coord ? ' · Coordinación' : '');
-    var h = '';
-    var pAps = PENDIENTES.aps, pPld = PENDIENTES.pld, pTot = pAps + pPld;
-    if (coord && hayPantalla('revaps') && pTot > 0) {          // lo primero que ve la coordinación, antes que cualquier otra cosa — siempre visible si hay algo pendiente
-      h += '<div class="inicio-warn"><div class="iw-top"><span class="ic">⚠️</span><b>Tienes pendientes por revisar</b></div><div class="iw-items">' +
-        (pAps ? '<button type="button" class="iw-btn" data-ir="revaps"><b>' + pAps + '</b> contrato' + (pAps === 1 ? '' : 's') + ' APS</button>' : '') +
-        (pPld ? '<button type="button" class="iw-btn" data-ir="revpld"><b>' + pPld + '</b> Pre PLD</button>' : '') + '</div></div>';
-    }
-    h += '<h2>¿Qué deseas hacer?</h2><div class="inicio-grid">' +
-      tarjeta('pld', '🛡️', 'Generar documento Pre PLD', 'Crea el Pre-Aviso PLD de una operación inmobiliaria, agrega pagos a una operación existente o consulta tus documentos.', { misRegistros: true }) +
-      tarjeta('aps', '🏠', 'Generar contrato APS', 'Aviso de Prestación de Servicios de Corretaje Inmobiliario de Hipoo: captura los datos y envíalo a revisión.',
+    var nom = USUARIO.nombre ? USUARIO.nombre.split(' ')[0] : '';
+    document.getElementById('inicioSaludo').innerHTML = hmEsc(saludo) + (nom ? ',<br><em>' + hmEsc(nom) + '</em>' : '');
+    var rol = document.getElementById('hmRol'); rol.textContent = coord ? 'Coordinación' : 'Asesor'; rol.className = 'hm-rol' + (coord ? ' coord' : '');
+    document.getElementById('inicioQuien').textContent = USUARIO.email;
+    var f = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('hmFecha').textContent = f;
+    var pAps = PENDIENTES.aps, pPld = PENDIENTES.pld;
+    var h = '<h2>¿Qué deseas hacer?</h2><div class="hm-acc dos">' +
+      tarjeta('pld', 'Generar documento Pre PLD', 'Crea el Pre-Aviso PLD de una operación, agrega pagos o consulta tus documentos.', { misRegistros: true }) +
+      tarjeta('aps', 'Generar contrato APS', 'Aviso de Prestación de Servicios de Corretaje de Hipoo: captura los datos y envíalo a revisión.',
         aps ? { misRegistros: true } : { off: true, aviso: 'No tienes autorización para generar contratos APS. Solicítala a la coordinación.' }) + '</div>';
     if (coord && hayPantalla('revaps')) {
-      h += '<h2>Coordinación</h2><div class="inicio-grid">' +
-        tarjeta('revaps', '🗂️', 'Revisión de contratos APS', 'Estatus de cada contrato (sin terminar, completado, en revisión, aprobado), Google Docs, PDF, alertas y auditoría.', { coord: true, badge: pAps }) +
-        tarjeta('revpld', '📋', 'Revisión de Pre PLD', 'Documentos enviados a revisión, quién los generó, observaciones, bitácora de modificaciones y auditoría.', { coord: true, badge: pPld }) +
-        (hayPantalla('tablero') ? tarjeta('tablero', '📊', 'Tablero Hipoo', 'Indicadores de la actividad inmobiliaria.' + (TABLERO_URL ? ' Se abre en una pestaña nueva.' : ''), { coord: true }) : '') + '</div>';
+      h += '<h2>Coordinación</h2><div class="hm-acc dos">' +
+        tarjeta('revaps', 'Revisión de contratos APS', 'Estatus de cada contrato, Google Docs, PDF, alertas y auditoría.', { coord: true, badge: pAps }) +
+        tarjeta('revpld', 'Revisión de Pre PLD', 'Documentos enviados a revisión, observaciones y bitácora de modificaciones.', { coord: true, badge: pPld }) +
+        (hayPantalla('tablero') ? tarjeta('tablero', 'Tablero Hipoo', 'Indicadores de la actividad inmobiliaria.' + (TABLERO_URL ? ' Se abre en una pestaña nueva.' : ''), { coord: true }) : '') + '</div>';
+    }
+    host.innerHTML = h;
+    pintaKpis(); pintaAviso(); pintaFeed(); pintaLive();
+  }
+  /* ── Indicadores ── */
+  function celda(clave, num, etiqueta, tono, destino, caliente) {
+    var cargando = (num == null);
+    return '<button type="button" class="hm-cell t-' + tono + (caliente && num > 0 ? ' hot' : '') + (cargando ? ' hm-sk' : '') + '" data-kir="' + destino + '" data-k="' + clave + '"><span class="n" data-n="' + (cargando ? '' : num) + '">' + (cargando ? '0' : num) + '</span><span class="l">' + etiqueta + '</span></button>';
+  }
+  function tarjetaKpi(icono, titulo, sub, celdas) {
+    return '<div class="hm-kpi"><div class="hm-kh"><span class="hm-ico">' + icono + '</span><div><b>' + titulo + '</b><small>' + sub + '</small></div></div><div class="hm-cells">' + celdas + '</div></div>';
+  }
+  function pintaKpis() {
+    var host = document.getElementById('hmKpis'); if (!USUARIO.email) { host.innerHTML = ''; return; }
+    var P = HM.panel, coord = USUARIO.rol === 'coordinador', a = P ? P.aps : null, d = P ? P.pld : null, sub = coord ? 'Todo el equipo' : 'Tus registros', h = '';
+    var v = function (o, k) { return o ? o[k] : null; };
+    if (USUARIO.puedeAps) h += tarjetaKpi(IC.aps, 'Contratos APS', sub,
+      celda('a_b', v(a, 'borradores'), 'Borradores<br>sin enviar', 'mute', 'aps') + celda('a_r', v(a, 'enRevision'), coord ? 'Por revisar' : 'En revisión', 'warn', 'aps', coord) + celda('a_o', v(a, 'aprobados'), 'Aprobados', 'ok', 'aps'));
+    if (!P || d) h += tarjetaKpi(IC.pld, 'Pre PLD', sub,
+      celda('p_s', v(d, 'sinEnviar'), 'Sin enviar', 'mute', 'pld') + celda('p_r', v(d, 'enRevision'), coord ? 'Por revisar' : 'En revisión', 'warn', 'pld', coord) + celda('p_x', v(d, 'observados'), coord ? 'Observados' : 'Por corregir', 'bad', 'pld', !coord) + celda('p_o', v(d, 'revisados'), 'Revisados', 'ok', 'pld'));
+    host.innerHTML = h;
+    host.querySelectorAll('.n[data-n]').forEach(function (el) {
+      var k = el.parentNode.getAttribute('data-k'), fin = el.getAttribute('data-n'); if (fin === '') return; fin = +fin;
+      var ini = HM.prev[k] == null ? 0 : HM.prev[k], t0 = performance.now(), dur = 700;
+      if (ini !== fin && HM.prev[k] != null) el.parentNode.classList.add('flash');
+      HM.prev[k] = fin;
+      (function paso(t) { var x = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - x, 3); el.textContent = Math.round(ini + (fin - ini) * e); if (x < 1) requestAnimationFrame(paso); })(t0);
+    });
+  }
+  function pintaAviso() {
+    var host = document.getElementById('hmAviso'), coord = USUARIO.rol === 'coordinador', P = HM.panel, h = '';
+    if (!P) { host.innerHTML = ''; return; }
+    if (coord && hayPantalla('revaps') && (PENDIENTES.aps + PENDIENTES.pld) > 0) {
+      h = '<div class="hm-aviso">' + IC.alerta + '<b>Tienes pendientes por revisar</b><div class="hm-av-b">' +
+        (PENDIENTES.aps ? '<button type="button" data-ir="revaps"><b>' + PENDIENTES.aps + '</b>contrato' + (PENDIENTES.aps === 1 ? '' : 's') + ' APS</button>' : '') +
+        (PENDIENTES.pld ? '<button type="button" data-ir="revpld"><b>' + PENDIENTES.pld + '</b>Pre PLD</button>' : '') + '</div></div>';
+    } else if (!coord && P.pld && P.pld.observados > 0) {
+      h = '<div class="hm-aviso">' + IC.alerta + '<b>Tienes ' + P.pld.observados + ' Pre PLD con observaciones por corregir</b><div class="hm-av-b"><button type="button" data-misreg="pld">Ver mis Pre PLD</button></div></div>';
     }
     host.innerHTML = h;
   }
-  document.getElementById('inicioTarjetas').addEventListener('click', function (e) {
+  /* ── Novedades en vivo ── */
+  function aMs(s) { var m = String(s).match(/(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)(?::(\d+))?/); return m ? new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0)).getTime() : 0; }
+  function relTiempo(f) {
+    var s = Math.max(0, (aMs(HM.ahoraSrv) + (Date.now() - HM.t0) - aMs(f)) / 1000);
+    if (s < 50) return 'hace un momento'; if (s < 3600) return 'hace ' + Math.round(s / 60) + ' min'; if (s < 86400) return 'hace ' + Math.round(s / 3600) + ' h';
+    return f.slice(8, 10) + '/' + f.slice(5, 7) + ' · ' + f.slice(11, 16);
+  }
+  function evId(e) { return e.fecha + '|' + e.modulo + '|' + e.id + '|' + e.titulo; }
+  function esNuevo(e) { return e.fecha > HM.visto; }
+  function pintaFeed() {
+    var ul = document.getElementById('hmFeed'), P = HM.panel, btn = document.getElementById('hmLeer'), nuevo = document.getElementById('hmNew');
+    if (!USUARIO.email) return;
+    if (!P) { ul.innerHTML = '<li class="hm-vacio">Cargando novedades…</li>'; return; }
+    var ev = P.eventos, n = ev.filter(esNuevo).length;
+    nuevo.textContent = n + (n === 1 ? ' nueva' : ' nuevas'); nuevo.classList.toggle('on', n > 0); btn.disabled = n === 0;
+    if (!ev.length) { ul.innerHTML = '<li class="hm-vacio">' + IC.campana + '<br>Todo en orden: por ahora no hay novedades.<br>Aquí aparecerá, en cuanto ocurra, cada contrato enviado, aprobado o con observaciones.</li>'; actualizaNavNov(); return; }
+    ul.innerHTML = ev.map(function (e) {
+      var fresh = HM.recien && HM.recien[evId(e)];
+      return '<li class="hm-ev t-' + e.tono + (esNuevo(e) ? ' nuevo' : '') + (fresh ? ' fresh' : '') + '" data-ev="' + hmEsc(e.modulo + '|' + e.id) + '"><span class="dot">' + (IC[e.tono] || IC.info) + '</span><div class="tx"><b>' + hmEsc(e.titulo) + '</b><p>' + hmEsc(e.texto) + '</p><time>' + hmEsc(relTiempo(e.fecha)) + '</time></div></li>';
+    }).join('');
+    actualizaNavNov();
+  }
+  function pintaLive() {
+    var el = document.getElementById('hmLive'), t = document.getElementById('hmLiveT'), pill = document.getElementById('hmPill'), fuera = HM.errores >= 2;
+    el.classList.toggle('off', fuera); pill.classList.toggle('off', fuera);
+    el.querySelector('b').textContent = fuera ? 'Reconectando' : 'En vivo';
+    pill.lastChild.textContent = fuera ? 'Reconectando' : 'En vivo';
+    t.textContent = HM.ultimoOk ? 'actualizado ' + new Date(HM.ultimoOk).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'conectando…';
+  }
+  function actualizaNavNov() {
+    var el = document.getElementById('navNov'); if (!el) return;
+    var n = HM.panel ? HM.panel.eventos.filter(esNuevo).length : 0;
+    if (n > 0) { el.style.display = ''; el.innerHTML = IC.campana.replace('<svg', '<svg width="15" height="15"') + n + ' novedad' + (n === 1 ? '' : 'es'); el.onclick = function () { irA('inicio'); }; } else el.style.display = 'none';
+  }
+  function marcaLeidas() {
+    if (!HM.panel) return; HM.visto = HM.panel.ahora; almacen('set', 'hm_visto_' + USUARIO.email, HM.visto); pintaFeed();
+  }
+  function hmToast(titulo, texto, irAlInicio) {
+    var t = document.getElementById('hmToast'); t.innerHTML = '<div><b>' + hmEsc(titulo) + '</b><span>' + hmEsc(texto) + '</span></div>';
+    t.classList.add('on'); t.onclick = function () { t.classList.remove('on'); if (irAlInicio) irA('inicio'); };
+    clearTimeout(hmToast.h); hmToast.h = setTimeout(function () { t.classList.remove('on'); }, 7000);
+  }
+  function abreEvento(clave) {
+    var p = clave.split('|'), mod = p[0], id = p.slice(1).join('|'), coord = USUARIO.rol === 'coordinador';
+    marcaLeidas();
+    if (mod === 'APS') { if (USUARIO.puedeAps && hayPantalla('aps')) { irA('aps'); if (window.APS_UI && APS_UI.abrir) APS_UI.abrir(id); } }
+    else if (coord && hayPantalla('revpld')) irA('revpld'); else irMisRegistros('pld');
+  }
+  function aplicaPanel(r) {
+    var primera = !HM.panel;
+    HM.ahoraSrv = r.ahora; HM.t0 = Date.now(); HM.ultimoOk = Date.now(); HM.errores = 0;
+    if (primera) {
+      var g = almacen('get', 'hm_visto_' + USUARIO.email);
+      HM.visto = g || (function () { var d = new Date(aMs(r.ahora) - 3 * 86400000), p = function (x) { return ('0' + x).slice(-2); }; return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':00'; })();
+    }
+    var nuevos = [];
+    r.eventos.forEach(function (e) { var k = evId(e); if (!HM.vistos[k]) { HM.vistos[k] = 1; if (!primera) nuevos.push(e); } });
+    HM.recien = {}; nuevos.forEach(function (e) { HM.recien[evId(e)] = 1; });
+    HM.panel = r; PENDIENTES = { aps: r.aps.enRevision || 0, pld: r.pld ? r.pld.enRevision || 0 : 0 };
+    if (nuevos.length) { var e0 = nuevos[0]; hmToast(nuevos.length > 1 ? nuevos.length + ' novedades nuevas' : e0.titulo, nuevos.length > 1 ? e0.titulo + ' · ' + e0.texto : e0.texto, true); }
+    pintaInicio(); actualizaNavPend();
+  }
+  function refrescarPanel() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run || !USUARIO.email || HM.cargando) return;
+    HM.cargando = true;
+    google.script.run.withSuccessHandler(function (r) { HM.cargando = false; aplicaPanel(r); })
+      .withFailureHandler(function () { HM.cargando = false; HM.errores++; pintaLive(); }).APS_panel();
+  }
+  window.APS_refrescarPendientes = refrescarPanel;     // los módulos lo llaman tras guardar, enviar, aprobar o cancelar: los números cambian sin recargar
+  setInterval(function () { if (!document.hidden) refrescarPanel(); }, 25000);
+  setInterval(function () { if (!document.hidden && HM.panel) { pintaFeed(); } }, 30000);       // solo para que "hace 3 min" avance
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) refrescarPanel(); });
+
+  document.getElementById('pantalla-inicio').addEventListener('click', function (e) {
+    var k = e.target.closest('[data-kir]');
+    if (k) { var d = k.getAttribute('data-kir'); if (USUARIO.rol === 'coordinador' && hayPantalla('rev' + d)) irA('rev' + d); else irMisRegistros(d); return; }
     var m = e.target.closest('[data-misreg]'); if (m) { irMisRegistros(m.getAttribute('data-misreg')); return; }
+    var ev = e.target.closest('[data-ev]'); if (ev) { abreEvento(ev.getAttribute('data-ev')); return; }
+    if (e.target.id === 'hmLeer') { marcaLeidas(); return; }
     var b = e.target.closest('button[data-ir]'); if (b && !b.disabled) { abrirTarjeta(b.getAttribute('data-ir')); }
   });
   // Desde la tarjeta de inicio: entra al módulo y, de una vez, abre la pestaña/lista de "mis registros" en vez de
@@ -1492,9 +1801,9 @@
     else if (id === 'pld') { var btn = document.getElementById('btnModoRev'); if (btn) setMode('revision', btn); }
   }
   pintaInicio();
+  refrescarPanel();
   // Enlace directo desde un correo (ej. "Registro aprobado ..."): si la URL trae ?modulo=aps&id=XXX, se abre esa
-  // pantalla y ese contrato en particular de una vez, en lugar de dejar a la persona en el menú de inicio para
-  // que lo busque. Si el parámetro no aplica o no hay acceso a esa pantalla, se queda en el inicio sin romper nada.
+  // pantalla y ese contrato en particular de una vez. Con ?modulo=pld&misreg=1 abre "mis Pre PLD"; con ?modulo=revpld, la revisión de Pre PLD.
   (function () {
     try {
       var qp = new URLSearchParams(window.location.search);
@@ -1502,22 +1811,10 @@
       if (modulo && hayPantalla(modulo)) {
         irA(modulo);
         if (id && modulo === 'aps' && window.APS_UI) APS_UI.abrir(id);
+        if (qp.get('misreg') && (modulo === 'pld' || modulo === 'aps')) irMisRegistros(modulo);
       }
     } catch (e) { /* URL sin parámetros válidos: sin problema, se queda en inicio */ }
   })();
-  <? if (ADM) { ?>
-  // Avisa de una vez, al entrar, si hay contratos APS o Pre PLD esperando revisión, sin que la coordinación tenga que
-  // abrir cada sección para enterarse. Va envuelto en el "if (ADM)" del servidor: a un asesor ni se le manda este código.
-  function refrescarPendientes() {
-    if (typeof google === 'undefined' || !google.script || !google.script.run) return;
-    google.script.run.withSuccessHandler(function (r) {
-      PENDIENTES = { aps: (r && r.aps && r.aps.EN_REVISION) || 0, pld: (r && r.pld && r.pld.EN_REVISION) || 0 };
-      pintaInicio(); actualizaNavPend();
-    }).withFailureHandler(function () { /* sin aviso si no se pudo consultar */ }).CONSOLA_resumen();
-  }
-  window.APS_refrescarPendientes = refrescarPendientes;   // con.js y APS_Modulo lo llaman tras aprobar / marcar revisado / observar, para que el número baje sin recargar la página
-  refrescarPendientes();
-  <? } ?>
 </script>
 </body>
 </html>

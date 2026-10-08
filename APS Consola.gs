@@ -117,7 +117,9 @@ function PLD_enviarRevision(id) {
       APS_coordinadores_().forEach(function (c) { try { DriveApp.getFileById(b.id).addCommenter(c); } catch (err) { Logger.log('No se pudo compartir con ' + c + ': ' + err.message); } });
     }
     APS_audit_('PLD', 'ENVIAR_REVISION', b.id, b.operacion);
-    APS_notificar_(APS_coordinadores_(), 'Pre PLD por revisar', 'El asesor <b>' + APS_escHtml_(u.email) + '</b> envió a revisión el Pre PLD <b>' + APS_escHtml_(b.nombre) + '</b> (' + APS_escHtml_(b.operacion) + ').');
+    APS_notificar_(APS_coordinadores_(), 'Pre PLD por revisar — ' + b.nombre, '<b>' + APS_escHtml_(APS_nombreDe_(u.email)) + '</b> envió a revisión un Pre PLD. Ábrelo desde el sistema para revisarlo.',
+      { params: { modulo: 'revpld' }, sistema: 'Pre PLD', titulo: 'Hay un Pre PLD esperando tu revisión', etiqueta: 'Por revisar', tono: 'warn', boton: 'Ir a la revisión de Pre PLD',
+        datos: [['Documento', b.nombre], ['Operación', b.operacion], ['Asociados', it.asociados], ['Enviado por', APS_nombreDe_(u.email) + ' · ' + u.email], ['Enviado', reg.fechaEnvio]] });
     return PLD_item_(b, R.mapa[b.id], null);
   });
 }
@@ -145,7 +147,9 @@ function PLD_observar(id, comentario) {
     e.reg.estado = 'OBSERVADO'; e.reg.comentario = comentario; e.reg.revisadoPor = u.email; e.reg.fechaRevision = APS_ahora_();
     PLD_escribirRev_(R, e, e.reg);
     APS_audit_('PLD', 'OBSERVAR', e.reg.id, comentario);
-    APS_notificar_([e.reg.creador], 'Pre PLD con observaciones', 'La coordinación observó el Pre PLD <b>' + APS_escHtml_(e.reg.nombre) + '</b>. Comentario: ' + APS_escHtml_(comentario));
+    APS_notificar_([e.reg.creador], 'Pre PLD con observaciones — ' + e.reg.nombre, 'La coordinación revisó tu Pre PLD y necesita que lo corrijas. Entra a «Ver mis registros», ajusta el documento y envíalo de nuevo a revisión.',
+      { params: { modulo: 'pld', misreg: '1' }, sistema: 'Pre PLD', firma: 'Revisó ' + (u.nombre || u.email), titulo: 'Tu Pre PLD tiene observaciones', etiqueta: 'Requiere corrección', tono: 'warn', boton: 'Ver mis Pre PLD',
+        datos: [['Documento', e.reg.nombre], ['Operación', e.reg.operacion], ['Qué corregir', comentario], ['Revisado', e.reg.fechaRevision]] });
     return PLD_item_({ id: e.reg.id, nombre: e.reg.nombre, operacion: e.reg.operacion, lado1: e.reg.asociados, lado2: '', url: e.reg.url, creador: e.reg.creador, fecha: e.reg.creado }, e, null);
   });
 }
@@ -158,7 +162,9 @@ function PLD_marcarRevisado(id, nota) {
     e.reg.estado = 'REVISADO'; e.reg.comentario = String(nota || '').trim().slice(0, 500); e.reg.revisadoPor = u.email; e.reg.fechaRevision = APS_ahora_();
     PLD_escribirRev_(R, e, e.reg);
     APS_audit_('PLD', 'REVISADO', e.reg.id, e.reg.comentario);
-    APS_notificar_([e.reg.creador], 'Pre PLD revisado', 'La coordinación marcó como revisado el Pre PLD <b>' + APS_escHtml_(e.reg.nombre) + '</b>.');
+    APS_notificar_([e.reg.creador], 'Pre PLD revisado — ' + e.reg.nombre, 'La coordinación revisó tu Pre PLD y no tiene observaciones. Ya está listo.',
+      { params: { modulo: 'pld', misreg: '1' }, sistema: 'Pre PLD', firma: 'Revisó ' + (u.nombre || u.email), titulo: 'Tu Pre PLD fue revisado', etiqueta: 'Revisado', tono: 'ok', boton: 'Ver mis Pre PLD',
+        datos: [['Documento', e.reg.nombre], ['Operación', e.reg.operacion], ['Nota', e.reg.comentario], ['Revisado', e.reg.fechaRevision]] });
     return PLD_item_({ id: e.reg.id, nombre: e.reg.nombre, operacion: e.reg.operacion, lado1: e.reg.asociados, lado2: '', url: e.reg.url, creador: e.reg.creador, fecha: e.reg.creado }, e, null);
   });
 }

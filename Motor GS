@@ -156,6 +156,7 @@ function APS_audit_(modulo, accion, ref, detalle) {
     var rg = sh.getRange(fila, 1, 1, APS_AUD_COLS.length);
     rg.setNumberFormat('@');
     rg.setValues([[Utilities.formatDate(new Date(), APS_CONFIG.ZONA, 'yyyy-MM-dd HH:mm:ss'), APS_correo_() || '(sin identificar)', modulo, accion, ref || '', String(detalle || '').slice(0, 300)]]);
+    CacheService.getScriptCache().put('APS_PANEL_V', String(new Date().getTime()), 21600);      // cualquier movimiento invalida el resumen guardado de la pantalla principal
   } catch (e) { Logger.log('Auditoría no registrada: ' + e.message); }
 }
 
@@ -442,28 +443,50 @@ function APS_soloMantenimiento_() {
   if (APS_usuario_().rol === 'coordinador') return;
   throw new Error('Sin permiso.');
 }
-function APS_correoHtml_(titulo, mensajeHtml, url, firma) {
-  var AZUL = '#0d122b', CYAN = '#35B7C5';
+/** Nombre para mostrar de una cuenta (el de la hoja Asesores; si no hay, la parte antes de la @). */
+function APS_nombreDe_(email) {
+  var e = String(email || '').toLowerCase(), i = APS_asesores_()[e];
+  return (i && i.nombre) ? i.nombre : (e ? e.split('@')[0] : '');
+}
+/** Renglones de datos que acompañan a los correos del contrato. */
+function APS_datosCorreo_(reg, extra) {
+  var tipos = { venta: 'Venta', renta: 'Arrendamiento', ambas: 'Venta y arrendamiento' };
+  return [['Folio', reg.id], ['Propietarios', reg.propietarios], ['Inmueble', String(reg.inmueble || '').slice(0, 140)], ['Operación', tipos[reg.tipo] || reg.tipo]].concat(extra || []);
+}
+function APS_correoHtml_(titulo, mensajeHtml, url, firma, extra) {
+  extra = extra || {};
+  var AZUL = '#364494', TINTA = '#1a224a', CYAN = '#35B7C5', SUAVE = '#f4f7fc', LINEA = '#dbe2ef';
+  var etiquetaTono = { ok: ['#e3f6ee', '#0f9d6e'], warn: ['#fff4d6', '#9a6700'], bad: ['#fdecee', '#d92d3f'], info: ['#e8f6f8', '#0f8594'] }[extra.tono || 'info'];
+  var chip = extra.etiqueta ? '<span style="display:inline-block;background:' + etiquetaTono[0] + ';color:' + etiquetaTono[1] + ';font-size:11px;font-weight:bold;letter-spacing:.6px;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin-bottom:12px">' + APS_escHtml_(extra.etiqueta) + '</span><br>' : '';
+  var tabla = '';
+  if (extra.datos && extra.datos.length) {
+    tabla = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0 4px;border:1px solid ' + LINEA + ';border-radius:10px;border-collapse:separate;overflow:hidden;background:' + SUAVE + '">' +
+      extra.datos.filter(function (d) { return d && d[1]; }).map(function (d, i) {
+        return '<tr><td style="padding:9px 14px;width:34%;font-size:12px;color:#5a6488;font-family:Arial,Helvetica,sans-serif;' + (i ? 'border-top:1px solid ' + LINEA : '') + '">' + APS_escHtml_(d[0]) + '</td>' +
+          '<td style="padding:9px 14px;font-size:13px;color:' + TINTA + ';font-weight:bold;font-family:Arial,Helvetica,sans-serif;' + (i ? 'border-top:1px solid ' + LINEA : '') + '">' + APS_escHtml_(d[1]) + '</td></tr>';
+      }).join('') + '</table>';
+  }
   var boton = url ? (
-    '<tr><td style="padding:26px 32px 6px" align="center">' +
-      '<a href="' + url + '" style="display:inline-block;background:' + CYAN + ';color:' + AZUL + ';text-decoration:none;' +
-      'font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:14px;padding:13px 28px;border-radius:8px;border:2px solid ' + AZUL + '">' +
-      'Abrir el sistema APS</a></td></tr>'
+    '<tr><td style="padding:22px 32px 6px" align="center">' +
+      '<a href="' + url + '" style="display:inline-block;background:' + AZUL + ';color:#ffffff;text-decoration:none;' +
+      'font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:14px;padding:13px 30px;border-radius:10px;border-bottom:3px solid ' + CYAN + '">' +
+      APS_escHtml_(extra.boton || 'Abrir el sistema') + '</a></td></tr>'
   ) : '';
-  var piePersona = firma ? '<p style="margin:0 0 4px;color:' + AZUL + ';font-weight:bold">' + APS_escHtml_(firma) + '</p>' : '';
+  var piePersona = firma ? '<p style="margin:0 0 4px;color:' + TINTA + ';font-weight:bold">' + APS_escHtml_(firma) + '</p>' : '';
+  var sistema = extra.sistema || 'APS Hipoo';
   return (
-    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:24px 0">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f9;padding:24px 0">' +
       '<tr><td align="center">' +
-        '<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;max-width:560px">' +
-          '<tr><td style="background:' + AZUL + ';padding:18px 32px" align="left"><img src="cid:logoHipoo" alt="Hipoo" height="34" style="display:block"></td></tr>' +
-          '<tr><td style="padding:30px 32px 4px">' +
-            '<h2 style="margin:0 0 14px;color:' + AZUL + ';font-size:19px;font-family:Arial,Helvetica,sans-serif">' + APS_escHtml_(titulo) + '</h2>' +
-            '<div style="color:#333333;font-size:14px;line-height:1.6;font-family:Arial,Helvetica,sans-serif">' + mensajeHtml + '</div>' +
+        '<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:14px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;max-width:560px;border:1px solid ' + LINEA + '">' +
+          '<tr><td style="background:' + AZUL + ';padding:18px 32px;border-bottom:4px solid ' + CYAN + '" align="left"><img src="cid:logoHipoo" alt="Hipoo" height="32" style="display:block"></td></tr>' +
+          '<tr><td style="padding:28px 32px 4px">' + chip +
+            '<h2 style="margin:0 0 12px;color:' + TINTA + ';font-size:20px;line-height:1.25;font-family:Arial,Helvetica,sans-serif">' + APS_escHtml_(titulo) + '</h2>' +
+            '<div style="color:#333b55;font-size:14px;line-height:1.6;font-family:Arial,Helvetica,sans-serif">' + mensajeHtml + '</div>' + tabla +
           '</td></tr>' +
           boton +
-          '<tr><td style="padding:22px 32px 22px;color:#8a8f9e;font-size:12px;border-top:1px solid #eef0f5;margin-top:10px;font-family:Arial,Helvetica,sans-serif">' +
+          '<tr><td style="padding:22px 32px;color:#7a819a;font-size:12px;font-family:Arial,Helvetica,sans-serif">' +
             piePersona +
-            '<p style="margin:0">Aviso automático del sistema APS Hipoo. No responder a este correo.</p>' +
+            '<p style="margin:0">Aviso automático de ' + APS_escHtml_(sistema) + '. No respondas a este correo; las novedades también aparecen en vivo en la pantalla principal del sistema.</p>' +
           '</td></tr>' +
         '</table>' +
       '</td></tr>' +
@@ -489,8 +512,8 @@ function APS_notificar_(para, asunto, mensaje, opts) {
       var qs = Object.keys(opts.params).map(function (k) { return k + '=' + encodeURIComponent(opts.params[k]); }).join('&');
       url += (url.indexOf('?') === -1 ? '?' : '&') + qs;
     }
-    var correo = { to: para.join(','), subject: '[APS Hipoo] ' + asunto, name: 'APS Hipoo',
-      htmlBody: APS_correoHtml_(asunto, mensaje, url, opts.firma) };
+    var correo = { to: para.join(','), subject: '[' + (opts.sistema || 'APS Hipoo') + '] ' + asunto, name: opts.sistema || 'APS Hipoo',
+      htmlBody: APS_correoHtml_(opts.titulo || asunto, mensaje, url, opts.firma, opts) };
     // Si hay un alias de "Enviar como" configurado y verificado en la cuenta que ejecuta el script, se usa como
     // remitente real; si no (CORREO_REMITENTE vacío), Apps Script manda el correo desde esa misma cuenta (la tuya),
     // que es el comportamiento de hoy.
@@ -506,6 +529,66 @@ function APS_notificar_(para, asunto, mensaje, opts) {
 function APS_iniciar() {
   var u = APS_usuario_();
   return { usuario: u, logo: u.email ? APS_logoDataUri_() : '' };
+}
+
+/* ═════════════ PANTALLA PRINCIPAL: indicadores y actividad en vivo ═════════════ */
+
+/**
+ * Datos de la pantalla principal. El asesor ve SOLO lo suyo; la coordinación ve el total del equipo.
+ * Devuelve: contadores de contratos APS y de Pre PLD, y las últimas novedades (enviado, aprobado, cancelado,
+ * observado, revisado). La pantalla lo consulta cada ~25 segundos; se guarda unos segundos en caché para que
+ * muchas personas con la pantalla abierta no saturen la hoja.
+ */
+function APS_panel() {
+  var u = APS_requiereUsuario_(), adm = u.rol === 'coordinador';
+  var cache = CacheService.getScriptCache(), llave = 'APS_PANEL_' + (cache.get('APS_PANEL_V') || '0') + '_' + (adm ? 'ADM' : u.email), c = cache.get(llave);
+  if (c) { try { return JSON.parse(c); } catch (e) { /* se recalcula */ } }
+  var suyo = function (email) { return adm || String(email).toLowerCase() === u.email; };
+  var aps = { borradores: 0, enRevision: 0, aprobados: 0, cancelados: 0, total: 0 }, apsMapa = {};
+  APS_todos_().forEach(function (r) {
+    apsMapa[r.id] = { dueno: r.asesor, titulo: r.propietarios, vigente: r.estado === 'EN_REVISION' };
+    if (!suyo(r.asesor)) return;
+    aps.total++;
+    if (r.estado === 'BORRADOR') aps.borradores++; else if (r.estado === 'EN_REVISION') aps.enRevision++; else if (r.estado === 'APROBADO') aps.aprobados++; else if (r.estado === 'CANCELADO') aps.cancelados++;
+  });
+  var pld = null, pldMapa = {};
+  try {
+    pld = { sinEnviar: 0, enRevision: 0, observados: 0, revisados: 0, total: 0 };
+    PLD_items_().forEach(function (x) {
+      pldMapa[x.id] = { dueno: x.creador, titulo: x.nombre, vigente: x.estado === 'EN_REVISION' };
+      if (!suyo(x.creador)) return;
+      pld.total++;
+      if (x.estado === 'SIN_ENVIAR') pld.sinEnviar++; else if (x.estado === 'EN_REVISION') pld.enRevision++; else if (x.estado === 'OBSERVADO') pld.observados++; else if (x.estado === 'REVISADO') pld.revisados++;
+    });
+  } catch (e) { pld = null; }      // si la bitácora del Pre PLD no está disponible, la pantalla solo oculta esa tarjeta
+  var eventos = [], sh = APS_hojaAux_('Auditoria', APS_AUD_COLS), ult = sh.getLastRow();
+  if (ult >= 2) {
+    var desde = Math.max(2, ult - 599);
+    var filas = sh.getRange(desde, 1, ult - desde + 1, 6).getValues();
+    for (var i = filas.length - 1; i >= 0 && eventos.length < 25; i--) {
+      var v = filas[i], mod = String(v[2]), acc = String(v[3]), ref = String(v[4]), det = String(v[5]), actor = String(v[1]);
+      var ctx = (mod === 'APS' ? apsMapa : (mod === 'PLD' ? pldMapa : null));
+      if (!ctx || !ctx[ref]) continue;
+      var dueno = String(ctx[ref].dueno).toLowerCase(), titulo = ctx[ref].titulo, vigente = ctx[ref].vigente, propio = dueno === u.email, quien = APS_nombreDe_(actor), e = null;
+      if (!adm && !propio) continue;
+      var motivo = det.indexOf(' · ') >= 0 ? det.split(' · ').slice(1).join(' · ') : det;
+      if (mod === 'APS') {
+        if (acc === 'ENVIAR_REVISION') e = adm ? { tono: vigente ? 'warn' : 'info', titulo: vigente ? 'Contrato por revisar' : 'Contrato enviado a revisión', texto: APS_nombreDe_(dueno) + ' envió el contrato de ' + titulo + '.', accionable: vigente }
+                                              : { tono: 'info', titulo: 'Enviaste un contrato a revisión', texto: titulo + (vigente ? ' está en revisión; te avisamos cuando se apruebe.' : ' fue enviado a revisión.') };
+        else if (acc === 'APROBAR') e = { tono: 'ok', titulo: 'Contrato aprobado', texto: adm ? quien + ' aprobó el contrato de ' + titulo + '.' : 'El contrato de ' + titulo + ' ya fue aprobado. Ya puedes descargar el PDF.', accionable: !adm };
+        else if (acc === 'CANCELAR') e = { tono: 'bad', titulo: 'Contrato cancelado', texto: 'El contrato de ' + titulo + ' se canceló. Motivo: ' + motivo, accionable: !adm };
+      } else {
+        if (acc === 'ENVIAR_REVISION') e = adm ? { tono: vigente ? 'warn' : 'info', titulo: vigente ? 'Pre PLD por revisar' : 'Pre PLD enviado a revisión', texto: APS_nombreDe_(dueno) + ' envió «' + titulo + '».', accionable: vigente }
+                                              : { tono: 'info', titulo: 'Enviaste un Pre PLD a revisión', texto: '«' + titulo + (vigente ? '» está en revisión.' : '» fue enviado a revisión.') };
+        else if (acc === 'OBSERVAR') e = { tono: 'warn', titulo: 'Pre PLD con observaciones', texto: '«' + titulo + '»: ' + motivo, accionable: !adm };
+        else if (acc === 'REVISADO') e = { tono: 'ok', titulo: 'Pre PLD revisado', texto: '«' + titulo + '» fue revisado' + (adm ? ' por ' + quien + '.' : '. No tiene observaciones.'), accionable: !adm };
+      }
+      if (e) { e.modulo = mod; e.id = ref; e.fecha = String(v[0]); e.propio = propio; eventos.push(e); }
+    }
+  }
+  var res = { ahora: Utilities.formatDate(new Date(), APS_CONFIG.ZONA, 'yyyy-MM-dd HH:mm:ss'), rol: u.rol, aps: aps, pld: pld, eventos: eventos };
+  try { cache.put(llave, JSON.stringify(res), 8); } catch (e) { /* sin caché: solo vuelve a leer la hoja */ }
+  return res;
 }
 
 /* ═════════════ UTILIDADES: huellas, versiones y diferencias ═════════════ */
@@ -644,8 +727,13 @@ function APS_enviarRevision(id) {
     APS_snapshot_(f.reg, u, 'ENVIO');                                   // lo que el asesor mandó, tal cual
     APS_audit_('APS', 'ENVIAR_REVISION', f.reg.id, f.reg.propietarios);
     APS_notificar_(APS_coordinadores_(), 'Contrato por revisar — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
-      'El asesor <b>' + APS_escHtml_(f.reg.asesor) + '</b> envió a revisión el contrato de <b>' + APS_escHtml_(f.reg.propietarios) + '</b> (folio ' + APS_escHtml_(f.reg.id) + '). Ábrelo desde el botón: podrás revisarlo, corregir lo que haga falta y aprobarlo.',
-      { params: { modulo: 'aps', id: f.reg.id } });
+      '<b>' + APS_escHtml_(APS_nombreDe_(f.reg.asesor)) + '</b> envió a revisión un contrato. Ábrelo con el botón: podrás revisarlo, corregir lo que haga falta y aprobarlo.',
+      { params: { modulo: 'aps', id: f.reg.id }, titulo: 'Hay un contrato esperando tu revisión', etiqueta: 'Por revisar', tono: 'warn', boton: 'Revisar el contrato',
+        datos: APS_datosCorreo_(f.reg, [['Asesor', APS_nombreDe_(f.reg.asesor) + ' · ' + f.reg.asesor], ['Enviado', f.reg.actualizado]]) });
+    APS_notificar_([f.reg.asesor], 'Recibimos tu contrato — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
+      'Tu contrato quedó <b>en revisión</b>. La coordinación lo revisará, ajustará lo que haga falta y lo aprobará; te avisamos en cuanto esté listo. Mientras tanto ya no puedes editarlo.',
+      { params: { modulo: 'aps', id: f.reg.id }, titulo: 'Tu contrato está en revisión', etiqueta: 'En revisión', tono: 'info', boton: 'Ver el estado del contrato',
+        datos: APS_datosCorreo_(f.reg, [['Enviado', f.reg.actualizado]]) });
     return APS_meta_(f.reg);
   });
 }
@@ -697,8 +785,9 @@ function APS_aprobar(id) {
     APS_snapshot_(f.reg, u, 'APROBACION');
     APS_audit_('APS', 'APROBAR', f.reg.id, 'PDF ' + f.reg.pdfId + ' · SHA ' + pdfSha.slice(0, 16) + ' · datos ' + datosHash.slice(0, 16));
     APS_notificar_([f.reg.asesor], 'Contrato aprobado — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
-      'Tu contrato de <b>' + APS_escHtml_(f.reg.propietarios) + '</b> (folio ' + APS_escHtml_(f.reg.id) + ') fue aprobado por la coordinación. Ya puedes entrar al sistema y descargar el PDF definitivo.',
-      { params: { modulo: 'aps', id: f.reg.id }, firma: u.nombre ? ('Aprobado por ' + u.nombre) : 'Aprobado por la coordinación' });
+      'La coordinación aprobó tu contrato. Ya puedes entrar al sistema y descargar el PDF definitivo.',
+      { params: { modulo: 'aps', id: f.reg.id }, firma: u.nombre ? ('Aprobado por ' + u.nombre) : 'Aprobado por la coordinación', titulo: 'Tu contrato fue aprobado', etiqueta: 'Aprobado', tono: 'ok', boton: 'Descargar el PDF',
+        datos: APS_datosCorreo_(f.reg, [['Aprobado', ahora], ['Versión', String(f.reg.version)], ['Huella de los datos', datosHash.slice(0, 16)]]) });
     return APS_meta_(f.reg);
   });
 }
@@ -722,8 +811,9 @@ function APS_cancelar(id, motivo) {
     APS_snapshot_(f.reg, u, 'CANCELACION');
     APS_audit_('APS', 'CANCELAR', f.reg.id, 'Estaba en ' + antes + ' · ' + motivo);
     APS_notificar_([f.reg.asesor], 'Contrato cancelado — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
-      'La coordinación canceló el contrato de <b>' + APS_escHtml_(f.reg.propietarios) + '</b> (folio ' + APS_escHtml_(f.reg.id) + '). Motivo: ' + APS_escHtml_(motivo),
-      { params: { modulo: 'aps', id: f.reg.id }, firma: u.nombre ? ('Cancelado por ' + u.nombre) : 'Cancelado por la coordinación' });
+      'La coordinación canceló este contrato. Si crees que es un error, habla con ella antes de generar uno nuevo.',
+      { params: { modulo: 'aps', id: f.reg.id }, firma: u.nombre ? ('Cancelado por ' + u.nombre) : 'Cancelado por la coordinación', titulo: 'Tu contrato fue cancelado', etiqueta: 'Cancelado', tono: 'bad', boton: 'Ver el contrato',
+        datos: APS_datosCorreo_(f.reg, [['Motivo', motivo]]) });
     return APS_meta_(f.reg);
   });
 }
