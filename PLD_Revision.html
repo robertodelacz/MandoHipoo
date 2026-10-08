@@ -1,0 +1,136 @@
+<!-- PRE PLD · Mis documentos y envío a revisión -->
+<style>
+#rv-root{--primary:#35B7C5;--bg-card:#364494;--text-dim:#B2B2B2;--text-soft:#D6DAEE;--bg-dark:#1a224a;--bg-input:#232d61;--border-dark:#0d122b;--ok:#10b981;--err:#ef4444;--warn:#f59e0b}
+#rv-root .cx{max-width:1280px;margin:0 auto;padding:26px 22px 60px;color:#fff;font-family:'Inter',system-ui,sans-serif;position:relative;z-index:1}
+#rv-root .cx-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;background:var(--border-dark);border:2px solid var(--primary);border-radius:14px;padding:16px 22px;box-shadow:6px 6px 0 rgba(0,0,0,.35)}
+#rv-root .cx-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:32px;color:var(--primary);text-shadow:2px 2px 0 var(--border-dark);letter-spacing:.5px}
+#rv-root .cx-sub{font-size:12px;color:var(--text-soft);margin-top:4px}
+#rv-root .cx-user{font-size:12px;font-weight:700;color:#dbe3ff;background:rgba(0,0,0,.28);border:1px solid rgba(53,183,197,.5);padding:7px 14px;border-radius:999px}
+#rv-root .cx-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+#rv-root .cx-chip{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:var(--bg-input);border:2px solid rgba(178,178,178,.5);border-radius:999px;color:var(--text-soft);font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+#rv-root .cx-chip:hover{border-color:var(--primary);color:#fff}
+#rv-root .cx-chip.on{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark)}
+#rv-root .cx-chip .n{background:rgba(0,0,0,.35);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px}
+#rv-root .cx-chip.on .n{background:var(--border-dark);color:#fff}
+#rv-root .cx-btn{display:inline-block;border:2px solid var(--text-dim);background:transparent;color:#fff;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;line-height:1.2}
+#rv-root .cx-btn:hover{border-color:var(--primary)}
+#rv-root .cx-btn.pri{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark)}
+#rv-root .cx-btn.ok{border-color:var(--ok);color:#7ff0c3}
+#rv-root .cx-btn.warn{border-color:var(--warn);color:#ffd28a}
+#rv-root .cx-btn.danger{border-color:#ff6b6b;color:#ffb3b3}
+#rv-root .cx-btn.danger:hover{background:#4a1414;border-color:#ff8a8a;color:#fff}
+#rv-root .cx-btn:disabled{opacity:.4;cursor:not-allowed}
+#rv-root .cx-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:22px}
+#rv-root .cx-kpi{background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:16px;box-shadow:6px 6px 0 rgba(0,0,0,.5);cursor:pointer;text-align:left;color:#fff;font-family:'Inter',sans-serif}
+#rv-root .cx-kpi:hover{transform:translate(-2px,-2px)}
+#rv-root .cx-kpi b{display:block;font-family:'Montserrat',sans-serif;font-size:36px;line-height:1.1}
+#rv-root .cx-kpi span{font-size:12px;color:#dbe3ff;font-weight:600}
+#rv-root .cx-kpi.al{border-color:var(--warn)}
+#rv-root .cx-kpi.mal{border-color:var(--err)}
+#rv-root .cx-kpi small{display:block;color:var(--text-soft);font-size:11px;margin-top:4px}
+#rv-root .cx-grid2{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:980px){#rv-root .cx-grid2{grid-template-columns:1fr 1fr}}
+#rv-root .cx-panel{background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
+#rv-root .cx-panel h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;margin-bottom:12px}
+#rv-root .cx-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+#rv-root .cx-search{flex:1;min-width:200px;background:var(--bg-input);border:2px solid var(--text-dim);border-radius:8px;padding:10px 14px;color:#fff;font-size:13px;font-weight:600;font-family:'Inter',sans-serif}
+#rv-root .cx-search:focus{outline:none;border-color:var(--primary)}
+#rv-root .cx-wrap{overflow-x:auto}
+#rv-root table.cx-tb{width:100%;border-collapse:collapse;font-size:12.5px}
+#rv-root table.cx-tb th{text-align:left;color:#8fe3ec;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:8px;border-bottom:2px solid rgba(53,183,197,.4);white-space:nowrap}
+#rv-root table.cx-tb td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.1);vertical-align:top}
+#rv-root table.cx-tb td.ac{white-space:nowrap}
+#rv-root table.cx-tb td.ac .cx-btn{margin:0 4px 4px 0}
+#rv-root .cx-est{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;border:2px solid var(--border-dark);white-space:nowrap}
+#rv-root .cx-est.e-BORRADOR,#rv-root .cx-est.e-SIN_ENVIAR,#rv-root .cx-est.e-SIN_TERMINAR{background:#cbd5e1;color:#1e293b}
+#rv-root .cx-est.e-COMPLETO{background:#7dd3fc;color:#0c2a3d}
+#rv-root .cx-est.e-EN_REVISION{background:var(--warn);color:#3b2600}
+#rv-root .cx-est.e-OBSERVADO{background:var(--err);color:#fff}
+#rv-root .cx-est.e-APROBADO,#rv-root .cx-est.e-REVISADO{background:var(--ok);color:#06281c}
+#rv-root .cx-flag{display:inline-block;margin-top:4px;font-size:10.5px;font-weight:800;color:#ffd28a;border:1px solid var(--warn);border-radius:6px;padding:1px 6px}
+#rv-root .cx-dim{color:var(--text-soft);font-size:11.5px}
+#rv-root .cx-note{font-size:12.5px;color:#dbe3ff;line-height:1.5;background:rgba(0,0,0,.25);border:1px solid rgba(53,183,197,.4);border-radius:8px;padding:12px 14px}
+#rv-root .cx-empty{color:var(--text-soft);font-size:13px;padding:8px 0}
+#rv-root .cx-li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:12.5px}
+#rv-root .cx-li:last-child{border-bottom:0}
+#rv-root .cx-modal{position:fixed;inset:0;background:rgba(13,18,43,.92);z-index:60;display:none;overflow:auto;padding:20px}
+#rv-root .cx-modal.open{display:block}
+#rv-root .cx-box{max-width:860px;margin:0 auto;background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:22px}
+#rv-root .cx-busy{position:fixed;inset:0;background:rgba(8,11,28,.97);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:80;display:none;align-items:center;justify-content:center}
+#rv-root .cx-busy.on{display:flex}
+#rv-root .cx-busy-card{display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--bg-card);border:3px solid var(--primary);border-radius:16px;padding:32px 44px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
+#rv-root .cx-busy-card span{font-weight:800;color:#fff;font-size:14px;font-family:'Inter',sans-serif}
+#rv-root .cx-spin{width:32px;height:32px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--primary);border-radius:50%;animation:cxgira .75s linear infinite}
+@keyframes cxgira{to{transform:rotate(360deg)}}
+#rv-root .cx-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:var(--ok);color:#06281c;border:3px solid var(--border-dark);border-radius:10px;padding:12px 18px;font-weight:800;font-size:13px;z-index:90;transition:all .25s;max-width:90vw}
+#rv-root .cx-toast.show{opacity:1;transform:translate(-50%,0)}
+#rv-root .cx-toast.err{background:var(--err);color:#fff}
+#rv-root .cx-tab-abrir{text-align:center;padding:48px 24px}
+#rv-root .cx-tab-abrir .ic{font-size:52px;margin-bottom:10px}
+#rv-root .cx-tab-abrir .cx-note{max-width:520px;margin:0 auto 20px}
+#rv-root .cx-btn.big{font-size:15px;padding:14px 26px;margin-top:6px}
+#rv-root .cx-doc{display:inline-block;margin:4px 4px 0 0;font-size:10.5px;font-weight:800;color:#9be7ee;border:1px solid var(--primary);border-radius:6px;padding:1px 6px;text-decoration:none}
+#rv-root .cx-kpis.mini{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-bottom:16px}
+#rv-root .cx-kpis.mini .cx-kpi b{font-size:26px}
+#rv-root .cx-kpis.mini .cx-kpi{padding:12px}
+</style>
+<div id="rv-root">
+<div class="cx" style="padding:0 0 24px;max-width:none">
+  <div class="cx-panel">
+    <h3>📋 Mis Pre PLD y revisión</h3>
+    <div class="cx-note" style="margin-bottom:14px">Después de generar tu Pre PLD, <b>envíalo a revisión</b> para que la coordinación lo revise. Si lo observa, verás aquí su comentario: corrígelo en el documento y vuelve a enviarlo.</div>
+    <div class="cx-tools"><button type="button" class="cx-btn" data-a="refrescar">↻ Actualizar</button></div>
+    <div data-r="lista"><div class="cx-empty">Abre esta pestaña para ver tus documentos.</div></div>
+  </div>
+</div>
+<div class="cx-busy" data-r="busy"><div class="cx-busy-card"><div class="cx-spin"></div><span data-r="busyTxt">Procesando…</span></div></div>
+<div class="cx-toast" data-r="toast"></div>
+
+</div>
+<script>
+/* ═══ PRE PLD · Mis documentos y envío a revisión (asesor) ═══ */
+(function () {
+  'use strict';
+  var ROOT = document.getElementById('rv-root');
+  function q(k) { return ROOT.querySelector('[data-r="' + k + '"]'); }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  var EST = { SIN_ENVIAR: 'Sin enviar', EN_REVISION: 'En revisión', OBSERVADO: 'Observado', REVISADO: 'Revisado' };
+  function toast(m, err) { var t = q('toast'); t.textContent = m; t.className = 'cx-toast show' + (err ? ' err' : ''); clearTimeout(toast._t); toast._t = setTimeout(function () { t.className = 'cx-toast'; }, err ? 7000 : 3500); }
+  function busy(on, txt) { q('busy').className = 'cx-busy' + (on ? ' on' : ''); if (txt) q('busyTxt').textContent = txt; }
+  /* Nunca se queda "cargando" para siempre: si el servidor no contesta en 25 s, se libera la pantalla sola, con
+     aviso para reintentar — sin tener que refrescar la página. */
+  function srv(fn, args, ok, txt) {
+    if (!(typeof google !== 'undefined' && google.script && google.script.run)) { toast('Solo disponible dentro de la aplicación de Apps Script.', true); return; }
+    busy(true, txt || 'Cargando…');
+    var listo = false;
+    var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); toast('El servidor está tardando más de lo normal. Vuelve a intentarlo.', true); }, 25000);
+    var r = google.script.run
+      .withSuccessHandler(function (x) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); ok(x); })
+      .withFailureHandler(function (e) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); toast(String((e && e.message) || e).replace(/^Error:\s*/, ''), true); });
+    r[fn].apply(r, args);
+  }
+  function cargar() {
+    srv('PLD_misDocumentos', [], function (rows) {
+      q('lista').innerHTML = rows.length ? '<div class="cx-wrap"><table class="cx-tb"><thead><tr><th>Generado</th><th>Documento</th><th>Operación</th><th>Estado</th><th>Comentario de la coordinación</th><th></th></tr></thead><tbody>' +
+        rows.map(function (r) {
+          var puede = r.estado === 'SIN_ENVIAR' || r.estado === 'OBSERVADO' || (r.estado === 'REVISADO' && r.modificadoDespues);
+          return '<tr><td>' + esc(r.creado) + '</td><td><a href="' + esc(r.url) + '" target="_blank" rel="noopener" style="color:#9be7ee">' + esc(r.nombre) + '</a></td><td>' + esc(r.operacion) + '</td>' +
+            '<td><span class="cx-est e-' + r.estado + '">' + EST[r.estado] + '</span>' + (r.modificadoDespues ? '<div class="cx-flag">⚠ modificado después</div>' : '') + '</td><td class="cx-dim">' + esc(r.comentario) + '</td>' +
+            '<td class="ac">' + (puede ? '<button type="button" class="cx-btn pri" data-env="' + esc(r.id) + '">📤 ' + (r.estado === 'OBSERVADO' ? 'Reenviar a revisión' : 'Enviar a revisión') + '</button>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>'
+        : '<div class="cx-empty">Todavía no has generado ningún Pre PLD con esta cuenta.</div>';
+    });
+  }
+  function enviar(id, btn) {
+    if (!window.confirm('¿Enviar este Pre PLD a revisión de la coordinación?')) return;
+    srv('PLD_enviarRevision', [id], function () {
+      toast('Enviado a revisión.'); if (btn) { btn.textContent = '✅ Enviado a revisión'; btn.disabled = true; } cargar();
+    }, 'Enviando…');
+  }
+  ROOT.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.getAttribute('data-env')) enviar(b.getAttribute('data-env'), b); else if (b.getAttribute('data-a') === 'refrescar') cargar();
+  });
+  window.PLDREV = { cargar: cargar, enviar: enviar };
+})();
+
+</script>
