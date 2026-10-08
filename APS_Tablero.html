@@ -1,0 +1,119 @@
+<!-- MÓDULO TABLERO · solo administradora -->
+<style>
+#tab-root{--primary:#35B7C5;--bg-card:#364494;--text-dim:#B2B2B2;--text-soft:#D6DAEE;--bg-dark:#1a224a;--bg-input:#232d61;--border-dark:#0d122b;--ok:#10b981;--err:#ef4444;--warn:#f59e0b}
+#tab-root .cx{max-width:1280px;margin:0 auto;padding:26px 22px 60px;color:#fff;font-family:'Inter',system-ui,sans-serif;position:relative;z-index:1}
+#tab-root .cx-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;background:var(--border-dark);border:2px solid var(--primary);border-radius:14px;padding:16px 22px;box-shadow:6px 6px 0 rgba(0,0,0,.35)}
+#tab-root .cx-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:32px;color:var(--primary);text-shadow:2px 2px 0 var(--border-dark);letter-spacing:.5px}
+#tab-root .cx-sub{font-size:12px;color:var(--text-soft);margin-top:4px}
+#tab-root .cx-user{font-size:12px;font-weight:700;color:#dbe3ff;background:rgba(0,0,0,.28);border:1px solid rgba(53,183,197,.5);padding:7px 14px;border-radius:999px}
+#tab-root .cx-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+#tab-root .cx-chip{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:var(--bg-input);border:2px solid rgba(178,178,178,.5);border-radius:999px;color:var(--text-soft);font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+#tab-root .cx-chip:hover{border-color:var(--primary);color:#fff}
+#tab-root .cx-chip.on{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark)}
+#tab-root .cx-chip .n{background:rgba(0,0,0,.35);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px}
+#tab-root .cx-chip.on .n{background:var(--border-dark);color:#fff}
+#tab-root .cx-btn{display:inline-block;border:2px solid var(--text-dim);background:transparent;color:#fff;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;line-height:1.2}
+#tab-root .cx-btn:hover{border-color:var(--primary)}
+#tab-root .cx-btn.pri{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark)}
+#tab-root .cx-btn.ok{border-color:var(--ok);color:#7ff0c3}
+#tab-root .cx-btn.warn{border-color:var(--warn);color:#ffd28a}
+#tab-root .cx-btn.danger{border-color:#ff6b6b;color:#ffb3b3}
+#tab-root .cx-btn.danger:hover{background:#4a1414;border-color:#ff8a8a;color:#fff}
+#tab-root .cx-btn:disabled{opacity:.4;cursor:not-allowed}
+#tab-root .cx-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:22px}
+#tab-root .cx-kpi{background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:16px;box-shadow:6px 6px 0 rgba(0,0,0,.5);cursor:pointer;text-align:left;color:#fff;font-family:'Inter',sans-serif}
+#tab-root .cx-kpi:hover{transform:translate(-2px,-2px)}
+#tab-root .cx-kpi b{display:block;font-family:'Montserrat',sans-serif;font-size:36px;line-height:1.1}
+#tab-root .cx-kpi span{font-size:12px;color:#dbe3ff;font-weight:600}
+#tab-root .cx-kpi.al{border-color:var(--warn)}
+#tab-root .cx-kpi.mal{border-color:var(--err)}
+#tab-root .cx-kpi small{display:block;color:var(--text-soft);font-size:11px;margin-top:4px}
+#tab-root .cx-grid2{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:980px){#tab-root .cx-grid2{grid-template-columns:1fr 1fr}}
+#tab-root .cx-panel{background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
+#tab-root .cx-panel h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;margin-bottom:12px}
+#tab-root .cx-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+#tab-root .cx-search{flex:1;min-width:200px;background:var(--bg-input);border:2px solid var(--text-dim);border-radius:8px;padding:10px 14px;color:#fff;font-size:13px;font-weight:600;font-family:'Inter',sans-serif}
+#tab-root .cx-search:focus{outline:none;border-color:var(--primary)}
+#tab-root .cx-wrap{overflow-x:auto}
+#tab-root table.cx-tb{width:100%;border-collapse:collapse;font-size:12.5px}
+#tab-root table.cx-tb th{text-align:left;color:#8fe3ec;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:8px;border-bottom:2px solid rgba(53,183,197,.4);white-space:nowrap}
+#tab-root table.cx-tb td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.1);vertical-align:top}
+#tab-root table.cx-tb td.ac{white-space:nowrap}
+#tab-root table.cx-tb td.ac .cx-btn{margin:0 4px 4px 0}
+#tab-root .cx-est{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;border:2px solid var(--border-dark);white-space:nowrap}
+#tab-root .cx-est.e-BORRADOR,#tab-root .cx-est.e-SIN_ENVIAR,#tab-root .cx-est.e-SIN_TERMINAR{background:#cbd5e1;color:#1e293b}
+#tab-root .cx-est.e-COMPLETO{background:#7dd3fc;color:#0c2a3d}
+#tab-root .cx-est.e-EN_REVISION{background:var(--warn);color:#3b2600}
+#tab-root .cx-est.e-OBSERVADO{background:var(--err);color:#fff}
+#tab-root .cx-est.e-APROBADO,#tab-root .cx-est.e-REVISADO{background:var(--ok);color:#06281c}
+#tab-root .cx-flag{display:inline-block;margin-top:4px;font-size:10.5px;font-weight:800;color:#ffd28a;border:1px solid var(--warn);border-radius:6px;padding:1px 6px}
+#tab-root .cx-dim{color:var(--text-soft);font-size:11.5px}
+#tab-root .cx-note{font-size:12.5px;color:#dbe3ff;line-height:1.5;background:rgba(0,0,0,.25);border:1px solid rgba(53,183,197,.4);border-radius:8px;padding:12px 14px}
+#tab-root .cx-empty{color:var(--text-soft);font-size:13px;padding:8px 0}
+#tab-root .cx-li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:12.5px}
+#tab-root .cx-li:last-child{border-bottom:0}
+#tab-root .cx-modal{position:fixed;inset:0;background:rgba(13,18,43,.92);z-index:60;display:none;overflow:auto;padding:20px}
+#tab-root .cx-modal.open{display:block}
+#tab-root .cx-box{max-width:860px;margin:0 auto;background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:22px}
+#tab-root .cx-busy{position:fixed;inset:0;background:rgba(8,11,28,.97);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:80;display:none;align-items:center;justify-content:center}
+#tab-root .cx-busy.on{display:flex}
+#tab-root .cx-busy-card{display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--bg-card);border:3px solid var(--primary);border-radius:16px;padding:32px 44px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
+#tab-root .cx-busy-card span{font-weight:800;color:#fff;font-size:14px;font-family:'Inter',sans-serif}
+#tab-root .cx-spin{width:32px;height:32px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--primary);border-radius:50%;animation:cxgira .75s linear infinite}
+@keyframes cxgira{to{transform:rotate(360deg)}}
+#tab-root .cx-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:var(--ok);color:#06281c;border:3px solid var(--border-dark);border-radius:10px;padding:12px 18px;font-weight:800;font-size:13px;z-index:90;transition:all .25s;max-width:90vw}
+#tab-root .cx-toast.show{opacity:1;transform:translate(-50%,0)}
+#tab-root .cx-toast.err{background:var(--err);color:#fff}
+#tab-root .cx-tab-abrir{text-align:center;padding:48px 24px}
+#tab-root .cx-tab-abrir .ic{font-size:52px;margin-bottom:10px}
+#tab-root .cx-tab-abrir .cx-note{max-width:520px;margin:0 auto 20px}
+#tab-root .cx-btn.big{font-size:15px;padding:14px 26px;margin-top:6px}
+#tab-root .cx-doc{display:inline-block;margin:4px 4px 0 0;font-size:10.5px;font-weight:800;color:#9be7ee;border:1px solid var(--primary);border-radius:6px;padding:1px 6px;text-decoration:none}
+#tab-root .cx-kpis.mini{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-bottom:16px}
+#tab-root .cx-kpis.mini .cx-kpi b{font-size:26px}
+#tab-root .cx-kpis.mini .cx-kpi{padding:12px}
+</style>
+<div id="tab-root">
+<div class="cx">
+  <div class="cx-head"><div><div class="cx-title">Tablero Hipoo</div><div class="cx-sub">Resumen · histórico de comisiones · ajustes · cierres por asesor · inventario</div></div><div data-r="acc"></div></div>
+  <div data-r="cuerpo"></div>
+</div>
+<div class="cx-busy" data-r="busy"><div class="cx-busy-card"><div class="cx-spin"></div><span data-r="busyTxt">Cargando…</span></div></div>
+<div class="cx-toast" data-r="toast"></div>
+
+</div>
+<script>
+/* ═══ MÓDULO TABLERO (solo administradora): aloja el tablero de Hipoo ═══ */
+(function () {
+  'use strict';
+  var ROOT = document.getElementById('tab-root'), hecho = false;
+  function q(k) { return ROOT.querySelector('[data-r="' + k + '"]'); }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  /* Google bloquea a propósito que sus aplicaciones web (script.google.com) se muestren dentro de un <iframe> de otra
+     página — es una protección contra clickjacking que Google aplica siempre, no algo que se pueda evitar desde aquí
+     (por eso aparecía "script.google.com rechazó la conexión"). La forma que sí funciona es abrirlo en su propia pestaña. */
+  function pinta(url) {
+    if (!url) {
+      q('acc').innerHTML = '';
+      q('cuerpo').innerHTML = '<div class="cx-panel"><h3>📊 Este espacio está listo para el tablero</h3>' +
+        '<div class="cx-note">Todavía no está conectado. Para mostrarlo aquí:<br><br>' +
+        '<b>1.</b> Publica el tablero de Hipoo como aplicación web (Implementar → Nueva implementación → Aplicación web, acceso: tu organización).<br>' +
+        '<b>2.</b> Copia la URL que termina en <code>/exec</code> y pégala en <code>TABLERO_URL</code>, al inicio de <code>APS_Codigo.gs</code>.<br>' +
+        '<b>3.</b> Vuelve a implementar una nueva versión de esta aplicación.<br><br>' +
+        'No se mostrará embebido en esta pantalla: Google no permite que sus aplicaciones web se incrusten dentro de otra página, así que se abrirá en su propia pestaña. ' +
+        'Para verlo integrado de verdad (sin salir de aquí), lo ideal es traer su código como un módulo propio, igual que se hizo con el Pre PLD y el contrato APS.</div></div>';
+      return;
+    }
+    q('acc').innerHTML = '';
+    q('cuerpo').innerHTML = '<div class="cx-panel cx-tab-abrir"><div class="ic">📊</div><h3>El tablero está listo</h3>' +
+      '<div class="cx-note">Google no permite mostrar sus aplicaciones web dentro de otra página (es una protección de seguridad, no un error de esta consola), así que se abre en su propia pestaña.</div>' +
+      '<a class="cx-btn pri big" href="' + esc(url) + '" target="_blank" rel="noopener">↗ Abrir el tablero de Hipoo</a></div>';
+  }
+  window.TAB = { activar: function () {
+    if (hecho) return; hecho = true;
+    pinta(window.TABLERO_URL || '');   // ya viene del servidor desde la carga de la página (APS_tableroUrlJson): sin llamada nueva al servidor
+  } };
+})();
+
+</script>
