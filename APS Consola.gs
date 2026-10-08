@@ -34,11 +34,11 @@ function PLD_ssBitacora_() {
   if (typeof CONFIG === 'undefined' || !CONFIG.BITACORA_SPREADSHEET_ID) throw new Error('No se encontró la bitácora del Pre PLD (CONFIG.BITACORA_SPREADSHEET_ID).');
   return SpreadsheetApp.openById(CONFIG.BITACORA_SPREADSHEET_ID);
 }
-/** Últimos 1000 Pre PLD generados (hoja "Seguimiento de Entregables"). */
+/** TODOS los Pre PLD generados (hoja "Seguimiento de Entregables"). Antes solo leía los últimos 1000: un documento en revisión más antiguo desaparecía de la lista. */
 function PLD_bitacora_() {
   var sh = PLD_ssBitacora_().getSheetByName('Seguimiento de Entregables');
   if (!sh || sh.getLastRow() < 2) return [];
-  var ult = sh.getLastRow(), desde = Math.max(2, ult - 999);
+  var ult = sh.getLastRow(), desde = 2;
   return sh.getRange(desde, 1, ult - desde + 1, 8).getValues().map(function (v) {
     return { fecha: PLD_fecha_(v[0]), nombre: String(v[1]), operacion: String(v[2]), lado1: String(v[3]), lado2: String(v[4]), id: String(v[5]), url: String(v[6]), creador: String(v[7]).toLowerCase() };
   }).filter(function (r) { return r.id; });
@@ -47,7 +47,7 @@ function PLD_bitacora_() {
 function PLD_ultimasMods_() {
   var sh = PLD_ssBitacora_().getSheetByName('Historial_Modificaciones'), mapa = {};
   if (!sh || sh.getLastRow() < 2) return mapa;
-  var ult = sh.getLastRow(), desde = Math.max(2, ult - 999);
+  var ult = sh.getLastRow(), desde = 2;
   sh.getRange(desde, 1, ult - desde + 1, 5).getValues().forEach(function (v) {
     var id = String(v[1]), f = PLD_fecha_(v[0]);
     if (id && (!mapa[id] || f > mapa[id])) mapa[id] = f;
@@ -114,10 +114,10 @@ function PLD_enviarRevision(id) {
       enviadoPor: u.email, fechaEnvio: APS_ahora_(), revisadoPor: '', fechaRevision: '', comentario: '' };
     PLD_escribirRev_(R, e, reg);
     if (APS_CONFIG.PLD_COMPARTIR_REVISOR) {
-      APS_CONFIG.COORDINADORES.forEach(function (c) { try { DriveApp.getFileById(b.id).addCommenter(c); } catch (err) { Logger.log('No se pudo compartir con ' + c + ': ' + err.message); } });
+      APS_coordinadores_().forEach(function (c) { try { DriveApp.getFileById(b.id).addCommenter(c); } catch (err) { Logger.log('No se pudo compartir con ' + c + ': ' + err.message); } });
     }
     APS_audit_('PLD', 'ENVIAR_REVISION', b.id, b.operacion);
-    APS_notificar_(APS_CONFIG.COORDINADORES, 'Pre PLD por revisar', 'El asesor <b>' + u.email + '</b> envió a revisión el Pre PLD <b>' + b.nombre + '</b> (' + b.operacion + ').');
+    APS_notificar_(APS_coordinadores_(), 'Pre PLD por revisar', 'El asesor <b>' + APS_escHtml_(u.email) + '</b> envió a revisión el Pre PLD <b>' + APS_escHtml_(b.nombre) + '</b> (' + APS_escHtml_(b.operacion) + ').');
     return PLD_item_(b, R.mapa[b.id], null);
   });
 }
@@ -145,7 +145,7 @@ function PLD_observar(id, comentario) {
     e.reg.estado = 'OBSERVADO'; e.reg.comentario = comentario; e.reg.revisadoPor = u.email; e.reg.fechaRevision = APS_ahora_();
     PLD_escribirRev_(R, e, e.reg);
     APS_audit_('PLD', 'OBSERVAR', e.reg.id, comentario);
-    APS_notificar_([e.reg.creador], 'Pre PLD con observaciones', 'La coordinación observó el Pre PLD <b>' + e.reg.nombre + '</b>. Comentario: ' + comentario);
+    APS_notificar_([e.reg.creador], 'Pre PLD con observaciones', 'La coordinación observó el Pre PLD <b>' + APS_escHtml_(e.reg.nombre) + '</b>. Comentario: ' + APS_escHtml_(comentario));
     return PLD_item_({ id: e.reg.id, nombre: e.reg.nombre, operacion: e.reg.operacion, lado1: e.reg.asociados, lado2: '', url: e.reg.url, creador: e.reg.creador, fecha: e.reg.creado }, e, null);
   });
 }
@@ -158,7 +158,7 @@ function PLD_marcarRevisado(id, nota) {
     e.reg.estado = 'REVISADO'; e.reg.comentario = String(nota || '').trim().slice(0, 500); e.reg.revisadoPor = u.email; e.reg.fechaRevision = APS_ahora_();
     PLD_escribirRev_(R, e, e.reg);
     APS_audit_('PLD', 'REVISADO', e.reg.id, e.reg.comentario);
-    APS_notificar_([e.reg.creador], 'Pre PLD revisado', 'La coordinación marcó como revisado el Pre PLD <b>' + e.reg.nombre + '</b>.');
+    APS_notificar_([e.reg.creador], 'Pre PLD revisado', 'La coordinación marcó como revisado el Pre PLD <b>' + APS_escHtml_(e.reg.nombre) + '</b>.');
     return PLD_item_({ id: e.reg.id, nombre: e.reg.nombre, operacion: e.reg.operacion, lado1: e.reg.asociados, lado2: '', url: e.reg.url, creador: e.reg.creador, fecha: e.reg.creado }, e, null);
   });
 }
@@ -198,7 +198,7 @@ function PLD_modificaciones() {
 function CONSOLA_resumen() {
   APS_requiereAdmin_();
   var N = APS_nucleo_(), hoy = APS_hoy_(), lim = APS_sumaDias_(hoy, 30), atras = APS_sumaDias_(hoy, -15), sem = APS_sumaDias_(hoy, -7);
-  var aps = { BORRADOR: 0, SIN_TERMINAR: 0, COMPLETO: 0, EN_REVISION: 0, APROBADO: 0, conDocs: 0, total: 0 }, ajustes = [], vigencias = [], apsPorRevisar = [];
+  var aps = { BORRADOR: 0, SIN_TERMINAR: 0, COMPLETO: 0, EN_REVISION: 0, APROBADO: 0, CANCELADO: 0, conDocs: 0, total: 0 }, ajustes = [], vigencias = [], apsPorRevisar = [];
   APS_todos_().forEach(function (r) {
     aps[r.estado] = (aps[r.estado] || 0) + 1; aps.total++;
     var ui = APS_estadoUI_(r); if (ui === 'SIN_TERMINAR' || ui === 'COMPLETO') aps[ui]++;
@@ -237,7 +237,7 @@ function CONSOLA_auditoria(texto, modulo) {
   APS_requiereAdmin_();
   var sh = APS_hojaAux_('Auditoria', APS_AUD_COLS);
   if (sh.getLastRow() < 2) return [];
-  var q = String(texto || '').toLowerCase().trim(), ult = sh.getLastRow(), desde = Math.max(2, ult - 999);
+  var q = String(texto || '').toLowerCase().trim(), ult = sh.getLastRow(), desde = (q || modulo) ? 2 : Math.max(2, ult - 999);      // sin filtros: lo más reciente; con filtros: toda la bitácora
   var filas = sh.getRange(desde, 1, ult - desde + 1, 6).getValues().map(function (v) {
     return { fecha: String(v[0]), usuario: String(v[1]), modulo: String(v[2]), accion: String(v[3]), ref: String(v[4]), detalle: String(v[5]) };
   }).reverse();

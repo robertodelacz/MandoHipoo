@@ -63,17 +63,22 @@ var APS_CONFIG = {
   // cuenta de Gmail, se puede usar aquí para que el remitente sea ese alias en vez de tu correo. Vacío = se queda
   // como está ahora (sale de robertodelacruz@cualli.mx con el nombre "APS Hipoo").
   CORREO_REMITENTE: '',
+  // ¿Puede una coordinadora aprobar un contrato que ella misma creó? true = sí (como estaba). false = no: lo debe aprobar otra persona de coordinación.
+  PERMITIR_AUTOAPROBACION: true,
   ZONA: 'America/Mexico_City'
 };
 
-var APS_COLS = ['ID', 'Creado', 'Actualizado', 'Asesor', 'Estado', 'Tipo', 'Propietarios', 'Inmueble', 'JSON', 'PDF_URL', 'PDF_ID', 'Comentario', 'RevisadoPor', 'Pendientes', 'DocURL', 'DocFecha'];
-var APS_ESTADOS = { BORRADOR: 1, EN_REVISION: 1, APROBADO: 1 };
+var APS_COLS = ['ID', 'Creado', 'Actualizado', 'Asesor', 'Estado', 'Tipo', 'Propietarios', 'Inmueble', 'JSON', 'PDF_URL', 'PDF_ID', 'Comentario', 'RevisadoPor', 'Pendientes', 'DocURL', 'DocFecha', 'Version', 'PDF_SHA256', 'AprobadoEn', 'DatosHash'];
+/* "Comentario" guarda el motivo cuando un contrato se CANCELA. Version sube con cada cambio (control de ediciones simultáneas). */
+var APS_ESTADOS = { BORRADOR: 1, EN_REVISION: 1, APROBADO: 1, CANCELADO: 1 };
+var APS_VER_COLS = ['Fecha', 'ID', 'Version', 'Usuario', 'Estado', 'Accion', 'JSON'];
 
 /* ═════════════ PUNTO DE ENTRADA ═════════════ */
 
 /* NOTA: el doGet() único está en tu Code.gs del Pre-PLD (sirve la pantalla 'Interfaz', que incluye este módulo). */
 /** Devuelve el contenido de un archivo HTML para armar la pantalla. Los archivos de la consola solo se entregan a la administradora. */
 function APS_incluir(nombre) {
+  if (['PLD_Revision', 'APS_Nucleo', 'APS_Modulo', 'APS_Consola', 'APS_Tablero'].indexOf(nombre) < 0) throw new Error('Sin permiso.');   // solo los módulos de la pantalla; cualquier otro archivo HTML del proyecto no se entrega
   if (['APS_Consola', 'APS_Tablero'].indexOf(nombre) >= 0 && !APS_esAdmin()) throw new Error('Sin permiso.');
   if (['APS_Modulo', 'APS_Nucleo'].indexOf(nombre) >= 0 && !APS_puedeGenerarAps()) throw new Error('Sin permiso.');
   return HtmlService.createHtmlOutputFromFile(nombre).getContent();
@@ -99,6 +104,7 @@ function APS_tableroUrlJson() {
 
 /** Crea la carpeta de Drive y la hoja de registro, y guarda sus IDs. Es seguro volver a ejecutarla. */
 function APS_setup() {
+  APS_soloMantenimiento_();
   var props = PropertiesService.getScriptProperties(), carpeta = null, ss = null, id;
   if ((id = props.getProperty('APS_CARPETA_ID'))) { try { carpeta = DriveApp.getFolderById(id); } catch (e) { carpeta = null; } }
   if (!carpeta) { carpeta = DriveApp.createFolder('APS Hipoo (pruebas)'); props.setProperty('APS_CARPETA_ID', carpeta.getId()); }
@@ -111,7 +117,7 @@ function APS_setup() {
   var sh = ss.getSheetByName('Registros') || ss.getSheets()[0].setName('Registros');
   sh.getRange(1, 1, 1, APS_COLS.length).setValues([APS_COLS]).setFontWeight('bold');      // el encabezado se actualiza siempre (columnas nuevas)
   sh.setFrozenRows(1);
-  APS_hojaAux_('Auditoria', APS_AUD_COLS); APS_hojaAux_('PLD_Revisiones', PLD_REV_COLS);
+  APS_hojaAux_('Auditoria', APS_AUD_COLS); APS_hojaAux_('PLD_Revisiones', PLD_REV_COLS); APS_hojaAux_('Versiones', APS_VER_COLS);
   APS_aseguraColumnasAsesores_(APS_hojaAux_('Asesores', ['Correo', 'Nombre', 'Género', 'Rol', 'Activo']));   // si la pestaña ya existía (de antes de "Género"/"Rol"), les agrega las columnas que falten, sin tocar lo que ya hay
   Logger.log('Carpeta de PDFs : ' + carpeta.getUrl());
   Logger.log('Hoja de registro: ' + ss.getUrl());
@@ -265,6 +271,14 @@ function APS_asesores_() {
   try { cache.put('APS_ASESORES', JSON.stringify(mapa), APS_ASESORES_CACHE_SEG); } catch (e) { /* sin caché: no pasa nada, solo se vuelve a leer la próxima vez */ }
   return mapa;
 }
+/** TODA la coordinación: el arreglo fijo COORDINADORES + quien tenga Rol "Coordinador" en la hoja Asesores. Úsala para correos y permisos de Drive. */
+function APS_coordinadores_() {
+  var lista = {};
+  (APS_CONFIG.COORDINADORES || []).forEach(function (c) { var k = String(c).toLowerCase().trim(); if (k) lista[k] = 1; });
+  var mapa = {}; try { mapa = APS_asesores_(); } catch (e) { mapa = {}; }
+  Object.keys(mapa).forEach(function (k) { if (mapa[k] && mapa[k].coordinador) lista[k] = 1; });
+  return Object.keys(lista);
+}
 /** Usuario identificado Y autorizado para generar contratos APS. */
 function APS_requiereAps_() {
   var u = APS_requiereUsuario_();
@@ -310,21 +324,22 @@ function APS_logoDataUri_() {
 }
 
 /** HTML completo del contrato listo para convertir a PDF. servidor=true → pie sin position:fixed. */
-function APS_htmlDocumento_(datos, servidor, marca) {
+function APS_htmlDocumento_(datos, servidor, marca, sello) {
   var N = APS_nucleo_(), logo = APS_logoDataUri_();
   if (logo) N.D.CFG.logoSrc = logo;
   var banda = marca ? '<div style="text-align:center;font:bold 9pt Arial,sans-serif;color:#333;border:1pt solid #555;padding:4pt;margin:0 0 8pt">' + N.U.esc(marca) + '</div>' : '';
   return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>APS Hipoo</title><style>html,body{margin:0;background:#fff}' +
-    N.D.css() + '</style></head><body>' + banda + N.D.render(datos, { borrador: false, servidor: !!servidor }) + '</body></html>';
+    N.D.css() + '</style></head><body>' + banda + N.D.render(datos, { borrador: false, servidor: !!servidor }) +
+    (sello ? '<div style="font:7pt Arial,sans-serif;color:#555;border-top:.75pt solid #999;margin:8pt 20mm 0;padding-top:4pt">' + N.U.esc(sello) + '</div>' : '') + '</body></html>';
 }
-function APS_pdfBlob_(datos, nombre, servidor) {
+function APS_pdfBlob_(datos, nombre, servidor, sello) {
   if (APS_CONFIG.PDF_METODO === 'docx') {
-    var doc = APS_docDesdeDocx_(datos, nombre + ' (temporal)', '');
+    var doc = APS_docDesdeDocx_(datos, nombre + ' (temporal)', sello || '');
     var pdf = doc.getAs('application/pdf').setName(nombre + '.pdf');
     try { doc.setTrashed(true); } catch (e) { Logger.log('No se pudo borrar el Doc temporal: ' + e.message); }
     return pdf;
   }
-  var html = APS_htmlDocumento_(datos, servidor);
+  var html = APS_htmlDocumento_(datos, servidor, '', sello);
   return Utilities.newBlob(html, 'text/html', nombre + '.html').getAs('application/pdf').setName(nombre + '.pdf');
 }
 function APS_nombrePdf_(reg, datos) {
@@ -350,10 +365,11 @@ function APS_ahora_() { return Utilities.formatDate(new Date(), APS_CONFIG.ZONA,
 function APS_filaAReg_(f) {
   return { id: String(f[0]), creado: String(f[1]), actualizado: String(f[2]), asesor: String(f[3]), estado: String(f[4]), tipo: String(f[5]),
     propietarios: String(f[6]), inmueble: String(f[7]), json: String(f[8]), pdfUrl: String(f[9]), pdfId: String(f[10]), comentario: String(f[11]), revisadoPor: String(f[12]),
-    pendientes: (f[13] === '' || f[13] === undefined) ? -1 : Number(f[13]), docUrl: String(f[14] || ''), docFecha: String(f[15] || '') };
+    pendientes: (f[13] === '' || f[13] === undefined) ? -1 : Number(f[13]), docUrl: String(f[14] || ''), docFecha: String(f[15] || ''),
+    version: Number(f[16]) || 1, pdfSha: String(f[17] || ''), aprobadoEn: String(f[18] || ''), datosHash: String(f[19] || '') };
 }
 function APS_regAFila_(r) {
-  return [r.id, r.creado, r.actualizado, r.asesor, r.estado, r.tipo, r.propietarios, r.inmueble, r.json, r.pdfUrl || '', r.pdfId || '', r.comentario || '', r.revisadoPor || '', (r.pendientes >= 0 ? r.pendientes : ''), r.docUrl || '', r.docFecha || ''];
+  return [r.id, r.creado, r.actualizado, r.asesor, r.estado, r.tipo, r.propietarios, r.inmueble, r.json, r.pdfUrl || '', r.pdfId || '', r.comentario || '', r.revisadoPor || '', (r.pendientes >= 0 ? r.pendientes : ''), r.docUrl || '', r.docFecha || '', r.version || 1, r.pdfSha || '', r.aprobadoEn || '', r.datosHash || ''];
 }
 /** Estado que ve la coordinación: distingue un borrador sin terminar de uno ya completo (sin enviar). */
 function APS_estadoUI_(r) {
@@ -361,11 +377,11 @@ function APS_estadoUI_(r) {
   return r.estado;
 }
 /** Datos del registro para la pantalla. El asesor nunca recibe los enlaces del PDF ni del documento de Google Docs. */
-function APS_meta_(r) {
-  var adm = APS_usuario_().rol === 'coordinador';
+function APS_meta_(r, admDado) {
+  var adm = (admDado === undefined) ? APS_usuario_().rol === 'coordinador' : admDado;
   return { id: r.id, creado: r.creado, actualizado: r.actualizado, asesor: r.asesor, estado: r.estado, estadoUI: APS_estadoUI_(r), tipo: r.tipo,
     propietarios: r.propietarios, inmueble: r.inmueble, pendientes: r.pendientes, pdfUrl: adm ? r.pdfUrl : '', docUrl: adm ? r.docUrl : '', docFecha: adm ? r.docFecha : '',
-    comentario: r.comentario, revisadoPor: r.revisadoPor };
+    comentario: r.comentario, revisadoPor: r.revisadoPor, version: r.version || 1, aprobadoEn: r.aprobadoEn || '', huella: String(r.datosHash || '').slice(0, 16) };
 }
 function APS_todos_() {
   var sh = APS_hoja_(), n = sh.getLastRow() - 1;
@@ -395,14 +411,6 @@ function APS_conLock_(fn) {
   lock.waitLock(20000);
   try { return fn(); } finally { lock.releaseLock(); }
 }
-function APS_limpiarDatos_(datos) {
-  if (!datos || typeof datos !== 'object') throw new Error('Datos inválidos.');
-  var o = JSON.parse(JSON.stringify(datos));
-  if (!Array.isArray(o.propietarios) || o.propietarios.length < 1 || o.propietarios.length > 4) throw new Error('Debe haber de 1 a 4 propietarios.');
-  var js = JSON.stringify(o);
-  if (js.length > 40000) throw new Error('El registro es demasiado grande.');
-  return o;
-}
 function APS_resumen_(o) {
   var N = APS_nucleo_();
   var nombres = o.propietarios.map(function (p) { return String(p.nombre || '').trim(); }).filter(Boolean);
@@ -422,6 +430,18 @@ function APS_nuevoId_(tomados) {
  * Institucional" #35B7C5 y azul oscuro #0d122b que usa la interfaz web), botón para abrir el sistema y, al pie,
  * el nombre de quien hizo la acción cuando se proporciona (ej. la coordinadora que aprobó).
  */
+/** Escapa texto que viene de captura (nombres, correos) antes de ponerlo dentro de un correo HTML. */
+function APS_escHtml_(t) {
+  return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+/** Para las funciones de prueba/instalación: solo la cuenta que publicó la aplicación o la coordinación (no cualquier usuario del dominio). */
+function APS_soloMantenimiento_() {
+  var activo = '', dueno = '';
+  try { activo = String(Session.getActiveUser().getEmail() || '').toLowerCase(); dueno = String(Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) {}
+  if (activo && dueno && activo === dueno) return;       // quien la corre desde el editor de Apps Script
+  if (APS_usuario_().rol === 'coordinador') return;
+  throw new Error('Sin permiso.');
+}
 function APS_correoHtml_(titulo, mensajeHtml, url, firma) {
   var AZUL = '#0d122b', CYAN = '#35B7C5';
   var boton = url ? (
@@ -430,14 +450,14 @@ function APS_correoHtml_(titulo, mensajeHtml, url, firma) {
       'font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:14px;padding:13px 28px;border-radius:8px;border:2px solid ' + AZUL + '">' +
       'Abrir el sistema APS</a></td></tr>'
   ) : '';
-  var piePersona = firma ? '<p style="margin:0 0 4px;color:' + AZUL + ';font-weight:bold">' + firma + '</p>' : '';
+  var piePersona = firma ? '<p style="margin:0 0 4px;color:' + AZUL + ';font-weight:bold">' + APS_escHtml_(firma) + '</p>' : '';
   return (
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:24px 0">' +
       '<tr><td align="center">' +
         '<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;max-width:560px">' +
           '<tr><td style="background:' + AZUL + ';padding:18px 32px" align="left"><img src="cid:logoHipoo" alt="Hipoo" height="34" style="display:block"></td></tr>' +
           '<tr><td style="padding:30px 32px 4px">' +
-            '<h2 style="margin:0 0 14px;color:' + AZUL + ';font-size:19px;font-family:Arial,Helvetica,sans-serif">' + titulo + '</h2>' +
+            '<h2 style="margin:0 0 14px;color:' + AZUL + ';font-size:19px;font-family:Arial,Helvetica,sans-serif">' + APS_escHtml_(titulo) + '</h2>' +
             '<div style="color:#333333;font-size:14px;line-height:1.6;font-family:Arial,Helvetica,sans-serif">' + mensajeHtml + '</div>' +
           '</td></tr>' +
           boton +
@@ -488,17 +508,66 @@ function APS_iniciar() {
   return { usuario: u, logo: u.email ? APS_logoDataUri_() : '' };
 }
 
-/** filtro: 'mios' | 'revision' | 'todos'. El asesor solo ve lo suyo, aunque pida 'todos'. */
-function APS_listar(filtro) {
-  var u = APS_requiereAps_();
-  var filas = APS_todos_().filter(function (r) {
-    if (u.rol !== 'coordinador') return r.asesor === u.email;
+/* ═════════════ UTILIDADES: huellas, versiones y diferencias ═════════════ */
+
+/** SHA-256 en hexadecimal de un texto o de bytes. */
+function APS_sha256_(entrada) {
+  var bytes = (typeof entrada === 'string') ? Utilities.newBlob(entrada).getBytes() : entrada;
+  return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, bytes).map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
+}
+/** JSON con las llaves en orden fijo: el mismo contenido siempre da la misma huella. */
+function APS_estable_(v) {
+  if (Array.isArray(v)) return '[' + v.map(APS_estable_).join(',') + ']';
+  if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(function (k) { return JSON.stringify(k) + ':' + APS_estable_(v[k]); }).join(',') + '}';
+  return JSON.stringify(v === undefined ? null : v);
+}
+/** Guarda una copia completa del contrato (quién, cuándo y en qué estado) para poder ver después qué cambió. */
+function APS_snapshot_(reg, u, accion) {
+  try {
+    var sh = APS_hojaAux_('Versiones', APS_VER_COLS), fila = sh.getLastRow() + 1;
+    if (fila > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), 200);
+    var rg = sh.getRange(fila, 1, 1, APS_VER_COLS.length);
+    rg.setNumberFormat('@');
+    rg.setValues([[APS_ahora_(), reg.id, reg.version || 1, (u && u.email) || APS_correo_(), reg.estado, accion, reg.json]]);
+  } catch (e) { Logger.log('Versión no registrada: ' + e.message); }
+}
+function APS_aplana_(v, pre, out) {
+  out = out || {};
+  if (Array.isArray(v)) { v.forEach(function (x, i) { APS_aplana_(x, pre + (pre ? '.' : '') + i, out); }); if (!v.length) out[pre] = ''; }
+  else if (v && typeof v === 'object') Object.keys(v).forEach(function (k) { APS_aplana_(v[k], pre + (pre ? '.' : '') + k, out); });
+  else out[pre] = v == null ? '' : String(v);
+  return out;
+}
+/** Lista de cambios entre dos versiones: [{campo, antes, despues}]. */
+function APS_diff_(a, b) {
+  var A = APS_aplana_(a || {}, '', {}), B = APS_aplana_(b || {}, '', {}), cambios = [], vistos = {};
+  Object.keys(A).concat(Object.keys(B)).forEach(function (k) {
+    if (vistos[k]) return; vistos[k] = 1;
+    if ((A[k] || '') !== (B[k] || '')) cambios.push({ campo: k, antes: A[k] || '', despues: B[k] || '' });
+  });
+  return cambios.slice(0, 80);
+}
+
+/* ═════════════ API PARA LA PANTALLA (continúa) ═════════════ */
+
+/**
+ * filtro: 'mios' | 'revision' | 'todos'. El asesor solo ve lo suyo, aunque pida 'todos'.
+ * texto: búsqueda (ID, propietarios, inmueble, asesor). limite: filas a devolver (máx. 1000).
+ * Devuelve { filas, total, conteos }: los conteos son de TODO lo que la persona puede ver, no solo de las filas devueltas.
+ */
+function APS_listar(filtro, texto, limite) {
+  var u = APS_requiereAps_(), adm = u.rol === 'coordinador', q = String(texto || '').toLowerCase().trim(), lim = Math.max(1, Math.min(Number(limite) || 300, 1000));
+  var base = APS_todos_().filter(function (r) {
+    if (!adm) return r.asesor === u.email;
     if (filtro === 'revision') return r.estado === 'EN_REVISION';
     if (filtro === 'mios') return r.asesor === u.email;
     return true;
   });
+  var conteos = { total: base.length, SIN_TERMINAR: 0, COMPLETO: 0, EN_REVISION: 0, APROBADO: 0, CANCELADO: 0, conDocs: 0 };
+  base.forEach(function (r) { var ui = APS_estadoUI_(r); conteos[ui] = (conteos[ui] || 0) + 1; if (r.docUrl) conteos.conDocs++; });
+  var filas = q ? base.filter(function (r) { return [r.id, r.propietarios, r.inmueble, r.asesor].join(' ').toLowerCase().indexOf(q) >= 0; }) : base;
   filas.sort(function (a, b) { return a.actualizado < b.actualizado ? 1 : -1; });
-  return filas.slice(0, 200).map(APS_meta_);
+  return { filas: filas.slice(0, lim).map(function (r) { return APS_meta_(r, adm); }), total: filas.length, conteos: conteos };
 }
 
 function APS_abrir(id) {
@@ -507,8 +576,30 @@ function APS_abrir(id) {
   return { meta: APS_meta_(f.reg), datos: JSON.parse(f.reg.json) };
 }
 
-/** Crea (id vacío) o actualiza un borrador. */
-function APS_guardar(datos, id) {
+/** Limpia lo que llega de la pantalla: quita caracteres de control, recorta espacios y pone tope al largo de cada campo. */
+function APS_limpiarDatos_(datos) {
+  if (!datos || typeof datos !== 'object') throw new Error('Datos inválidos.');
+  var o = JSON.parse(JSON.stringify(datos));
+  if (!Array.isArray(o.propietarios) || o.propietarios.length < 1 || o.propietarios.length > 4) throw new Error('Debe haber de 1 a 4 propietarios.');
+  if (Array.isArray(o.ajustes) && o.ajustes.length > 15) throw new Error('Máximo 15 ajustes de precio.');
+  var libres = { inmDomicilio: 1, instalaciones: 1 };           // los únicos campos donde se permiten saltos de línea
+  function limpia(v, llave) {
+    if (typeof v === 'string') {
+      var t = v.replace(libres[llave] ? /[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f]/g : /[\u0000-\u001f\u007f]/g, ' ').trim();
+      if (t.length > 600) throw new Error('El campo "' + llave + '" es demasiado largo (máximo 600 caracteres).');
+      return t;
+    }
+    if (Array.isArray(v)) return v.map(function (x) { return limpia(x, llave); });
+    if (v && typeof v === 'object') { var r = {}; Object.keys(v).forEach(function (k) { r[k] = limpia(v[k], k); }); return r; }
+    return v;
+  }
+  o = limpia(o, '');
+  if (JSON.stringify(o).length > 40000) throw new Error('El registro es demasiado grande.');
+  return o;
+}
+
+/** Crea (id vacío) o actualiza un borrador. versionBase: la versión que la pantalla tenía abierta; si otra persona guardó antes, avisa en vez de pisar sus cambios. */
+function APS_guardar(datos, id, versionBase) {
   var u = APS_requiereAps_(), o = APS_limpiarDatos_(datos), res = APS_resumen_(o), pend = APS_nucleo_().D.validar(o).length;
   return APS_conLock_(function () {
     var ahora = APS_ahora_();
@@ -516,7 +607,7 @@ function APS_guardar(datos, id) {
       var tomados = {};
       APS_todos_().forEach(function (r) { tomados[r.id] = 1; });
       var reg = { id: APS_nuevoId_(tomados), creado: ahora, actualizado: ahora, asesor: u.email, estado: 'BORRADOR', tipo: res.tipo,
-        propietarios: res.propietarios, inmueble: res.inmueble, json: JSON.stringify(o), pdfUrl: '', pdfId: '', comentario: '', revisadoPor: '', pendientes: pend, docUrl: '', docFecha: '' };
+        propietarios: res.propietarios, inmueble: res.inmueble, json: JSON.stringify(o), pdfUrl: '', pdfId: '', comentario: '', revisadoPor: '', pendientes: pend, docUrl: '', docFecha: '', version: 1 };
       var sh = APS_hoja_(), fila = sh.getLastRow() + 1;
       if (fila > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), 200);   // la hoja crece sola
       APS_escribir_(sh, fila, reg);
@@ -526,9 +617,13 @@ function APS_guardar(datos, id) {
     var f = APS_buscar_(id);
     if (!f) throw new Error('No existe el registro ' + id + '.');
     if (!APS_puedeEditar_(f.reg, u)) throw new Error('No puedes editar este registro (estado: ' + f.reg.estado + ').');
-    f.reg.actualizado = ahora; f.reg.tipo = res.tipo; f.reg.propietarios = res.propietarios; f.reg.inmueble = res.inmueble; f.reg.json = JSON.stringify(o); f.reg.pendientes = pend;
+    if (versionBase != null && Number(versionBase) !== f.reg.version) throw new Error('Este contrato lo modificó otra persona mientras lo tenías abierto. Ábrelo de nuevo desde «Mis contratos» para ver los cambios y no perderlos.');
+    var nuevoJson = JSON.stringify(o);
+    if (nuevoJson === f.reg.json) return APS_meta_(f.reg);               // nada cambió: no se escribe, no se sube la versión
+    f.reg.actualizado = ahora; f.reg.tipo = res.tipo; f.reg.propietarios = res.propietarios; f.reg.inmueble = res.inmueble; f.reg.json = nuevoJson; f.reg.pendientes = pend; f.reg.version = (f.reg.version || 1) + 1;
     APS_escribir_(f.hoja, f.fila, f.reg);
-    APS_audit_('APS', 'EDITAR', f.reg.id, 'Estado: ' + f.reg.estado);
+    if (f.reg.estado !== 'BORRADOR') APS_snapshot_(f.reg, u, 'EDICION_COORDINACION');       // desde que se envía, cada cambio de la coordinación queda guardado completo
+    APS_audit_('APS', 'EDITAR', f.reg.id, 'Estado: ' + f.reg.estado + ' · v' + f.reg.version);
     return APS_meta_(f.reg);
   });
 }
@@ -544,36 +639,172 @@ function APS_enviarRevision(id) {
     if (u.rol !== 'coordinador' && f.reg.asesor !== u.email) throw new Error('Solo el asesor que lo creó puede enviarlo.');
     var pend = N.D.validar(JSON.parse(f.reg.json));
     if (pend.length) throw new Error('Faltan ' + pend.length + ' dato(s): ' + pend.slice(0, 3).map(function (p) { return p.msg; }).join('; ') + (pend.length > 3 ? '…' : ''));
-    f.reg.estado = 'EN_REVISION'; f.reg.actualizado = APS_ahora_();
+    f.reg.estado = 'EN_REVISION'; f.reg.actualizado = APS_ahora_(); f.reg.version = (f.reg.version || 1) + 1;
     APS_escribir_(f.hoja, f.fila, f.reg);
+    APS_snapshot_(f.reg, u, 'ENVIO');                                   // lo que el asesor mandó, tal cual
     APS_audit_('APS', 'ENVIAR_REVISION', f.reg.id, f.reg.propietarios);
-    APS_notificar_(APS_CONFIG.COORDINADORES, 'Contrato por revisar — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
-      'El asesor <b>' + f.reg.asesor + '</b> envió a revisión el contrato de <b>' + f.reg.propietarios + '</b> (folio ' + f.reg.id + ').');
+    APS_notificar_(APS_coordinadores_(), 'Contrato por revisar — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
+      'El asesor <b>' + APS_escHtml_(f.reg.asesor) + '</b> envió a revisión el contrato de <b>' + APS_escHtml_(f.reg.propietarios) + '</b> (folio ' + APS_escHtml_(f.reg.id) + '). Ábrelo desde el botón: podrás revisarlo, corregir lo que haga falta y aprobarlo.',
+      { params: { modulo: 'aps', id: f.reg.id } });
     return APS_meta_(f.reg);
   });
 }
 
-/** Solo coordinador: EN_REVISION → APROBADO. Genera el PDF definitivo y lo guarda en la carpeta de Drive. */
+/** Texto de sello que se imprime al final del PDF aprobado: permite comprobar después que es el mismo contrato. */
+function APS_selloTexto_(reg, u, datosHash, ahora) {
+  return 'Folio ' + reg.id + ' · versión ' + (reg.version || 1) + ' · Aprobado por la coordinación (' + (u.nombre || u.email) + ') el ' + ahora + ' · Huella de los datos (SHA-256): ' + datosHash.slice(0, 16) + '. Verificación: abrir el folio en el sistema APS.';
+}
+
+/**
+ * Solo coordinador: EN_REVISION → APROBADO. Genera el PDF definitivo y lo guarda en la carpeta de Drive.
+ * El PDF (lo lento) se genera FUERA del bloqueo general; al terminar se vuelve a comprobar que el contrato no cambió
+ * mientras tanto. Si ya estaba aprobado (doble clic, reintento tras una pantalla que se quedó esperando), devuelve el resultado en vez de fallar.
+ */
 function APS_aprobar(id) {
   var u = APS_requiereUsuario_(), N = APS_nucleo_();
   if (u.rol !== 'coordinador') throw new Error('Solo el coordinador puede aprobar registros.');
-  return APS_conLock_(function () {
+  var snap = APS_conLock_(function () {
     var f = APS_buscar_(id);
     if (!f) throw new Error('No se encontró el registro.');
+    if (f.reg.estado === 'APROBADO') return { yaAprobado: true, meta: APS_meta_(f.reg) };
     if (f.reg.estado !== 'EN_REVISION') throw new Error('Solo se puede aprobar un registro en revisión (estado actual: ' + f.reg.estado + ').');
+    if (!APS_CONFIG.PERMITIR_AUTOAPROBACION && f.reg.asesor === u.email) throw new Error('Este contrato lo creaste tú: debe aprobarlo otra persona de la coordinación.');
     var datos = JSON.parse(f.reg.json), pend = N.D.validar(datos);
     if (pend.length) throw new Error('Faltan ' + pend.length + ' dato(s): ' + pend.slice(0, 3).map(function (p) { return p.msg; }).join('; '));
-    var blob = APS_pdfBlob_(datos, APS_nombrePdf_(f.reg, datos), false);
-    var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(blob);
-    APS_CONFIG.COORDINADORES.forEach(function (c) { try { archivo.addViewer(c); } catch (e) { Logger.log('No se pudo compartir el PDF con ' + c + ': ' + e.message); } });   // para poder verlo en Drive
-    f.reg.estado = 'APROBADO'; f.reg.pdfUrl = archivo.getUrl(); f.reg.pdfId = archivo.getId(); f.reg.revisadoPor = u.email; f.reg.actualizado = APS_ahora_();
+    return { json: f.reg.json, version: f.reg.version || 1, reg: f.reg };
+  });
+  if (snap.yaAprobado) return snap.meta;
+
+  var datos = JSON.parse(snap.json), datosHash = APS_sha256_(APS_estable_(datos)), ahora = APS_ahora_();
+  var regSello = Object.assign({}, snap.reg, { version: snap.version });
+  var blob = APS_pdfBlob_(datos, APS_nombrePdf_(snap.reg, datos), false, APS_selloTexto_(regSello, u, datosHash, ahora));
+  var pdfSha = APS_sha256_(blob.getBytes());
+  var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(blob);
+  var coord = APS_coordinadores_();
+
+  return APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f) { try { archivo.setTrashed(true); } catch (e) {} throw new Error('El contrato ya no existe.'); }
+    if (f.reg.estado === 'APROBADO') { try { archivo.setTrashed(true); } catch (e) {} return APS_meta_(f.reg); }          // otra persona lo aprobó en ese lapso
+    if (f.reg.estado !== 'EN_REVISION' || (f.reg.version || 1) !== snap.version) {
+      try { archivo.setTrashed(true); } catch (e) {}
+      throw new Error('El contrato cambió mientras se generaba el PDF. Ábrelo de nuevo, revisa y vuelve a aprobar.');
+    }
+    coord.forEach(function (c) { try { archivo.addViewer(c); } catch (e) { Logger.log('No se pudo compartir el PDF con ' + c + ': ' + e.message); } });   // para poder verlo en Drive
+    f.reg.estado = 'APROBADO'; f.reg.pdfUrl = archivo.getUrl(); f.reg.pdfId = archivo.getId(); f.reg.revisadoPor = u.email; f.reg.actualizado = ahora;
+    f.reg.version = snap.version + 1; f.reg.pdfSha = pdfSha; f.reg.datosHash = datosHash; f.reg.aprobadoEn = ahora;
     APS_escribir_(f.hoja, f.fila, f.reg);
-    APS_audit_('APS', 'APROBAR', f.reg.id, 'PDF ' + f.reg.pdfId);
+    APS_snapshot_(f.reg, u, 'APROBACION');
+    APS_audit_('APS', 'APROBAR', f.reg.id, 'PDF ' + f.reg.pdfId + ' · SHA ' + pdfSha.slice(0, 16) + ' · datos ' + datosHash.slice(0, 16));
     APS_notificar_([f.reg.asesor], 'Contrato aprobado — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
-      'Tu contrato de <b>' + f.reg.propietarios + '</b> (folio ' + f.reg.id + ') fue aprobado por la coordinación. Ya puedes entrar al sistema y descargar el PDF definitivo.',
+      'Tu contrato de <b>' + APS_escHtml_(f.reg.propietarios) + '</b> (folio ' + APS_escHtml_(f.reg.id) + ') fue aprobado por la coordinación. Ya puedes entrar al sistema y descargar el PDF definitivo.',
       { params: { modulo: 'aps', id: f.reg.id }, firma: u.nombre ? ('Aprobado por ' + u.nombre) : 'Aprobado por la coordinación' });
     return APS_meta_(f.reg);
   });
+}
+
+/**
+ * SOLO COORDINACIÓN: cancela un contrato enviado o aprobado (queda en el registro, con motivo, quién y cuándo; el PDF
+ * aprobado se conserva). Reemplaza al borrado permanente: no se pierde evidencia.
+ */
+function APS_cancelar(id, motivo) {
+  var u = APS_requiereAdmin_();
+  motivo = String(motivo || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 300);
+  if (motivo.length < 5) throw new Error('Escribe el motivo de la cancelación (mínimo 5 caracteres).');
+  return APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f) throw new Error('No se encontró el registro.');
+    if (f.reg.estado === 'CANCELADO') return APS_meta_(f.reg);
+    if (f.reg.estado === 'BORRADOR') throw new Error('Un borrador sin enviar no se cancela: se elimina.');
+    var antes = f.reg.estado;
+    f.reg.estado = 'CANCELADO'; f.reg.comentario = motivo; f.reg.revisadoPor = u.email; f.reg.actualizado = APS_ahora_(); f.reg.version = (f.reg.version || 1) + 1;
+    APS_escribir_(f.hoja, f.fila, f.reg);
+    APS_snapshot_(f.reg, u, 'CANCELACION');
+    APS_audit_('APS', 'CANCELAR', f.reg.id, 'Estaba en ' + antes + ' · ' + motivo);
+    APS_notificar_([f.reg.asesor], 'Contrato cancelado — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
+      'La coordinación canceló el contrato de <b>' + APS_escHtml_(f.reg.propietarios) + '</b> (folio ' + APS_escHtml_(f.reg.id) + '). Motivo: ' + APS_escHtml_(motivo),
+      { params: { modulo: 'aps', id: f.reg.id }, firma: u.nombre ? ('Cancelado por ' + u.nombre) : 'Cancelado por la coordinación' });
+    return APS_meta_(f.reg);
+  });
+}
+
+/**
+ * SOLO COORDINACIÓN: elimina un BORRADOR (nunca enviado). Los contratos enviados o aprobados no se borran: se cancelan
+ * (APS_cancelar). Antes de borrar se guarda una copia completa en la hoja Versiones.
+ */
+function APS_eliminar(id) {
+  var u = APS_requiereAdmin_();
+  return APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f) throw new Error('No se encontró el registro.');
+    if (f.reg.estado !== 'BORRADOR') throw new Error('Solo se pueden eliminar borradores. Un contrato enviado o aprobado se cancela (queda el registro con su motivo).');
+    var detalle = f.reg.id + ' (' + f.reg.propietarios + ') · borrador';
+    APS_snapshot_(f.reg, u, 'ELIMINADO');
+    f.hoja.deleteRow(f.fila);
+    APS_audit_('APS', 'ELIMINAR', id, detalle);
+    return { ok: true };
+  });
+}
+
+/**
+ * Asesor (dueño): descarta un borrador que NUNCA se envió a revisión (sin PDF de por medio). Los enviados o aprobados
+ * ya no los toca el asesor. Queda constancia en Auditoría.
+ */
+function APS_descartarBorrador(id) {
+  var u = APS_requiereAps_();
+  return APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f || f.reg.asesor !== u.email) throw new Error('No se encontró el borrador.');
+    if (f.reg.estado !== 'BORRADOR') throw new Error('Solo se pueden descartar borradores que no se han enviado a revisión.');
+    f.hoja.deleteRow(f.fila);
+    APS_audit_('APS', 'DESCARTAR_BORRADOR', id, f.reg.propietarios);
+    return { ok: true };
+  });
+}
+
+/** SOLO COORDINACIÓN: historial de versiones de un contrato, con lo que cambió en cada una respecto a la anterior. */
+function APS_versiones(id) {
+  APS_requiereAdmin_();
+  var sh = APS_hojaAux_('Versiones', APS_VER_COLS), n = sh.getLastRow() - 1, out = [];
+  if (n < 1) return out;
+  var ids = sh.getRange(2, 2, n, 1).getValues(), prev = null;
+  for (var i = 0; i < n; i++) {
+    if (String(ids[i][0]) !== String(id)) continue;
+    var v = sh.getRange(i + 2, 1, 1, APS_VER_COLS.length).getValues()[0], datos = null;
+    try { datos = JSON.parse(String(v[6])); } catch (e) { datos = null; }
+    out.push({ fecha: String(v[0]), version: Number(v[2]) || 0, usuario: String(v[3]), estado: String(v[4]), accion: String(v[5]), cambios: (prev && datos) ? APS_diff_(prev, datos) : [] });
+    if (datos) prev = datos;
+  }
+  return out.reverse();
+}
+
+/** Contratos activos (no cancelados) que coinciden en folio real, domicilio del inmueble o RFC de algún propietario con el que se indica. */
+function APS_duplicados(id) {
+  var u = APS_requiereAps_(), f = APS_buscar_(id);
+  if (!f || !APS_puedeVer_(f.reg, u)) throw new Error('No se encontró el registro.');
+  var adm = u.rol === 'coordinador', norm = function (t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, ''); };
+  var base = JSON.parse(f.reg.json), folio = norm(base.folioReal), dom = norm(base.inmDomicilio), rfcs = {};
+  (base.propietarios || []).forEach(function (p) { var r = norm(p.rfc); if (r.length >= 12 && (p.rfcModo || 'normal') === 'normal') rfcs[r] = 1; });
+  var out = [];
+  APS_todos_().forEach(function (r) {
+    if (r.id === f.reg.id || r.estado === 'CANCELADO') return;
+    var d; try { d = JSON.parse(r.json); } catch (e) { return; }
+    var motivos = [];
+    if (folio.length >= 4 && norm(d.folioReal) === folio) motivos.push('el mismo folio real');
+    if (dom.length >= 12 && norm(d.inmDomicilio) === dom) motivos.push('el mismo domicilio del inmueble');
+    if ((d.propietarios || []).some(function (p) { var x = norm(p.rfc); return x.length >= 12 && rfcs[x]; })) motivos.push('el mismo RFC de un propietario');
+    if (motivos.length) out.push({ id: (adm || r.asesor === u.email) ? r.id : 'de otro asesor', estado: r.estado, propio: r.asesor === u.email, motivo: motivos.join(' y ') });
+  });
+  return out.slice(0, 10);
+}
+
+/** Datos para comprobar un contrato aprobado: folio, versión, quién lo aprobó, cuándo y las huellas. Lo puede ver el asesor dueño y la coordinación. */
+function APS_verificar(id) {
+  var u = APS_requiereAps_(), f = APS_buscar_(id);
+  if (!f || !APS_puedeVer_(f.reg, u)) throw new Error('No se encontró el registro o no tienes acceso a él.');
+  var r = f.reg, vigente = true;
+  if (r.estado === 'APROBADO') { try { vigente = APS_sha256_(APS_estable_(JSON.parse(r.json))) === r.datosHash; } catch (e) { vigente = false; } }
+  return { id: r.id, estado: r.estado, version: r.version || 1, aprobadoPor: r.revisadoPor, aprobadoEn: r.aprobadoEn, huellaDatos: r.datosHash, huellaPdf: r.pdfSha, datosCoincidenConHuella: r.estado === 'APROBADO' ? vigente : null };
 }
 
 /**
@@ -581,37 +812,26 @@ function APS_aprobar(id) {
  * Regla: el coordinador siempre puede. El asesor SOLO puede descargar el PDF de un contrato que sea suyo
  * (REG.asesor === su correo) y única y exclusivamente cuando ESE contrato ya está en estado APROBADO.
  * Antes de la aprobación, aunque el asesor pida este PDF directamente, se le niega.
+ * Antes de entregarlo se comprueba que el archivo en Drive sea el mismo que se generó al aprobar (huella SHA-256).
  */
-/**
- * SOLO COORDINACIÓN: borra un contrato por completo (borrador, en revisión o ya aprobado) — "poder absoluto": no hay
- * "devolver con comentario" en este flujo; si algo está mal, la coordinación lo corrige directo (ya puede editar
- * cualquier contrato enviado) o, si no tiene remedio, lo elimina. Border irreversible: no hay papelera.
- */
-function APS_eliminar(id) {
-  var u = APS_requiereAdmin_();
-  return APS_conLock_(function () {
-    var f = APS_buscar_(id);
-    if (!f) throw new Error('No se encontró el registro.');
-    var detalle = f.reg.id + ' (' + f.reg.propietarios + ') · estaba en ' + f.reg.estado;
-    f.hoja.deleteRow(f.fila);
-    APS_audit_('APS', 'ELIMINAR', id, detalle);
-    return { ok: true };
-  });
-}
-
 function APS_obtenerPdf(id) {
   var u = APS_requiereAps_(), f = APS_buscar_(id);
   if (!f || !APS_puedeVer_(f.reg, u)) throw new Error('No se encontró el registro o no tienes acceso a él.');
-  var esDueno = f.reg.asesor === u.email;
-  if (u.rol !== 'coordinador' && !esDueno) throw new Error('No tienes acceso al PDF de este registro.');
-  if (f.reg.estado !== 'APROBADO' || !f.reg.pdfId) {
-    throw new Error(esDueno && u.rol !== 'coordinador'
+  var esDueno = f.reg.asesor === u.email, adm = u.rol === 'coordinador';
+  if (!adm && !esDueno) throw new Error('No tienes acceso al PDF de este registro.');
+  var habilitado = f.reg.estado === 'APROBADO' || (adm && f.reg.estado === 'CANCELADO');
+  if (!habilitado || !f.reg.pdfId) {
+    throw new Error(esDueno && !adm
       ? 'Todavía no puedes descargar este PDF: solo se habilita cuando la coordinación aprueba el contrato.'
       : 'Este registro todavía no tiene PDF aprobado.');
   }
-  var blob = DriveApp.getFileById(f.reg.pdfId).getBlob();
-  APS_audit_('APS', 'DESCARGA_PDF', f.reg.id, '');
-  return { nombre: blob.getName() || (f.reg.id + '.pdf'), base64: Utilities.base64Encode(blob.getBytes()) };
+  var blob = DriveApp.getFileById(f.reg.pdfId).getBlob(), sha = APS_sha256_(blob.getBytes());
+  if (f.reg.pdfSha && sha !== f.reg.pdfSha) {
+    APS_audit_('APS', 'PDF_NO_COINCIDE', f.reg.id, 'Esperada ' + f.reg.pdfSha.slice(0, 16) + ' · actual ' + sha.slice(0, 16));
+    throw new Error('El PDF guardado en Drive ya no coincide con el que se generó al aprobar. No se entrega; avisa a la coordinación.');
+  }
+  APS_audit_('APS', 'DESCARGA_PDF', f.reg.id, 'SHA ' + sha.slice(0, 16));
+  return { nombre: blob.getName() || (f.reg.id + '.pdf'), base64: Utilities.base64Encode(blob.getBytes()), huella: sha.slice(0, 16) };
 }
 
 /**
@@ -666,6 +886,7 @@ function APS_docDesdeDocx_(datos, nombre, marca) {
  * Revisa: tamaño de página (A4 vs Carta), MÁRGENES, encabezado/pie, grises, tablas, saltos de página y firmas.
  */
 function APS_probarPDF() {
+  APS_soloMantenimiento_();
   var N = APS_nucleo_(), carpeta = DriveApp.getFolderById(APS_ids_().carpeta);
   var casos = [['B', 'Prueba_Venta_y_Renta_2_propietarios'], ['D', 'Prueba_Venta_3_propietarios_mixto']];
   casos.forEach(function (c) {
@@ -687,6 +908,7 @@ function APS_probarPDF() {
 
 /** Prueba rápida de que el núcleo carga bien en el servidor y valida los ejemplos. */
 function APS_probarNucleo() {
+  APS_soloMantenimiento_();
   var N = APS_nucleo_(), ok = true;
   ['A', 'B', 'C', 'D'].forEach(function (k) {
     var pend = N.D.validar(N.M.ejemplos[k]()).length;

@@ -1,78 +1,81 @@
 <!-- CONSOLA DE COORDINACIÓN · solo se entrega a la administradora (ver APS_incluir) -->
 <style>
-#con-root{--primary:#35B7C5;--bg-card:#364494;--text-dim:#B2B2B2;--text-soft:#D6DAEE;--bg-dark:#1a224a;--bg-input:#232d61;--border-dark:#0d122b;--ok:#10b981;--err:#ef4444;--warn:#f59e0b}
-#con-root .cx{max-width:1280px;margin:0 auto;padding:26px 22px 60px;color:#fff;font-family:'Inter',system-ui,sans-serif;position:relative;z-index:1}
-#con-root .cx-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;background:var(--border-dark);border:2px solid var(--primary);border-radius:14px;padding:16px 22px;box-shadow:6px 6px 0 rgba(0,0,0,.35)}
-#con-root .cx-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:32px;color:var(--primary);text-shadow:2px 2px 0 var(--border-dark);letter-spacing:.5px}
-#con-root .cx-sub{font-size:12px;color:var(--text-soft);margin-top:4px}
-#con-root .cx-user{font-size:12px;font-weight:700;color:#dbe3ff;background:rgba(0,0,0,.28);border:1px solid rgba(53,183,197,.5);padding:7px 14px;border-radius:999px}
-#con-root .cx-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-#con-root .cx-chip{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;background:var(--bg-input);border:2px solid rgba(178,178,178,.5);border-radius:999px;color:var(--text-soft);font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
-#con-root .cx-chip:hover{border-color:var(--primary);color:#fff}
-#con-root .cx-chip.on{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark)}
-#con-root .cx-chip .n{background:rgba(0,0,0,.35);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px}
-#con-root .cx-chip.on .n{background:var(--border-dark);color:#fff}
-#con-root .cx-btn{display:inline-block;border:2px solid var(--text-dim);background:transparent;color:#fff;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;line-height:1.2}
-#con-root .cx-btn:hover{border-color:var(--primary)}
-#con-root .cx-btn.pri{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark)}
-#con-root .cx-btn.ok{border-color:var(--ok);color:#7ff0c3}
-#con-root .cx-btn.warn{border-color:var(--warn);color:#ffd28a}
-#con-root .cx-btn.danger{border-color:#ff6b6b;color:#ffb3b3}
-#con-root .cx-btn.danger:hover{background:#4a1414;border-color:#ff8a8a;color:#fff}
+#con-root{--primary:#35B7C5;--teal:#0f8594;--navy:#364494;--ink:#1a224a;--muted:#5a6488;--line:#dbe2ef;--soft:#f4f7fc;--tint:#e8f6f8;--ok:#0f9d6e;--ok-bg:#e3f6ee;--err:#d92d3f;--err-bg:#fdecee;--warn:#9a6700;--warn-bg:#fff4d6;--shadow:0 1px 2px rgba(26,34,74,.06),0 6px 18px rgba(26,34,74,.07);
+  background:var(--soft);color:var(--ink);border-radius:18px;max-width:1320px;margin:0 auto;font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.45;overflow:clip;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+#con-root *{box-sizing:border-box}
+#con-root .cx{max-width:1280px;margin:0 auto;padding:0 22px 50px;position:relative;z-index:1}
+#con-root .cx-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin:0 -22px 20px;background:linear-gradient(100deg,#364494 0%,#2b377a 100%);border-bottom:4px solid var(--primary);padding:16px 22px}
+#con-root .cx-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:21px;color:#fff;text-shadow:none;letter-spacing:.2px}
+#con-root .cx-sub{font-size:12px;color:#cfe9ee;margin-top:3px}
+#con-root .cx-user{font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:6px 12px;border-radius:999px}
+#con-root .cx-head .cx-btn{background:#fff;color:var(--navy);border-color:#fff}
+#con-root .cx-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+#con-root .cx-chip{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:#fff;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s}
+#con-root .cx-chip:hover{border-color:var(--primary);color:var(--ink)}
+#con-root .cx-chip.on{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:none}
+#con-root .cx-chip .n{background:var(--soft);color:var(--muted);border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700}
+#con-root .cx-chip.on .n{background:rgba(255,255,255,.2);color:#fff}
+#con-root .cx-btn{display:inline-block;border:1px solid #b9c4de;background:#fff;color:var(--navy);border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;line-height:1.2;transition:all .12s}
+#con-root .cx-btn:hover{border-color:var(--primary);background:var(--tint)}
+#con-root .cx-btn.pri{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:none}
+#con-root .cx-btn.pri:hover{background:#2c3a82}
+#con-root .cx-btn.ok{border-color:#9bd9c1;color:#0a6b4a}
+#con-root .cx-btn.warn{border-color:#e6c97a;color:var(--warn)}
+#con-root .cx-btn.danger{border-color:#f0b4bb;color:var(--err)}
+#con-root .cx-btn.danger:hover{background:var(--err-bg);border-color:var(--err);color:var(--err)}
 #con-root .cx-btn:disabled{opacity:.4;cursor:not-allowed}
-#con-root .cx-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:22px}
-#con-root .cx-kpi{background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:16px;box-shadow:6px 6px 0 rgba(0,0,0,.5);cursor:pointer;text-align:left;color:#fff;font-family:'Inter',sans-serif}
-#con-root .cx-kpi:hover{transform:translate(-2px,-2px)}
-#con-root .cx-kpi b{display:block;font-family:'Montserrat',sans-serif;font-size:36px;line-height:1.1}
-#con-root .cx-kpi span{font-size:12px;color:#dbe3ff;font-weight:600}
-#con-root .cx-kpi.al{border-color:var(--warn)}
-#con-root .cx-kpi.mal{border-color:var(--err)}
-#con-root .cx-kpi small{display:block;color:var(--text-soft);font-size:11px;margin-top:4px}
+#con-root .cx-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+#con-root .cx-kpi{background:#fff;border:1px solid var(--line);border-top:4px solid var(--primary);border-radius:12px;padding:16px;box-shadow:var(--shadow);cursor:pointer;text-align:left;color:var(--ink);font-family:'Inter',sans-serif}
+#con-root .cx-kpi:hover{border-color:var(--primary)}
+#con-root .cx-kpi b{display:block;font-family:'Montserrat',sans-serif;font-size:32px;line-height:1.1;color:var(--navy)}
+#con-root .cx-kpi span{font-size:12.5px;color:var(--muted);font-weight:600}
+#con-root .cx-kpi.al{border-top-color:#e0a21a}
+#con-root .cx-kpi.mal{border-top-color:var(--err)}
+#con-root .cx-kpi small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
 #con-root .cx-grid2{display:grid;grid-template-columns:1fr;gap:20px}
 @media(min-width:980px){#con-root .cx-grid2{grid-template-columns:1fr 1fr}}
-#con-root .cx-panel{background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
-#con-root .cx-panel h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;margin-bottom:12px}
+#con-root .cx-panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:var(--shadow)}
+#con-root .cx-panel h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;margin:0 0 12px;color:var(--ink)}
 #con-root .cx-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-#con-root .cx-search{flex:1;min-width:200px;background:var(--bg-input);border:2px solid var(--text-dim);border-radius:8px;padding:10px 14px;color:#fff;font-size:13px;font-weight:600;font-family:'Inter',sans-serif}
-#con-root .cx-search:focus{outline:none;border-color:var(--primary)}
+#con-root .cx-search{flex:1;min-width:200px;background:#fff;border:1px solid #c4cde0;border-radius:10px;padding:10px 14px;color:var(--ink);font-size:14px;font-weight:500;font-family:'Inter',sans-serif}
+#con-root .cx-search:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(53,183,197,.22)}
 #con-root .cx-wrap{overflow-x:auto}
-#con-root table.cx-tb{width:100%;border-collapse:collapse;font-size:12.5px}
-#con-root table.cx-tb th{text-align:left;color:#8fe3ec;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:8px;border-bottom:2px solid rgba(53,183,197,.4);white-space:nowrap}
-#con-root table.cx-tb td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.1);vertical-align:top}
+#con-root table.cx-tb{width:100%;border-collapse:collapse;font-size:13px}
+#con-root table.cx-tb th{text-align:left;color:var(--muted);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:8px;border-bottom:2px solid var(--line);white-space:nowrap}
+#con-root table.cx-tb td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+#con-root table.cx-tb tbody tr:hover{background:var(--soft)}
 #con-root table.cx-tb td.ac{white-space:nowrap}
 #con-root table.cx-tb td.ac .cx-btn{margin:0 4px 4px 0}
-#con-root .cx-est{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;border:2px solid var(--border-dark);white-space:nowrap}
-#con-root .cx-est.e-BORRADOR,#con-root .cx-est.e-SIN_ENVIAR,#con-root .cx-est.e-SIN_TERMINAR{background:#cbd5e1;color:#1e293b}
-#con-root .cx-est.e-COMPLETO{background:#7dd3fc;color:#0c2a3d}
-#con-root .cx-est.e-EN_REVISION{background:var(--warn);color:#3b2600}
-#con-root .cx-est.e-OBSERVADO{background:var(--err);color:#fff}
-#con-root .cx-est.e-APROBADO,#con-root .cx-est.e-REVISADO{background:var(--ok);color:#06281c}
-#con-root .cx-flag{display:inline-block;margin-top:4px;font-size:10.5px;font-weight:800;color:#ffd28a;border:1px solid var(--warn);border-radius:6px;padding:1px 6px}
-#con-root .cx-dim{color:var(--text-soft);font-size:11.5px}
-#con-root .cx-note{font-size:12.5px;color:#dbe3ff;line-height:1.5;background:rgba(0,0,0,.25);border:1px solid rgba(53,183,197,.4);border-radius:8px;padding:12px 14px}
-#con-root .cx-empty{color:var(--text-soft);font-size:13px;padding:8px 0}
-#con-root .cx-li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:12.5px}
+#con-root .cx-est{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;border:0;white-space:nowrap}
+#con-root .cx-est.e-BORRADOR,#con-root .cx-est.e-SIN_ENVIAR,#con-root .cx-est.e-SIN_TERMINAR{background:#e6eaf3;color:#3d4766}
+#con-root .cx-est.e-COMPLETO{background:#dff1fb;color:#0b4a6b}
+#con-root .cx-est.e-EN_REVISION{background:var(--warn-bg);color:var(--warn)}
+#con-root .cx-est.e-OBSERVADO,#con-root .cx-est.e-CANCELADO{background:var(--err-bg);color:#8f1b29}
+#con-root .cx-est.e-APROBADO,#con-root .cx-est.e-REVISADO{background:var(--ok-bg);color:#0a6b4a}
+#con-root .cx-flag{display:inline-block;margin-top:4px;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-bg);border-radius:6px;padding:1px 7px}
+#con-root .cx-dim{color:var(--muted);font-size:12px}
+#con-root .cx-note{font-size:13px;color:#16465a;line-height:1.5;background:var(--tint);border:1px solid #bfe6ec;border-radius:10px;padding:12px 14px}
+#con-root .cx-empty{color:var(--muted);font-size:13.5px;padding:8px 0}
+#con-root .cx-li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
 #con-root .cx-li:last-child{border-bottom:0}
-#con-root .cx-modal{position:fixed;inset:0;background:rgba(13,18,43,.92);z-index:60;display:none;overflow:auto;padding:20px}
+#con-root .cx-modal{position:fixed;inset:0;background:rgba(26,34,74,.82);z-index:60;display:none;overflow:auto;padding:20px}
 #con-root .cx-modal.open{display:block}
-#con-root .cx-box{max-width:860px;margin:0 auto;background:var(--bg-card);border:3px solid var(--primary);border-radius:12px;padding:22px}
-#con-root .cx-busy{position:fixed;inset:0;background:rgba(8,11,28,.97);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:80;display:none;align-items:center;justify-content:center}
+#con-root .cx-box{max-width:860px;margin:0 auto;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:22px}
+#con-root .cx-busy{position:fixed;inset:0;background:rgba(244,247,252,.82);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:80;display:none;align-items:center;justify-content:center}
 #con-root .cx-busy.on{display:flex}
-#con-root .cx-busy-card{display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--bg-card);border:3px solid var(--primary);border-radius:16px;padding:32px 44px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
-#con-root .cx-busy-card span{font-weight:800;color:#fff;font-size:14px;font-family:'Inter',sans-serif}
-#con-root .cx-spin{width:32px;height:32px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--primary);border-radius:50%;animation:cxgira .75s linear infinite}
+#con-root .cx-busy-card{display:flex;flex-direction:column;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 40px;box-shadow:0 12px 40px rgba(26,34,74,.22)}
+#con-root .cx-busy-card span{font-weight:700;color:var(--ink);font-size:14px;font-family:'Inter',sans-serif}
+#con-root .cx-spin{width:30px;height:30px;border:4px solid var(--line);border-top-color:var(--primary);border-radius:50%;animation:cxgira .75s linear infinite}
 @keyframes cxgira{to{transform:rotate(360deg)}}
-#con-root .cx-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:var(--ok);color:#06281c;border:3px solid var(--border-dark);border-radius:10px;padding:12px 18px;font-weight:800;font-size:13px;z-index:90;transition:all .25s;max-width:90vw}
+#con-root .cx-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;border-radius:10px;padding:12px 18px;font-weight:600;font-size:13.5px;z-index:90;transition:all .25s;max-width:90vw;box-shadow:0 8px 24px rgba(26,34,74,.35)}
 #con-root .cx-toast.show{opacity:1;transform:translate(-50%,0)}
-#con-root .cx-toast.err{background:var(--err);color:#fff}
+#con-root .cx-toast.err{background:var(--err)}
 #con-root .cx-tab-abrir{text-align:center;padding:48px 24px}
-#con-root .cx-tab-abrir .ic{font-size:52px;margin-bottom:10px}
-#con-root .cx-tab-abrir .cx-note{max-width:520px;margin:0 auto 20px}
-#con-root .cx-btn.big{font-size:15px;padding:14px 26px;margin-top:6px}
-#con-root .cx-doc{display:inline-block;margin:4px 4px 0 0;font-size:10.5px;font-weight:800;color:#9be7ee;border:1px solid var(--primary);border-radius:6px;padding:1px 6px;text-decoration:none}
+#con-root .cx-doc{display:inline-block;margin:4px 4px 0 0;font-size:11px;font-weight:700;color:var(--teal);background:var(--tint);border-radius:6px;padding:1px 7px;text-decoration:none}
 #con-root .cx-kpis.mini{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-bottom:16px}
 #con-root .cx-kpis.mini .cx-kpi b{font-size:26px}
 #con-root .cx-kpis.mini .cx-kpi{padding:12px}
+@media print{#con-root{display:none!important}}
 </style>
 <div id="con-root">
 <div class="cx">
@@ -98,13 +101,13 @@
   var ROOT = document.getElementById('con-root');
   function q(k) { return ROOT.querySelector('[data-r="' + k + '"]'); }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-  var ESTA = { SIN_TERMINAR: 'Guardado sin terminar', COMPLETO: 'Completado', EN_REVISION: 'En revisión', APROBADO: 'Aprobado' };
+  var ESTA = { SIN_TERMINAR: 'Guardado sin terminar', COMPLETO: 'Completado', EN_REVISION: 'En revisión', APROBADO: 'Aprobado', CANCELADO: 'Cancelado' };
   var ESTP = { SIN_ENVIAR: 'Sin enviar', EN_REVISION: 'En revisión', OBSERVADO: 'Observado', REVISADO: 'Revisado' };
   var SECCIONES = {
     aps: { titulo: 'Revisión de contratos APS', sub: 'Estatus de cada contrato · Google Docs · PDF · alertas · auditoría', tabs: [['aps', '🗂️ Contratos'], ['alertas', '⏰ Alertas'], ['aud', '🧾 Auditoría']] },
     pld: { titulo: 'Revisión de Pre PLD', sub: 'Documentos enviados a revisión · quién los generó · bitácora de modificaciones · auditoría', tabs: [['pld', '📋 Revisión'], ['aud', '🧾 Auditoría']] }
   };
-  var st = { seccion: 'aps', vista: 'aps', fa: 'revision', fp: 'revision', textoA: '', textoP: '', textoU: '', aps: [], admin: '' }, tmr = null;
+  var st = { seccion: 'aps', vista: 'aps', fa: 'revision', fp: 'revision', textoA: '', textoP: '', textoU: '', aps: [], conteos: {}, total: 0, admin: '' }, tmr = null;
 
   function toast(m, err) { var t = q('toast'); t.textContent = m; t.className = 'cx-toast show' + (err ? ' err' : ''); clearTimeout(toast._t); toast._t = setTimeout(function () { t.className = 'cx-toast'; }, err ? 7000 : 3000); }
   function busy(on, txt) { q('busy').className = 'cx-busy' + (on ? ' on' : ''); if (txt) q('busyTxt').textContent = txt; }
@@ -115,7 +118,7 @@
     if (!(typeof google !== 'undefined' && google.script && google.script.run)) { toast('Solo disponible dentro de la aplicación de Apps Script.', true); return; }
     busy(true, txt || 'Cargando…');
     var listo = false;
-    var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); toast('El servidor está tardando más de lo normal. Vuelve a intentarlo.', true); }, 25000);
+    var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); toast('El servidor está tardando más de lo normal. Vuelve a intentarlo.', true); }, 40000);
     var r = google.script.run
       .withSuccessHandler(function (x) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); ok(x); })
       .withFailureHandler(function (e) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); toast(String((e && e.message) || e).replace(/^Error:\s*/, ''), true); });
@@ -141,15 +144,16 @@
 
   /* ── Contratos APS ── */
   var FA = [['todos', 'Todos', null], ['sin_terminar', 'Guardados sin terminar', 'SIN_TERMINAR'], ['completos', 'Completados', 'COMPLETO'], ['revision', 'En revisión', 'EN_REVISION'],
-    ['aprobados', 'Aprobados', 'APROBADO'], ['docs', '📝 Con Docs generado', 'DOCS']];
-  function vAps() { srv('APS_listar', ['todos'], function (rows) { st.aps = rows; pintaAps(); }); }
+    ['aprobados', 'Aprobados', 'APROBADO'], ['cancelados', 'Cancelados', 'CANCELADO'], ['docs', '📝 Con Docs generado', 'DOCS']];
+  /* La búsqueda y los conteos los hace el servidor sobre TODOS los contratos; la tabla muestra los 1000 más recientes de lo que coincida. */
+  function vAps() { srv('APS_listar', ['todos', st.textoA, 1000], function (res) { st.aps = res.filas; st.conteos = res.conteos || {}; st.total = res.total; pintaAps(); }); }
+  function cuenta(est) { var c = st.conteos || {}; return est === null ? (c.total || 0) : (est === 'DOCS' ? (c.conDocs || 0) : (c[est] || 0)); }
   function coincide(r, est) { return !est || (est === 'DOCS' ? !!r.docUrl : r.estadoUI === est); }
   function pintaAps() {
-    var t = st.textoA.toLowerCase().trim();
     var act = FA.filter(function (x) { return x[0] === st.fa; })[0], est = act ? act[2] : null;
-    var rows = st.aps.filter(function (r) { return coincide(r, est) && (!t || [r.id, r.propietarios, r.inmueble, r.asesor].join(' ').toLowerCase().indexOf(t) >= 0); });
+    var rows = st.aps.filter(function (r) { return coincide(r, est); });
     q('vista').innerHTML = '<div class="cx-panel"><div class="cx-tabs">' + FA.map(function (x) {
-        return '<button type="button" class="cx-chip' + (st.fa === x[0] ? ' on' : '') + '" data-fa="' + x[0] + '">' + x[1] + ' <span class="n">' + st.aps.filter(function (r) { return coincide(r, x[2]); }).length + '</span></button>'; }).join('') + '</div>' +
+        return '<button type="button" class="cx-chip' + (st.fa === x[0] ? ' on' : '') + '" data-fa="' + x[0] + '">' + x[1] + ' <span class="n">' + cuenta(x[2]) + '</span></button>'; }).join('') + '</div>' +
       '<div class="cx-tools"><input class="cx-search" data-s="a" placeholder="Buscar por ID, propietario, inmueble o asesor…" value="' + esc(st.textoA) + '"></div>' +
       (rows.length ? '<div class="cx-wrap"><table class="cx-tb"><thead><tr><th>ID</th><th>Estatus</th><th>Propietarios</th><th>Tipo</th><th>Inmueble</th><th>Asesor</th><th>Actualizado</th><th></th></tr></thead><tbody>' +
         rows.map(function (r) {
@@ -159,13 +163,15 @@
             '<td class="ac"><button type="button" class="cx-btn pri" data-open="' + esc(r.id) + '">' + (r.estado === 'EN_REVISION' ? 'Revisar' : 'Abrir') + '</button>' +
             (r.estado === 'APROBADO' && r.pdfUrl ? '<a class="cx-btn ok" href="' + esc(r.pdfUrl) + '" target="_blank" rel="noopener">👁 Ver PDF</a>' : '') + (r.estado === 'APROBADO' ? '<button type="button" class="cx-btn ok" data-pdf="' + esc(r.id) + '">⬇ Descargar</button>' : '') +
             (r.docUrl ? '<button type="button" class="cx-btn" data-docs="' + esc(r.id) + '" data-regen="1" title="Genera una versión nueva con los datos actuales">↻ Docs</button>' : '<button type="button" class="cx-btn" data-docs="' + esc(r.id) + '" title="Descarga el contrato en Google Docs">📝 Google Docs</button>') +
-            '<button type="button" class="cx-btn danger" data-del="' + esc(r.id) + '" title="Eliminar de forma permanente">🗑️ Eliminar</button></td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="cx-empty">No hay contratos en esta vista.</div>') + '</div>';
+            (r.estado === 'BORRADOR' ? '<button type="button" class="cx-btn danger" data-del="' + esc(r.id) + '" title="Elimina el borrador de forma permanente">🗑️ Eliminar borrador</button>' : '') +
+            (r.estado === 'EN_REVISION' || r.estado === 'APROBADO' ? '<button type="button" class="cx-btn danger" data-cancel="' + esc(r.id) + '" title="Cancela el contrato; queda el registro con el motivo">⛔ Cancelar</button>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<div class="cx-empty">No hay contratos en esta vista.</div>') + (st.total > st.aps.length ? '<div class="cx-dim" style="margin-top:10px">Se cargaron los ' + st.aps.length + ' más recientes de ' + st.total + '. Usa la búsqueda para encontrar uno específico.</div>' : '') + '</div>';
+    if (st.fo) { st.fo = false; var el = ROOT.querySelector('[data-s="a"]'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
   }
   function vAlertas() {
     srv('CONSOLA_resumen', [], function (r) {
       var a = r.aps;
       function lista(items, vacio, fila) { return items.length ? items.map(fila).join('') : '<div class="cx-empty">' + vacio + '</div>'; }
-      q('vista').innerHTML = '<div class="cx-kpis mini">' + [['Sin terminar', a.SIN_TERMINAR, 'sin_terminar'], ['Completados', a.COMPLETO, 'completos'], ['En revisión', a.EN_REVISION, 'revision'], ['Aprobados', a.APROBADO, 'aprobados'], ['Con Docs', a.conDocs, 'docs']].map(function (k) {
+      q('vista').innerHTML = '<div class="cx-kpis mini">' + [['Sin terminar', a.SIN_TERMINAR, 'sin_terminar'], ['Completados', a.COMPLETO, 'completos'], ['En revisión', a.EN_REVISION, 'revision'], ['Aprobados', a.APROBADO, 'aprobados'], ['Cancelados', a.CANCELADO || 0, 'cancelados'], ['Con Docs', a.conDocs, 'docs']].map(function (k) {
           return '<button type="button" class="cx-kpi" data-goaps="' + k[2] + '"><b>' + k[1] + '</b><span>' + k[0] + '</span></button>'; }).join('') + '</div>' +
         '<div class="cx-grid2"><div class="cx-panel"><h3>Ajustes de precio en los próximos 30 días</h3>' + lista(r.ajustesProximos, 'Sin ajustes próximos.', function (x) {
           return '<div class="cx-li"><span><b>' + esc(x.fecha) + '</b> · ' + esc(corto(x.propietarios, 40)) + '<br><span class="cx-dim">' + esc(x.id) + '</span></span><b>$' + esc(x.monto) + '</b></div>'; }) + '</div>' +
@@ -220,8 +226,13 @@
     srv('APS_docEditable', [id], function (r) { window.open(r.url, '_blank', 'noopener'); toast('Documento generado en Google Docs.'); vAps(); }, 'Generando el documento en Google Docs…');
   }
   function eliminarContrato(id) {
-    if (!window.confirm('¿Eliminar el contrato ' + id + ' de forma permanente? Esto no se puede deshacer.')) return;
-    srv('APS_eliminar', [id], function () { toast('Contrato eliminado.'); vAps(); }, 'Eliminando…');
+    if (!window.confirm('¿Eliminar el borrador ' + id + ' de forma permanente? (Se guarda una copia en el historial.)')) return;
+    srv('APS_eliminar', [id], function () { toast('Borrador eliminado.'); vAps(); }, 'Eliminando…');
+  }
+  function cancelarContrato(id) {
+    var m = window.prompt('¿Por qué se cancela el contrato ' + id + '? (queda registrado junto con quién lo canceló)', ''); if (m === null) return;
+    if (String(m).trim().length < 5) { toast('Escribe el motivo (mínimo 5 caracteres).', true); return; }
+    srv('APS_cancelar', [id, m], function () { toast('Contrato cancelado.'); vAps(); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Cancelando…');
   }
   function historial(id, nombre) {
     srv('PLD_historial', [id], function (h) {
@@ -253,6 +264,7 @@
     else if (g('data-pdf')) descargaPdf(g('data-pdf'));
     else if (g('data-docs')) docs(g('data-docs'), !!g('data-regen'));
     else if (g('data-del')) eliminarContrato(g('data-del'));
+    else if (g('data-cancel')) cancelarContrato(g('data-cancel'));
     else if (g('data-his')) historial(g('data-his'), g('data-nom'));
     else if (g('data-rev')) revisar(g('data-rev'));
     else if (g('data-obs')) observar(g('data-obs'));
@@ -262,9 +274,8 @@
   ROOT.addEventListener('input', function (e) {
     var s = e.target.getAttribute && e.target.getAttribute('data-s'); if (!s) return;
     var v = e.target.value; clearTimeout(tmr);
-    if (s === 'a') { st.textoA = v; pintaAps(); var el = ROOT.querySelector('[data-s="a"]'); if (el) { el.focus(); el.setSelectionRange(v.length, v.length); } return; }
     tmr = setTimeout(function () {
-      if (s === 'p') { st.textoP = v; vPld(); } else { st.textoU = v; vAud(); }
+      if (s === 'a') { st.textoA = v; st.fo = true; vAps(); } else if (s === 'p') { st.textoP = v; vPld(); } else { st.textoU = v; vAud(); }
       setTimeout(function () { var el = ROOT.querySelector('[data-s="' + s + '"]'); if (el) { el.focus(); el.setSelectionRange(v.length, v.length); } }, 400);
     }, 450);
   });

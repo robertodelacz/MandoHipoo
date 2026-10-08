@@ -87,6 +87,8 @@ var APS_U = (function () {
     if (!m) return '';
     var mes = parseInt(m[2], 10), dia = parseInt(m[3], 10);
     if (mes < 1 || mes > 12 || dia < 1 || dia > 31) return '';
+    var anio = parseInt(m[1], 10), chk = new Date(Date.UTC(anio, mes - 1, dia));
+    if (anio < 1900 || anio > 2100 || chk.getUTCMonth() !== mes - 1 || chk.getUTCDate() !== dia) return '';      // 31 de febrero, 30 de abril, años absurdos: no son fechas
     return dia + ' de ' + MESES[mes - 1] + ' de ' + m[1];
   }
   /* "A, B y C" */
@@ -579,6 +581,8 @@ var APS_DOC = (function (U, T) {
   function tieneRfc(modo) { return !modo || modo === 'normal'; }
   function rfcTexto(rfc, modo) { return tieneRfc(modo) ? String(rfc || '') : 'No proporcionado'; }
   var RE_RFC = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/;
+  /* Límites de sentido común. Si algún caso real queda fuera, se ajusta aquí y en ningún otro lado. */
+  var LIM = { nombre: 150, idDoc: 80, corto: 120, largo: 400, precioMin: 50000, precioMax: 500000000, pctMax: 20, mesesMax: 120, rentaMin: 1000, rentaMax: 5000000, depositoMeses: 6, rentasAdelMax: 12 };
   var RE_MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   function vacio(s) { return !String(s === null || s === undefined ? '' : s).trim(); }
   function rfcOk(s) { return RE_RFC.test(String(s || '').toUpperCase().trim()); }
@@ -669,6 +673,41 @@ var APS_DOC = (function (U, T) {
     }
     need('firma', 'lugar', 'Lugar de firma', vacio(d.lugar));
     need('firma', 'fecha', 'Fecha de firma', !U.fechaLarga(d.fecha));
+    /* ── Límites de sentido común (ajustables en LIM): atrapan errores de dedo y texto desmedido ── */
+    var hoyIso = new Date().toISOString().slice(0, 10), lejos = new Date(Date.now() + 366 * 86400000).toISOString().slice(0, 10);
+    function largo(step, key, etq, max, val) { need(step, key, etq + ': máximo ' + max + ' caracteres', String(val == null ? '' : val).length > max); }
+    P.forEach(function (o, i) {
+      var pre = 'propietarios.' + i + '.', t = multi ? ' (propietario ' + (i + 1) + ')' : '';
+      largo('cliente', pre + 'nombre', 'Nombre o razón social' + t, LIM.nombre, o.nombre);
+      largo('cliente', pre + 'idDoc', 'Identificación' + t, LIM.idDoc, o.idDoc);
+      largo('cliente', pre + 'idAutoridad', 'Autoridad' + t, LIM.corto, o.idAutoridad);
+      largo('cliente', pre + 'poderNotario', 'Notario del poder' + t, LIM.corto, o.poderNotario);
+      (o.representantes || []).forEach(function (r, j) { largo('cliente', pre + 'representantes.' + j + '.nombre', 'Representante ' + (j + 1) + t, LIM.nombre, r.nombre); });
+    });
+    ['calle', 'colonia', 'alcaldia'].forEach(function (k) { largo('cliente', 'contactoDir.' + k, 'Domicilio de notificaciones', LIM.corto, (d.contactoDir || {})[k]); });
+    largo('cliente', 'correo', 'Correo', LIM.corto, d.correo);
+    largo('inmueble', 'inmDomicilio', 'Domicilio del inmueble', LIM.largo, d.inmDomicilio);
+    largo('inmueble', 'instalaciones', 'Instalaciones', LIM.largo, d.instalaciones);
+    largo('inmueble', 'notarioNombre', 'Notario', LIM.corto, d.notarioNombre);
+    largo('inmueble', 'notariaNumDe', 'Notaría', LIM.corto, d.notariaNumDe);
+    largo('inmueble', 'folioReal', 'Folio real', 40, d.folioReal);
+    largo('inmueble', 'escrituraNum', 'Núm. de escritura', 40, d.escrituraNum);
+    largo('firma', 'lugar', 'Lugar de firma', LIM.corto, d.lugar);
+    if (U.fechaLarga(d.escrituraFecha)) need('inmueble', 'escrituraFecha', 'La fecha de la escritura del inmueble no puede ser futura', d.escrituraFecha > hoyIso);
+    if (U.fechaLarga(d.fecha)) need('firma', 'fecha', 'La fecha de firma está muy lejos (más de un año): revísala', d.fecha > lejos);
+    if (tieneVenta(d)) {
+      var pr2 = num(d.precio), hp2 = num(d.honorariosPct), vm2 = num(d.vigenciaVentaMeses);
+      if (!isNaN(pr2) && pr2 > 0) need('venta', 'precio', 'El precio de venta parece incorrecto (mínimo $' + LIM.precioMin.toLocaleString('en-US') + ' y máximo $' + LIM.precioMax.toLocaleString('en-US') + '): revísalo', pr2 < LIM.precioMin || pr2 > LIM.precioMax);
+      if (!isNaN(hp2) && hp2 > 0 && hp2 <= 100) need('venta', 'honorariosPct', 'Los honorarios parecen incorrectos (máximo ' + LIM.pctMax + ' %): revísalos', hp2 > LIM.pctMax);
+      if (!isNaN(vm2) && vm2 >= 1) need('venta', 'vigenciaVentaMeses', 'La vigencia parece incorrecta (máximo ' + LIM.mesesMax + ' meses)', vm2 > LIM.mesesMax);
+    }
+    if (tieneRenta(d)) {
+      var rm2 = num(d.rentaMonto), dp2 = num(d.deposito), ra2 = num(d.rentasAdelantadas), vr2 = num(d.vigenciaRentaMeses);
+      if (!isNaN(rm2) && rm2 > 0) need('renta', 'rentaMonto', 'La renta mensual parece incorrecta (mínimo $' + LIM.rentaMin.toLocaleString('en-US') + ' y máximo $' + LIM.rentaMax.toLocaleString('en-US') + '): revísala', rm2 < LIM.rentaMin || rm2 > LIM.rentaMax);
+      if (!isNaN(rm2) && rm2 > 0 && !isNaN(dp2) && dp2 > 0) need('renta', 'deposito', 'El depósito parece incorrecto (más de ' + LIM.depositoMeses + ' rentas): revísalo', dp2 > rm2 * LIM.depositoMeses);
+      if (!isNaN(ra2) && ra2 >= 0) need('renta', 'rentasAdelantadas', 'Las rentas adelantadas parecen incorrectas (máximo ' + LIM.rentasAdelMax + ')', ra2 > LIM.rentasAdelMax);
+      if (!isNaN(vr2) && vr2 >= 1) need('renta', 'vigenciaRentaMeses', 'La vigencia parece incorrecta (máximo ' + LIM.mesesMax + ' meses)', vr2 > LIM.mesesMax);
+    }
     return p;
   }
 

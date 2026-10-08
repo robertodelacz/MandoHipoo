@@ -1,184 +1,232 @@
 <!-- ═══ APS · MÓDULO «Contrato APS» (Hipoo): estilos acotados + pantalla + lógica. Requiere APS_Nucleo cargado antes. ═══ -->
 <style>
-#aps-root{--primary:#35B7C5;--bg-card:#364494;--text-dim:#B2B2B2;--text-soft:#D6DAEE;--bg-dark:#1a224a;--bg-input:#232d61;--text-main:#fff;--border-dark:#0d122b;--border-width:3px;--radius:12px;--ok:#10b981;--err:#ef4444;--warn:#f59e0b;--hipoo:#0E9E97}
-#aps-root .app{max-width:1280px;margin:0 auto;padding:30px 22px 60px;position:relative;z-index:1}
-#aps-root .hdr{text-align:center;margin-bottom:18px}
-#aps-root .hdr h1{font-family:'Montserrat',sans-serif;font-weight:900;font-size:40px;color:var(--primary);letter-spacing:1px;text-shadow:2px 2px 0 var(--border-dark);margin-bottom:10px}
-#aps-root .hdr p{color:#fff;font-size:13px;font-weight:600;background:var(--border-dark);display:inline-block;padding:6px 16px;border-radius:20px;border:1px solid var(--primary)}
-#aps-root .modbar{display:flex;gap:12px;max-width:620px;margin:0 auto 26px}
-#aps-root .mod{flex:1;padding:13px 14px;background:var(--bg-input);border:2px solid var(--text-dim);border-radius:10px;color:var(--text-dim);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;cursor:pointer}
-#aps-root .mod.active{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:4px 4px 0 var(--border-dark);transform:translate(-1px,-1px)}
-#aps-root .mod[disabled]{opacity:.55;cursor:not-allowed}
+#aps-root{--primary:#35B7C5;--teal:#0f8594;--navy:#364494;--ink:#1a224a;--muted:#5a6488;--line:#dbe2ef;--soft:#f4f7fc;--tint:#e8f6f8;--surface:#fff;--ok:#0f9d6e;--ok-bg:#e3f6ee;--err:#d92d3f;--err-bg:#fdecee;--warn:#9a6700;--warn-bg:#fff4d6;--radius:14px;--shadow:0 1px 2px rgba(26,34,74,.06),0 6px 18px rgba(26,34,74,.07);
+  background:var(--soft);color:var(--ink);border-radius:18px;max-width:1320px;margin:0 auto;font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.45;overflow:clip;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+#aps-root *{box-sizing:border-box}
+#aps-root .app{max-width:1280px;margin:0 auto;padding:22px 22px 60px;position:relative;z-index:1}
+/* ── Encabezado: franja azul delgada con los colores institucionales ── */
+#aps-root .hdr{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:linear-gradient(100deg,#364494 0%,#2b377a 100%);padding:14px 22px;border-bottom:4px solid var(--primary)}
+#aps-root .hdr-l{display:flex;align-items:center;gap:14px;min-width:0}
+#aps-root .hdr .logo-container{margin:0;padding:4px 12px;border-radius:10px;box-shadow:none}
+#aps-root .hdr .header-logo{width:auto;height:30px}
+#aps-root .hdr h1{font-family:'Montserrat',sans-serif;font-weight:800;font-size:20px;line-height:1.1;color:#fff;letter-spacing:.2px;text-shadow:none;margin:0}
+#aps-root .hdr p{color:#cfe9ee;font-size:12px;font-weight:500;background:none;border:0;padding:0;margin:3px 0 0;display:block;border-radius:0}
+#aps-root .userbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin:0}
+#aps-root .user-chip{font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:6px 12px;border-radius:999px}
+#aps-root .userbar .btn-sec{padding:7px 13px;font-size:12px;background:#fff;color:var(--navy);border-color:#fff}
+#aps-root .userbar .btn-sec:hover{background:var(--tint);border-color:var(--primary)}
 #aps-root .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
 #aps-root .col-form,#aps-root .col-prev{min-width:0}
-@media(min-width:1050px){#aps-root .layout{grid-template-columns:minmax(0,1fr) 500px;align-items:start}#aps-root .col-prev{position:sticky;top:18px}}
-#aps-root .steps{display:flex;gap:8px;flex-wrap:wrap;padding:2px 2px 14px;margin-bottom:4px}
-#aps-root .chip{flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:8px 12px;background:var(--bg-input);border:2px solid rgba(178,178,178,.5);border-radius:999px;color:var(--text-soft);font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
-#aps-root .chip b{display:inline-flex;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;align-items:center;justify-content:center;font-size:11px}
-#aps-root .chip.ok b{background:var(--ok);color:#06281c}
-#aps-root .chip.active{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark)}
-#aps-root .chip.active b{background:var(--border-dark);color:#fff}
-#aps-root .card{background:var(--bg-card);border:var(--border-width) solid var(--primary);border-radius:var(--radius);padding:26px;margin-bottom:22px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
-#aps-root .card-header{display:flex;align-items:center;gap:16px;margin-bottom:22px;border-bottom:2px dashed rgba(53,183,197,.4);padding-bottom:14px}
-#aps-root .icon-box{width:44px;height:44px;background:var(--primary);border:2px solid var(--border-dark);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 var(--border-dark);flex-shrink:0}
-#aps-root .icon-emoji{font-size:22px;line-height:1}
-#aps-root .card-header h2{font-family:'Montserrat',sans-serif;font-size:19px;font-weight:800;text-shadow:1px 1px 0 var(--border-dark)}
-#aps-root .subtitle{font-size:12px;color:var(--text-soft);display:block;font-weight:500;margin-top:4px}
+@media(min-width:1050px){#aps-root .layout{grid-template-columns:minmax(0,1fr) 480px;align-items:start}#aps-root .col-prev{position:sticky;top:14px}}
+/* ── Pasos ── */
+#aps-root .progress{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:2px 2px 8px}
+#aps-root .progress b{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:var(--navy)}
+#aps-root .progress span{font-size:12px;color:var(--muted)}
+#aps-root .bar{height:6px;background:var(--line);border-radius:999px;overflow:hidden;margin:0 2px 12px}
+#aps-root .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--navy));border-radius:999px;transition:width .25s}
+#aps-root .steps{display:flex;gap:6px;flex-wrap:wrap;padding:0 0 12px}
+#aps-root .chip{flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:7px 12px 7px 8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s}
+#aps-root .chip:hover{border-color:var(--primary);color:var(--ink)}
+#aps-root .chip b{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--soft);border:1px solid var(--line);color:var(--muted);align-items:center;justify-content:center;font-size:11px}
+#aps-root .chip.ok b{background:var(--ok);border-color:var(--ok);color:#fff}
+#aps-root .chip.active{background:var(--navy);border-color:var(--navy);color:#fff}
+#aps-root .chip.active b{background:#fff;border-color:#fff;color:var(--navy)}
+#aps-root .chip:only-child{padding-left:12px}
+/* ── Tarjetas ── */
+#aps-root .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:18px;box-shadow:var(--shadow)}
+#aps-root .card-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:14px}
+#aps-root .icon-box{width:40px;height:40px;background:var(--tint);border:1px solid #bfe6ec;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:none;flex-shrink:0}
+#aps-root .icon-emoji{font-size:20px;line-height:1}
+#aps-root .card-header h2{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:800;color:var(--ink);text-shadow:none;margin:0}
+#aps-root .subtitle{font-size:12.5px;color:var(--muted);display:block;font-weight:400;margin-top:3px}
 #aps-root .field-group{margin-bottom:18px}
 #aps-root .field-group:last-child{margin-bottom:0}
 #aps-root .grid2{display:grid;grid-template-columns:1fr;gap:0 16px}
 #aps-root .grid2>.field-group{margin-bottom:18px}
 #aps-root .card>.grid2:last-child{margin-bottom:-18px}
 @media(min-width:700px){#aps-root .grid2{grid-template-columns:1fr 1fr}}
-#aps-root label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#55D3E0;margin-bottom:8px}
-#aps-root label em{font-style:normal;color:var(--text-soft);text-transform:none;letter-spacing:0;font-weight:600}
-#aps-root .input-text{width:100%;background:var(--bg-input);border:2px solid var(--text-dim);border-radius:8px;padding:13px 15px;color:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;transition:all .15s}
+#aps-root label{display:block;font-size:13px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink);margin-bottom:6px}
+#aps-root label em{font-style:normal;color:var(--muted);font-weight:400}
+#aps-root .input-text{width:100%;background:#fff;border:1px solid #c4cde0;border-radius:10px;padding:11px 13px;color:var(--ink);font-family:'Inter',sans-serif;font-size:14.5px;font-weight:500;transition:border-color .12s,box-shadow .12s;transform:none;box-shadow:none}
 #aps-root textarea.input-text{resize:vertical;min-height:64px;line-height:1.4}
-#aps-root .input-text::placeholder{color:rgba(178,178,178,.55);font-weight:500}
-#aps-root .input-text:focus{outline:none;background:var(--bg-dark);border-color:var(--primary);box-shadow:4px 4px 0 rgba(53,183,197,.3);transform:translate(-2px,-2px)}
-#aps-root .input-text[type=date]{color-scheme:dark}
-#aps-root .money{display:flex;align-items:center;background:var(--bg-input);border:2px solid var(--text-dim);border-radius:8px;padding-left:14px}
-#aps-root .money:focus-within{border-color:var(--primary);box-shadow:4px 4px 0 rgba(53,183,197,.3)}
-#aps-root .money>span{font-weight:800;color:var(--primary);font-size:14px}
-#aps-root .money .mn{padding:0 14px;color:var(--text-soft);font-size:12px}
+#aps-root .input-text::placeholder{color:#9aa4c0;font-weight:400}
+#aps-root .input-text:hover{border-color:#9fb0d3}
+#aps-root .input-text:focus{outline:none;background:#fff;border-color:var(--primary);box-shadow:0 0 0 4px rgba(53,183,197,.22);transform:none}
+#aps-root .input-text[type=date]{color-scheme:light}
+#aps-root .input-text:disabled,#aps-root .money:has(.input-text:disabled){background:#f1f4fa;color:#4b557a}
+#aps-root .money{display:flex;align-items:center;background:#fff;border:1px solid #c4cde0;border-radius:10px;padding-left:13px;transition:border-color .12s,box-shadow .12s}
+#aps-root .money:hover{border-color:#9fb0d3}
+#aps-root .money:focus-within{border-color:var(--primary);box-shadow:0 0 0 4px rgba(53,183,197,.22)}
+#aps-root .money>span{font-weight:700;color:var(--teal);font-size:14px}
+#aps-root .money .mn{padding:0 13px;color:var(--muted);font-size:12px;font-weight:600}
 #aps-root .money .input-text{min-width:0;border:0;background:transparent;box-shadow:none!important;transform:none!important}
-#aps-root .help{font-size:12px;color:var(--text-soft);margin-top:6px;line-height:1.4}
-#aps-root .hint{font-size:12px;color:#9be7ee;font-weight:600;margin-top:7px;line-height:1.4}
-#aps-root .hint.dim{color:var(--text-soft);font-weight:500}
-#aps-root .regime-toggle{display:flex;gap:10px;flex-wrap:wrap}
-#aps-root .regime-btn{flex:1 1 110px;min-width:0;border:2px solid var(--text-dim);background:var(--bg-input);padding:12px 14px;border-radius:8px;color:var(--text-soft);font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .1s}
-#aps-root .regime-btn:hover{border-color:var(--primary);color:#fff}
-#aps-root .regime-btn.active{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark);transform:translate(-1px,-1px)}
-#aps-root .regime-btn.check.active::before{content:'✓ '}
-#aps-root .invalid.input-text,#aps-root .invalid.money,#aps-root .invalid.regime-toggle{border-color:var(--err)!important;box-shadow:0 0 0 3px rgba(239,68,68,.25)}
-#aps-root .regime-toggle.invalid{padding:4px;border:2px solid var(--err);border-radius:10px}
-#aps-root .row-item{display:flex;gap:12px;align-items:flex-end;margin-bottom:14px;padding:14px;border:2px dashed rgba(53,183,197,.35);border-radius:10px}
-#aps-root .row-item .ri-main{flex:1}
+#aps-root .help{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.45}
+#aps-root .hint{font-size:12.5px;color:var(--teal);font-weight:600;margin-top:6px;line-height:1.4}
+#aps-root .hint.dim{color:var(--muted);font-weight:400}
+#aps-root .hint:empty{display:none}
+#aps-root .err-msg{display:flex;gap:6px;align-items:flex-start;color:var(--err);font-size:12.5px;font-weight:600;margin-top:6px}
+#aps-root .err-msg::before{content:'!';flex:0 0 auto;width:16px;height:16px;border-radius:50%;background:var(--err);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+/* ── Opciones tipo botón ── */
+#aps-root .regime-toggle{display:flex;gap:8px;flex-wrap:wrap}
+#aps-root .regime-btn{flex:1 1 120px;min-width:0;border:1px solid #c4cde0;background:#fff;padding:11px 14px;border-radius:10px;color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .12s;box-shadow:none;transform:none}
+#aps-root .regime-btn:hover{border-color:var(--primary);background:var(--tint)}
+#aps-root .regime-btn.active{background:var(--tint);border-color:var(--primary);color:var(--ink);box-shadow:inset 0 0 0 1px var(--primary),0 0 0 3px rgba(53,183,197,.18);transform:none}
+#aps-root .regime-btn.active::before{content:'●  ';color:var(--primary);font-size:10px;vertical-align:1px}
+#aps-root .regime-btn.check.active::before{content:'✓  ';color:var(--teal);font-size:13px;vertical-align:0}
+#aps-root .regime-btn:disabled{opacity:.7;cursor:default}
+#aps-root .invalid.input-text,#aps-root .invalid.money{border-color:var(--err)!important;box-shadow:0 0 0 3px rgba(217,45,63,.14)!important;background:#fffafa}
+#aps-root .regime-toggle.invalid{padding:5px;border:1px solid var(--err);border-radius:12px;background:#fffafa}
+#aps-root .row-item{display:flex;gap:12px;align-items:flex-end;margin-bottom:12px;padding:14px;border:1px solid var(--line);background:var(--soft);border-radius:12px}
+#aps-root .row-item .ri-main{flex:1;min-width:0}
 #aps-root .row-item .field-group{margin-bottom:12px}
 #aps-root .row-item .field-group:last-child{margin-bottom:0}
-#aps-root .btn-mini{background:transparent;border:2px solid var(--text-dim);color:var(--text-soft);border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:12px}
-#aps-root .btn-mini:hover{border-color:var(--err);color:#fff}
-#aps-root .btn-add{background:transparent;border:2px dashed var(--primary);color:var(--primary);border-radius:8px;padding:11px 16px;font-weight:800;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif}
-#aps-root .btn-add:hover{background:rgba(53,183,197,.12)}
-#aps-root .info-note{display:flex;gap:10px;background:rgba(0,0,0,.25);border:1px solid rgba(53,183,197,.4);border-radius:8px;padding:12px 14px;font-size:12.5px;color:#dbe3ff;line-height:1.45;margin-top:16px}
+#aps-root .btn-mini{background:#fff;border:1px solid #c4cde0;color:var(--navy);border-radius:8px;padding:8px 12px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:12px}
+#aps-root .btn-mini:hover{border-color:var(--primary);background:var(--tint)}
+#aps-root .btn-add{background:#fff;border:1px dashed var(--primary);color:var(--teal);border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif}
+#aps-root .btn-add:hover{background:var(--tint)}
+#aps-root .info-note{display:flex;gap:10px;background:var(--tint);border:1px solid #bfe6ec;border-radius:10px;padding:12px 14px;font-size:13px;color:#16465a;line-height:1.5;margin-top:16px}
+#aps-root .tenga{background:#fff;border:1px solid var(--line);border-left:4px solid var(--primary);border-radius:10px;padding:14px 16px;margin-bottom:18px;box-shadow:var(--shadow)}
+#aps-root .tenga b{font-family:'Montserrat',sans-serif;font-size:13px;color:var(--navy)}
+#aps-root .tenga ul{margin:8px 0 0 18px;padding:0;color:var(--muted);font-size:13px}
+#aps-root .tenga li{margin:3px 0}
+/* ── Botones ── */
 #aps-root .actions{display:flex;justify-content:space-between;gap:12px;margin-top:4px}
-#aps-root .btn-main{background:var(--primary);color:var(--border-dark);border:3px solid var(--border-dark);border-radius:10px;padding:15px 24px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:14px;letter-spacing:.4px;cursor:pointer;box-shadow:5px 5px 0 var(--border-dark);transition:all .1s}
-#aps-root .btn-main:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--border-dark)}
-#aps-root .btn-main:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:5px 5px 0 var(--border-dark)}
-#aps-root .btn-sec{background:var(--border-dark);color:#fff;border:2px solid #8fa0d8;border-radius:10px;padding:14px 20px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;cursor:pointer}
-#aps-root .btn-sec.danger{border-color:#ff6b6b;color:#ffb3b3}
-#aps-root .btn-sec.danger:hover{background:#4a1414;border-color:#ff8a8a;color:#fff}
-#aps-root .btn-sec:hover{border-color:var(--primary)}
-#aps-root .btn-sec:disabled{opacity:.35;cursor:not-allowed}
-#aps-root .msg-step{background:rgba(239,68,68,.15);border:2px solid var(--err);border-radius:10px;padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:16px}
-#aps-root .prev-card{background:var(--bg-card);border:var(--border-width) solid var(--primary);border-radius:var(--radius);padding:16px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
+#aps-root .btn-main{background:var(--navy);color:#fff;border:1px solid var(--navy);border-radius:10px;padding:12px 22px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;letter-spacing:.2px;cursor:pointer;box-shadow:0 2px 6px rgba(54,68,148,.28);transition:all .12s;width:auto;margin-bottom:0}
+#aps-root .btn-main:hover{background:#2c3a82;border-color:#2c3a82;transform:none;box-shadow:0 4px 12px rgba(54,68,148,.35)}
+#aps-root .btn-main:disabled,#aps-root .btn-main:disabled:hover{opacity:.45;cursor:not-allowed;background:var(--navy);box-shadow:none}
+#aps-root .btn-main.ok{background:var(--ok);border-color:var(--ok);box-shadow:0 2px 6px rgba(15,157,110,.3)}
+#aps-root .btn-main.ok:hover{background:#0b8760;border-color:#0b8760}
+#aps-root .btn-sec{background:#fff;color:var(--navy);border:1px solid #b9c4de;border-radius:10px;padding:11px 18px;font-family:'Inter',sans-serif;font-weight:700;font-size:13.5px;cursor:pointer;transition:all .12s}
+#aps-root .btn-sec:hover{border-color:var(--primary);background:var(--tint)}
+#aps-root .btn-sec:disabled{opacity:.4;cursor:not-allowed}
+#aps-root .btn-sec.danger{border-color:#f0b4bb;color:var(--err)}
+#aps-root .btn-sec.danger:hover{background:var(--err-bg);border-color:var(--err)}
+#aps-root .btn-sec.lnk{display:inline-block;text-decoration:none;color:var(--navy)}
+#aps-root button:disabled{cursor:not-allowed}
+#aps-root .msg-step{background:var(--err-bg);border:1px solid #f3b6bd;color:#8f1b29;border-radius:10px;padding:12px 14px;font-size:13.5px;font-weight:600;margin-bottom:16px}
+#aps-root .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+#aps-root .acciones .nota{flex:1 1 100%;font-size:12.5px;color:var(--muted)}
+/* ── Vista previa ── */
+#aps-root .prev-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
 #aps-root .prev-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
-#aps-root .prev-head h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800}
-#aps-root .badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;border:2px solid var(--border-dark)}
-#aps-root .badge.warn{background:var(--warn);color:#3b2600}
-#aps-root .badge.ok{background:var(--ok);color:#06281c}
-#aps-root .prev-tools{display:flex;gap:8px;margin-bottom:12px}
-#aps-root .prev-tools button{flex:1;padding:10px 8px;font-size:12px}
-#aps-root .prev-scroll{max-height:66vh;overflow:auto;border-radius:8px;background:#5b6480;padding:10px}
+#aps-root .prev-head h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;color:var(--ink);margin:0}
+#aps-root .badge{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;border:0}
+#aps-root .badge.warn{background:var(--warn-bg);color:var(--warn)}
+#aps-root .badge.ok{background:var(--ok-bg);color:#0a6b4a}
+#aps-root .prev-tools{display:flex;gap:8px;margin-bottom:12px;align-items:stretch}
+#aps-root .prev-tools button{flex:1;padding:9px 8px;font-size:12.5px}
+#aps-root .prev-tools .sin-pdf{flex:1;font-size:12px;color:var(--muted);background:var(--soft);border:1px dashed #b9c4de;border-radius:10px;padding:8px 10px;line-height:1.35}
+#aps-root .prev-scroll{max-height:66vh;overflow:auto;border-radius:10px;background:#e3e9f4;padding:10px;border:1px solid var(--line)}
 #aps-root .prev-sizer{position:relative;margin:0 auto}
-#aps-root .paper{width:794px;background:#fff;color:#1b2a2a;padding:0;transform-origin:0 0;position:absolute;top:0;left:0;box-shadow:0 6px 24px rgba(0,0,0,.35)}
-#aps-root .pend{margin-top:12px;font-size:12.5px}
-#aps-root .pend .ok-line{color:#7ff0c3;font-weight:700}
-#aps-root .pend .bad-line{color:#ffd28a;font-weight:800;margin-bottom:6px}
-#aps-root .pend button{display:block;width:100%;text-align:left;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:6px;padding:7px 10px;margin-bottom:5px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif}
-#aps-root .pend button:hover{border-color:var(--primary)}
-#aps-root .ejs{margin-top:12px;padding-top:12px;border-top:2px dashed rgba(53,183,197,.35);font-size:12px;color:var(--text-soft)}
-#aps-root .ejs button{background:var(--bg-input);border:2px solid var(--text-dim);color:#fff;border-radius:6px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;margin:6px 6px 0 0;font-family:'Inter',sans-serif}
-#aps-root .ejs button:hover{border-color:var(--primary)}
-#aps-root .integ{margin-top:10px;font-size:11.5px;color:var(--text-soft);line-height:1.45}
-#aps-root .modal{position:fixed;inset:0;background:rgba(13,18,43,.92);z-index:50;display:none;overflow:auto;padding:16px}
+#aps-root .paper{width:794px;background:#fff;color:#1b2a2a;padding:0;transform-origin:0 0;position:absolute;top:0;left:0;box-shadow:0 4px 18px rgba(26,34,74,.25)}
+#aps-root .pend{margin-top:12px;font-size:13px}
+#aps-root .pend .ok-line{color:#0a6b4a;font-weight:700;background:var(--ok-bg);border-radius:10px;padding:9px 12px}
+#aps-root .pend .bad-line{color:var(--warn);font-weight:700;margin-bottom:6px}
+#aps-root .pend button{display:block;width:100%;text-align:left;background:var(--soft);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 11px;margin-bottom:5px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif}
+#aps-root .pend button:hover{border-color:var(--primary);background:var(--tint)}
+#aps-root .ejs{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted)}
+#aps-root .ejs button{background:#fff;border:1px solid #c4cde0;color:var(--navy);border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:600;cursor:pointer;margin:6px 6px 0 0;font-family:'Inter',sans-serif}
+#aps-root .ejs button:hover{border-color:var(--primary);background:var(--tint)}
+#aps-root .integ{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.45}
+/* ── Ventanas ── */
+#aps-root .modal{position:fixed;inset:0;background:rgba(26,34,74,.82);z-index:50;display:none;overflow:auto;padding:16px}
 #aps-root .modal.open{display:block}
 #aps-root .modal-bar{position:sticky;top:0;z-index:2;display:flex;justify-content:flex-end;gap:10px;padding-bottom:12px}
-#aps-root .modal-bar button{padding:10px 16px;font-size:12px}
+#aps-root .modal-bar button{padding:9px 16px;font-size:12.5px}
 #aps-root .modal-stage{position:relative;margin:0 auto}
-@media(max-width:600px){#aps-root .app{padding:20px 12px 50px}#aps-root .card{padding:18px;box-shadow:5px 5px 0 rgba(0,0,0,.5)}#aps-root .hdr h1{font-size:30px}#aps-root .row-item{flex-direction:column;align-items:stretch}#aps-root .btn-mini{align-self:flex-start}}
-#aps-root .userbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-#aps-root .userbar .btn-sec{padding:8px 14px;font-size:12px}
-#aps-root .user-chip{font-size:12px;font-weight:700;color:#fff;background:var(--border-dark);border:2px solid var(--primary);padding:7px 14px;border-radius:999px}
-#aps-root .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-#aps-root .banner{border-radius:10px;padding:11px 14px;font-size:13px;font-weight:600;margin-bottom:14px;background:var(--border-dark);color:#fff;border:2px solid var(--text-dim)}
-#aps-root .banner.nuevo{border-color:var(--primary)}
-#aps-root .banner.e-BORRADOR{border-color:var(--text-dim)}
-#aps-root .banner.e-COMPLETO{border-color:#7dd3fc}
-#aps-root .banner.e-EN_REVISION{border-color:var(--warn)}
-#aps-root .banner.e-APROBADO{border-color:var(--ok)}
-#aps-root .reg-box{max-width:980px;margin:0 auto;background:var(--bg-card);border:var(--border-width) solid var(--primary);border-radius:var(--radius);padding:22px}
-#aps-root .reg-box h2{font-family:'Montserrat',sans-serif;font-size:20px;margin-bottom:14px}
+#aps-root .modal-stage .paper{box-shadow:0 8px 30px rgba(0,0,0,.4)}
+#aps-root .reg-box{max-width:1000px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px;color:var(--ink)}
+#aps-root .reg-box h2{font-family:'Montserrat',sans-serif;font-size:19px;margin:0 0 14px;color:var(--ink)}
 #aps-root .reg-wrap{overflow-x:auto}
-#aps-root table.reg{width:100%;border-collapse:collapse;font-size:12.5px}
-#aps-root table.reg th{text-align:left;color:var(--primary);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:8px;border-bottom:2px solid rgba(53,183,197,.4)}
-#aps-root table.reg td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.1);vertical-align:top}
-#aps-root .est{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;border:2px solid var(--border-dark)}
-#aps-root .est.e-BORRADOR,#aps-root .est.e-SIN_TERMINAR{background:#cbd5e1;color:#1e293b}
-#aps-root .est.e-COMPLETO{background:#7dd3fc;color:#0c2a3d}
-#aps-root .est.e-EN_REVISION{background:var(--warn);color:#3b2600}
-#aps-root .est.e-APROBADO{background:var(--ok);color:#06281c}
-#aps-root .busy{position:fixed;inset:0;background:rgba(8,11,28,.97);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:80;display:none;align-items:center;justify-content:center}
-#aps-root .busy-card{display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--bg-card);border:var(--border-width) solid var(--primary);border-radius:16px;padding:32px 44px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
-#aps-root .busy-card span{font-weight:800;color:#fff;font-size:14px;font-family:'Inter',sans-serif}
+#aps-root table.reg{width:100%;border-collapse:collapse;font-size:13px}
+#aps-root table.reg th{text-align:left;color:var(--muted);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:8px;border-bottom:2px solid var(--line)}
+#aps-root table.reg td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+#aps-root table.reg tbody tr:hover{background:var(--soft)}
+#aps-root .est{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;border:0;white-space:nowrap}
+#aps-root .est.e-BORRADOR,#aps-root .est.e-SIN_TERMINAR{background:#e6eaf3;color:#3d4766}
+#aps-root .est.e-COMPLETO{background:#dff1fb;color:#0b4a6b}
+#aps-root .est.e-EN_REVISION{background:var(--warn-bg);color:var(--warn)}
+#aps-root .est.e-APROBADO{background:var(--ok-bg);color:#0a6b4a}
+#aps-root .est.e-CANCELADO{background:var(--err-bg);color:#8f1b29}
+#aps-root .banner.e-CANCELADO{border-left-color:var(--err)}
+#aps-root .his-i{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+#aps-root .his-i b{font-size:13px}
+#aps-root .his-i ul{margin:6px 0 0 18px;padding:0;font-size:12.5px;color:var(--muted)}
+#aps-root .his-i li span{color:var(--ink)}
+/* ── Aviso de estado del contrato ── */
+#aps-root .banner{border-radius:12px;padding:12px 14px;font-size:13.5px;margin-bottom:14px;background:#fff;color:var(--ink);border:1px solid var(--line);border-left:5px solid #b9c4de;box-shadow:var(--shadow)}
+#aps-root .banner small{display:block;margin-top:3px;color:var(--muted);font-size:12.5px;font-weight:400}
+#aps-root .banner .gd{float:right;font-size:12px;font-weight:600;color:var(--muted)}
+#aps-root .banner .gd.sucio{color:var(--warn)}
+#aps-root .banner.nuevo{border-left-color:var(--primary)}
+#aps-root .banner.e-BORRADOR{border-left-color:#b9c4de}
+#aps-root .banner.e-COMPLETO{border-left-color:#4fb3e8}
+#aps-root .banner.e-EN_REVISION{border-left-color:#e0a21a}
+#aps-root .banner.e-APROBADO{border-left-color:var(--ok)}
+/* ── Cargando / avisos ── */
+#aps-root .busy{position:fixed;inset:0;background:rgba(244,247,252,.82);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:80;display:none;align-items:center;justify-content:center}
+#aps-root .busy-card{display:flex;flex-direction:column;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 40px;box-shadow:0 12px 40px rgba(26,34,74,.22)}
+#aps-root .busy-card span{font-weight:700;color:var(--ink);font-size:14px;font-family:'Inter',sans-serif}
 #aps-root .busy.on{display:flex}
-#aps-root .spin{width:32px;height:32px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--primary);border-radius:50%;animation:gira .75s linear infinite}
+#aps-root .spin{width:30px;height:30px;border:4px solid var(--line);border-top-color:var(--primary);border-radius:50%;animation:gira .75s linear infinite}
 @keyframes gira{to{transform:rotate(360deg)}}
-#aps-root .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:var(--ok);color:#06281c;border:3px solid var(--border-dark);border-radius:10px;padding:12px 18px;font-weight:800;font-size:13px;z-index:90;transition:all .25s;max-width:90vw}
+#aps-root .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;border-radius:10px;padding:12px 18px;font-weight:600;font-size:13.5px;z-index:90;transition:all .25s;max-width:90vw;box-shadow:0 8px 24px rgba(26,34,74,.35)}
 #aps-root .toast.show{opacity:1;transform:translate(-50%,0)}
-#aps-root .toast.err{background:var(--err);color:#fff}
-#aps-root button:disabled{cursor:not-allowed}
-#aps-root .btn-sec.lnk{display:inline-block;text-decoration:none;color:#fff}
-#aps-root .dirbox{border:2px dashed rgba(53,183,197,.35);border-radius:10px;padding:16px;margin-bottom:6px}
-#aps-root .dir-t{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#9be7ee;margin-bottom:12px}
+#aps-root .toast.err{background:var(--err)}
+#aps-root .dirbox{border:1px solid var(--line);background:var(--soft);border-radius:12px;padding:16px;margin-bottom:6px}
+#aps-root .dir-t{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:12px}
 #aps-root select.input-text{appearance:auto;cursor:pointer}
-#aps-root select.input-text option{background:#232d61;color:#fff}
+#aps-root select.input-text option{background:#fff;color:var(--ink)}
 #aps-root .adj-n{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
 #aps-root .adj-n input{width:110px}
 #aps-root .adj-box .row-item{margin-bottom:10px}
-/* neutraliza estilos globales del Pre-PLD que se filtrarían al módulo (.btn-main del PLD es de ancho completo) */
-#aps-root .btn-main{width:auto;margin-bottom:0;font-size:14px}
-#aps-root .btn-main:hover{background:var(--primary)}
-#aps-root .btn-main:disabled{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:5px 5px 0 var(--border-dark);opacity:.4}
-#aps-root .info-note{border-left:1px solid rgba(53,183,197,.4)}
-#aps-root .card-header h2{margin:0}
-
+#aps-root .card-header h2,#aps-root .hdr h1{margin:0}
+/* ── Botón flotante para ver el contrato en el celular ── */
+#aps-root .fab{display:none;position:fixed;right:14px;bottom:16px;z-index:40;background:var(--navy);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:700;font-size:13px;font-family:'Inter',sans-serif;box-shadow:0 6px 18px rgba(26,34,74,.4);cursor:pointer}
+@media(max-width:1049px){#aps-root .fab{display:block}}
+@media(max-width:600px){#aps-root .app{padding:14px 12px 80px}#aps-root .card{padding:18px}#aps-root .hdr{padding:12px 14px}#aps-root .row-item{flex-direction:column;align-items:stretch}#aps-root .btn-mini{align-self:flex-start}#aps-root .actions .btn-main,#aps-root .actions .btn-sec{flex:1}}
+/* Si alguien intenta imprimir la página (Ctrl+P), el módulo no sale en papel: el contrato solo se imprime desde el PDF aprobado */
+@media print{#aps-root{display:none!important}}
 </style>
 <style id="aps_docCss"></style>
 <div id="aps-root">
+<header class="hdr">
+  <div class="hdr-l">
+    <div class="logo-container"><img src="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000" alt="hipoo.mx" class="header-logo"></div>
+    <div><h1>Contrato APS</h1><p>Aviso de Prestación de Servicios de Corretaje Inmobiliario</p></div>
+  </div>
+  <div class="userbar" id="aps_userbar" style="display:none"><span id="aps_userChip" class="user-chip"></span><button type="button" class="btn-sec" id="aps_btnRegistros">📂 Mis contratos</button><button type="button" class="btn-sec" id="aps_btnNuevo">➕ Nuevo</button></div>
+</header>
 <div class="app">
-  <div class="userbar" id="aps_userbar" style="display:none"><span id="aps_userChip" class="user-chip"></span><button type="button" class="btn-sec" id="aps_btnRegistros">📂 Registros</button><button type="button" class="btn-sec" id="aps_btnNuevo">➕ Nuevo</button></div>
-  <header class="hdr">
-    <div class="logo-container">
-      <img src="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000" alt="hipoo.mx" class="header-logo">
-    </div>
-    <h1>Contrato APS</h1>
-    <p>Aviso de Prestación de Servicios de Corretaje Inmobiliario</p>
-  </header>
   <div class="layout">
     <main class="col-form">
+      <div class="progress"><b id="aps_progT"></b><span id="aps_progS"></span></div>
+      <div class="bar"><i id="aps_progB" style="width:0"></i></div>
       <div class="steps" id="aps_steps"></div>
       <div id="aps_stepHost"></div>
       <div class="actions"><button type="button" class="btn-sec" id="aps_btnPrev">← Anterior</button><button type="button" class="btn-main" id="aps_btnNext">Siguiente →</button></div>
     </main>
     <aside class="col-prev">
       <div class="prev-card">
-        <div class="prev-head"><h3>Vista previa en vivo</h3><span class="badge warn" id="aps_estado"></span></div>
-        <div class="prev-tools"><button type="button" class="btn-sec" id="aps_btnZoom">🔍 Ampliar</button><button type="button" class="btn-sec" id="aps_btnPrint">🖨️ Imprimir / Guardar PDF</button></div>
+        <div class="prev-head"><h3>Vista previa del contrato</h3><span class="badge warn" id="aps_estado"></span></div>
+        <div class="prev-tools"><button type="button" class="btn-sec" id="aps_btnZoom">🔍 Ampliar</button><button type="button" class="btn-sec" id="aps_btnPrint">🖨️ Imprimir / Guardar PDF</button><div class="sin-pdf" id="aps_sinPdf" style="display:none">🔒 El PDF se habilita cuando la coordinación apruebe el contrato.</div></div>
         <div class="prev-scroll" id="aps_pvScroll"><div class="prev-sizer" id="aps_pvSizer"><div class="paper" id="aps_pvPaper"></div></div></div>
         <div class="pend" id="aps_pend"></div>
-        <div class="ejs">Datos de ejemplo (prototipo):<br>
+        <div class="ejs">Datos de ejemplo (solo coordinación, para pruebas):<br>
           <button type="button" data-ej="A">Venta · persona moral</button><button type="button" data-ej="B">Venta y arrendamiento · 2 propietarios</button><button type="button" data-ej="D">Venta · 3 propietarios (mixto)</button><button type="button" data-ej="C">Arrendamiento</button><button type="button" data-ej="reset">Limpiar</button></div>
       </div>
     </aside>
   </div>
 </div>
+<button type="button" class="fab" id="aps_fab">📄 Ver contrato</button>
 <div class="modal" id="aps_modal">
   <div class="modal-bar"><button type="button" class="btn-sec" id="aps_modalPrint">🖨️ Imprimir / Guardar PDF</button><button type="button" class="btn-main" id="aps_modalClose" style="padding:10px 18px;font-size:12px">Cerrar ✕</button></div>
   <div class="modal-stage" id="aps_modalStage"><div class="paper" id="aps_modalPaper"></div></div>
 </div>
 <div class="modal" id="aps_regModal"><div class="modal-bar"><button type="button" class="btn-main" id="aps_regClose" style="padding:10px 18px;font-size:12px">Cerrar ✕</button></div>
-  <div class="reg-box"><h2>Registros APS</h2><div class="steps" id="aps_regTabs"></div><div id="aps_regList"></div></div></div>
+  <div class="reg-box"><h2>Mis contratos</h2><div class="steps" id="aps_regTabs"></div><div id="aps_regList"></div></div></div>
+<div class="modal" id="aps_hisModal"><div class="modal-bar"><button type="button" class="btn-main" id="aps_hisClose" style="padding:10px 18px;font-size:12px">Cerrar ✕</button></div>
+  <div class="reg-box"><h2>Historial de cambios</h2><div id="aps_hisBody"></div></div></div>
 <div class="busy" id="aps_busy"><div class="busy-card"><div class="spin"></div><span id="aps_busyTxt">Procesando…</span></div></div>
 <div class="toast" id="aps_toast"></div>
 
@@ -195,8 +243,9 @@
   var M = APS_MODELO, newProp = M.newProp, defaults = M.defaults;
   var IN_GAS = !!(typeof google !== 'undefined' && google.script && google.script.run);
   var S = defaults(), STEP = 'operacion', showErr = {}, ISS = [], REG = null, USER = { email: '', rol: 'local' };
-  var ESTADOS = { BORRADOR: 'Borrador', EN_REVISION: 'En revisión', APROBADO: 'Aprobado' };
-  var ESTADOS_UI = { SIN_TERMINAR: 'Guardado sin terminar', COMPLETO: 'Completado', EN_REVISION: 'En revisión', APROBADO: 'Aprobado' };
+  var SUCIO = false, GUARDADO = '', OCUPADO = false;      // cambios sin guardar · hora del último guardado · hay una acción del servidor en curso
+  var ESTADOS = { BORRADOR: 'Borrador', EN_REVISION: 'En revisión', APROBADO: 'Aprobado', CANCELADO: 'Cancelado' };
+  var ESTADOS_UI = { SIN_TERMINAR: 'Guardado sin terminar', COMPLETO: 'Completado', EN_REVISION: 'En revisión', APROBADO: 'Aprobado', CANCELADO: 'Cancelado' };
   function etiquetaEstado() { return REG.estado === 'BORRADOR' ? (ISS.length ? ESTADOS_UI.SIN_TERMINAR : ESTADOS_UI.COMPLETO + ' (sin enviar)') : ESTADOS[REG.estado]; }
   var STEP_INFO = { operacion: 'Operación', cliente: 'Propietarios', inmueble: 'Inmueble', venta: 'Venta', renta: 'Arrendamiento', firma: 'Revisión y firma' };
 
@@ -206,28 +255,55 @@
   function setP(p, v) { var ks = p.split('.'), o = S; for (var i = 0; i < ks.length - 1; i++) o = o[ks[i]]; o[ks[ks.length - 1]] = v; }
   function hasIssue(k) { return ISS.some(function (x) { return x.k === k; }); }
   function inv(k) { return (showErr[STEP] && hasIssue(k)) ? ' invalid' : ''; }
+  /* Mensaje de error junto al campo: si el pendiente es una etiqueta («Nombre completo») se lee «Falta: …»; si ya es una frase se deja tal cual */
+  function msgCampo(m) {
+    m = String(m || '');
+    if (/debe|no tiene|no v\u00e1lido|^Elige|^Escribe|^Agrega|^M\u00e1ximo|\?|^Ajuste|parece|m\u00e1ximo|muy lejos|futura/.test(m)) return m;
+    var i = m.lastIndexOf(': '); if (i > 0) m = m.slice(i + 2);
+    return 'Falta: ' + (/^[A-Z\u00c1\u00c9\u00cd\u00d3\u00da\u00d1]{2}/.test(m) ? m : m.charAt(0).toLowerCase() + m.slice(1));
+  }
+  function errMsg(k) {
+    if (!showErr[STEP]) return '';
+    for (var i = 0; i < ISS.length; i++) if (ISS[i].k === k) return '<div class="err-msg" data-errk="' + esc(k) + '">' + esc(msgCampo(ISS[i].msg)) + '</div>';
+    return '';
+  }
   function puedeImprimir() { return !IN_GAS || USER.rol === 'coordinador'; }      // el PDF y su vista de impresión: solo coordinación
   function ro() {                       // solo lectura (el servidor también lo valida)
     if (!REG) return false;
-    if (REG.estado === 'APROBADO') return true;
+    if (REG.estado === 'APROBADO' || REG.estado === 'CANCELADO') return true;
     if (USER.rol === 'coordinador') return false;
     return !(REG.asesor === USER.email && REG.estado === 'BORRADOR');   // enviado ya solo lo maneja la coordinación
   }
   function claseBanner() { return 'banner e-' + (REG.estado === 'BORRADOR' ? (ISS.length ? 'BORRADOR' : 'COMPLETO') : REG.estado); }
-  function textoBanner() { return '📄 <b>' + esc(REG.id) + '</b> · ' + etiquetaEstado() + (ro() ? ' · solo lectura' : ''); }
+  function indicadorGuardado() {
+    if (!IN_GAS || !REG || ro()) return '';
+    if (GUARDADO === 'error') return '<span class="gd sucio">\u26a0 No se pudo guardar solo; usa \u00abGuardar borrador\u00bb</span>';
+    if (SUCIO) return '<span class="gd sucio">\u25cf Cambios sin guardar</span>';
+    return GUARDADO ? '<span class="gd">\u2713 Guardado ' + esc(GUARDADO) + '</span>' : '';
+  }
+  function guiaEstado() {
+    var e = REG.estado, coord = USER.rol === 'coordinador';
+    if (e === 'CANCELADO') return 'Cancelado' + (REG.comentario ? ': ' + esc(REG.comentario) : '.');
+    if (e === 'APROBADO') return (coord ? 'Aprobado: el PDF definitivo ya est\u00e1 generado.' : 'Aprobado por la coordinaci\u00f3n. Ya puedes descargar el PDF definitivo.') + (REG.aprobadoEn ? '<br>Aprob\u00f3 ' + esc(REG.revisadoPor) + ' el ' + esc(REG.aprobadoEn) + (REG.huella ? ' \u00b7 huella de los datos ' + esc(REG.huella) : '') : '');
+    if (e === 'EN_REVISION') return coord ? 'Revisa los datos, corrige lo que haga falta y aprueba para generar el PDF.' : 'La coordinaci\u00f3n lo est\u00e1 revisando: puede ajustar datos y aprobarlo. Te avisamos por correo cuando est\u00e9 listo.';
+    if (ro()) return '';
+    return ISS.length ? 'Se guarda como borrador. Completa los datos pendientes para poder enviarlo a revisi\u00f3n.' : 'Datos completos. Rev\u00edsalo en la vista previa y env\u00edalo a revisi\u00f3n.';
+  }
+  function textoBanner() { var g = guiaEstado(); return indicadorGuardado() + '\ud83d\udcc4 <b>' + esc(REG.id) + '</b> \u00b7 ' + etiquetaEstado() + (ro() && REG.estado === 'BORRADOR' ? ' \u00b7 solo lectura' : '') + (g ? '<small>' + g + '</small>' : ''); }
   function banner() {
     if (!IN_GAS) return '';
-    if (!REG) return '<div class="banner nuevo">📝 Registro nuevo · aún sin guardar</div>';
+    if (!REG) return '<div class="banner nuevo">\ud83d\udcdd <b>Contrato nuevo</b><small>Al pasar al siguiente paso se guarda como borrador y puedes seguir despu\u00e9s desde \u00abMis contratos\u00bb.</small></div>';
     return '<div id="aps_estadoBanner" class="' + claseBanner() + '">' + textoBanner() + '</div>';
   }
+  function pintaBanner() { var bx = $('aps_bannerBox'); if (bx) bx.innerHTML = banner(); }
   function accionesHtml() {
     var b = '', st = REG ? REG.estado : null, coord = USER.rol === 'coordinador', hay = ISS.length > 0;
     if (IN_GAS) {
       if (!ro()) b += '<button type="button" class="btn-sec" data-act="save">💾 Guardar borrador</button>';
       if (!ro() && (!st || st === 'BORRADOR'))
-        b += '<button type="button" class="btn-main" data-act="submit"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>📤 Enviar al coordinador</button>';
+        b += '<button type="button" class="btn-main" data-act="submit"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>📤 Enviar a revisión</button>';
       if (coord && st === 'EN_REVISION')
-        b += '<button type="button" class="btn-main" data-act="approve"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>✅ Aprobar y generar PDF</button>';
+        b += '<button type="button" class="btn-main ok" data-act="approve"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>✅ Aprobar y generar PDF</button>';
       if (st === 'APROBADO') {
         // Regla: el coordinador siempre puede descargar. El asesor SOLO si es dueño de este contrato en particular
         // (y éste ya está APROBADO, por eso basta estar dentro de "st === 'APROBADO'"; antes de eso el botón ni existe).
@@ -236,10 +312,15 @@
              (coord && REG.pdfUrl ? '<a class="btn-sec lnk" href="' + esc(REG.pdfUrl) + '" target="_blank" rel="noopener">👁 Ver PDF aprobado en Drive</a>' : '');
       }
     }
-    if (puedeImprimir()) b += '<button type="button" class="btn-main" data-act="print" data-keep="1">🖨️ Imprimir / Guardar PDF</button>';
+    if (puedeImprimir()) b += '<button type="button" class="btn-sec" data-act="print" data-keep="1" title="Solo para revisión: el contrato definitivo es el PDF aprobado">' + (IN_GAS ? '🖨️ Imprimir (revisión)' : '🖨️ Imprimir / Guardar PDF') + '</button>';
+    else if (IN_GAS && st !== 'APROBADO') b += '<div class="nota">🔒 El PDF definitivo se habilita cuando la coordinación apruebe el contrato.</div>';
     if (IN_GAS && coord) b += '<button type="button" class="btn-sec" data-act="docs" data-keep="1" title="Descarga el contrato en Google Docs">📝 Descargar en Google Docs</button>';
-    b += '<button type="button" class="btn-sec" data-act="zoom" data-keep="1">🔍 Ampliar</button>';
-    if (IN_GAS && coord && REG) b += '<button type="button" class="btn-sec danger" data-act="eliminar" data-keep="1">🗑️ Eliminar</button>';
+    b += '<button type="button" class="btn-sec" data-act="zoom" data-keep="1">🔍 Ver contrato completo</button>';
+    if (IN_GAS && REG && st === 'APROBADO') b += '<button type="button" class="btn-sec" data-act="verificar" data-keep="1" title="Comprueba folio, quién aprobó y que los datos no hayan cambiado">🔎 Verificar</button>';
+    if (IN_GAS && coord && REG && st !== 'BORRADOR') b += '<button type="button" class="btn-sec" data-act="historial" data-keep="1">🕘 Historial de cambios</button>';
+    if (IN_GAS && coord && REG && (st === 'EN_REVISION' || st === 'APROBADO')) b += '<button type="button" class="btn-sec danger" data-act="cancelar" data-keep="1">⛔ Cancelar contrato</button>';
+    if (IN_GAS && coord && REG && st === 'BORRADOR') b += '<button type="button" class="btn-sec danger" data-act="eliminar" data-keep="1">🗑️ Eliminar borrador</button>';
+    if (IN_GAS && !coord && REG && st === 'BORRADOR' && !ro()) b += '<button type="button" class="btn-sec danger" data-act="descartar">🗑️ Descartar borrador</button>';
     return b;
   }
   function visible() { var a = ['operacion', 'cliente', 'inmueble']; if (D.tieneVenta(S)) a.push('venta'); if (D.tieneRenta(S)) a.push('renta'); a.push('firma'); return a; }
@@ -251,19 +332,19 @@
     var dataDir = o.dir ? ' data-dir="' + (o.dir === true ? '1' : o.dir) + '"' : '';
     var el = o.area ? '<textarea class="' + c + '" data-k="' + k + '" rows="' + (o.rows || 2) + '" placeholder="' + esc(o.ph || '') + '"' + dataDir + '>' + esc(v) + '</textarea>'
       : '<input class="' + c + '" data-k="' + k + '" type="' + (o.type || 'text') + '" value="' + esc(v) + '" placeholder="' + esc(o.ph || '') + '"' + (o.upper ? ' data-upper="1"' : '') + dataDir + (o.digits ? ' data-digits="1"' : '') + (o.mode ? ' inputmode="' + o.mode + '"' : '') + ' autocomplete="off">';
-    return '<div class="field-group"><label>' + label + (o.opt ? ' <em>(opcional)</em>' : '') + '</label>' + el + help(o.help) + '</div>';
+    return '<div class="field-group"><label>' + label + (o.opt ? ' <em>(opcional)</em>' : '') + '</label>' + el + errMsg(k) + help(o.help) + '</div>';
   }
   function fUnit(k, label, kind, suffix, o) {           // money | pct | meses
     o = o || {}; var v = getP(k) || '';
     var pre = kind === 'money' ? '<span>$</span>' : '';
     return '<div class="field-group"><label>' + label + '</label><div class="money' + inv(k) + '">' + pre +
       '<input class="input-text" data-k="' + k + '" data-fmt="' + kind + '" inputmode="decimal" value="' + esc(v) + '" placeholder="' + esc(o.ph || (kind === 'money' ? '0.00' : '')) + '" autocomplete="off">' +
-      '<span class="mn">' + suffix + '</span></div><div class="hint dim" data-hint="' + kind + '" data-for="' + k + '"></div>' + help(o.help) + '</div>';
+      '<span class="mn">' + suffix + '</span></div>' + errMsg(k) + '<div class="hint dim" data-hint="' + kind + '" data-for="' + k + '"></div>' + help(o.help) + '</div>';
   }
   function fSelect(k, label, lista) {
     var v = getP(k) || '';
     return '<div class="field-group"><label>' + label + '</label><select class="input-text' + inv(k) + '" data-k="' + k + '" data-rerender="1"><option value="">Selecciona…</option>' +
-      lista.map(function (e) { return '<option value="' + esc(e) + '"' + (v === e ? ' selected' : '') + '>' + esc(e) + '</option>'; }).join('') + '</select></div>';
+      lista.map(function (e) { return '<option value="' + esc(e) + '"' + (v === e ? ' selected' : '') + '>' + esc(e) + '</option>'; }).join('') + '</select>' + errMsg(k) + '</div>';
   }
   /* Dirección en partes: la pantalla arma la dirección completa y en forma (sin comas ni espacios de más) */
   function fDir(pre, titulo, ayuda) {
@@ -290,12 +371,12 @@
   function fSeg(k, label, opts, h) {
     var cur = getP(k);
     return '<div class="field-group"><label>' + label + '</label><div class="regime-toggle' + inv(k) + '">' + opts.map(function (o) {
-      return '<button type="button" class="regime-btn' + (cur === o[0] ? ' active' : '') + '" data-seg="' + k + '" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>' + help(h) + '</div>';
+      return '<button type="button" class="regime-btn' + (cur === o[0] ? ' active' : '') + '" data-seg="' + k + '" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>' + errMsg(k) + help(h) + '</div>';
   }
   function fMulti(k, label, opts, h) {
     var cur = getP(k) || [];
     return '<div class="field-group"><label>' + label + '</label><div class="regime-toggle' + inv(k) + '">' + opts.map(function (o) {
-      return '<button type="button" class="regime-btn check' + (cur.indexOf(o[0]) >= 0 ? ' active' : '') + '" data-multi="' + k + '" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>' + help(h) + '</div>';
+      return '<button type="button" class="regime-btn check' + (cur.indexOf(o[0]) >= 0 ? ' active' : '') + '" data-multi="' + k + '" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>' + errMsg(k) + help(h) + '</div>';
   }
   function card(icon, title, sub, body) {
     return '<div class="card"><div class="card-header"><div class="icon-box"><span class="icon-emoji">' + icon + '</span></div><div><h2>' + title + '</h2><span class="subtitle">' + sub + '</span></div></div>' + body + '</div>';
@@ -310,8 +391,17 @@
   }
 
   /* ── pasos ── */
+  function tengaAlaMano() {
+    return '<div class="tenga"><b>Antes de empezar, ten a la mano:</b><ul>' +
+      '<li>Identificación oficial de cada propietario y su RFC (si lo tienen)</li>' +
+      '<li>Escritura del inmueble: número, fecha, notario y folio real</li>' +
+      '<li>Si el propietario es una empresa: el poder o acta de quien firma</li>' +
+      '<li>Teléfono, correo y domicilio de contacto</li>' +
+      '<li>Lo acordado: precio o renta, vigencia y honorarios</li></ul>' +
+      '<div class="help">No tienes que terminar de una vez: se guarda como borrador y puedes continuar después.</div></div>';
+  }
   function stepOperacion() {
-    return card('📋', 'Tipo de operación', 'Define qué apartados llevará la carátula',
+    return tengaAlaMano() + card('📋', 'Tipo de operación', 'Define qué apartados llevará la carátula',
       fSeg('tipo', '¿Qué se va a hacer con el inmueble?', [['venta', 'Venta'], ['renta', 'Arrendamiento'], ['ambas', 'Venta y arrendamiento']]) +
       note('La carátula solo imprime los apartados que aplican: si es venta no aparece nada de arrendamiento, y viceversa.'));
   }
@@ -395,16 +485,16 @@
       '<div class="grid2">' + fText('lugar', 'Lugar de firma', { ph: 'Ciudad de México' }) + fText('fecha', 'Fecha de firma', { type: 'date' }) + '</div>' +
       note('Firmas que llevará el documento: ' + firm + ' del cliente (según los propietarios y representantes capturados) y 1 de "EL PROFESIONAL".')) +
       card('✅', 'Revisión final', n ? 'Todavía faltan datos' : 'Todo listo',
-        (n ? '<div class="msg-step">Faltan ' + n + ' dato' + (n === 1 ? '' : 's') + '. Mientras falten, el documento sale con la marca BORRADOR. Revísalos en el panel de la derecha.</div>'
-           : '<div class="info-note"><span>🎉</span><span>Datos completos. Revisa la vista previa (botón "Ampliar") y, si todo está bien, imprime o guarda el PDF.</span></div>') +
+        (n ? '<div class="msg-step">Faltan ' + n + ' dato' + (n === 1 ? '' : 's') + '. Mientras falten no se puede enviar a revisión. Toca cada uno en la lista de pendientes para ir directo al campo.</div>'
+           : '<div class="info-note"><span>🎉</span><span>' + (IN_GAS && USER.rol !== 'coordinador' ? 'Datos completos. Revisa la vista previa (botón «Ver contrato completo») y, si todo está bien, envíalo a revisión. La coordinación lo revisará y aprobará; el PDF se habilita al aprobarse.' : 'Datos completos. Revisa la vista previa (botón «Ver contrato completo») y, si todo está bien, continúa.') + '</span></div>') +
         '<div class="acciones">' + accionesHtml() + '</div>' +
-        (IN_GAS ? '' : '<div class="integ">Al integrarse al sistema, aquí aparecerán "Guardar borrador" y "Enviar a revisión del coordinador".</div>'));
+        (IN_GAS ? '' : '<div class="integ">Al integrarse al sistema, aquí aparecerán «Guardar borrador» y «Enviar a revisión».</div>'));
   }
   var RENDER = { operacion: stepOperacion, cliente: stepCliente, inmueble: stepInmueble, venta: stepVenta, renta: stepRenta, firma: stepFirma };
 
   /* ── render de piezas ── */
   function renderStep() {
-    $('aps_stepHost').innerHTML = banner() + RENDER[STEP]();
+    $('aps_stepHost').innerHTML = '<div id="aps_bannerBox">' + banner() + '</div>' + RENDER[STEP]();
     if (ro()) { var els = $('aps_stepHost').querySelectorAll('input,textarea,button'); for (var i = 0; i < els.length; i++) if (!els[i].hasAttribute('data-keep')) els[i].disabled = true; }
     updateHints(); paintNav();
   }
@@ -414,6 +504,9 @@
       var okS = !ISS.some(function (x) { return x.step === id; });
       return '<button type="button" class="chip' + (id === STEP ? ' active' : '') + (okS && id !== 'firma' ? ' ok' : '') + '" data-goto="' + id + '"><b>' + (okS && id !== 'firma' && id !== STEP ? '✓' : (i + 1)) + '</b>' + STEP_INFO[id] + '</button>'; }).join('');
     var idx = v.indexOf(STEP);
+    $('aps_progT').textContent = 'Paso ' + (idx + 1) + ' de ' + v.length + ' · ' + STEP_INFO[STEP];
+    $('aps_progS').textContent = ISS.length ? 'Faltan ' + ISS.length + ' dato' + (ISS.length === 1 ? '' : 's') : '✓ Todo completo';
+    $('aps_progB').style.width = Math.round((idx + 1) / v.length * 100) + '%';
     $('aps_btnPrev').style.visibility = idx > 0 ? 'visible' : 'hidden';
     $('aps_btnNext').style.display = idx < v.length - 1 ? '' : 'none';
   }
@@ -440,12 +533,20 @@
       var k = els[i].getAttribute('data-k'), on = !!showErr[STEP] && hasIssue(k), tgt = els[i].parentElement.classList.contains('money') ? els[i].parentElement : els[i];
       tgt.classList.toggle('invalid', on);
     }
+    var viejos = ROOT.querySelectorAll('#aps_stepHost [data-errk]'); for (var j = 0; j < viejos.length; j++) viejos[j].parentNode.removeChild(viejos[j]);
+    if (!showErr[STEP]) return;
+    for (var m = 0; m < els.length; m++) {
+      var kk = els[m].getAttribute('data-k'), t2 = els[m].parentElement.classList.contains('money') ? els[m].parentElement : els[m];
+      if (hasIssue(kk)) t2.insertAdjacentHTML('afterend', errMsg(kk));
+    }
   }
-  function docHtml() { return D.render(S, { borrador: ISS.length > 0 }); }
+  /* Marca de agua BORRADOR: mientras el contrato no esté aprobado (o falten datos) NUNCA sale como definitivo */
+  function marcaBorrador() { return ISS.length > 0 || (IN_GAS && !(REG && REG.estado === 'APROBADO')); }
+  function docHtml() { return D.render(S, { borrador: marcaBorrador() }); }
   function renderPreview() {
     var h = docHtml();
     $('aps_pvPaper').innerHTML = h; 
-    var b = $('aps_estado'); b.className = 'badge ' + (ISS.length ? 'warn' : 'ok'); b.textContent = ISS.length ? 'Borrador · ' + ISS.length + ' pendiente' + (ISS.length === 1 ? '' : 's') : 'Completo';
+    var b = $('aps_estado'); b.className = 'badge ' + (ISS.length ? 'warn' : 'ok'); b.textContent = ISS.length ? 'Borrador · ' + ISS.length + ' pendiente' + (ISS.length === 1 ? '' : 's') : (IN_GAS && !(REG && REG.estado === 'APROBADO') ? 'Datos completos · sin aprobar' : 'Completo');
     if ($('aps_modal').classList.contains('open')) { $('aps_modalPaper').innerHTML = h; fitModal(); }
     fitPreview();
   }
@@ -461,7 +562,7 @@
   }
   function renderPend() {
     var h = '';
-    if (!ISS.length) h = '<div class="ok-line">✓ Documento completo. Listo para imprimir o guardar como PDF.</div>';
+    if (!ISS.length) h = '<div class="ok-line">✓ Datos completos.' + (IN_GAS && !(REG && REG.estado === 'APROBADO') ? ' El PDF definitivo se genera al aprobarse.' : ' Listo para imprimir o guardar como PDF.') + '</div>';
     else {
       h = '<div class="bad-line">Faltan ' + ISS.length + ' dato' + (ISS.length === 1 ? '' : 's') + ':</div>' + ISS.slice(0, 6).map(function (x) {
         return '<button type="button" data-goto="' + x.step + '" data-focus="' + x.k + '">• ' + esc(x.msg) + '</button>'; }).join('') +
@@ -473,7 +574,7 @@
     if (visible().indexOf(STEP) < 0) STEP = 'operacion';
     ISS = D.validar(S);
     if (struct) renderStep(); else { updateHints(); paintNav(); paintInvalid(); }
-    var bn = REG && document.getElementById('aps_estadoBanner'); if (bn) { bn.className = claseBanner(); bn.innerHTML = textoBanner(); }      // el estado (sin terminar / completado) se actualiza al escribir
+    var bn = REG && document.getElementById('aps_estadoBanner'); if (bn) { bn.className = claseBanner(); bn.innerHTML = textoBanner(); }      // el estado (sin terminar / completado / guardado) se actualiza al escribir
     renderPreview(); renderPend();
   }
 
@@ -491,6 +592,7 @@
       $('aps_stepHost').insertBefore(m, $('aps_stepHost').firstChild); return;
     }
     if (idx < v.length - 1) goStep(v[idx + 1]);
+    if (IN_GAS && SUCIO && !ro() && (!REG || REG.estado === 'BORRADOR')) guardarSilencioso(function (ok) { if (ok && !REG.avisado) { REG.avisado = true; toast('Borrador guardado · ' + REG.id); } });
   }
   function prev() { var v = visible(), idx = v.indexOf(STEP); if (idx > 0) goStep(v[idx - 1]); }
   function tieneDatos(p) { return ['nombre', 'rfc', 'idDoc', 'rfcRep'].some(function (k) { return String(p[k] || '').trim(); }); }
@@ -501,11 +603,12 @@
       if (S.propietarios.slice(c).some(tieneDatos) && !window.confirm('Se quitarán los datos de ' + (cur - c) + ' propietario(s) (los últimos). ¿Continuar?')) return;
       S.propietarios.length = c;
     }
-    refresh(true);
+    toca(); refresh(true);
   }
 
   /* Página completa e independiente del documento (se imprime dentro de un iframe: así no le afecta el scroll ni los estilos de la interfaz) */
   function paginaImprimible() {
+    if (!puedeImprimir()) return '';      // solo coordinación; el asesor no obtiene el HTML imprimible ni desde la consola
     return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>APS Hipoo</title><style>html,body{margin:0;background:#fff}' + D.css() + '</style></head><body>' + docHtml() + '<script>' + D.ajusteJS + '<\/script></body></html>';
   }
   function nombreArchivo() {
@@ -514,7 +617,7 @@
   }
   function imprimir() {
     if (!puedeImprimir()) { toast('El PDF solo lo obtiene la coordinación.', true); return; }
-    if (ISS.length && !window.confirm('Hay ' + ISS.length + ' dato(s) pendiente(s). El documento se imprimirá con la marca BORRADOR. ¿Continuar?')) return;
+    if (marcaBorrador() && !window.confirm(ISS.length ? 'Hay ' + ISS.length + ' dato(s) pendiente(s). El documento se imprimirá con la marca BORRADOR. ¿Continuar?' : 'Este contrato todavía no está aprobado: se imprimirá con la marca BORRADOR, solo para revisión. El definitivo es el PDF que se genera al aprobar. ¿Continuar?')) return;
     var t0 = document.title, fr = document.createElement('iframe'), hecho = false;
     fr.setAttribute('aria-hidden', 'true'); fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
     document.body.appendChild(fr);
@@ -533,7 +636,10 @@
   function closeModal() { $('aps_modal').classList.remove('open'); }
 
   var EJ = M.ejemplos;
-  function cargar(id) { S = id ? EJ[id]() : defaults(); showErr = {}; STEP = id ? 'firma' : 'operacion'; refresh(true); }
+  function cargar(id) {
+    if ((REG || SUCIO) && !window.confirm('Esto reemplaza lo que tienes abierto' + (REG ? ' (' + REG.id + ')' : '') + ' por datos de ejemplo y lo cierra sin guardar. ¿Continuar?')) return;
+    S = id ? EJ[id]() : defaults(); REG = null; SUCIO = false; GUARDADO = ''; showErr = {}; STEP = id ? 'firma' : 'operacion'; refresh(true);
+  }
 
 
   /* ── capa Apps Script (solo si corre dentro de la aplicación web) ── */
@@ -544,14 +650,14 @@
   function busy(on, txt) { $('aps_busy').className = 'busy' + (on ? ' on' : ''); if (txt) $('aps_busyTxt').textContent = txt; }
   /* Nunca se queda "cargando" para siempre: si el servidor no contesta en 25 s, se libera la pantalla sola, con
      aviso para reintentar — sin tener que refrescar la página. */
-  function srv(fn, args, ok, txt) {
+  function srv(fn, args, ok, txt, ms, onFail) {
     if (!IN_GAS) { toast('Esta función solo está disponible dentro de la aplicación de Apps Script.', true); return; }
     busy(true, txt || 'Procesando…');
     var listo = false;
-    var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); toast('El servidor está tardando más de lo normal. Vuelve a intentarlo.', true); }, 25000);
+    var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); toast('El servidor está tardando más de lo normal. No repitas la acción todavía: abre «Mis contratos» y revisa si ya quedó.', true); if (onFail) onFail(); }, ms || 25000);
     var r = google.script.run
       .withSuccessHandler(function (res) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); if (ok) ok(res); })
-      .withFailureHandler(function (err) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); toast(String((err && err.message) || err).replace(/^Error:\s*/, ''), true); });
+      .withFailureHandler(function (err) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); toast(String((err && err.message) || err).replace(/^Error:\s*/, ''), true); if (onFail) onFail(); });
     r[fn].apply(r, args);
   }
   function normaliza(d) {
@@ -564,24 +670,91 @@
     if (!Array.isArray(o.ajustes)) o.ajustes = [];
     return o;
   }
-  function conRegistro(meta) { REG = meta; renderStep(); renderPend(); renderPreview(); }
-  function guardar(despues) {
-    srv('APS_guardar', [S, REG ? REG.id : null], function (meta) { conRegistro(meta); if (despues) despues(meta); else toast('Borrador guardado · ' + meta.id); }, 'Guardando…');
+  function conRegistro(meta) { REG = meta; SUCIO = false; GUARDADO = horaAhora(); renderStep(); renderPend(); renderPreview(); }
+  function horaAhora() { var d = new Date(); return 'a las ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function guardar(despues, intento) {
+    if (OCUPADO && (intento || 0) < 40) { setTimeout(function () { guardar(despues, (intento || 0) + 1); }, 400); return; }      // espera a que termine un autoguardado en curso
+    OCUPADO = true;
+    srv('APS_guardar', [S, REG ? REG.id : null, REG ? REG.version : null], function (meta) { OCUPADO = false; conRegistro(meta); if (despues) despues(meta); else toast(meta.estado !== 'BORRADOR' ? 'Cambios guardados \u00b7 ' + meta.id : 'Borrador guardado \u00b7 ' + meta.id); }, 'Guardando…', 0, function () { OCUPADO = false; });
   }
+  /* Guardado automático y silencioso: sin pantalla de "cargando" y sin volver a dibujar el formulario (para no interrumpir a quien escribe) */
+  function guardarSilencioso(alTerminar) {
+    if (!IN_GAS || OCUPADO || ro() || !USER.email || (REG && (REG.estado !== 'BORRADOR' || (REG.asesor && REG.asesor !== USER.email)))) { if (alTerminar) alTerminar(false); return; }
+    var ver = VER, conId = !!REG;
+    OCUPADO = true;
+    google.script.run
+      .withSuccessHandler(function (meta) {
+        OCUPADO = false; REG = meta; GUARDADO = horaAhora(); if (ver === VER) SUCIO = false;
+        pintaBanner(); if (alTerminar) alTerminar(true);
+      })
+      .withFailureHandler(function () { OCUPADO = false; GUARDADO = 'error'; pintaBanner(); if (alTerminar) alTerminar(false); })
+      .APS_guardar(S, conId ? REG.id : null, conId ? REG.version : null);
+  }
+  var VER = 0;                          // cuenta los cambios: si cambia mientras se guarda, el contrato sigue "sin guardar"
+  function toca() { if (ro()) return; VER++; SUCIO = true; if (GUARDADO === 'error') GUARDADO = ''; var g = ROOT.querySelector('#aps_estadoBanner .gd'); if (g) { g.className = 'gd sucio'; g.innerHTML = '\u25cf Cambios sin guardar'; } else if (REG) pintaBanner(); }
+  setInterval(function () { if (SUCIO && REG && REG.estado === 'BORRADOR') guardarSilencioso(); }, 30000);
+  window.addEventListener('beforeunload', function (e) { if (IN_GAS && SUCIO) { e.preventDefault(); e.returnValue = ''; } });
   function enviar() {
     if (ISS.length) { toast('Completa los datos pendientes antes de enviar.', true); return; }
-    if (!window.confirm('¿Enviar a revisión del coordinador? Ya no podrás editarlo salvo que te lo devuelva.')) return;
-    guardar(function (meta) { srv('APS_enviarRevision', [meta.id], function (m) { conRegistro(m); toast('Enviado a revisión · ' + m.id); }, 'Enviando a revisión…'); });
+    if (!window.confirm('¿Enviar a revisión? Revisa que los datos estén bien: después ya no podrás editarlo. La coordinación lo revisará (puede ajustar datos) y lo aprobará; te avisamos por correo cuando esté listo.')) return;
+    guardar(function (meta) {
+      avisoDuplicados(meta.id, 'enviarlo', function () { srv('APS_enviarRevision', [meta.id], function (m) { conRegistro(m); toast('Enviado a revisión · ' + m.id); }, 'Enviando a revisión…'); });
+    });
   }
   function aprobar() {
     if (ISS.length) { toast('Completa los datos pendientes antes de aprobar.', true); return; }
     if (!window.confirm('¿Aprobar y generar el PDF definitivo? Después ya no se puede editar.')) return;
-    guardar(function (meta) { srv('APS_aprobar', [meta.id], function (m) { conRegistro(m); toast('Aprobado · PDF generado'); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Generando PDF…'); });
+    guardar(function (meta) {
+      avisoDuplicados(meta.id, 'aprobarlo', function () { srv('APS_aprobar', [meta.id], function (m) { conRegistro(m); toast('Aprobado · PDF generado'); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Generando PDF… (puede tardar hasta un minuto)', 150000); });
+    });
+  }
+  /* Antes de enviar o aprobar: ¿ya hay otro contrato vigente con el mismo folio real, domicilio o RFC? Solo avisa; la persona decide. */
+  function avisoDuplicados(id, accion, seguir) {
+    srv('APS_duplicados', [id], function (d) {
+      if (d && d.length) {
+        var txt = d.map(function (x) { return '\u2022 ' + x.id + ' (' + (ESTADOS[x.estado] || x.estado).toLowerCase() + '): ' + x.motivo; }).join('\n');
+        if (!window.confirm('Ojo: ya existe otro contrato con datos que coinciden:\n\n' + txt + '\n\n\u00bfQuieres ' + accion + ' de todos modos?')) return;
+      }
+      seguir();
+    }, 'Revisando que no est\u00e9 duplicado…');
+  }
+  function cancelar() {
+    if (!REG) return;
+    var m = window.prompt('\u00bfPor qu\u00e9 se cancela el contrato ' + REG.id + '? (queda registrado junto con qui\u00e9n lo cancel\u00f3)', ''); if (m === null) return;
+    if (String(m).trim().length < 5) { toast('Escribe el motivo (m\u00ednimo 5 caracteres).', true); return; }
+    srv('APS_cancelar', [REG.id, m], function (meta) { conRegistro(meta); toast('Contrato cancelado.'); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Cancelando…');
+  }
+  function verificar() {
+    if (!REG) return;
+    srv('APS_verificar', [REG.id], function (v) {
+      toast('Folio ' + v.id + ' \u00b7 versi\u00f3n ' + v.version + ' \u00b7 aprob\u00f3 ' + v.aprobadoPor + ' el ' + v.aprobadoEn + (v.datosCoincidenConHuella === false ? ' \u00b7 \u26a0 LOS DATOS YA NO COINCIDEN CON LA HUELLA' : ' \u00b7 datos \u00edntegros (huella ' + String(v.huellaDatos).slice(0, 12) + ')'), v.datosCoincidenConHuella === false);
+    }, 'Verificando…');
+  }
+  var ETQ = { tipo: 'Tipo de operaci\u00f3n', precio: 'Precio de venta', honorariosPct: 'Honorarios venta (%)', vigenciaVentaMeses: 'Vigencia venta (meses)', ivaVenta: 'IVA venta', modalidadVenta: 'Modalidad venta', rentaMonto: 'Renta mensual',
+    deposito: 'Dep\u00f3sito', rentasAdelantadas: 'Rentas adelantadas', vigenciaRentaMeses: 'Vigencia renta (meses)', inmDomicilio: 'Domicilio del inmueble', escrituraNum: 'N\u00fam. de escritura', escrituraFecha: 'Fecha de escritura', notarioNombre: 'Notario',
+    notariaNumDe: 'Notar\u00eda', folioReal: 'Folio real', instalaciones: 'Instalaciones', telMovil: 'Tel\u00e9fono m\u00f3vil', telFijo: 'Tel\u00e9fono fijo', correo: 'Correo', lugar: 'Lugar de firma', fecha: 'Fecha de firma', nombre: 'Nombre', rfc: 'RFC',
+    idDoc: 'Identificaci\u00f3n', idAutoridad: 'Autoridad', calle: 'Calle', numExt: 'N\u00fam. exterior', numInt: 'N\u00fam. interior', colonia: 'Colonia', cp: 'C.P.', estado: 'Estado', alcaldia: 'Alcald\u00eda/Municipio', monto: 'Nuevo precio' };
+  function etiquetaCampo(path) {
+    var p = String(path).split('.'), pre = '', k = p[p.length - 1];
+    if (p[0] === 'propietarios') pre = 'Propietario ' + (parseInt(p[1], 10) + 1) + ' \u00b7 ';
+    else if (p[0] === 'ajustes') pre = 'Ajuste ' + (parseInt(p[1], 10) + 1) + ' \u00b7 ';
+    else if (p[0] === 'contactoDir') pre = 'Domicilio de contacto \u00b7 ';
+    return pre + (ETQ[k] || k);
+  }
+  function historial() {
+    if (!REG) return;
+    srv('APS_versiones', [REG.id], function (v) {
+      $('aps_hisBody').innerHTML = v.length ? v.map(function (x) {
+        return '<div class="his-i"><b>Versi\u00f3n ' + x.version + ' \u00b7 ' + esc(x.accion.replace(/_/g, ' ').toLowerCase()) + '</b> <span class="help">' + esc(x.fecha) + ' \u00b7 ' + esc(x.usuario) + '</span>' +
+          (x.cambios.length ? '<ul>' + x.cambios.map(function (c) { return '<li>' + esc(etiquetaCampo(c.campo)) + ': <span>' + esc(c.antes || '(vac\u00edo)') + '</span> \u2192 <span>' + esc(c.despues || '(vac\u00edo)') + '</span></li>'; }).join('') + '</ul>' : '<div class="help">' + (x.accion === 'ENVIO' ? 'Lo que envi\u00f3 el asesor.' : 'Sin diferencias respecto a la anterior.') + '</div>') + '</div>'; }).join('')
+        : '<div class="help">Todav\u00eda no hay versiones guardadas (se guardan desde que el asesor lo env\u00eda).</div>';
+      $('aps_hisModal').classList.add('open');
+    }, 'Cargando historial…');
   }
   function descargar() {
     srv('APS_obtenerPdf', [REG.id], function (r) {
       var a = document.createElement('a'); a.href = 'data:application/pdf;base64,' + r.base64; a.download = r.nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      toast('Descarga iniciada: ' + r.nombre);
+      toast('Descarga iniciada: ' + r.nombre + ' (huella ' + r.huella + ')');
     }, 'Preparando PDF…');
   }
   function copiaDocs() {
@@ -591,18 +764,24 @@
     if (REG) { crear(REG.id); return; }
     guardar(function (meta) { crear(meta.id); });          // registro nuevo: se guarda como borrador y de inmediato se crea la copia
   }
-  function clonar() { REG = null; S.fecha = M.hoyISO(); showErr = {}; STEP = 'operacion'; refresh(true); toast('Nuevo registro basado en el anterior (sin guardar).'); }
+  function clonar() { REG = null; S.fecha = M.hoyISO(); SUCIO = true; GUARDADO = ''; showErr = {}; STEP = 'operacion'; refresh(true); toast('Nuevo contrato basado en el anterior (aún sin guardar).'); }
   function eliminar() {
     if (!REG) return;
-    if (!window.confirm('¿Eliminar el contrato ' + REG.id + ' de forma permanente? Esto no se puede deshacer.')) return;
-    srv('APS_eliminar', [REG.id], function () { toast('Contrato eliminado.'); S = defaults(); REG = null; showErr = {}; STEP = 'operacion'; refresh(true); }, 'Eliminando…');
+    if (!window.confirm('¿Eliminar el borrador ' + REG.id + ' de forma permanente?')) return;
+    srv('APS_eliminar', [REG.id], function () { toast('Contrato eliminado.'); S = defaults(); REG = null; SUCIO = false; GUARDADO = ''; showErr = {}; STEP = 'operacion'; refresh(true); }, 'Eliminando…');
+  }
+  function descartar() {
+    if (!REG || REG.estado !== 'BORRADOR') return;
+    if (!window.confirm('¿Descartar este borrador (' + REG.id + ')? Se elimina y no se puede recuperar.')) return;
+    srv('APS_descartarBorrador', [REG.id], function () { toast('Borrador descartado.'); S = defaults(); REG = null; SUCIO = false; GUARDADO = ''; showErr = {}; STEP = 'operacion'; refresh(true); }, 'Descartando…');
   }
   function nuevo() {
-    if (!window.confirm('¿Empezar un registro nuevo? Se descartan los cambios no guardados.')) return;
-    S = defaults(); REG = null; showErr = {}; STEP = 'operacion'; refresh(true);
+    if (SUCIO && !window.confirm('Tienes cambios sin guardar. ¿Empezar un contrato nuevo y descartarlos?')) return;
+    S = defaults(); REG = null; SUCIO = false; GUARDADO = ''; showErr = {}; STEP = 'operacion'; refresh(true);
   }
   function abrirRegistro(id) {
-    srv('APS_abrir', [id], function (r) { S = normaliza(r.datos); REG = r.meta; showErr = {}; STEP = 'firma'; cerrarRegistros(); refresh(true); }, 'Abriendo…');
+    if (SUCIO && !window.confirm('Tienes cambios sin guardar en el contrato que está abierto. ¿Abrir otro y descartarlos?')) return;
+    srv('APS_abrir', [id], function (r) { S = normaliza(r.datos); REG = r.meta; SUCIO = false; GUARDADO = ''; showErr = {}; STEP = 'firma'; cerrarRegistros(); refresh(true); }, 'Abriendo…');
   }
   var regFiltro = 'mios';
   function abrirRegistros(f) {
@@ -611,11 +790,13 @@
     var tabs = USER.rol === 'coordinador' ? [['revision', 'Por revisar'], ['todos', 'Todos'], ['mios', 'Míos']] : [['mios', 'Mis registros']];
     $('aps_regTabs').innerHTML = tabs.map(function (t) { return '<button type="button" class="chip' + (t[0] === regFiltro ? ' active' : '') + '" data-regtab="' + t[0] + '">' + t[1] + '</button>'; }).join('');
     $('aps_regList').innerHTML = '<div class="help">Cargando…</div>';
-    srv('APS_listar', [regFiltro], function (rows) {
+    srv('APS_listar', [regFiltro, '', 300], function (res) {
+      var rows = res.filas;
       $('aps_regList').innerHTML = rows.length ? '<div class="reg-wrap"><table class="reg"><thead><tr><th>ID</th><th>Estado</th><th>Propietarios</th><th>Tipo</th><th>Actualizado</th>' + (USER.rol === 'coordinador' ? '<th>Asesor</th>' : '') + '<th></th></tr></thead><tbody>' +
         rows.map(function (r) { return '<tr><td>' + esc(r.id) + '</td><td><span class="est e-' + (r.estadoUI || r.estado) + '">' + (ESTADOS_UI[r.estadoUI] || ESTADOS[r.estado]) + '</span></td><td>' + esc(r.propietarios) + '</td><td>' + esc(r.tipo) + '</td><td>' + esc(r.actualizado) + '</td>' +
           (USER.rol === 'coordinador' ? '<td>' + esc(r.asesor) + '</td>' : '') + '<td><button type="button" class="btn-mini" data-open="' + esc(r.id) + '">Abrir</button></td></tr>'; }).join('') + '</tbody></table></div>'
         : '<div class="help">No hay registros en esta vista.</div>';
+      if (res.total > rows.length) $('aps_regList').insertAdjacentHTML('beforeend', '<div class="help">Se muestran los ' + rows.length + ' m\u00e1s recientes de ' + res.total + '.</div>');
     }, 'Cargando registros…');
   }
   function cerrarRegistros() { $('aps_regModal').classList.remove('open'); }
@@ -625,7 +806,7 @@
     srv('APS_iniciar', [], function (r) {
       USER = r.usuario;
       if (USER.rol === 'coordinador') ROOT.querySelector('.ejs').style.display = '';
-      var pi = puedeImprimir(); $('aps_btnPrint').style.display = pi ? '' : 'none'; $('aps_modalPrint').style.display = pi ? '' : 'none';
+      var pi = puedeImprimir(); $('aps_btnPrint').style.display = pi ? '' : 'none'; $('aps_modalPrint').style.display = pi ? '' : 'none'; $('aps_sinPdf').style.display = pi ? 'none' : '';
       $('aps_userChip').textContent = USER.email ? USER.email + ' · ' + (USER.rol === 'coordinador' ? 'Coordinador' : 'Asesor') : 'Sin identificar';
       if (r.logo) {
         D.CFG.logoSrc = r.logo;
@@ -659,7 +840,7 @@
       while (i2 < v.length && vistos < digitosAntes) { if (/\d/.test(v[i2])) vistos++; i2++; }
       try { t.setSelectionRange(i2, i2); } catch (er) {}
     }
-    setP(k, v); refresh(!!t.getAttribute('data-rerender'));
+    setP(k, v); toca(); refresh(!!t.getAttribute('data-rerender'));
   });
   function setAjustes(n, campo) {
     var A = S.ajustes || (S.ajustes = []);
@@ -667,7 +848,7 @@
       if (A.slice(n).some(function (a) { return String(a.fecha || '').trim() || String(a.monto || '').trim(); }) && !window.confirm('Se quitarán los últimos ' + (A.length - n) + ' ajuste(s) ya capturados. ¿Continuar?')) { campo.value = A.length; return; }
       A.length = n;
     } else { while (A.length < n) A.push({ fecha: '', monto: '' }); }
-    campo.value = n; ROOT.querySelector('.adj-box').innerHTML = ajustesRows(); refresh(false);
+    campo.value = n; toca(); ROOT.querySelector('.adj-box').innerHTML = ajustesRows(); refresh(false);
   }
   host.addEventListener('change', function (e) {
     var t = e.target; if (!t.getAttribute || !t.getAttribute('data-nadj') || ro()) return;
@@ -677,10 +858,10 @@
     var t = e.target;
     if (t.getAttribute && t.getAttribute('data-dir') && !ro()) {
       var libre = t.getAttribute('data-dir') === 'libre', nv = libre ? U.normDireccionLibre(t.value) : U.normDir(t.value);
-      if (nv !== t.value) { t.value = nv; setP(t.getAttribute('data-k'), nv); refresh(false); }
+      if (nv !== t.value) { t.value = nv; setP(t.getAttribute('data-k'), nv); toca(); refresh(false); }
     }
     if (t.getAttribute && t.getAttribute('data-fmt') === 'money') {
-      var n = U.parseNum(t.value); if (!isNaN(n)) { t.value = U.formatoNum(n); setP(t.getAttribute('data-k'), t.value); refresh(false); } }
+      var n = U.parseNum(t.value); if (!isNaN(n)) { t.value = U.formatoNum(n); setP(t.getAttribute('data-k'), t.value); toca(); refresh(false); } }
   });
   host.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
@@ -688,17 +869,17 @@
     if (b.hasAttribute('data-count')) { setCount(parseInt(b.getAttribute('data-count'), 10)); return; }
     if (b.hasAttribute('data-seg')) {
       var kSeg = b.getAttribute('data-seg'), vSeg = b.getAttribute('data-v');
-      setP(kSeg, vSeg);
+      setP(kSeg, vSeg); toca();
       if (/\.rfcModo$/.test(kSeg)) setP(kSeg.replace(/rfcModo$/, 'rfc'), '');      // al cambiar "Sí"/"No" el campo de RFC se limpia, para escribirlo de nuevo o dejarlo vacío
       refresh(true); return;
     }
     if (b.hasAttribute('data-multi')) {
       var k = b.getAttribute('data-multi'), v = b.getAttribute('data-v'), arr = (getP(k) || []).slice(), i = arr.indexOf(v);
-      if (i >= 0) arr.splice(i, 1); else arr.push(v); setP(k, arr); refresh(true); return; }
+      if (i >= 0) arr.splice(i, 1); else arr.push(v); setP(k, arr); toca(); refresh(true); return; }
     var a = b.getAttribute('data-act'), oi = parseInt(b.getAttribute('data-i'), 10), rj = parseInt(b.getAttribute('data-j'), 10);
-    if (a === 'copiarContacto') { setP('inmDomicilio', U.direccion(S.contactoDir)); refresh(true); }
-    else if (a === 'addRep' && S.propietarios[oi].representantes.length < 2) { S.propietarios[oi].representantes.push({ trato: '', nombre: '' }); refresh(true); }
-    else if (a === 'delRep') { S.propietarios[oi].representantes.splice(rj, 1); refresh(true); }
+    if (a === 'copiarContacto') { setP('inmDomicilio', U.direccion(S.contactoDir)); toca(); refresh(true); }
+    else if (a === 'addRep' && S.propietarios[oi].representantes.length < 2) { S.propietarios[oi].representantes.push({ trato: '', nombre: '' }); toca(); refresh(true); }
+    else if (a === 'delRep') { S.propietarios[oi].representantes.splice(rj, 1); toca(); refresh(true); }
     else if (a === 'print') imprimir();
     else if (a === 'zoom') openModal();
     else if (a === 'save') guardar();
@@ -708,6 +889,10 @@
     else if (a === 'clone') clonar();
     else if (a === 'docs') copiaDocs();
     else if (a === 'eliminar') eliminar();
+    else if (a === 'cancelar') cancelar();
+    else if (a === 'verificar') verificar();
+    else if (a === 'historial') historial();
+    else if (a === 'descartar') descartar();
   });
   ROOT.addEventListener('click', function (e) {
     var b = e.target.closest('[data-goto]'); if (b) { goStep(b.getAttribute('data-goto'), b.getAttribute('data-focus')); return; }
@@ -719,9 +904,9 @@
   });
   $('aps_btnRegistros').addEventListener('click', function () { abrirRegistros(); });
   $('aps_btnNuevo').addEventListener('click', nuevo);
-  $('aps_regClose').addEventListener('click', cerrarRegistros);
+  $('aps_regClose').addEventListener('click', cerrarRegistros); $('aps_hisClose').addEventListener('click', function () { $('aps_hisModal').classList.remove('open'); });
   $('aps_btnNext').addEventListener('click', next); $('aps_btnPrev').addEventListener('click', prev);
-  $('aps_btnZoom').addEventListener('click', openModal); $('aps_btnPrint').addEventListener('click', imprimir);
+  $('aps_btnZoom').addEventListener('click', openModal); $('aps_btnPrint').addEventListener('click', imprimir); $('aps_fab').addEventListener('click', openModal);
   $('aps_modalClose').addEventListener('click', closeModal); $('aps_modalPrint').addEventListener('click', function () { closeModal(); imprimir(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ROOT.offsetParent !== null) { closeModal(); cerrarRegistros(); } });
   window.addEventListener('resize', function () { fitPreview(); if ($('aps_modal').classList.contains('open')) fitModal(); });
@@ -729,8 +914,8 @@
   $('aps_docCss').textContent = D.css(null, { sinPagina: true });
   var activado = false;
   function activar() { if (!activado) { activado = true; iniciarServidor(); } refresh(true); fitPreview(); }
-  window.APS_UI = { activar: activar, paginaImprimible: paginaImprimible, abrir: abrirRegistro, misRegistros: abrirRegistros, cargar: cargar, estado: function () { return S; }, pendientes: function () { return ISS.slice(); }, ir: goStep, step: function () { return STEP; } };
-  if (IN_GAS) { $('aps_btnPrint').style.display = 'none'; $('aps_modalPrint').style.display = 'none'; }      // el PDF solo lo ve la coordinación (se muestran al identificar)
+  window.APS_UI = { activar: activar, abrir: abrirRegistro, misRegistros: abrirRegistros, cargar: cargar, estado: function () { return S; }, pendientes: function () { return ISS.slice(); }, ir: goStep, step: function () { return STEP; } };
+  if (IN_GAS) { $('aps_btnPrint').style.display = 'none'; $('aps_modalPrint').style.display = 'none'; $('aps_sinPdf').style.display = ''; }      // el PDF solo lo ve la coordinación (se muestran al identificar)
   if (IN_GAS) ROOT.querySelector('.ejs').style.display = 'none';       // datos de ejemplo: solo coordinador (se muestran al identificar)
   refresh(true);
 })();
