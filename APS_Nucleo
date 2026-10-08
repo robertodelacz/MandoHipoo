@@ -1,0 +1,771 @@
+<!-- APS · NÚCLEO (compartido). Lo usan la pantalla (navegador) y el servidor (PDF). NO editar el texto del clausulado sin autorización. -->
+<script>
+
+/* ═══════════════════════════════════════════════════════════════════
+   APS · UTILIDADES (puras, sin DOM): número a letra, moneda, fechas
+   ═══════════════════════════════════════════════════════════════════ */
+var APS_U = (function () {
+  var U = ['CERO','UNO','DOS','TRES','CUATRO','CINCO','SEIS','SIETE','OCHO','NUEVE','DIEZ','ONCE','DOCE','TRECE','CATORCE','QUINCE','DIECISÉIS','DIECISIETE','DIECIOCHO','DIECINUEVE','VEINTE','VEINTIUNO','VEINTIDÓS','VEINTITRÉS','VEINTICUATRO','VEINTICINCO','VEINTISÉIS','VEINTISIETE','VEINTIOCHO','VEINTINUEVE'];
+  var D = ['','','','TREINTA','CUARENTA','CINCUENTA','SESENTA','SETENTA','OCHENTA','NOVENTA'];
+  var C = ['','CIENTO','DOSCIENTOS','TRESCIENTOS','CUATROCIENTOS','QUINIENTOS','SEISCIENTOS','SETECIENTOS','OCHOCIENTOS','NOVECIENTOS'];
+  var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+  function menorMil(n, apocope) {               // 1..999
+    if (n === 100) return 'CIEN';
+    var c = Math.floor(n / 100), r = n % 100, out = [];
+    if (c) out.push(C[c]);
+    if (r) {
+      if (r < 30) out.push(apocope && r === 1 ? 'UN' : apocope && r === 21 ? 'VEINTIÚN' : U[r]);
+      else {
+        var d = Math.floor(r / 10), u = r % 10;
+        out.push(D[d] + (u ? ' Y ' + (apocope && u === 1 ? 'UN' : U[u]) : ''));
+      }
+    }
+    return out.join(' ');
+  }
+  function miles(x, apocope) {                  // 1..999,999
+    var k = Math.floor(x / 1000), r = x % 1000, o = [];
+    if (k) o.push(k === 1 ? 'MIL' : menorMil(k, true) + ' MIL');
+    if (r) o.push(menorMil(r, apocope));
+    return o.join(' ');
+  }
+  /* Entero 0..999,999,999,999 en letra (mayúsculas). apocope=true → "UN" en vez de "UNO" al final. */
+  function entero(n, apocope) {
+    n = Math.floor(n);
+    if (n === 0) return 'CERO';
+    var millones = Math.floor(n / 1e6), resto = n % 1e6, out = [];
+    if (millones) out.push(millones === 1 ? 'UN MILLÓN' : miles(millones, true) + ' MILLONES');
+    if (resto) out.push(miles(resto, apocope));
+    return out.join(' ');
+  }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+  /* Texto → número (acepta "$ 1,500,000.50"). NaN si no es válido. */
+  function parseNum(s) {
+    if (typeof s === 'number') return s;
+    if (s === null || s === undefined) return NaN;
+    var t = String(s).replace(/[\s$]/g, '').replace(/,/g, '');
+    if (t === '' || !/^\d*\.?\d*$/.test(t) || t === '.') return NaN;
+    return parseFloat(t);
+  }
+  /* 1500000 → "1,500,000.00" */
+  function formatoNum(x) {
+    var s = (Math.round(x * 100) / 100).toFixed(2).split('.');
+    return s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + s[1];
+  }
+  /* "$1,500,000.00 (UN MILLÓN QUINIENTOS MIL PESOS 00/100 M.N.)" */
+  function montoALetras(x) {
+    var cent = Math.round(x * 100), ent = Math.floor(cent / 100), c = cent % 100;
+    var de = (ent >= 1e6 && ent % 1e6 === 0) ? ' DE' : '';
+    return entero(ent, true) + de + ' ' + (ent === 1 ? 'PESO' : 'PESOS') + ' ' + pad2(c) + '/100 M.N.';
+  }
+  function montoCompleto(x) { return '$' + formatoNum(x) + ' (' + montoALetras(x) + ')'; }
+
+  /* 3 → "3 % (TRES por ciento)" · 2.5 → "2.5 % (DOS PUNTO CINCO por ciento)" */
+  /* Primera letra mayúscula y el resto en minúsculas ("CUATRO" → "Cuatro", "CINCUENTA Y CINCO" → "Cincuenta y cinco").
+     Para porcentajes y vigencias; el monto en letra del dinero se queda en mayúsculas (es la convención). */
+  function fraseDesdeMayus(s) { return s ? s.charAt(0) + s.slice(1).toLowerCase() : s; }
+  function porcientoALetras(p) {
+    var s = String(Math.round(p * 100) / 100), pt = s.split('.');
+    var e = entero(parseInt(pt[0], 10), false);
+    if (pt[1]) {
+      var dec = pt[1].length === 1 ? pt[1] + '0' : pt[1];      // "5" → 50 centésimas
+      var txt = dec.charAt(1) === '0' ? entero(parseInt(dec.charAt(0), 10), false)
+              : (dec.charAt(0) === '0' ? 'CERO ' : '') + entero(parseInt(dec, 10), false);
+      e += ' PUNTO ' + txt;
+    }
+    return fraseDesdeMayus(e);
+  }
+  function porcientoCompleto(p) { return String(Math.round(p * 100) / 100) + ' % (' + porcientoALetras(p) + ' por ciento)'; }
+
+  /* 12 → "(12) DOCE meses" */
+  function mesesCompleto(n) { return '(' + n + ') ' + fraseDesdeMayus(entero(n, true)) + (n === 1 ? ' mes' : ' meses'); }
+
+  /* '2026-09-20' → "20 de septiembre de 2026" */
+  function fechaLarga(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    if (!m) return '';
+    var mes = parseInt(m[2], 10), dia = parseInt(m[3], 10);
+    if (mes < 1 || mes > 12 || dia < 1 || dia > 31) return '';
+    return dia + ' de ' + MESES[mes - 1] + ' de ' + m[1];
+  }
+  /* "A, B y C" */
+  function unir(lista) {
+    lista = lista.filter(Boolean);
+    if (lista.length <= 1) return lista.join('');
+    return lista.slice(0, -1).join(', ') + ' y ' + lista[lista.length - 1];
+  }
+  function esc(s) {
+    return String(s === null || s === undefined ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  /* '2026-11-30' + 3 meses → '2027-02-28' (ajusta el día al fin de mes) */
+  function sumaMeses(iso, n) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    if (!m) return '';
+    var t = parseInt(m[1], 10) * 12 + (parseInt(m[2], 10) - 1) + n, y = Math.floor(t / 12), mo = t % 12, dia = parseInt(m[3], 10);
+    var fin = new Date(y, mo + 1, 0).getDate();
+    return y + '-' + pad2(mo + 1) + '-' + pad2(Math.min(dia, fin));
+  }
+
+  /* ── Direcciones estructuradas ── */
+  var ESTADOS_MX = ['Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango',
+    'Estado de México', 'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo',
+    'San Luis Potosí', 'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'];
+  function limpiaDir(s) { return String(s === null || s === undefined ? '' : s).replace(/[,;]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/[.\s]+$/, ''); }
+  var DIC_TXT = 'Aarón Ábalos Adrián Aérea Aéreo Águila Águilas Agustín Álamo Álamos Alcalá Alcántara Alcázar Alemán Alemania Algarín Álvarez Álvaro Ámbar Amézquita Ámsterdam Andrés Ánfora Ángel Ángela Ángeles Angélica Ánimas Antón Apatzingán Aragón Arámbula Árbol Árboles Arévalo Arróyave Artillería Astronomía Asunción Atizapán Ávalos Ávila Báez Bahía Bañuelos Bárbara Bárcenas Barragán Belén Bélgica Beltrán Benjamín Berlín Bermúdez Bernabé Biología Bogotá Bolívar Boulevard Briseño Bucerías Búho Caballería Cabañas Cádiz Calderón Callejón Cámara Cámaras Cañadas Cancún Cañón Cantú Cárdenas Carrión Castañeda Castañón Cázares Cerón César Chacón Chávez Chimalhuacán Ciénaga Ciénega Círculo Cirugía Citlaltépetl Clavería Clínica Colibrí Colón Concepción Cóndor Córdoba Córdova Cortés Coyoacán Cuauhtémoc Cuautitlán Cuéllar Cuitláhuac Culhuacán Culiacán Cúpula Dávila Delfín Díaz Domínguez Dueñas Durán Ébano Echeverría Economía Efraín Ejército Eléctricos Elías Encarnación Escandón Escuadrón España Espíritu Estévez Éxito Fabián Fábrica Fábricas Faisán Falcón Fénix Fernández Filosofía Física Galán Gálvez García Gavilán Gaytán Génova Geología Germán Godínez Gómez González Guillén Gutiérrez Guzmán Haití Halcón Héctor Henríquez Hernández Héroes Hipódromo Ibáñez Índigo Inés Infantería Ingeniería Íñiguez Isaías Iván Iztaccíhuatl Japón Jardín Jáuregui Jazmín Jeremías Jerónimo Jesús Jiménez Joaquín José Juárez Julián Kanasín Lázaro León Lizárraga López Lucía Luján Macías Magaña Magón Málaga Manríquez María Marín Mármol Márquez Marroquín Martín Martínez Mártires Matías Mazatlán Mecánica Mecánicos Mejía Meléndez Méndez Menéndez Mérida México Michoacán Milán Minería Módulo Mónica Montaño Morón Muñiz Muñoz Nájera Nápoles Náutica Netzahualcóyotl Nezahualcóyotl Nicolás Niño Niños Núñez Obregón Océano Océanos Olímpica Olímpico Ónix Ópalo Ópera Óptica Órbita Ordóñez Orduña Órgano Óscar Páez Pájaro Pájaros Panamá Panteón Pantitlán Paraíso París Patiño Pátzcuaro Pelícano Peña Península Peñón Pérez Periférico Perú Pétalos Petén Petróleo Petróleos Piña Pirámide Pirámides Plátano Policía Politécnico Pólvora Popocatépetl Potosí Purísima Querétaro Quetzalcóatl Química Quiñones Quirós Ramírez Ramón Raúl Refinería Rentería República Rincón Río Ríos Rocío Rodríguez Román Rómulo Rubén Rubí Ruiseñor Sábalo Sáenz Salomón Sánchez Santibáñez Satélite Sebastián Secretaría Serdán Serranía Simón Sofía Solís Suárez Tacubaya Taxqueña Tecámac Tecnología Tecnológico Tecomán Tehuacán Teléfonos Telégrafos Tenochtitlán Teotihuacán Tepatitlán Tepotzotlán Terán Tiburón Tizapán Tlacoquemécatl Tláhuac Tomás Tonalá Torreón Tránsito Trébol Treviño Tulipán Tultitlán Túnel Turín Turquía Umán Úrsula Útiles Valdés Vázquez Velázquez Vélez Verónica Vértiz Vía Víctor Villaseñor Volcán Xicoténcatl Xóchitl Xólotl Yáñez Yucatán Zacarías Zárate Zermeño Zitácuaro Zócalo Zúñiga';
+  var DIC = null, PART = { de: 1, del: 1, la: 1, las: 1, los: 1, el: 1, y: 1, e: 1, en: 1, con: 1, al: 1 };
+  var SIGLAS = { cdmx: 1, df: 1, unam: 1, ipn: 1, imss: 1, issste: 1, sep: 1, cfe: 1, uam: 1, itesm: 1, ife: 1 };
+  var EXC_EZ = { jerez: 1, cortez: 1 };
+  function tiene(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }      // evita que palabras como "constructor" coincidan con propiedades internas
+  function llave(w) { return String(w).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }   // sin acentos ni ñ, en minúsculas
+  function diccionario() {
+    if (DIC) return DIC;
+    DIC = {}; DIC_TXT.split(' ').forEach(function (w) { if (w) DIC[llave(w)] = w.toLowerCase(); });
+    return DIC;
+  }
+  /* Apellidos en -ez (González, Pérez, Rodríguez…): casi todos son graves y llevan acento en la sílaba anterior. */
+  function reglaEz(k) {
+    if (k.length < 5 || !/ez$/.test(k) || tiene(EXC_EZ, k)) return '';
+    var m = /[gq]uez$/.test(k) ? k.length - 4 : k.length - 2, stem = k.slice(0, m), g = /([aeiou]+)[^aeiou]*$/.exec(stem);
+    if (!g) return '';
+    var v = g[1], i = g.index, pos, ac = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú' };
+    if (v.length === 1) pos = i;
+    else if (/^(ia|ie|io|ua|ue|uo)$/.test(v)) pos = i + 1;
+    else if (/^(ai|ei|oi|au|eu)$/.test(v)) pos = i;
+    else return '';
+    return stem.slice(0, pos) + ac[stem.charAt(pos)] + stem.slice(pos + 1) + k.slice(m);
+  }
+  function conCaso(r, w) {
+    if (w.length > 1 && w === w.toUpperCase()) return r.toUpperCase();
+    return w.charAt(0) !== w.charAt(0).toLowerCase() ? r.charAt(0).toUpperCase() + r.slice(1) : r;
+  }
+  /* Devuelve la palabra con su acento si es una palabra conocida y se escribió sin él. Lo ya acentuado no se toca. */
+  function acentuaPalabra(w) {
+    if (/[áéíóúÁÉÍÓÚñÑüÜ]/.test(w)) return w;
+    var k = llave(w), r = tiene(diccionario(), k) ? diccionario()[k] : '';
+    if (!r && k.length > 5) { if (/(c|s|g)ion$/.test(k)) r = k.replace(/ion$/, 'ión'); }
+    if (!r) r = reglaEz(k);
+    return r ? conCaso(r, w) : w;
+  }
+  /* Pone en forma un texto de dirección: Mayúscula inicial (de, del, la… en minúscula), acentos de palabras comunes,
+     sin comas ni espacios de más. Respeta lo que ya viene bien escrito (mayúsculas mixtas y acentos). */
+  var ABREV = { av: 'Av.', blvd: 'Blvd.', calz: 'Calz.', prol: 'Prol.', cda: 'Cda.', cto: 'Cto.', gral: 'Gral.', lic: 'Lic.', ing: 'Ing.', dr: 'Dr.', dra: 'Dra.', prof: 'Prof.', esq: 'Esq.', fracc: 'Fracc.', mza: 'Mza.', lt: 'Lt.' };
+  function _formatoPalabraDir(w, off, todo) {
+    var primero = (off === 0), k = llave(w), sig = todo.charAt(off + w.length), ant = todo.charAt(off - 1);
+    if (w.length === 1) {                                                   // letras sueltas: inicial con punto (A.), S/N, y/e
+      if (sig === '.' || sig === '/' || ant === '/') return w.toUpperCase();
+      return (tiene(PART, k) && !primero) ? w.toLowerCase() : w;
+    }
+    if (tiene(ABREV, k) && (w === w.toLowerCase() || w === w.toUpperCase())) return sig === '.' ? ABREV[k].slice(0, -1) : ABREV[k];
+    if (w === w.toLowerCase() || w === w.toUpperCase()) {
+      if (tiene(SIGLAS, k)) w = w.toUpperCase();
+      else if (tiene(PART, k) && !primero) w = w.toLowerCase();
+      else w = w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    }
+    return acentuaPalabra(w);
+  }
+  function normDir(s) {
+    s = limpiaDir(s);
+    if (!s) return '';
+    return s.replace(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+/g, _formatoPalabraDir);
+  }
+  /* Limpieza para texto libre de dirección: a diferencia de limpiaDir, CONSERVA las comas (lote, manzana, fraccionamiento…
+     suelen ir separados por comas) — solo pareja los espacios alrededor de cada una y quita las que sobran. */
+  function limpiaLibre(s) {
+    return String(s === null || s === undefined ? '' : s).replace(/\s+/g, ' ').replace(/\s*,\s*/g, ', ').replace(/(,\s*){2,}/g, ', ')
+      .trim().replace(/^,\s*/, '').replace(/[,;\s]+$/, '');
+  }
+  /* Dirección del inmueble tal como la escribió el asesor (texto libre): mismas correcciones de acentos y mayúsculas
+     que normDir, pero sin forzar el formato "Calle No. Ext., Col., Alcaldía…", porque muchas escrituras traen lote,
+     manzana, fraccionamiento u otra estructura distinta a la del domicilio de contacto. */
+  function normDireccionLibre(s) {
+    s = limpiaLibre(s);
+    if (!s) return '';
+    return s.replace(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+/g, _formatoPalabraDir);
+  }
+  function esCDMX(est) {
+    var t = String(est || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    return t === 'ciudad de mexico' || t === 'cdmx';
+  }
+  /* Dirección completa y en forma: "Av. X No. Ext. 12, No. Int. 3, Col. Y, Alcaldía Z, C.P. 01000, Ciudad de México"
+     (sin comas dentro de los campos, sin espacios dobles, sin "Col."/"Alcaldía" repetidos). '' si no hay nada. */
+  function direccion(d) {
+    if (!d) return '';
+    var calle = normDir(d.calle), ext = limpiaDir(d.numExt).toUpperCase(), int_ = limpiaDir(d.numInt).toUpperCase(), est = limpiaDir(d.estado);
+    var col = normDir(limpiaDir(d.colonia).replace(/^(colonia|col)\.?\s+/i, '')), alc = normDir(limpiaDir(d.alcaldia).replace(/^(alcald[ií]a|municipio|mpio)\.?\s+(de\s+)?/i, ''));
+    var cp = String(d.cp || '').replace(/\D/g, ''), via = calle, p = [];
+    if (ext) via += (via ? ' ' : '') + 'No. Ext. ' + ext;
+    if (int_) via += (via ? ', ' : '') + 'No. Int. ' + int_;
+    if (via) p.push(via);
+    if (col) p.push('Col. ' + col);
+    if (alc) p.push((esCDMX(est) ? 'Alcaldía ' : 'Municipio de ') + alc);
+    if (cp) p.push('C.P. ' + cp);
+    if (est) p.push(est);
+    return p.join(', ');
+  }
+  /* Dirección del inmueble: campo de texto libre (lote, manzana, fraccionamiento, o el formato que traiga la escritura),
+     con acentos y mayúsculas ya corregidos. Si el registro es de antes de este campo (dirección estructurada), se arma
+     con esos datos como respaldo. */
+  function direccionInmueble(d) {
+    d = d || {};
+    if (String(d.inmDomicilio || '').trim()) return normDireccionLibre(d.inmDomicilio);
+    return direccion(d.inmDir) || '';
+  }
+  return { normDir: normDir, normDireccionLibre: normDireccionLibre, acentuaPalabra: acentuaPalabra, direccionInmueble: direccionInmueble, sumaMeses: sumaMeses, direccion: direccion, esCDMX: esCDMX, ESTADOS_MX: ESTADOS_MX, entero: entero, parseNum: parseNum, formatoNum: formatoNum, montoALetras: montoALetras, montoCompleto: montoCompleto,
+           porcientoALetras: porcientoALetras, porcientoCompleto: porcientoCompleto, mesesCompleto: mesesCompleto,
+           fechaLarga: fechaLarga, unir: unir, esc: esc };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
+   APS · TEXTO FIJO (clausulado) — NO EDITAR SIN AUTORIZACIÓN
+   Fuente: APS_Hipoo_v2.docx. Solo se aplicaron las 6 correcciones
+   autorizadas (marcadas con   …  ).
+   ═══════════════════════════════════════════════════════════════════ */
+var APS_TEXTO = {
+  generalidades:
+    'Acuerdo de prestación de servicios de corretaje inmobiliario para venta y/o arrendamiento que celebran por una parte “VELCO CONSULTORES”, SOCIEDAD CIVIL ("Hipoo.mx"), representada por la C. Mariana Ramírez Aguilar, en lo sucesivo “EL PROFESIONAL”, y por otra parte la persona física o moral asentada en el apartado 2 inciso A de la carátula, en lo sucesivo “EL CLIENTE”, denominadas en conjunto como “LAS PARTES”, al tenor de las siguientes:',
+
+  declaraciones: [
+    ['A', 'Declara “EL PROFESIONAL” ser una empresa mexicana debidamente constituida mediante Escritura Pública número 5686, de fecha 23 de enero de 2007 otorgada ante la fe del Lic. Celso de Jesús Pola Castillo, Notario Público número 244 del Distrito Federal e inscrito en el Registro Público de la Propiedad, con Registro Federal de Contribuyentes VCO0701242M1 y que su representante tiene facultades para celebrar el presente acuerdo acreditándolo en esa misma escritura.'],
+    ['B', 'Declara “EL CLIENTE” contar con plena capacidad jurídica para disponer libremente “DEL INMUEBLE” detallado en el apartado 3 de la carátula, ser el único y legítimo propietario y tener la facultad idónea, estar libre de gravámenes y asegurar la veracidad de los datos de la carátula.'],
+    ['C', 'Declaran ambas partes, que celebran este acuerdo de buena fe, libre de vicios de la voluntad, obligándose bajo las siguientes:']
+  ],
+
+  /* tipo: 'p' párrafo · 'b' viñeta · pl = etiqueta en negritas al inicio (no altera el texto) */
+  clausulas: [
+    { t: 'PRIMERA. Objeto y Condiciones', c: [
+      { k: 'p', pl: 'Venta:', x: ' “EL CLIENTE” encomienda a “EL PROFESIONAL” la promoción para la venta de “EL INMUEBLE” bajo el precio inicial, ajustes a la baja y vigencia estipulados en el apartado 4 incisos A, B y C de la carátula. El precio fijado considera el inmueble en el estado físico en que se encuentra actualmente e incluye las instalaciones especiales detalladas en el apartado 3, inciso C de la carátula.' },
+      { k: 'p', pl: 'Renta:', x: ' “EL CLIENTE” encomienda a “EL PROFESIONAL” la promoción para el arrendamiento de “EL INMUEBLE” bajo el monto del arrendamiento inicial y vigencia estipulados en el apartado 5 incisos A, B y C de la carátula.' }
+    ]},
+    { t: 'SEGUNDA. Obligaciones de “EL PROFESIONAL”', c: [
+      { k: 'p', x: 'En cumplimiento del presente Acuerdo, “EL PROFESIONAL” se obliga a:' },
+      { k: 'b', x: 'Orientar a “EL CLIENTE” tanto en el precio estimado en que se puede vender y/o rentar “EL INMUEBLE” como en relación a los documentos necesarios para la operación.' },
+      { k: 'b', x: 'Promover “EL INMUEBLE” a través de los medios que considere adecuados, corriendo con todos los gastos de promoción.' },
+      { k: 'b', x: 'Atender las citas para mostrar “EL INMUEBLE” en los términos acordados con “EL CLIENTE” e informar periódicamente a “EL CLIENTE” los resultados de la promoción, enviando la lista de interesados y comentarios.' },
+      { k: 'b', x: 'Negociar con “EL CLIENTE” las ofertas de compra y/o renta de los interesados, siendo decisión de “EL CLIENTE” aceptar o rechazar dichas ofertas. Una vez aceptada una oferta, se procederá a la firma del contrato de compraventa y/o contrato de arrendamiento, quedando “EL PROFESIONAL” completamente liberado de cualquier responsabilidad en caso de incumplimiento de alguna de las partes.' },
+      { k: 'b', x: 'En el caso de venta, entregar toda la documentación facilitada por “EL CLIENTE” a la notaría o persona física o moral que “EL CLIENTE” indique y apoyar en todo el proceso hasta la firma de la Escritura Pública. En el caso de renta, entregar toda la documentación facilitada por “EL CLIENTE” a la empresa de la póliza jurídica o persona física o moral que “EL CLIENTE” indique y apoyar en todo el proceso hasta la firma del contrato de arrendamiento.' }
+    ]},
+    { t: 'TERCERA. Obligaciones de “EL CLIENTE”', c: [
+      { k: 'p', x: 'Para la consecución de la venta y/o renta, “EL CLIENTE” se obliga a:' },
+      { k: 'b', x: 'Otorgar a “EL PROFESIONAL” la autorización de modalidad de corretaje detallada en el apartado 4, inciso G (venta) y/o en el apartado 5, inciso I (renta) de la carátula, según corresponda, para la venta y/o el arrendamiento de “EL INMUEBLE” por el plazo fijado en la carátula. Dicha vigencia concluirá de manera definitiva al término del plazo detallado en el apartado 4, inciso C (venta) y/o en el apartado 5, inciso C (renta) de la carátula, sin que exista renovación automática bajo ningún supuesto, obligándose las partes a suscribir un nuevo Acuerdo (APS) en caso de decidir continuar con la promoción; sin embargo, “EL CLIENTE” respetará los prospectos registrados por “EL PROFESIONAL”.' },
+      { k: 'b', x: 'Dar a “EL PROFESIONAL” las facilidades necesarias para mostrar “EL INMUEBLE” a los posibles compradores y/o arrendatarios.' },
+      { k: 'b', x: 'Cubrir, en su caso, con sus obligaciones fiscales (Impuesto Sobre la Renta por enajenación) al escriturar y mantener servicios al corriente.' },
+      { k: 'b', x: 'En el caso de venta, pagar los honorarios a “EL PROFESIONAL” detallados en el apartado 4, inciso D de la carátula, una vez aceptada una oferta de compra: liquidación 50% a la firma del contrato privado de compraventa y 50% restante a la firma de la Escritura Pública. En el caso de renta, pagar los honorarios a “EL PROFESIONAL” detallados en el apartado 5, inciso J de la carátula, una vez aceptada una oferta de arrendamiento, realizando la liquidación 100% a la firma del contrato de arrendamiento.' }
+    ]},
+    { t: 'CUARTA. Casos Especiales de Comisión', c: [
+      { k: 'b', x: 'Si el comprador o arrendatario es un conocido o pariente directo aportado por “EL CLIENTE”, se pagará únicamente el 75% de los honorarios pactados, siempre y cuando “EL CLIENTE” solicite apoyo a “EL PROFESIONAL” para llevar a cabo todo el seguimiento de la operación.' },
+      { k: 'b', pl: 'Prospectos Registrados:', x: ' si al vencimiento de este acuerdo no se logró la venta y/o el arrendamiento, “EL CLIENTE” se obliga a respetar por un año calendario a los prospectos registrados por “EL PROFESIONAL”. Si realiza la compraventa y/o el arrendamiento con alguno de ellos, sus familiares o co-inversionistas dentro de ese plazo, pagará el 100% de la comisión a “EL PROFESIONAL”.' },
+      { k: 'b', pl: 'Desistimiento por la oferta total:', x: ' si “EL CLIENTE” rechaza una oferta formal por escrito presentada por “EL PROFESIONAL” que cumpla el 100% de las condiciones planteadas en este acuerdo, o se desiste de la operación tras haber aceptado una propuesta, pagará a “EL PROFESIONAL” el 100% de la comisión como justa indemnización.' }
+    ]},
+    { t: 'QUINTA. Depositario y Penalizaciones Compartidas', c: [
+      { k: 'p', x: '“EL PROFESIONAL” queda autorizado para recibir, en el caso de venta, de los posibles compradores un depósito en garantía de seriedad para soportar su oferta por escrito, por un monto que no excederá en ningún caso el 1% del valor base de la propiedad. Esta cantidad fungirá únicamente como respaldo de la oferta, debiendo ser devuelta en su totalidad “AL OFERENTE” al momento de formalizarse el contrato privado de compraventa.' },
+      { k: 'p', x: '“EL PROFESIONAL” queda autorizado para recibir, en el caso de renta, de los posibles arrendatarios un depósito en garantía de seriedad para soportar su oferta por escrito, por un monto que no excederá en ningún caso 1 mes de arrendamiento base de la propiedad o hasta $30,000.00 pesos. Esta cantidad fungirá únicamente como respaldo de la oferta, debiendo ser devuelta en su totalidad “AL OFERENTE” al momento de formalizar el contrato de arrendamiento.' },
+      { k: 'p', x: 'Para ambos casos, en caso de que “EL OFERENTE” se desista o incumpla sin causa justificada dentro de los 5 días naturales posteriores a la aceptación de su oferta, dicha cantidad se aplicará como pena convencional y se dividirá estrictamente entre “EL CLIENTE” y “EL PROFESIONAL”.' }
+    ]},
+    { t: 'SEXTA. Antilavado (LFPIORPI)', c: [
+      { k: 'p', x: '“EL CLIENTE” se compromete a entregar la información y documentos de identidad de socios, accionistas o beneficiarios controladores que dicte la Ley Antilavado. La entrega de datos falsos o la negativa a cooperar faculta a “EL PROFESIONAL” a rescindir el contrato de inmediato sin responsabilidad.' }
+    ]},
+    { t: 'SÉPTIMA. Jurisdicción y Firmas', c: [
+      { k: 'p', x: 'Para cualquier controversia, las partes se someten a las leyes y Tribunales de la Ciudad de México, renunciando a cualquier otro fuero. Este acuerdo puede ser firmado de manera autógrafa o mediante firmas electrónicas válidas.' }
+    ]}
+  ],
+
+  anexoTitulo: 'ANEXO 1: AVISO DE PRIVACIDAD',
+  anexo: '“VELCO CONSULTORES”, S.C., en lo sucesivo “Hipoo.mx”, con domicilio en Blvd. Manuel Ávila Camacho 184 Piso 7, Colonia Reforma Social, CDMX, es responsable de proteger los datos personales y patrimoniales proporcionados. Los datos se tratarán confidencialmente para prestar el servicio de corretaje pactado, integrar expedientes legales ante notarías y realizar análisis estadísticos internos. “EL CLIENTE” autoriza la transferencia de sus datos personales a los terceros indispensables (notarios, peritos, contrapartes, etc.) para consumar la operación. El aviso de privacidad integral puede ser consultado en el sitio web https://hipoo.mx/. Cualquier actualización o modificación al mismo será publicada en dicha página, sin que sea necesaria una notificación previa al titular. Para ejercer sus derechos ARCO, puede contactarnos por medio del e-mail oficialdatospersonales@velco.mx.'
+};
+
+/* Trazabilidad: las únicas diferencias contra el machote original. */
+var APS_CORRECCIONES = [
+  { id: 1, donde: 'PRIMERA · Venta',     antes: 'la promoción para la venta y/o arrendamiento de “EL INMUEBLE”', despues: 'la promoción para la venta de “EL INMUEBLE”' },
+  { id: 2, donde: 'PRIMERA · Venta',     antes: 'apartado 4 incisos A y B',  despues: 'apartado 4 incisos A, B y C' },
+  { id: 3, donde: 'PRIMERA · Renta',     antes: 'apartado 5 incisos A y B',  despues: 'apartado 5 incisos A, B y C' },
+  { id: 4, donde: 'TERCERA · 1er punto', antes: 'detallado en el apartado 4, inciso G de la carátula, para la venta “DEL INMUEBLE”', despues: 'detallada en el apartado 4, inciso G (venta) y/o en el apartado 5, inciso I (renta) de la carátula, según corresponda, para la venta y/o el arrendamiento de “EL INMUEBLE”' },
+  { id: 5, donde: 'TERCERA · 1er punto', antes: 'plazo detallado en el apartado 4, inciso C de la carátula', despues: 'plazo detallado en el apartado 4, inciso C (venta) y/o en el apartado 5, inciso C (renta) de la carátula' },
+  { id: 6, donde: 'TERCERA · último',    antes: 'apartado 5, inciso I de la carátula, una vez', despues: 'apartado 5, inciso J de la carátula, una vez' }
+];
+
+/* ═══ APS · MODELO DE DATOS Y EJEMPLOS (compartido navegador/servidor) ═══ */
+var APS_MODELO = (function () {
+  function hoyISO() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function newDir() { return { calle: '', numExt: '', numInt: '', colonia: '', alcaldia: '', cp: '', estado: '' }; }
+  function newProp() {
+    return { naturaleza: 'PF', nombre: '', rfc: '', rfcModo: 'normal', rfcRep: '', idDoc: '', idAutoridad: '', representantes: [{ trato: '', nombre: '' }],
+      poderNotario: '', poderNotariaNum: '', poderEscrituraNum: '', poderFecha: '' };
+  }
+  function defaults() {
+    return { tipo: 'venta', propietarios: [newProp()], contactoDir: newDir(), telFijo: '', telMovil: '', correo: '',
+      inmDomicilio: '', escrituraNum: '', escrituraFecha: '', notarioNombre: '', notariaNumDe: '', folioReal: '', instalaciones: '',
+      precio: '', ajustes: [], vigenciaVentaMeses: '', honorariosPct: '', ivaVenta: '', modalidadVenta: '',
+      rentaMonto: '', mantenimiento: '', vigenciaRentaMeses: '', duracion: '', duracionOtro: '', garantias: [], deposito: '', rentasAdelantadas: '',
+      destino: '', menores: '', mascotas: '', modalidadRenta: '', ivaRenta: '', lugar: 'Ciudad de México', fecha: hoyISO() };
+  }
+  function P(o) { return Object.assign(newProp(), o); }
+  var EJ = {
+    A: function () { var d = defaults(); Object.assign(d, { tipo: 'venta',
+      propietarios: [P({ naturaleza: 'PM', nombre: 'Constructora Lomas del Valle, S.A. de C.V.', representantes: [{ trato: 'Sra.', nombre: 'Laura Beltrán Ortega' }], rfc: 'CLV150312AB3', rfcRep: 'BEOL800215HK2', idDoc: 'INE 0123456789012', idAutoridad: 'Instituto Nacional Electoral', poderNotario: 'Lic. Andrés Villaseñor Mora', poderNotariaNum: '112', poderEscrituraNum: '48,215', poderFecha: '2021-04-12' })],
+      contactoDir: { calle: 'Av. de los Insurgentes Sur', numExt: '1602', numInt: 'Piso 4', colonia: 'Crédito Constructor', alcaldia: 'Benito Juárez', cp: '03940', estado: 'Ciudad de México' }, telFijo: '5555550123', telMovil: '5512345678', correo: 'contacto@lomasdelvalle.example',
+      inmDomicilio: 'Calle Sierra Vertientes No. 245, Colonia Lomas de Chapultepec, Alcaldía Miguel Hidalgo, C.P. 11000, Ciudad de México', escrituraNum: '31,904', escrituraFecha: '2018-09-05', notarioNombre: 'Lic. Marcela Ortiz Bravo', notariaNumDe: '87 de la Ciudad de México', folioReal: '9012345', instalaciones: 'Cocina integral, cisterna de 10,000 litros y sistema de calentadores solares',
+      precio: '18,500,000.00', ajustes: [{ fecha: '2026-12-20', monto: '17,900,000' }, { fecha: '2027-01-20', monto: '17,400,000' }], vigenciaVentaMeses: '6', honorariosPct: '4', ivaVenta: 'mas', modalidadVenta: 'exclusiva' }); return d; },
+    B: function () { var d = defaults(); Object.assign(d, { tipo: 'ambas',
+      propietarios: [P({ nombre: 'Ricardo Mendoza Aguirre', rfc: 'MEAR760318QR4', idDoc: 'INE 4589012367145', idAutoridad: 'Instituto Nacional Electoral' }),
+                     P({ nombre: 'Patricia Soto Villalobos', rfc: 'SOVP790822LK9', idDoc: 'INE 7712345098231', idAutoridad: 'Instituto Nacional Electoral' })],
+      contactoDir: { calle: 'Calle Amsterdam', numExt: '78', numInt: '5', colonia: 'Condesa', alcaldia: 'Cuauhtémoc', cp: '06100', estado: 'Ciudad de México' }, telMovil: '5587654321', correo: 'ricardo.mendoza@correo.example',
+      inmDomicilio: 'Calle Durango No. 120, Interior 802, Colonia Roma Norte, Alcaldía Cuauhtémoc, C.P. 06700, Ciudad de México', escrituraNum: '58,730', escrituraFecha: '2015-03-19', notarioNombre: 'Lic. Héctor Ramos Cervantes', notariaNumDe: '203 de la Ciudad de México', folioReal: '2210987',
+      precio: '6,200,000', ajustes: [{ fecha: '2026-11-20', monto: '6,000,000' }], vigenciaVentaMeses: '4', honorariosPct: '3.5', ivaVenta: 'incluido', modalidadVenta: 'no_exclusiva',
+      rentaMonto: '28,000', mantenimiento: 'incluido', vigenciaRentaMeses: '3', duracion: '2', garantias: ['poliza', 'fiador'], deposito: '28,000', rentasAdelantadas: '1', destino: 'habitacional', menores: 'SI', mascotas: 'NO', modalidadRenta: 'exclusiva', ivaRenta: 'mas' }); return d; },
+    C: function () { var d = defaults(); Object.assign(d, { tipo: 'renta',
+      propietarios: [P({ nombre: 'Gabriela Núñez Cárdenas', rfc: 'NUCG850922L58', idDoc: 'Pasaporte G12345678', idAutoridad: 'Secretaría de Relaciones Exteriores' })],
+      contactoDir: { calle: 'Av. Universidad', numExt: '1330', numInt: '', colonia: 'Del Carmen', alcaldia: 'Coyoacán', cp: '04100', estado: 'Ciudad de México' }, telMovil: '5544332211', correo: 'gabriela.nunez@correo.example',
+      inmDomicilio: 'Avenida Coyoacán No. 1450, Local 3, Colonia Del Valle Centro, Alcaldía Benito Juárez, C.P. 03100, Ciudad de México', escrituraNum: '22,118', escrituraFecha: '2019-11-27', notarioNombre: 'Lic. Sergio Paniagua Luna', notariaNumDe: '15 de la Ciudad de México', folioReal: '7712345',
+      rentaMonto: '9,500', mantenimiento: 'no_incluido', vigenciaRentaMeses: '2', duracion: 'otro', duracionOtro: '3 años', garantias: ['fiador'], deposito: '9,500', rentasAdelantadas: '0', destino: 'comercial', menores: 'SI', mascotas: 'SI', modalidadRenta: 'no_exclusiva', ivaRenta: 'incluido' }); return d; },
+    D: function () { var d = defaults(); Object.assign(d, { tipo: 'venta',
+      propietarios: [P({ nombre: 'Alberto Fuentes Lara', rfc: 'FULA700604TR2', idDoc: 'INE 3344556677889', idAutoridad: 'Instituto Nacional Electoral' }),
+                     P({ nombre: 'Mariana Lara Espinosa', rfc: 'LAEM720130HB6', idDoc: 'INE 9988776655443', idAutoridad: 'Instituto Nacional Electoral' }),
+                     P({ naturaleza: 'PM', nombre: 'Inmuebles del Sur, S.A.P.I. de C.V.', representantes: [{ trato: 'Sr.', nombre: 'Jorge Iván Castillo Reyes' }, { trato: 'Sra.', nombre: 'Daniela Robles Meza' }], rfc: 'ISU120709QW1', rfcRep: 'CARJ780415PL3', idDoc: 'INE 1122334455667', idAutoridad: 'Instituto Nacional Electoral', poderNotario: 'Lic. Pablo Guerrero Ríos', poderNotariaNum: '68', poderEscrituraNum: '91,442', poderFecha: '2022-08-30' })],
+      contactoDir: { calle: 'Paseo de las Palmas', numExt: '405', numInt: '', colonia: 'Lomas de Chapultepec', alcaldia: 'Miguel Hidalgo', cp: '11000', estado: 'Ciudad de México' }, telFijo: '5552001122', telMovil: '5511223344', correo: 'alberto.fuentes@correo.example',
+      inmDomicilio: 'Lote 14, Manzana 7, Fraccionamiento Residencial Guadalupe Inn, Avenida Insurgentes Sur No. 1971, Torre B Piso 9, Alcaldía Álvaro Obregón, C.P. 01020, Ciudad de México', escrituraNum: '77,310', escrituraFecha: '2020-02-14', notarioNombre: 'Lic. Verónica Salas Domínguez', notariaNumDe: '31 de la Ciudad de México', folioReal: '5561234',
+      precio: '32,750,000', vigenciaVentaMeses: '12', honorariosPct: '3', ivaVenta: 'mas', modalidadVenta: 'exclusiva' }); return d; }
+  };
+  return { hoyISO: hoyISO, newDir: newDir, newProp: newProp, defaults: defaults, ejemplos: EJ };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
+   APS · MOTOR DEL DOCUMENTO (puro, sin DOM)
+   render(datos, opciones) → HTML del contrato  ·  validar(datos) → pendientes
+   Solo tablas y CSS básico. Paleta en escala de grises (impresión B/N).
+   Modelo: d.propietarios = [ {naturaleza:'PF'|'PM', nombre, rfc, rfcRep,
+           idDoc, idAutoridad, representantes:[{trato,nombre}], poder*} ]  (1 a 4)
+   ═══════════════════════════════════════════════════════════════════ */
+var APS_DOC = (function (U, T) {
+  var esc = U.esc;
+
+  var CFG = {
+    razon: 'VELCO CONSULTORES, S.C.',
+    representante: 'Mariana Ramírez Aguilar',
+    banco: 'BANCO INBURSA',
+    clabe: '036180500715889515',
+    titular: 'VELCO CONSULTORES, SOCIEDAD CIVIL',
+    pie: 'Torre del Árbol, Periférico. Blvd. Manuel Ávila Camacho 184 Piso 7, Col. Reforma Social, 11650, Ciudad de México. Tel. 55 81 17 17 17',
+    web: 'hipoo.mx',
+    /* Logo: URL pública de Drive (archivo "Logo Hipo.png"). Puede sustituirse por un data URI (PNG en base64).
+       Si no carga, el documento muestra el wordmark "hipoo.mx" en texto. */
+    logoSrc: 'https://drive.google.com/thumbnail?id=14hryvZUI3VK_xzaOnVjIc_x8MYVjns2R&sz=w1000',
+    paleta: 'grises',            // 'grises' (recomendada para impresión B/N) | 'azul' (azul tenue)
+    anexoFirmanTodos: true,      // el Anexo 1 lo firman todos los firmantes de la carátula
+    margenLateralMm: 20,         // márgenes DENTRO del documento (así salen igual imprimiendo, guardando PDF o en el servidor)
+    margenSuperiorMm: 15,
+    margenInferiorMm: 12,
+    margenNumPagMm: 8,            // franja reservada al pie, FUERA del margen de arriba, solo para "Página X de N" (vía @page; si el motor de impresión la ignora, no pasa nada más que no se vea el número)
+    clausuladoEnHojaNueva: false // true = el clausulado empieza siempre en hoja nueva (false = continúa tras la carátula, sin huecos)
+  };
+
+  /* ── helpers de datos ── */
+  function tieneVenta(d) { return d.tipo === 'venta' || d.tipo === 'ambas'; }
+  function tieneRenta(d) { return d.tipo === 'renta' || d.tipo === 'ambas'; }
+  function blank() { return '<span class="bl">&nbsp;</span>'; }
+  function txt(s) { s = (s === null || s === undefined) ? '' : String(s).trim(); return s ? esc(s) : blank(); }
+  function num(s) { return U.parseNum(s); }
+  function monto(s) { var n = num(s); return isNaN(n) ? blank() : esc(U.montoCompleto(n)); }
+  function pct(s) { var n = num(s); return isNaN(n) ? blank() : esc(U.porcientoCompleto(n)); }
+  /* 'mas' → 'más IVA' · 'incluido' → 'IVA incluido' · sin elegir → deja constancia visual del pendiente */
+  function ivaFrase(v) { return v === 'incluido' ? 'IVA incluido' : (v === 'mas' ? 'más IVA' : blank()); }
+  function meses(s) { var n = num(s); return (isNaN(n) || n < 1) ? blank() : esc(U.mesesCompleto(Math.round(n))); }
+  function fecha(s) { var f = U.fechaLarga(s); return f ? esc(f) : blank(); }
+  function nota(s) { return '<div class="sn">' + s + '</div>'; }
+  function k(s) { return '<span class="k">' + s + '</span>'; }
+  function tipoProp(p) { return p.naturaleza === 'PM' ? 'Persona moral' : 'Persona física'; }
+  function dirTxt(dir, legacy) { var s = dir ? U.direccion(dir) : ''; return s || String(legacy || ''); }
+  function ajustesHtml(d) {
+    var A = d.ajustes || [];
+    if (!A.length) return 'No aplica';
+    var h = 'El precio de venta se ajustará a la baja conforme al siguiente calendario:';
+    A.forEach(function (a, i) { h += '<div class="aj"><b>Ajuste ' + (i + 1) + ':</b> a partir del ' + fecha(a.fecha) + ', precio de venta de ' + monto(a.monto) + '.</div>'; });
+    return h;
+  }
+  function props(d) { return (d.propietarios && d.propietarios.length) ? d.propietarios : [{ naturaleza: 'PF', nombre: '' }]; }
+
+  /* ── firmantes: uno por propietario persona física; uno por representante en persona moral ── */
+  function firmantes(d) {
+    var f = [];
+    props(d).forEach(function (p, i) {
+      if (p.naturaleza === 'PM') {
+        var reps = (p.representantes && p.representantes.length) ? p.representantes : [{ trato: '', nombre: '' }];
+        reps.forEach(function (r) { f.push({ pm: true, idx: i, razon: p.nombre, trato: r.trato, nombre: r.nombre }); });
+      } else f.push({ pm: false, idx: i, nombre: p.nombre });
+    });
+    return f;
+  }
+  function celdaFirma(f, nProp, centrada) {
+    var etq = '“EL CLIENTE”', l2, l3;               // jurídicamente “EL CLIENTE” engloba a todos los propietarios: no se numera
+    if (f.pm) {
+      var art = f.trato === 'Sra.' ? 'la Sra.' : (f.trato === 'Sr.' ? 'el Sr.' : '');
+      l2 = txt(f.razon);
+      l3 = 'Representada por ' + (art ? art + ' ' : '') + txt(f.nombre);
+    } else {
+      l2 = 'Por propio derecho';
+      l3 = 'Nombre: ' + txt(f.nombre);
+    }
+    return '<td' + (centrada ? ' colspan="2" class="one"' : '') + '><div class="fl">&nbsp;</div><div class="fe">' + etq + '</div><div class="fs">' + l2 + '</div><div class="fs">' + l3 + '</div></td>';
+  }
+  function celdaProfesional(centrada) {
+    return '<td' + (centrada ? ' colspan="2" class="one"' : '') + '><div class="fl">&nbsp;</div><div class="fe">“EL PROFESIONAL”</div><div class="fs">' + esc(CFG.razon) + '</div><div class="fs">' + esc(CFG.representante) + '</div></td>';
+  }
+  /* Cuadrícula de firmas en 2 columnas (sin bloques altos que dejen huecos entre hojas). conProfesional: “EL PROFESIONAL” va en la primera celda. */
+  function bloqueFirmas(d, soloPrimero, conProfesional) {
+    var f = firmantes(d), nProp = props(d).length, celdas = [], filas = '', i;
+    if (soloPrimero) f = f.slice(0, 1);
+    var total = f.length + (conProfesional ? 1 : 0);
+    if (conProfesional) celdas.push(function (c) { return celdaProfesional(c); });
+    f.forEach(function (x) { celdas.push(function (c) { return celdaFirma(x, nProp, c); }); });
+    if (total === 1) return '<table class="fr"><tr>' + celdas[0](true) + '</tr></table>';
+    for (i = 0; i < celdas.length; i += 2) filas += '<tr>' + celdas[i](!celdas[i + 1]) + (celdas[i + 1] ? celdas[i + 1](false) : '') + '</tr>';
+    return '<table class="fr">' + filas + '</table>';
+  }
+
+  /* ── carátula ── */
+  function fila(letra, etiqueta, html, sub, alta) {
+    return '<tr' + (alta ? ' class="tall"' : '') + '><td class="lb">' + (letra ? letra + '. ' : '') + etiqueta + (sub ? nota(sub) : '') + '</td><td class="vl">' + html + '</td></tr>';
+  }
+  function banda(t) { return '<tr><td colspan="2" class="bd">' + t + '</td></tr>'; }
+  function seccion(numero, titulo, filas) {
+    return '<table class="cs"><thead><tr><th colspan="2"><span class="ch">' + numero + '</span>' + titulo + '</th></tr></thead><tbody>' + filas + '</tbody></table>';
+  }
+  function dos(a, b) { return '<table class="sv"><tr><td>' + a + '</td><td>' + b + '</td></tr></table>'; }
+  function fijoBanco() {
+    return k('Banco: ') + esc(CFG.banco) + '&nbsp;&nbsp;&nbsp;' + k('CLABE: ') + esc(CFG.clabe) + '<br>' + k('Titular: ') + esc(CFG.titular);
+  }
+
+  function secTipo(d) {
+    var t = d.tipo === 'ambas' ? 'Venta y arrendamiento' : (d.tipo === 'renta' ? 'Arrendamiento' : (d.tipo === 'venta' ? 'Venta' : ''));
+    return seccion(1, 'Tipo de operación', fila('A', 'Tipo de operación', t ? esc(t) : blank()));
+  }
+  function secCliente(d) {
+    var P = props(d), multi = P.length > 1, L = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', i = 0, r = '';
+    function add(etq, html, sub) { r += fila(L.charAt(i++), etq, html, sub); }
+    function datosProp(p) {
+      var pm = p.naturaleza === 'PM';
+      if (pm) {
+        var reps = (p.representantes || []).map(function (x) { return ((x.trato ? x.trato + ' ' : '') + (x.nombre || '')).trim(); }).filter(Boolean);
+        add('Representante / Apoderado', reps.length ? esc(U.unir(reps)) : blank());
+        add('RFC', dos(k('Empresa: ') + txt(rfcTexto(p.rfc, p.rfcModo)), k('Representante: ') + rfcRepHtml(p.rfcRep)));
+      } else add('RFC', txt(rfcTexto(p.rfc, p.rfcModo)));
+      add('Identificación Oficial Vigente', dos(k('Documento / Número: ') + txt(p.idDoc), k('Autoridad Emisora: ') + txt(p.idAutoridad)));
+      if (pm) add('Acta Poder del Representante Legal',
+        dos(k('Notario Público: ') + txt(p.poderNotario) + '<br>' + k('Núm: ') + txt(p.poderNotariaNum),
+            k('Escritura: ') + '<br>' + k('Núm: ') + txt(p.poderEscrituraNum) + '<br>' + k('Fecha: ') + fecha(p.poderFecha)));
+    }
+    if (!multi) {
+      r += fila('', 'Naturaleza Legal', tipoProp(P[0]));
+      add('Nombre o Razón Social', txt(P[0].nombre));
+      datosProp(P[0]);
+    } else {
+      add('Nombre o Razón Social', P.map(function (p, j) {
+        return '<div class="ow"><b>' + (j + 1) + '.</b> ' + txt(p.nombre) + ' <span class="tp">· ' + tipoProp(p) + '</span></div>'; }).join(''));
+      P.forEach(function (p, j) { r += banda('Propietario ' + (j + 1) + ' · ' + tipoProp(p)); datosProp(p); });
+    }
+    add('Domicilio para notificaciones', txt(dirTxt(d.contactoDir, d.domicilioNotif)));
+    add('Teléfonos de Contacto', dos(k('Fijo: ') + (String(d.telFijo || '').trim() ? esc(d.telFijo) : '—'), k('Móvil: ') + txt(d.telMovil)));
+    add('Correo Electrónico', txt(d.correo));
+    return seccion(2, multi ? 'Los clientes (propietarios)' : 'El cliente (propietario)', r);
+  }
+  function secInmueble(d) {
+    var tit = d.tipo === 'venta' ? 'Inmueble objeto de la venta' : (d.tipo === 'renta' ? 'Inmueble objeto del arrendamiento' : 'Inmueble objeto de la venta y arrendamiento');
+    var titulo = dos(k('Núm. de Escritura: ') + txt(d.escrituraNum), k('Fecha: ') + fecha(d.escrituraFecha)) +
+      dos(k('Notario Público: ') + txt(d.notarioNombre), k('Núm. / De: ') + txt(d.notariaNumDe)) +
+      '<div style="margin-top:2pt">' + k('Folio Real o Partida (RPP): ') + txt(d.folioReal) + '</div>';
+    var inst = String(d.instalaciones || '').trim();
+    return seccion(3, tit,
+      fila('A', 'Domicilio', txt(U.direccionInmueble(d)), '(Tal y como aparece en el Título de Propiedad)') +
+      fila('B', 'Datos del título de propiedad', titulo) +
+      fila('C', 'Instalaciones Incluidas', inst ? esc(inst) : 'No aplica', '', true));
+  }
+  function secVenta(d) {
+    return seccion(4, 'Condiciones comerciales y de corretaje — Venta',
+      fila('A', 'Precio Venta Base', monto(d.precio) + nota('* Nota: El precio considera el inmueble en el estado físico en que se encuentra.')) +
+      fila('B', 'Esquema de Ajuste de Precio', ajustesHtml(d), '', true) +
+      fila('C', 'Vigencia Forzosa', meses(d.vigenciaVentaMeses) + ' a partir de la firma. Sin renovación automática.' + nota('Al término de este plazo, se requiere obligatoriamente un nuevo acuerdo escrito (APS).')) +
+      fila('D', 'Honorarios por Venta', pct(d.honorariosPct) + (d.ivaVenta === 'incluido' ? ', ' + ivaFrase(d.ivaVenta) + ',' : ' ' + ivaFrase(d.ivaVenta)) + ' sobre el precio final pactado en la compraventa.' + nota('Generados de forma automática al aceptarse una oferta de compra formal por “EL CLIENTE”.')) +
+      fila('E', 'Forma de Liquidación', '50% a la firma del Contrato Privado de Compraventa y 50% a la firma de la Escritura Pública.') +
+      fila('F', 'Operación Referida', '75% de la comisión total estipulada, si “EL CLIENTE” aporta directamente al comprador (parientes o conocidos).') +
+      fila('G', 'Modalidad de Corretaje', d.modalidadVenta === 'exclusiva' ? 'EN EXCLUSIVA' : (d.modalidadVenta === 'no_exclusiva' ? 'NO EXCLUSIVA' : blank())) +
+      fila('H', 'Cuenta Bancaria Pago de Comisión', fijoBanco()) +
+      fila('I', 'Fecha de Firma', fecha(d.fecha)));
+  }
+  function secRenta(d) {
+    var dur = d.duracion === '1' ? '1 año forzoso' : (d.duracion === '2' ? '2 años' : (d.duracion === 'otro' ? 'Otro plazo: ' + txt(d.duracionOtro) : blank()));
+    var gmap = { poliza: 'Póliza de Servicios Jurídicos', fiador: 'Fiador con Inmueble libre de gravamen' };
+    var gar = (d.garantias || []).map(function (g) { return gmap[g]; }).filter(Boolean);
+    var ra = num(d.rentasAdelantadas);
+    var restr = k('¿Aceptan menores de 12 años? ') + (d.menores === 'SI' ? 'SÍ' : (d.menores === 'NO' ? 'NO' : '—')) +
+      '<br>' + k('¿Aceptan mascotas? ') + (d.mascotas === 'SI' ? 'SÍ' : (d.mascotas === 'NO' ? 'NO' : '—')) + nota('* ver reglamento del inmueble');
+    var ivaR = ivaFrase(d.ivaRenta);
+    var hon = 'Contrato de 1 año: 1 mes de arrendamiento ' + ivaR + '.<br>Contrato de 2 años: 1 mes y medio de arrendamiento ' + ivaR + '.<br>Contrato de 3 años o más: 2 meses de arrendamiento ' + ivaR + '.<br>Tarifa Mínima (si el arrendamiento es &lt; a $10,000.00 M.N.): $10,000.00 M.N. ' + ivaR + ', al igual que las gestiones por renovación con el mismo inquilino.';
+    return seccion(5, 'Condiciones comerciales y de corretaje — Arrendamiento',
+      fila('A', 'Arrendamiento base mensual', monto(d.rentaMonto)) +
+      fila('B', 'Mantenimiento mensual', d.mantenimiento === 'incluido' ? 'Incluido' : (d.mantenimiento === 'no_incluido' ? 'No incluido' : blank())) +
+      fila('C', 'Vigencia Forzosa', meses(d.vigenciaRentaMeses) + ' a partir de la firma. Sin renovación automática.' + nota('Al término de este plazo, se requiere obligatoriamente un nuevo acuerdo escrito (APS).')) +
+      fila('D', 'Duración Mínima del arrendamiento', dur) +
+      fila('E', 'Garantías Requeridas', gar.length ? esc(U.unir(gar)) : blank()) +
+      fila('F', 'Depósito y Adelantos', k('Depósito en Garantía: ') + monto(d.deposito) + '<br>' + k('Rentas Adelantadas: ') + (isNaN(ra) ? blank() : (ra === 0 ? 'Ninguna' : esc(U.mesesCompleto(Math.round(ra)))))) +
+      fila('G', 'Destino / Uso autorizado', { habitacional: 'Habitacional', comercial: 'Comercial', oficinas: 'Oficinas' }[d.destino] || blank()) +
+      fila('H', 'Restricciones', restr) +
+      fila('I', 'Modalidad de Corretaje', d.modalidadRenta === 'exclusiva' ? 'EN EXCLUSIVA' : (d.modalidadRenta === 'no_exclusiva' ? 'NO EXCLUSIVA' : blank())) +
+      fila('J', 'Honorarios Profesionales', hon) +
+      fila('K', 'Cuenta Bancaria Pago de Comisiones', fijoBanco()) +
+      fila('L', 'Fecha de Firma', fecha(d.fecha)));
+  }
+
+  function caratula(d) {
+    var h = '<div class="tit">AVISO DE PRESTACIÓN DE SERVICIOS DE CORRETAJE INMOBILIARIO</div><div class="sub">CARÁTULA</div>';
+    h += secTipo(d) + secCliente(d) + secInmueble(d);
+    if (tieneVenta(d)) h += secVenta(d);
+    if (tieneRenta(d)) h += secRenta(d);
+    h += '<div class="sig">' + bloqueFirmas(d, false, true);
+    h += '<p class="nt">La presente carátula forma parte integrante del Aviso de Prestación de Servicios que celebran “EL PROFESIONAL” y “EL CLIENTE”.</p>';
+    h += '</div>';
+    return h;
+  }
+
+  /* ── clausulado (texto fijo): formato de contrato — títulos centrados, cláusulas en negritas, incisos con sangría francesa ── */
+  function item(marca, inner) { return '<table class="it"><tr><td class="mk">' + marca + '</td><td>' + inner + '</td></tr></table>'; }
+  function clausulado() {
+    var h = '<div class="h2">Generalidades del Aviso</div><p class="j">' + esc(T.generalidades) + '</p>';
+    h += '<div class="h2">Declaraciones</div>';
+    T.declaraciones.forEach(function (x) { h += item('<b>' + x[0] + '.</b>', esc(x[1])); });
+    h += '<div class="h2">Cláusulas</div>';
+    T.clausulas.forEach(function (cl) {
+      h += '<div class="ct">' + esc(cl.t) + '</div>';
+      var n = 0;
+      cl.c.forEach(function (p) {
+        var inner = (p.pl ? '<b>' + esc(p.pl) + '</b>' : '') + esc(p.x);
+        h += p.k === 'b' ? item('<b>' + String.fromCharCode(97 + (n++)) + ')</b>', inner) : '<p class="j">' + inner + '</p>';
+      });
+    });
+    return h;
+  }
+  function anexo(d) {
+    var lugar = String(d.lugar || '').trim(), f = U.fechaLarga(d.fecha);
+    var lf = (lugar ? esc(lugar) : blank()) + ', el día ' + (f ? esc(f) : blank());
+    return '<div class="anx"><div class="h2">' + esc(T.anexoTitulo) + '</div><p class="j">' + esc(T.anexo) + '</p><p class="lf">' + lf + '</p><div class="sig">' + bloqueFirmas(d, !CFG.anexoFirmanTodos) + '</div></div>';
+  }
+
+  function encabezado() {
+    // Solo el logo, centrado: el texto "Aviso de Prestación de Servicios de Corretaje Inmobiliario" ya no se repite
+    // aquí — se duplicaba con el título grande de la carátula (y salía en cada hoja).
+    var wm = '<span class="wm1">hipoo</span><span class="wm2">.mx</span>', logo;
+    if (CFG.logoSrc) {
+      logo = '<img class="lg" src="' + esc(CFG.logoSrc) + '" alt="hipoo.mx" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';var s=this.nextSibling;if(s){s.style.display=\'inline\';}">' +
+             '<span style="display:none">' + wm + '</span>';
+    } else logo = wm;
+    return '<div class="hd">' + logo + '</div>';
+  }
+  function pie() { return '<div class="ft">' + esc(CFG.pie) + '<br><b>' + esc(CFG.web) + '</b></div>'; }
+
+  function render(d, opciones) {
+    opciones = opciones || {};
+    var srv = !!opciones.servidor;      // servidor: sin position:fixed (el convertidor de Apps Script puede ignorarlo)
+    return '<div class="aps-doc">' + (opciones.borrador ? '<div class="wmk">BORRADOR</div>' : '') +
+      '<table class="sheet"><thead><tr><td>' + encabezado() + '</td></tr></thead>' +
+      (srv ? '' : '<tfoot><tr><td><div class="fsp">&nbsp;</div></td></tr></tfoot>') +
+      '<tbody><tr><td>' + caratula(d) +
+      '<div class="cl' + (CFG.clausuladoEnHojaNueva ? ' pb' : '') + '">' + clausulado() + anexo(d) + '</div>' +
+      '</td></tr></tbody></table><div class="' + (srv ? 'ftend' : 'pgfoot') + '">' + pie() + '</div></div>';
+  }
+
+  /* ── validación ── */
+  // "¿Cuenta con RFC?" Sí (modo vacío/'normal', el de siempre) / No (cualquier otro valor — incluye los modos
+  // anteriores 'extranjero'/'sin_rfc'/'vacio', por si algún registro viejo los trae guardados).
+  function tieneRfc(modo) { return !modo || modo === 'normal'; }
+  function rfcTexto(rfc, modo) { return tieneRfc(modo) ? String(rfc || '') : 'No proporcionado'; }
+  var RE_RFC = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/;
+  var RE_MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function vacio(s) { return !String(s === null || s === undefined ? '' : s).trim(); }
+  function rfcOk(s) { return RE_RFC.test(String(s || '').toUpperCase().trim()); }
+  function rfcOkOVacio(s) { s = String(s || '').trim(); return !s || rfcOk(s); }      // vacío pasa; si SÍ se escribe algo, debe tener el formato correcto (atrapa errores de dedo)
+  function rfcRepHtml(s) { return String(s || '').trim() ? txt(s) : '<i>No proporcionado</i>'; }
+  function validar(d) {
+    var p = [], P = d.propietarios || [], multi = P.length > 1;
+    function need(step, key, msg, cond) { if (cond) p.push({ step: step, k: key, msg: msg }); }
+    function dirValida(pre, x, etq, step) {
+      x = x || {};
+      var nm = /^[0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ][0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ\-\/ ]{0,19}$/, cdmx = U.esCDMX(x.estado);
+      var corto = function (s, n) { return String(s || '').replace(/[,;]/g, ' ').trim().length < n; };
+      need(step, pre + '.calle', etq + ': calle o avenida', corto(x.calle, 3));
+      need(step, pre + '.numExt', etq + ': número exterior (o S/N)', !nm.test(String(x.numExt || '').trim()));
+      need(step, pre + '.numInt', etq + ': número interior no válido', !!String(x.numInt || '').trim() && !nm.test(String(x.numInt).trim()));
+      need(step, pre + '.colonia', etq + ': colonia', corto(x.colonia, 2));
+      need(step, pre + '.alcaldia', etq + ': ' + (cdmx ? 'alcaldía' : 'municipio'), corto(x.alcaldia, 2));
+      need(step, pre + '.estado', etq + ': estado', U.ESTADOS_MX.indexOf(x.estado) < 0);
+      need(step, pre + '.cp', etq + ': código postal (5 dígitos)', !/^\d{5}$/.test(String(x.cp || '').trim()));
+    }
+    need('operacion', 'tipo', 'Elige el tipo de operación', ['venta', 'renta', 'ambas'].indexOf(d.tipo) < 0);
+    if (!P.length) need('cliente', 'propietarios.0.nombre', 'Agrega al menos un propietario', true);
+    P.forEach(function (o, i) {
+      var pre = 'propietarios.' + i + '.', t = multi ? ' (propietario ' + (i + 1) + ')' : '', pm = o.naturaleza === 'PM';
+      need('cliente', pre + 'naturaleza', 'Persona física o moral' + t, ['PF', 'PM'].indexOf(o.naturaleza) < 0);
+      need('cliente', pre + 'nombre', (pm ? 'Razón social' : 'Nombre completo') + t, vacio(o.nombre));
+      if (pm) {
+        (o.representantes || []).forEach(function (r, j) {
+          need('cliente', pre + 'representantes.' + j + '.nombre', 'Nombre del representante ' + (j + 1) + t, vacio(r.nombre));
+          need('cliente', pre + 'representantes.' + j + '.trato', 'Sr. o Sra. del representante ' + (j + 1) + t, !r.trato);
+        });
+        if (!(o.representantes || []).length) need('cliente', pre + 'nombre', 'Agrega un representante' + t, true);
+        need('cliente', pre + 'rfcRep', 'El RFC del representante' + t + ' no tiene el formato correcto (12 o 13 caracteres) — puedes dejarlo vacío si no lo tiene', !rfcOkOVacio(o.rfcRep));
+        need('cliente', pre + 'poderNotario', 'Notario del poder' + t, vacio(o.poderNotario));
+        need('cliente', pre + 'poderNotariaNum', 'Núm. de notaría del poder' + t, vacio(o.poderNotariaNum));
+        need('cliente', pre + 'poderEscrituraNum', 'Núm. de escritura del poder' + t, vacio(o.poderEscrituraNum));
+        need('cliente', pre + 'poderFecha', 'Fecha de la escritura del poder' + t, !U.fechaLarga(o.poderFecha));
+      }
+      if (!tieneRfc(o.rfcModo)) { /* no cuenta con RFC o no lo quiso dar: no se exige capturar un RFC con formato */ }
+      else need('cliente', pre + 'rfc', (pm ? 'RFC de la empresa' : 'RFC') + t + ' (12 o 13 caracteres)', !rfcOk(o.rfc));
+      need('cliente', pre + 'idDoc', 'Documento y número de identificación' + t, vacio(o.idDoc));
+      need('cliente', pre + 'idAutoridad', 'Autoridad que emitió la identificación' + t, vacio(o.idAutoridad));
+    });
+    dirValida('contactoDir', d.contactoDir, 'Domicilio para notificaciones', 'cliente');
+    need('cliente', 'telMovil', 'Teléfono móvil (10 dígitos)', String(d.telMovil || '').replace(/\D/g, '').length < 10);
+    need('cliente', 'correo', 'Correo electrónico válido', !RE_MAIL.test(String(d.correo || '').trim()));
+    need('inmueble', 'inmDomicilio', 'Escribe el domicilio del inmueble (tal como aparece en la escritura)', !String(d.inmDomicilio || '').trim());
+    need('inmueble', 'escrituraNum', 'Núm. de escritura del inmueble', vacio(d.escrituraNum));
+    need('inmueble', 'escrituraFecha', 'Fecha de la escritura del inmueble', !U.fechaLarga(d.escrituraFecha));
+    need('inmueble', 'notarioNombre', 'Notario público de la escritura', vacio(d.notarioNombre));
+    need('inmueble', 'notariaNumDe', 'Núm. y lugar de la notaría', vacio(d.notariaNumDe));
+    need('inmueble', 'folioReal', 'Folio Real o Partida (RPP)', vacio(d.folioReal));
+    if (tieneVenta(d)) {
+      var pr = num(d.precio), hp = num(d.honorariosPct), vm = num(d.vigenciaVentaMeses);
+      need('venta', 'precio', 'Precio de venta', isNaN(pr) || pr <= 0);
+      need('venta', 'vigenciaVentaMeses', 'Vigencia en meses (venta)', isNaN(vm) || vm < 1);
+      need('venta', 'honorariosPct', 'Porcentaje de honorarios (mayor a 0 y hasta 100)', isNaN(hp) || hp <= 0 || hp > 100);
+      need('venta', 'ivaVenta', 'Honorarios de venta: ¿más IVA o IVA incluido?', ['mas', 'incluido'].indexOf(d.ivaVenta) < 0);
+      need('venta', 'modalidadVenta', 'Modalidad de corretaje (venta)', !d.modalidadVenta);
+      var aj = d.ajustes || [], prevM = pr, prevF = '', ini = U.fechaLarga(d.fecha) ? d.fecha : '', fin = (ini && !isNaN(vm) && vm >= 1) ? U.sumaMeses(ini, Math.round(vm)) : '';
+      need('venta', 'ajustes', 'Máximo 15 ajustes de precio', aj.length > 15);
+      aj.forEach(function (a, i) {
+        var k = 'ajustes.' + i + '.', n = i + 1, m = num(a.monto), fv = U.fechaLarga(a.fecha);
+        if (!fv) need('venta', k + 'fecha', 'Fecha del ajuste ' + n, true);
+        else if (prevF && a.fecha <= prevF) need('venta', k + 'fecha', 'Ajuste ' + n + ': la fecha debe ser posterior a la del ajuste anterior', true);
+        else if (ini && a.fecha <= ini) need('venta', k + 'fecha', 'Ajuste ' + n + ': la fecha debe ser posterior a la firma (' + U.fechaLarga(ini) + ')', true);
+        else if (fin && a.fecha > fin) need('venta', k + 'fecha', 'Ajuste ' + n + ': la fecha queda fuera de la vigencia (hasta ' + U.fechaLarga(fin) + ')', true);
+        if (fv) prevF = a.fecha;
+        if (isNaN(m) || m <= 0) need('venta', k + 'monto', 'Nuevo precio del ajuste ' + n, true);
+        else { if (!isNaN(prevM) && m >= prevM) need('venta', k + 'monto', 'Ajuste ' + n + ': el nuevo precio debe ser menor al anterior (los ajustes son a la baja)', true); prevM = m; }
+      });
+    }
+    if (tieneRenta(d)) {
+      var rm = num(d.rentaMonto), dp = num(d.deposito), ra = num(d.rentasAdelantadas), vr = num(d.vigenciaRentaMeses);
+      need('renta', 'rentaMonto', 'Renta mensual', isNaN(rm) || rm <= 0);
+      need('renta', 'mantenimiento', 'Mantenimiento incluido o no', !d.mantenimiento);
+      need('renta', 'vigenciaRentaMeses', 'Vigencia en meses (arrendamiento)', isNaN(vr) || vr < 1);
+      need('renta', 'duracion', 'Duración mínima del arrendamiento', !d.duracion);
+      need('renta', 'duracionOtro', 'Especifica el otro plazo', d.duracion === 'otro' && vacio(d.duracionOtro));
+      need('renta', 'garantias', 'Elige al menos una garantía', !(d.garantias || []).length);
+      need('renta', 'deposito', 'Depósito en garantía', isNaN(dp) || dp <= 0);
+      need('renta', 'rentasAdelantadas', 'Rentas adelantadas (puede ser 0)', isNaN(ra) || ra < 0);
+      need('renta', 'destino', 'Destino o uso autorizado', !d.destino);
+      need('renta', 'menores', '¿Aceptan menores de 12 años?', !d.menores);
+      need('renta', 'mascotas', '¿Aceptan mascotas?', !d.mascotas);
+      need('renta', 'modalidadRenta', 'Modalidad de corretaje (arrendamiento)', !d.modalidadRenta);
+      need('renta', 'ivaRenta', 'Honorarios de arrendamiento: ¿más IVA o IVA incluido?', ['mas', 'incluido'].indexOf(d.ivaRenta) < 0);
+    }
+    need('firma', 'lugar', 'Lugar de firma', vacio(d.lugar));
+    need('firma', 'fecha', 'Fecha de firma', !U.fechaLarga(d.fecha));
+    return p;
+  }
+
+  /* ── CSS del documento: plantilla con tokens de color → se genera según la paleta ── */
+  var PALETAS = {
+    grises: { barra: '#454545', chip: '#1F1F1F', label: '#F0F0F0', labelTxt: '#2A2A2A', borde: '#8C8C8C', bordeIn: '#CDCDCD', banda: '#E2E2E2',
+              tit: '#1A1A1A', acento: '#3A3A3A', muted: '#5C5C5C', texto: '#1A1A1A', marca: 'rgba(0,0,0,.09)', wm1: '#2E2E2E', wm2: '#5A5A5A' },
+    azul:   { barra: '#4A6787', chip: '#34506D', label: '#EEF2F6', labelTxt: '#2B4460', borde: '#9DB0C4', bordeIn: '#D2DCE6', banda: '#DCE5EE',
+              tit: '#1E2F42', acento: '#3E5C7C', muted: '#5F6F80', texto: '#1C2733', marca: 'rgba(70,100,140,.10)', wm1: '#4A6787', wm2: '#2F4A66' }
+  };
+  var CSS_T = [
+    '@page{size:A4;margin:0 0 %pn%mm 0;@bottom-right{content:"Página " counter(page) " de " counter(pages);font-family:Arial,Helvetica,sans-serif;font-size:7.5pt;color:%muted%;margin-right:%ml%mm}}',
+    '.aps-doc{font-family:Arial,Helvetica,"Liberation Sans",sans-serif;font-size:9pt;line-height:1.35;color:%texto%;position:relative}',
+    '.aps-doc table{border-collapse:collapse}',
+    '.aps-doc .sheet{width:100%}',
+    '.aps-doc .sheet>thead>tr>td{padding:%mt%mm %ml%mm 0}.aps-doc .sheet>tbody>tr>td{padding:0 %ml%mm}.aps-doc .sheet>tfoot>tr>td{padding:0}',
+    '.aps-doc .hd{width:100%;text-align:center;border-bottom:2pt solid %acento%;margin-bottom:11pt;padding-bottom:6pt}',
+    '.aps-doc .lg{height:48pt;width:auto;display:inline-block;vertical-align:bottom;filter:grayscale(1) contrast(1.08);-webkit-filter:grayscale(1) contrast(1.08)}',
+    '.aps-doc .wm1{font-size:26pt;font-weight:bold;color:%wm1%;letter-spacing:-.4pt}',
+    '.aps-doc .wm2{font-size:26pt;font-weight:bold;color:%wm2%;letter-spacing:-.4pt}',
+    '.aps-doc .fsp{height:%fsp%mm}',
+    '.aps-doc .pgfoot{position:fixed;left:0;right:0;bottom:0;box-sizing:border-box;padding:0 %ml%mm %mb%mm;background:#fff}',
+    '.aps-doc .ftend{margin-top:14pt;padding:0 %ml%mm %mb%mm}',
+    '.aps-doc .ft{border-top:.75pt solid %bordeIn%;padding-top:5pt;text-align:center;font-size:6.6pt;color:%muted%;font-style:italic;line-height:1.5}',
+    '.aps-doc .ft b{color:%acento%;font-style:normal;font-size:7.2pt;letter-spacing:.3pt}',
+    '.aps-doc .tit{text-align:center;font-size:12.6pt;font-weight:bold;letter-spacing:.4pt;color:%tit%;margin:6pt 0 3pt}',
+    '.aps-doc .sub{text-align:center;font-size:9pt;letter-spacing:3pt;color:%acento%;font-weight:bold;margin-bottom:11pt}',
+    '.aps-doc .cs{width:100%;margin:0 0 8.5pt;border:.75pt solid %borde%}',
+    '.aps-doc .cs th{background:%barra%;color:#fff;text-align:left;font-size:9pt;letter-spacing:.6pt;padding:4.5pt 7pt;text-transform:uppercase}',
+    '.aps-doc .cs th .ch{background:%chip%;color:#fff;padding:1.5pt 6pt;margin-right:7pt}',
+    '.aps-doc .cs td{border-top:.75pt solid %bordeIn%;padding:3.6pt 7pt;vertical-align:top;font-size:9pt}',
+    '.aps-doc .cs td.lb{width:31%;background:%label%;color:%labelTxt%;font-weight:bold;font-size:9pt;border-right:.75pt solid %bordeIn%}',
+    '.aps-doc .cs td.bd{background:%banda%;color:%tit%;font-weight:bold;font-size:9pt;letter-spacing:.5pt;text-transform:uppercase;padding:3pt 7pt;border-top:.75pt solid %borde%}',
+    '.aps-doc .cs .ow{margin:0 0 1.5pt}.aps-doc .cs .tp{color:%muted%;font-size:9pt}',
+    '.aps-doc .cs tr{page-break-inside:avoid;break-inside:avoid}',
+    '.aps-doc .cs tr.tall{page-break-inside:auto;break-inside:auto}',
+    '.aps-doc .cs thead{display:table-header-group}',
+    '.aps-doc .sn{font-size:8pt;color:%muted%;font-style:italic;font-weight:normal;margin-top:1.5pt;line-height:1.35}',
+    '.aps-doc .k{color:%acento%;font-weight:bold;font-size:9pt}',
+    '.aps-doc .cs .sv{width:100%}',
+    '.aps-doc .cs .sv td{border:0;padding:0 8pt 2pt 0;width:50%;font-size:9pt}',
+    '.aps-doc .bl{display:inline-block;min-width:80pt;border-bottom:.75pt solid #777}',
+    '.aps-doc .fp{width:100%;margin-top:16pt;page-break-inside:avoid;break-inside:avoid;page-break-after:avoid;break-after:avoid}',
+    '.aps-doc .fp td{text-align:center;padding:0 0 12pt}',
+    '.aps-doc .fp .fl{width:58%;margin:0 auto}',
+    '.aps-doc .fr tr{page-break-inside:avoid;break-inside:avoid}',
+    '.aps-doc .fr{width:100%}',
+    '.aps-doc .sig{padding-top:26pt}',
+    '.aps-doc .fr td{width:50%;text-align:center;vertical-align:top;padding:0 8pt 10pt}',
+    '.aps-doc .fr td.one .fl{width:calc(50% - 28pt);margin:0 auto}',
+    '.aps-doc .fl{height:26pt;border-bottom:1pt solid #222;margin:0 10pt}',
+    '.aps-doc .fe{font-weight:bold;margin-top:3.5pt;font-size:9pt;color:%tit%}',
+    '.aps-doc .fs{font-size:9pt;color:#333;line-height:1.35}',
+    '.aps-doc .nt{font-size:9pt;color:%muted%;font-style:italic;text-align:center;margin:8pt 12pt 0;line-height:1.45}',
+    '.aps-doc .pb{page-break-before:always;break-before:page}',
+    '.aps-doc .cl{font-size:9pt;line-height:1.35;color:%texto%;margin-top:14pt}',
+    '.aps-doc .cl .h2{text-align:center;font-size:9pt;font-weight:bold;letter-spacing:1pt;color:%tit%;text-transform:uppercase;border:0;padding:0;margin:15pt 0 7pt;page-break-after:avoid;break-after:avoid}',
+    '.aps-doc .cl .j{text-align:justify;margin:0 0 5pt}',
+    '.aps-doc .cl .ct{font-weight:bold;color:%tit%;text-transform:uppercase;margin:11pt 0 4pt;font-size:9pt;letter-spacing:.3pt;page-break-after:avoid;break-after:avoid}',
+    '.aps-doc .cl table.it{width:100%;margin:0 0 4pt}',
+    '.aps-doc .cl table.it td{vertical-align:top;text-align:justify;padding:0}',
+    '.aps-doc .cl table.it td.mk{width:24pt}',
+    '.aps-doc .cl .j,.aps-doc .cl table.it td{orphans:2;widows:2}',
+    '.aps-doc .aj{margin-top:2pt}',
+    '.aps-doc .cl .lf{margin:8pt 0 8pt;font-size:9pt}',
+    '.aps-doc .wmk{position:fixed;top:36%;left:0;right:0;text-align:center;font-size:92pt;font-weight:bold;letter-spacing:10pt;color:%marca%;transform:rotate(-28deg);pointer-events:none;z-index:5}',
+    '.aps-doc.dens1,.aps-doc.dens1 .cl{line-height:1.29}',
+    '.aps-doc.dens1 .cl .j{margin-bottom:3.5pt}.aps-doc.dens1 .cl .ct{margin:8pt 0 3pt}.aps-doc.dens1 .cl .h2{margin:11pt 0 5pt}.aps-doc.dens1 .cl table.it{margin-bottom:3pt}',
+    '.aps-doc.dens1 .cs td{padding-top:2.9pt;padding-bottom:2.9pt}.aps-doc.dens1 .cs{margin-bottom:7pt}.aps-doc.dens1 .fl{height:22pt}.aps-doc.dens1 .fr td{padding-bottom:7pt}.aps-doc.dens1 .sig{padding-top:22pt}',
+    '.aps-doc.dens2,.aps-doc.dens2 .cl{line-height:1.23}',
+    '.aps-doc.dens2 .cl .j{margin-bottom:3pt}.aps-doc.dens2 .cl .ct{margin:6pt 0 2.5pt}.aps-doc.dens2 .cl .h2{margin:9pt 0 4pt}.aps-doc.dens2 .cl table.it{margin-bottom:2.5pt}',
+    '.aps-doc.dens2 .cs td{padding-top:2.4pt;padding-bottom:2.4pt}.aps-doc.dens2 .cs{margin-bottom:6pt}.aps-doc.dens2 .fl{height:20pt}.aps-doc.dens2 .fr td{padding-bottom:5pt}.aps-doc.dens2 .sig{padding-top:19pt}',
+    '.aps-doc.dens3,.aps-doc.dens3 .cl{line-height:1.18}',
+    '.aps-doc.dens3 .cl .j{margin-bottom:2.5pt}.aps-doc.dens3 .cl .ct{margin:5pt 0 2pt}.aps-doc.dens3 .cl .h2{margin:7pt 0 3pt}.aps-doc.dens3 .cl table.it{margin-bottom:2pt}',
+    '.aps-doc.dens3 .cs td{padding-top:1.9pt;padding-bottom:1.9pt}.aps-doc.dens3 .cs{margin-bottom:5pt}.aps-doc.dens3 .fl{height:18pt}.aps-doc.dens3 .fr td{padding-bottom:4pt}.aps-doc.dens3 .sig{padding-top:16pt}',
+    '@media print{.aps-doc{-webkit-print-color-adjust:exact;print-color-adjust:exact}.aps-doc thead{display:table-header-group}.aps-doc tfoot{display:table-footer-group}}'
+  ].join('\n');
+  function css(nombre, opciones) {
+    var base = PALETAS[nombre || CFG.paleta] || PALETAS.grises, pal = {}, kk;
+    for (kk in base) pal[kk] = base[kk];
+    pal.ml = CFG.margenLateralMm; pal.mt = CFG.margenSuperiorMm; pal.mb = CFG.margenInferiorMm; pal.fsp = CFG.margenInferiorMm + 15; pal.pn = CFG.margenNumPagMm;
+    var t = CSS_T;
+    if (opciones && opciones.sinPagina) t = t.split('\n').filter(function (l) { return l.indexOf('@page') !== 0 && l.indexOf('@media print') !== 0; }).join('\n');
+    return t.replace(/%(\w+)%/g, function (m, k) { return pal[k] !== undefined ? pal[k] : m; });
+  }
+
+  /* Ajuste de hojas (se ejecuta en el navegador antes de imprimir). Simula la paginación (columnas del alto útil de una hoja);
+     si la última hoja quedaría con menos de 25% de contenido, compacta el interlineado y los espacios (misma letra, Arial 10)
+     hasta que el documento ocupe una hoja menos. Si no logra reducir hojas, deja el formato normal. */
+  var AJUSTE_TPL = "(function(){var A=__A__,W=__W__;function medir(cl){var doc=document.querySelector('.aps-doc'),td=doc.querySelector('.sheet > tbody > tr > td');var c=document.createElement('div');c.style.cssText='position:absolute;left:0;top:0;visibility:hidden;pointer-events:none;width:'+W+'px;height:'+A+'px;column-width:'+W+'px;column-gap:0;column-fill:auto;';var f=document.createElement('div');f.className='aps-doc'+(cl?' '+cl:'');f.innerHTML=td.innerHTML;c.appendChild(f);document.body.appendChild(c);var cols=Math.max(1,Math.round(c.scrollWidth/W)),ini=(cols-1)*W-1,b=0,els=f.querySelectorAll('*');for(var i=0;i<els.length;i++){var r=els[i].getBoundingClientRect();if(r.height>0&&r.left>=ini&&r.bottom>b)b=r.bottom;}document.body.removeChild(c);return{cols:cols,fill:Math.min(1,b/A)};}try{var doc=document.querySelector('.aps-doc'),td=doc&&doc.querySelector('.sheet > tbody > tr > td');if(!td)return;var base=medir('');if(base.cols<2)return;var sola=base.fill<0.45,justa=base.fill>0.85;if(!sola&&!justa)return;var niv=['dens1','dens2','dens3'];for(var i=0;i<niv.length;i++){var m=medir(niv[i]);if(m.cols<base.cols||(m.cols===base.cols&&m.fill<=0.85&&justa)){doc.className+=' '+niv[i];return;}}}catch(e){}})();";
+  var ENCABEZADO_MM = 18.5;    // alto del bloque del encabezado sin contar el margen superior (con el logo de 48 pt puede ser algo mayor: la simulación ya es pesimista)
+  function ajusteJS() {
+    var mm = 96 / 25.4, W = Math.floor((210 - 2 * CFG.margenLateralMm) * mm) - 6, A = Math.round((297 - CFG.margenNumPagMm - CFG.margenSuperiorMm - ENCABEZADO_MM - (CFG.margenInferiorMm + 15)) * mm * 0.97);   // simulación algo pesimista (margen de seguridad)
+    return AJUSTE_TPL.replace('__A__', A).replace('__W__', W);
+  }
+  return { get ajusteJS() { return ajusteJS(); }, CFG: CFG, PALETAS: PALETAS, css: css, render: render, validar: validar, firmantes: firmantes, tieneVenta: tieneVenta, tieneRenta: tieneRenta };
+})(APS_U,
+   APS_TEXTO);
+
+</script>
