@@ -1,0 +1,699 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════
+ *  APS · Aviso de Prestación de Servicios de Corretaje Inmobiliario (Hipoo)
+ *  BACKEND — proyecto de PRUEBAS (aparte del Pre-Aviso PLD)
+ * ═══════════════════════════════════════════════════════════════════════
+ *  Archivos nuevos en el proyecto del Pre-PLD (junto a Code.gs e Interfaz.html):
+ *    APS_Codigo.gs       (este archivo)
+ *    APS_Modulo.html     (pantalla del módulo Contrato APS)
+ *    APS_Nucleo.html     (motor del documento + clausulado; lo usan la pantalla Y este servidor)
+ *  Archivo que se REEMPLAZA: Interfaz.html (agrega el selector de módulos). Code.gs: solo cambia doGet().
+ *
+ *  Implementación: la misma del Pre-PLD (Ejecutar como: YO · Acceso: organización).
+ *
+ *  Flujo (simple, sin ida y vuelta): el asesor llena el contrato y lo ENVÍA cuando está terminado (BORRADOR →
+ *  EN_REVISION). A partir de ahí es responsabilidad exclusiva de la coordinación: puede corregir lo que haga falta
+ *  y APROBARLO (EN_REVISION → APROBADO), generando el PDF en Drive. El asesor ya no puede editarlo ni se le regresa.
+ *
+ *  Pasos para probar: ver funciones APS_setup() y APS_probarPDF() más abajo.
+ */
+
+var APS_CONFIG = {
+  TITULO: 'Contrato APS · Hipoo',
+  // ADMINISTRADORES / coordinación: cuentas con la consola completa (todos los contratos APS, revisión de Pre PLD,
+  // PDF definitivo, copia en Google Docs, tablero y auditoría). Todos los demás usuarios son "asesor".
+  // ⚠️ Este arreglo es FIJO: quitar o agregar un correo aquí solo toma efecto después de publicar una versión nueva
+  // (Implementar → Administrar implementaciones → ✏️ → Nueva versión → Implementar). Para dar o quitar el acceso de
+  // coordinador SIN publicar nada, usa la columna "Rol" de la pestaña "Asesores" en su lugar — se detecta en vivo,
+  // en la siguiente carga de la página. Trata este arreglo como algo que casi no se toca una vez configurado.
+  COORDINADORES: ['lizbethserrato@hipoo.mx'],
+  // Método para generar el PDF GUARDADO en Drive al aprobar: 'html' (conversión directa del HTML) o 'docx' (arma un Word
+  // nativo, con márgenes y número de página reales, lo convierte a Google Doc y lo exporta a PDF; requiere el servicio
+  // avanzado "Drive API"). Compáralos con APS_probarPDF y elige el mejor.
+  PDF_METODO: 'html',
+  // ASESORES AUTORIZADOS para GENERAR contratos APS (los coordinadores siempre pueden). Se toman de tres lugares, todos se suman:
+  //  1) esta lista; 2) un archivo de Google Sheets con los correos (pega su ID en ASESORES_HOJA_ID); 3) la pestaña "Asesores"
+  //  del archivo de registro que crea APS_setup. En el archivo: una columna con encabezado "Correo" (opcionales "Nombre",
+  //  "Activo", "Género" — M/F, Hombre/Mujer o Sr./Sra., para saludar "Bienvenido"/"Bienvenida" — y "Rol", con
+  //  "Coordinador"/"Admin" para dar acceso completo a la consola). IMPORTANTE: para dar o quitar el rol de
+  //  coordinador SIN publicar una versión nueva, usa siempre esta hoja (columna "Rol"), nunca el arreglo de abajo:
+  //  ese arreglo vive en el código, así que cualquier cambio ahí solo toma efecto después de Implementar →
+  //  Administrar implementaciones → Nueva versión — mientras tanto, quien se quitó de ahí conserva el acceso.
+  //  La hoja se lee prácticamente en vivo (caché de solo unos segundos, ver APS_ASESORES_CACHE_SEG): dar de baja a
+  //  un asesor (columna "Activo" en NO) o a un coordinador (columna "Rol") se aplica en su siguiente operación, en
+  //  cuestión de segundos — sin publicar nada. (El caché existe para no saturar la hoja si varias llamadas llegan
+  //  casi juntas; sin él, la pantalla puede quedarse cargando la primera vez que alguien entra a una sección.)
+  ASESORES_AUTORIZADOS: [],
+  ASESORES_HOJA_ID: '',
+  ASESORES_HOJA_NOMBRE: '',        // pestaña del archivo (vacío = la primera)
+  // URL de la aplicación web del tablero de Hipoo (se muestra en la pestaña "Tablero"). Vacío = aviso de cómo conectarlo.
+  TABLERO_URL: 'https://script.google.com/a/macros/cualli.mx/s/AKfycbyAcu60En08nsL68IWT1sPNEXcOC-KD8B6C6mMYbuzD4yNFI7LJG1lqo8JtT0BUYn5M8Q/exec',
+  // Al enviar un Pre PLD a revisión, ¿se comparte el archivo con la coordinación como "comentarista"?
+  PLD_COMPARTIR_REVISOR: true,
+  // Logo "Logo Hipo.png" en Drive (se lee desde el servidor, no depende de enlaces públicos).
+  LOGO_FILE_ID: '14hryvZUI3VK_xzaOnVjIc_x8MYVjns2R',
+  // (Regla fija, ya no es una bandera de configuración: el asesor SOLO puede descargar el PDF de un contrato suyo
+  // cuando ese contrato en particular ya está APROBADO por la coordinación. Antes de eso, no hay botón ni acceso.
+  // Ver APS_obtenerPdf().)
+  // false durante pruebas: no se envía ningún correo. Cambiar a true para avisar a coordinadores/asesores.
+  NOTIFICAR_CORREOS: true,       // avisos por correo: a la coordinación cuando un asesor envía un contrato; al asesor cuando se aprueba
+  // Apps Script SIEMPRE manda estos correos desde la cuenta que ejecuta el script (la tuya), nunca desde quien hizo
+  // clic dentro de la app — por eso hoy el correo de "aprobado" sale de tu correo y no del de la coordinadora que
+  // aprobó. Si en Workspace se da de alta un alias de "Enviar como" (ej. notificaciones@hipoo.mx) verificado en tu
+  // cuenta de Gmail, se puede usar aquí para que el remitente sea ese alias en vez de tu correo. Vacío = se queda
+  // como está ahora (sale de robertodelacruz@cualli.mx con el nombre "APS Hipoo").
+  CORREO_REMITENTE: '',
+  ZONA: 'America/Mexico_City'
+};
+
+var APS_COLS = ['ID', 'Creado', 'Actualizado', 'Asesor', 'Estado', 'Tipo', 'Propietarios', 'Inmueble', 'JSON', 'PDF_URL', 'PDF_ID', 'Comentario', 'RevisadoPor', 'Pendientes', 'DocURL', 'DocFecha'];
+var APS_ESTADOS = { BORRADOR: 1, EN_REVISION: 1, APROBADO: 1 };
+
+/* ═════════════ PUNTO DE ENTRADA ═════════════ */
+
+/* NOTA: el doGet() único está en tu Code.gs del Pre-PLD (sirve la pantalla 'Interfaz', que incluye este módulo). */
+/** Devuelve el contenido de un archivo HTML para armar la pantalla. Los archivos de la consola solo se entregan a la administradora. */
+function APS_incluir(nombre) {
+  if (['APS_Consola', 'APS_Tablero'].indexOf(nombre) >= 0 && !APS_esAdmin()) throw new Error('Sin permiso.');
+  if (['APS_Modulo', 'APS_Nucleo'].indexOf(nombre) >= 0 && !APS_puedeGenerarAps()) throw new Error('Sin permiso.');
+  return HtmlService.createHtmlOutputFromFile(nombre).getContent();
+}
+/** ¿La cuenta que abre la aplicación es la administradora? (la usa la plantilla Interfaz.html) */
+function APS_esAdmin() { return APS_usuario_().rol === 'coordinador'; }
+/** ¿Puede generar contratos APS? (coordinadores y asesores de la lista de autorizados). La usa la plantilla Interfaz.html. */
+function APS_puedeGenerarAps() { return APS_usuario_().puedeAps; }
+/** Datos mínimos del usuario para la pantalla de bienvenida (JSON seguro para incrustarlo en la página). */
+function APS_usuarioJson() {
+  var u = APS_usuario_();
+  return JSON.stringify({ email: u.email, nombre: u.nombre, genero: u.genero, rol: u.rol, puedeAps: u.puedeAps }).replace(/</g, '\\u003c');
+}
+/** URL del tablero, solo para coordinación (JSON: '""' si no aplica o no está configurado). Google no permite mostrar
+ * sus aplicaciones web dentro de un iframe de otra página, así que el botón de la bienvenida abre esta URL directo
+ * en una pestaña nueva en vez de navegar a una pantalla intermedia dentro de esta aplicación. */
+function APS_tableroUrlJson() {
+  var u = APS_usuario_();
+  return JSON.stringify(u.rol === 'coordinador' ? (APS_CONFIG.TABLERO_URL || '') : '').replace(/</g, '\\u003c');
+}
+
+/* ═════════════ CONFIGURACIÓN INICIAL (ejecutar UNA vez desde el editor) ═════════════ */
+
+/** Crea la carpeta de Drive y la hoja de registro, y guarda sus IDs. Es seguro volver a ejecutarla. */
+function APS_setup() {
+  var props = PropertiesService.getScriptProperties(), carpeta = null, ss = null, id;
+  if ((id = props.getProperty('APS_CARPETA_ID'))) { try { carpeta = DriveApp.getFolderById(id); } catch (e) { carpeta = null; } }
+  if (!carpeta) { carpeta = DriveApp.createFolder('APS Hipoo (pruebas)'); props.setProperty('APS_CARPETA_ID', carpeta.getId()); }
+  if ((id = props.getProperty('APS_HOJA_ID'))) { try { ss = SpreadsheetApp.openById(id); } catch (e) { ss = null; } }
+  if (!ss) {
+    ss = SpreadsheetApp.create('APS Hipoo · Registro');
+    DriveApp.getFileById(ss.getId()).moveTo(carpeta);
+    props.setProperty('APS_HOJA_ID', ss.getId());
+  }
+  var sh = ss.getSheetByName('Registros') || ss.getSheets()[0].setName('Registros');
+  sh.getRange(1, 1, 1, APS_COLS.length).setValues([APS_COLS]).setFontWeight('bold');      // el encabezado se actualiza siempre (columnas nuevas)
+  sh.setFrozenRows(1);
+  APS_hojaAux_('Auditoria', APS_AUD_COLS); APS_hojaAux_('PLD_Revisiones', PLD_REV_COLS);
+  APS_aseguraColumnasAsesores_(APS_hojaAux_('Asesores', ['Correo', 'Nombre', 'Género', 'Rol', 'Activo']));   // si la pestaña ya existía (de antes de "Género"/"Rol"), les agrega las columnas que falten, sin tocar lo que ya hay
+  Logger.log('Carpeta de PDFs : ' + carpeta.getUrl());
+  Logger.log('Hoja de registro: ' + ss.getUrl());
+  return { carpeta: carpeta.getUrl(), hoja: ss.getUrl() };
+}
+
+/* ═════════════ HOJAS AUXILIARES Y AUDITORÍA ═════════════ */
+
+var APS_AUD_COLS = ['Fecha', 'Usuario', 'Módulo', 'Acción', 'Referencia', 'Detalle'];
+/** Hoja auxiliar dentro del mismo archivo de registro (se crea sola si no existe). */
+function APS_hojaAux_(nombre, cols) {
+  var ss = SpreadsheetApp.openById(APS_ids_().hoja), sh = ss.getSheetByName(nombre);
+  if (!sh) {
+    sh = ss.insertSheet(nombre);
+    sh.getRange(1, 1, 1, cols.length).setValues([cols]).setFontWeight('bold');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+/** Si la pestaña "Asesores" ya existía de antes de tener las columnas "Género" o "Rol" (opcionales), se las agrega
+ * al final del encabezado — sin tocar las columnas ni los datos que ya haya. Las detecta por el TEXTO del
+ * encabezado (igual que APS_parseAsesores_), no por posición, así que no importa en qué orden queden. */
+function APS_aseguraColumnasAsesores_(sh) {
+  var ultima = sh.getLastColumn(), header = ultima > 0 ? sh.getRange(1, 1, 1, ultima).getValues()[0] : [];
+  var normal = header.map(function (v) { return String(v).toLowerCase().trim(); });
+  var faltan = [];
+  if (!normal.some(function (h) { return /^(genero|género|sexo|trato)/.test(h); })) faltan.push('Género');
+  if (!normal.some(function (h) { return /^(rol|tipo|perfil|coordinador)/.test(h); })) faltan.push('Rol');
+  if (faltan.length) sh.getRange(1, ultima + 1, 1, faltan.length).setValues([faltan]).setFontWeight('bold');
+}
+/** Bitácora de auditoría: quién hizo qué y cuándo (todo corre "como el dueño", así que Drive no lo distingue). Nunca interrumpe el flujo. */
+function APS_audit_(modulo, accion, ref, detalle) {
+  try {
+    var sh = APS_hojaAux_('Auditoria', APS_AUD_COLS), fila = sh.getLastRow() + 1;
+    if (fila > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), 500);
+    var rg = sh.getRange(fila, 1, 1, APS_AUD_COLS.length);
+    rg.setNumberFormat('@');
+    rg.setValues([[Utilities.formatDate(new Date(), APS_CONFIG.ZONA, 'yyyy-MM-dd HH:mm:ss'), APS_correo_() || '(sin identificar)', modulo, accion, ref || '', String(detalle || '').slice(0, 300)]]);
+  } catch (e) { Logger.log('Auditoría no registrada: ' + e.message); }
+}
+
+/* ═════════════ IDENTIDAD Y ROLES ═════════════ */
+
+function APS_correo_() {
+  var c = '';
+  try { c = Session.getActiveUser().getEmail(); } catch (e) { c = ''; }
+  return String(c || '').toLowerCase();
+}
+function APS_usuario_() {
+  var email = APS_correo_();
+  var info = email ? APS_asesores_()[email] : null;      // una sola lectura (con caché de segundos) de la hoja: de ahí salen nombre, género Y si es coordinador
+  // "Coordinador" por CUALQUIERA de dos caminos: 1) el arreglo COORDINADORES de aquí abajo (fijo: quitar a alguien
+  // de ahí exige publicar una versión nueva, Implementar → Administrar implementaciones → Nueva versión); o
+  // 2) la columna "Rol"/"Coordinador" de la pestaña "Asesores" (en vivo: quitarlo de la hoja basta, sin publicar nada,
+  // igual que dar de baja a alguien en el panel de Accesos de LPB — se refleja en su siguiente operación).
+  var coord = APS_CONFIG.COORDINADORES.some(function (x) { return String(x).toLowerCase() === email; }) || !!(info && info.coordinador);
+  var nombre = info ? info.nombre : '';
+  var genero = (info && info.genero) || APS_generoNombre_(nombre);       // primero lo explícito (columna "Género"), si no hay, se adivina
+  // "pdf" ya no es un permiso de todo-o-nada: el coordinador siempre puede; el asesor solo lo sabrá contrato por
+  // contrato (ver accionesHtml() en el cliente y el candado real en APS_obtenerPdf() del servidor).
+  return { email: email, nombre: nombre, genero: genero, rol: coord ? 'coordinador' : 'asesor', pdf: coord, puedeAps: !!email && (coord || !!info) };
+}
+/* Nombres femeninos frecuentes que NO terminan en "a" (la heurística por defecto solo acertaría los que sí). Lista
+ * corta, pensada para México; no pretende cubrir todos los nombres. */
+var APS_NOMBRES_F_ = ('lizbeth elizabeth isabel carmen miriam ruth esther raquel abigail ingrid beatriz itzel ' +
+  'soledad mercedes pilar nayeli dulce nancy jazmin marisol consuelo cristel ivon sarai noemi belen anahi ' +
+  'guillermina esperanza montserrat maite estefani estefany jimena mayte yamile aime nicte citlali xochitl').split(' ')
+  .reduce(function (o, n) { o[n] = 1; return o; }, {});
+/* Nombres que, aunque terminan en "a", son de uso masculino (para no marcarlos como femeninos por la heurística). */
+var APS_NOMBRES_M_ = 'luca noe jonathan matias tobias elias isaias jeremias zacarias'.split(' ').reduce(function (o, n) { o[n] = 1; return o; }, {});
+/* Nombres de uso frecuente para ambos sexos en México: mejor no adivinar que adivinar mal. */
+var APS_NOMBRES_AMBIGUOS_ = 'guadalupe trinidad rosario cruz angel refugio candelaria remedios socorro'.split(' ').reduce(function (o, n) { o[n] = 1; return o; }, {});
+/**
+ * Adivina el género del primer nombre para conjugar "Bienvenido"/"Bienvenida" — 'm' | 'f' | '' (no se sabe: el saludo
+ * cae entonces en "Bienvenido/a"). Nunca es infalible; por eso, si hay duda razonable (nombre ambiguo o muy corto),
+ * prefiere no adivinar. La columna "Género" del archivo de asesores (ver APS_parseAsesores_) siempre tiene prioridad
+ * sobre esta heurística cuando está presente.
+ */
+function APS_generoNombre_(nombre) {
+  var primero = String(nombre || '').trim().split(/\s+/)[0];
+  if (!primero || primero.length < 3) return '';
+  var k = primero.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (APS_NOMBRES_AMBIGUOS_[k]) return '';
+  if (APS_NOMBRES_F_[k]) return 'f';
+  if (APS_NOMBRES_M_[k]) return 'm';
+  return /a$/.test(k) ? 'f' : 'm';
+}
+var APS_RE_CORREO_ = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Lee una tabla (matriz) y devuelve { correo: {nombre} }. Detecta el encabezado ("Correo"/"Email"), y omite a quien tenga Activo = NO. */
+function APS_parseAsesores_(filas) {
+  var res = {}, hdr = -1, cCorreo = -1, cNombre = -1, cActivo = -1, cGenero = -1, cRol = -1, i, j;
+  if (!filas || !filas.length) return res;
+  for (i = 0; i < Math.min(filas.length, 5) && hdr < 0; i++) {
+    for (j = 0; j < filas[i].length; j++) { if (/^(correo|e-?mail|mail|usuario)/.test(String(filas[i][j]).toLowerCase().trim())) { cCorreo = j; hdr = i; break; } }
+  }
+  if (hdr >= 0) {
+    filas[hdr].forEach(function (v, k) {
+      var t = String(v).toLowerCase().trim();
+      if (/^nombre/.test(t)) cNombre = k;
+      if (/^(activo|estatus|estado|vigente)/.test(t)) cActivo = k;
+      if (/^(genero|género|sexo|trato)/.test(t)) cGenero = k;
+      if (/^(rol|tipo|perfil|coordinador)/.test(t)) cRol = k;
+    });
+  } else {
+    var cuenta = {}, mejor = -1;
+    filas.forEach(function (fila) { fila.forEach(function (v, k) { if (APS_RE_CORREO_.test(String(v).trim())) cuenta[k] = (cuenta[k] || 0) + 1; }); });
+    Object.keys(cuenta).forEach(function (k) { if (mejor < 0 || cuenta[k] > cuenta[mejor]) mejor = k; });
+    if (mejor < 0) return res;
+    cCorreo = Number(mejor);
+  }
+  for (i = hdr + 1; i < filas.length; i++) {
+    var em = String(filas[i][cCorreo] === undefined ? '' : filas[i][cCorreo]).toLowerCase().trim();
+    if (!APS_RE_CORREO_.test(em)) continue;
+    if (cActivo >= 0 && /^(no|n|0|false|falso|baja|inactivo|inactiva)$/i.test(String(filas[i][cActivo]).trim())) continue;
+    var g = cGenero >= 0 ? String(filas[i][cGenero]).trim().toLowerCase() : '';                 // columna "Género" opcional: M/F, Hombre/Mujer, Sr./Sra., etc.
+    var esF = /^(f|mujer|fem|sra\.?|srita\.?|señora)/.test(g);                                   // se revisa primero "femenino": "mujer" también empieza con "m"
+    var rolTxt = cRol >= 0 ? String(filas[i][cRol]).trim().toLowerCase() : '';                  // columna "Rol"/"Coordinador" opcional: "Coordinador"/"Admin", o "Sí"/"X" si la columna ya se llama "Coordinador"
+    res[em] = { nombre: cNombre >= 0 ? String(filas[i][cNombre]).trim() : '',
+      genero: esF ? 'f' : (/^(m|h|masc|hombre|sr\.?|señor)/.test(g) ? 'm' : ''),
+      coordinador: /coord|admin|^(si|sí|s|x|1|true|yes)$/.test(rolTxt) };
+  }
+  return res;
+}
+/** Lee el archivo externo (ASESORES_HOJA_ID) y la pestaña interna "Asesores" — mismo criterio que el panel de Accesos
+ * de LPB: quitar (o dar de baja, columna "Activo") a un asesor O a un coordinador en la hoja se refleja en su
+ * siguiente operación, sin publicar nada. Con un caché de unos segundos (ver APS_ASESORES_CACHE_SEG) para evitar
+ * que varias llamadas casi simultáneas abran la hoja al mismo tiempo — eso fue lo que causó que la pantalla se
+ * quedara cargando la primera vez que alguien entraba a una sección. */
+/** Caché MUY corto (segundos, no minutos) para la lectura de la hoja de asesores. No es para "esperar a que se
+ * refresque" — es solo para que, cuando la página dispara varias llamadas casi juntas (por ejemplo, al entrar a una
+ * sección), no se abra la hoja de Google una vez POR CADA llamada al mismo tiempo — eso fue lo que provocó que la
+ * pantalla se quedara cargando la primera vez. Dar de baja a alguien se sigue notando en cuestión de segundos, sin
+ * publicar nada; ya no es "al instante exacto", pero es un precio pequeño a cambio de que la página no se cuelgue. */
+var APS_ASESORES_CACHE_SEG = 8;
+function APS_asesores_() {
+  var cache = CacheService.getScriptCache(), c = cache.get('APS_ASESORES');
+  if (c) { try { return JSON.parse(c); } catch (e) { /* se recalcula */ } }
+  var mapa = {}, une = function (m) { Object.keys(m).forEach(function (k) { mapa[k] = m[k]; }); };
+  (APS_CONFIG.ASESORES_AUTORIZADOS || []).forEach(function (e) { var k = String(e).toLowerCase().trim(); if (APS_RE_CORREO_.test(k)) mapa[k] = { nombre: '', coordinador: false }; });
+  try {
+    if (APS_CONFIG.ASESORES_HOJA_ID) {
+      var ss = SpreadsheetApp.openById(APS_CONFIG.ASESORES_HOJA_ID);
+      var sh = APS_CONFIG.ASESORES_HOJA_NOMBRE ? ss.getSheetByName(APS_CONFIG.ASESORES_HOJA_NOMBRE) : ss.getSheets()[0];
+      if (sh && sh.getLastRow() > 0) une(APS_parseAsesores_(sh.getDataRange().getValues()));
+    }
+  } catch (e) { Logger.log('No se pudo leer el archivo de asesores autorizados: ' + e.message); }
+  try {
+    var pr = PropertiesService.getScriptProperties().getProperty('APS_HOJA_ID');
+    if (pr) { var interna = SpreadsheetApp.openById(pr).getSheetByName('Asesores'); if (interna && interna.getLastRow() > 0) une(APS_parseAsesores_(interna.getDataRange().getValues())); }
+  } catch (e) { Logger.log('No se pudo leer la pestaña Asesores: ' + e.message); }
+  try { cache.put('APS_ASESORES', JSON.stringify(mapa), APS_ASESORES_CACHE_SEG); } catch (e) { /* sin caché: no pasa nada, solo se vuelve a leer la próxima vez */ }
+  return mapa;
+}
+/** Usuario identificado Y autorizado para generar contratos APS. */
+function APS_requiereAps_() {
+  var u = APS_requiereUsuario_();
+  if (!u.puedeAps) throw new Error('No tienes autorización para generar contratos APS. Solicítala a la coordinación.');
+  return u;
+}
+function APS_requiereUsuario_() {
+  var u = APS_usuario_();
+  if (!u.email) throw new Error('No se pudo identificar tu cuenta de Google. Abre el enlace con tu cuenta corporativa.');
+  return u;
+}
+function APS_puedeVer_(reg, u) { return u.rol === 'coordinador' || reg.asesor === u.email; }
+function APS_puedeEditar_(reg, u) {
+  if (reg.estado === 'APROBADO') return false;
+  if (u.rol === 'coordinador') return true;
+  return reg.asesor === u.email && reg.estado === 'BORRADOR';   // una vez enviado, ya no lo edita el asesor: es responsabilidad de la coordinación
+}
+
+/* ═════════════ NÚCLEO COMPARTIDO (mismo código que usa la pantalla) ═════════════ */
+
+var APS_N_ = null;
+/** Carga APS_Nucleo.html y APS_Docx.html en el servidor: { U: utilidades, T: texto, M: modelo/ejemplos, D: motor del documento, X: generador de Word }. */
+function APS_nucleo_() {
+  if (APS_N_) return APS_N_;
+  var cod = function (n) { return HtmlService.createHtmlOutputFromFile(n).getContent().replace(/<\/?script[^>]*>/gi, '').replace(/<!--[\s\S]*?-->/g, ''); };
+  APS_N_ = (new Function(cod('APS_Nucleo') + '\n' + cod('APS_Docx') + '\n;return { U: APS_U, T: APS_TEXTO, D: APS_DOC, M: APS_MODELO, X: APS_DOCX };'))();
+  return APS_N_;
+}
+
+var APS_LOGO_ = null;
+/** Logo como data URI (PNG en base64) leído de Drive; se guarda en caché 6 h. Devuelve '' si no se puede leer. */
+function APS_logoDataUri_() {
+  if (APS_LOGO_ !== null) return APS_LOGO_;
+  var cache = CacheService.getScriptCache(), c = cache.get('APS_LOGO');
+  if (c) { APS_LOGO_ = c; return c; }
+  try {
+    var b = DriveApp.getFileById(APS_CONFIG.LOGO_FILE_ID).getBlob();
+    var uri = 'data:' + b.getContentType() + ';base64,' + Utilities.base64Encode(b.getBytes());
+    if (uri.length < 95000) cache.put('APS_LOGO', uri, 21600);
+    APS_LOGO_ = uri;
+  } catch (e) { Logger.log('Logo no disponible: ' + e.message); APS_LOGO_ = ''; }
+  return APS_LOGO_;
+}
+
+/** HTML completo del contrato listo para convertir a PDF. servidor=true → pie sin position:fixed. */
+function APS_htmlDocumento_(datos, servidor, marca) {
+  var N = APS_nucleo_(), logo = APS_logoDataUri_();
+  if (logo) N.D.CFG.logoSrc = logo;
+  var banda = marca ? '<div style="text-align:center;font:bold 9pt Arial,sans-serif;color:#333;border:1pt solid #555;padding:4pt;margin:0 0 8pt">' + N.U.esc(marca) + '</div>' : '';
+  return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>APS Hipoo</title><style>html,body{margin:0;background:#fff}' +
+    N.D.css() + '</style></head><body>' + banda + N.D.render(datos, { borrador: false, servidor: !!servidor }) + '</body></html>';
+}
+function APS_pdfBlob_(datos, nombre, servidor) {
+  if (APS_CONFIG.PDF_METODO === 'docx') {
+    var doc = APS_docDesdeDocx_(datos, nombre + ' (temporal)', '');
+    var pdf = doc.getAs('application/pdf').setName(nombre + '.pdf');
+    try { doc.setTrashed(true); } catch (e) { Logger.log('No se pudo borrar el Doc temporal: ' + e.message); }
+    return pdf;
+  }
+  var html = APS_htmlDocumento_(datos, servidor);
+  return Utilities.newBlob(html, 'text/html', nombre + '.html').getAs('application/pdf').setName(nombre + '.pdf');
+}
+function APS_nombrePdf_(reg, datos) {
+  var p = (datos.propietarios && datos.propietarios[0]) ? String(datos.propietarios[0].nombre || '') : '';
+  p = p.replace(/[\\\/:*?"<>|]/g, '').trim().slice(0, 60);
+  return 'APS Hipoo - ' + (p || 'sin nombre') + ' - ' + reg.id;
+}
+
+/* ═════════════ ALMACÉN (hoja de cálculo) ═════════════ */
+
+function APS_ids_() {
+  var p = PropertiesService.getScriptProperties(), h = p.getProperty('APS_HOJA_ID'), c = p.getProperty('APS_CARPETA_ID');
+  if (!h || !c) throw new Error('Falta la configuración inicial. Ejecuta APS_setup() una vez desde el editor de Apps Script.');
+  return { hoja: h, carpeta: c };
+}
+function APS_hoja_() {
+  var sh = SpreadsheetApp.openById(APS_ids_().hoja).getSheetByName('Registros');
+  if (!sh) throw new Error('No se encontró la hoja "Registros". Vuelve a ejecutar APS_setup().');
+  return sh;
+}
+function APS_ahora_() { return Utilities.formatDate(new Date(), APS_CONFIG.ZONA, 'yyyy-MM-dd HH:mm'); }
+
+function APS_filaAReg_(f) {
+  return { id: String(f[0]), creado: String(f[1]), actualizado: String(f[2]), asesor: String(f[3]), estado: String(f[4]), tipo: String(f[5]),
+    propietarios: String(f[6]), inmueble: String(f[7]), json: String(f[8]), pdfUrl: String(f[9]), pdfId: String(f[10]), comentario: String(f[11]), revisadoPor: String(f[12]),
+    pendientes: (f[13] === '' || f[13] === undefined) ? -1 : Number(f[13]), docUrl: String(f[14] || ''), docFecha: String(f[15] || '') };
+}
+function APS_regAFila_(r) {
+  return [r.id, r.creado, r.actualizado, r.asesor, r.estado, r.tipo, r.propietarios, r.inmueble, r.json, r.pdfUrl || '', r.pdfId || '', r.comentario || '', r.revisadoPor || '', (r.pendientes >= 0 ? r.pendientes : ''), r.docUrl || '', r.docFecha || ''];
+}
+/** Estado que ve la coordinación: distingue un borrador sin terminar de uno ya completo (sin enviar). */
+function APS_estadoUI_(r) {
+  if (r.estado === 'BORRADOR') return (r.pendientes < 0 || r.pendientes > 0) ? 'SIN_TERMINAR' : 'COMPLETO';
+  return r.estado;
+}
+/** Datos del registro para la pantalla. El asesor nunca recibe los enlaces del PDF ni del documento de Google Docs. */
+function APS_meta_(r) {
+  var adm = APS_usuario_().rol === 'coordinador';
+  return { id: r.id, creado: r.creado, actualizado: r.actualizado, asesor: r.asesor, estado: r.estado, estadoUI: APS_estadoUI_(r), tipo: r.tipo,
+    propietarios: r.propietarios, inmueble: r.inmueble, pendientes: r.pendientes, pdfUrl: adm ? r.pdfUrl : '', docUrl: adm ? r.docUrl : '', docFecha: adm ? r.docFecha : '',
+    comentario: r.comentario, revisadoPor: r.revisadoPor };
+}
+function APS_todos_() {
+  var sh = APS_hoja_(), n = sh.getLastRow() - 1;
+  if (n < 1) return [];
+  return sh.getRange(2, 1, n, APS_COLS.length).getValues().map(APS_filaAReg_);
+}
+function APS_buscar_(id) {
+  var sh = APS_hoja_(), n = sh.getLastRow() - 1;
+  if (n < 1) return null;
+  var ids = sh.getRange(2, 1, n, 1).getValues();
+  for (var i = 0; i < n; i++) {
+    if (String(ids[i][0]) === String(id)) {
+      var fila = i + 2;
+      return { fila: fila, hoja: sh, reg: APS_filaAReg_(sh.getRange(fila, 1, 1, APS_COLS.length).getValues()[0]) };
+    }
+  }
+  return null;
+}
+function APS_escribir_(hoja, fila, reg) {
+  // Formato de texto: evita que un valor que empiece con "=" se interprete como fórmula.
+  var rango = hoja.getRange(fila, 1, 1, APS_COLS.length);
+  rango.setNumberFormat('@');
+  rango.setValues([APS_regAFila_(reg)]);
+}
+function APS_conLock_(fn) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try { return fn(); } finally { lock.releaseLock(); }
+}
+function APS_limpiarDatos_(datos) {
+  if (!datos || typeof datos !== 'object') throw new Error('Datos inválidos.');
+  var o = JSON.parse(JSON.stringify(datos));
+  if (!Array.isArray(o.propietarios) || o.propietarios.length < 1 || o.propietarios.length > 4) throw new Error('Debe haber de 1 a 4 propietarios.');
+  var js = JSON.stringify(o);
+  if (js.length > 40000) throw new Error('El registro es demasiado grande.');
+  return o;
+}
+function APS_resumen_(o) {
+  var N = APS_nucleo_();
+  var nombres = o.propietarios.map(function (p) { return String(p.nombre || '').trim(); }).filter(Boolean);
+  var tipo = { venta: 'Venta', renta: 'Arrendamiento', ambas: 'Venta y arrendamiento' }[o.tipo] || '';
+  return { tipo: tipo, propietarios: N.U.unir(nombres).slice(0, 200), inmueble: N.U.direccionInmueble(o).slice(0, 150) };
+}
+function APS_nuevoId_(tomados) {
+  var base = 'APS-' + Utilities.formatDate(new Date(), APS_CONFIG.ZONA, 'yyMMdd') + '-';
+  for (var i = 0; i < 20; i++) {
+    var id = base + Utilities.getUuid().replace(/-/g, '').slice(0, 4).toUpperCase();
+    if (!tomados[id]) return id;
+  }
+  throw new Error('No se pudo generar un ID único. Intenta de nuevo.');
+}
+/**
+ * Arma el cuerpo HTML del correo con el diseño de marca de Hipoo: logo, color institucional (el mismo "Cyan
+ * Institucional" #35B7C5 y azul oscuro #0d122b que usa la interfaz web), botón para abrir el sistema y, al pie,
+ * el nombre de quien hizo la acción cuando se proporciona (ej. la coordinadora que aprobó).
+ */
+function APS_correoHtml_(titulo, mensajeHtml, url, firma) {
+  var AZUL = '#0d122b', CYAN = '#35B7C5';
+  var boton = url ? (
+    '<tr><td style="padding:26px 32px 6px" align="center">' +
+      '<a href="' + url + '" style="display:inline-block;background:' + CYAN + ';color:' + AZUL + ';text-decoration:none;' +
+      'font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:14px;padding:13px 28px;border-radius:8px;border:2px solid ' + AZUL + '">' +
+      'Abrir el sistema APS</a></td></tr>'
+  ) : '';
+  var piePersona = firma ? '<p style="margin:0 0 4px;color:' + AZUL + ';font-weight:bold">' + firma + '</p>' : '';
+  return (
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:24px 0">' +
+      '<tr><td align="center">' +
+        '<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;max-width:560px">' +
+          '<tr><td style="background:' + AZUL + ';padding:18px 32px" align="left"><img src="cid:logoHipoo" alt="Hipoo" height="34" style="display:block"></td></tr>' +
+          '<tr><td style="padding:30px 32px 4px">' +
+            '<h2 style="margin:0 0 14px;color:' + AZUL + ';font-size:19px;font-family:Arial,Helvetica,sans-serif">' + titulo + '</h2>' +
+            '<div style="color:#333333;font-size:14px;line-height:1.6;font-family:Arial,Helvetica,sans-serif">' + mensajeHtml + '</div>' +
+          '</td></tr>' +
+          boton +
+          '<tr><td style="padding:22px 32px 22px;color:#8a8f9e;font-size:12px;border-top:1px solid #eef0f5;margin-top:10px;font-family:Arial,Helvetica,sans-serif">' +
+            piePersona +
+            '<p style="margin:0">Aviso automático del sistema APS Hipoo. No responder a este correo.</p>' +
+          '</td></tr>' +
+        '</table>' +
+      '</td></tr>' +
+    '</table>'
+  );
+}
+
+/**
+ * Envía un correo de aviso con el diseño de marca. "opts" (opcional):
+ *   - params: {modulo:'aps', id:'APS-...'} agrega a la liga del correo los datos para caer directo en un contrato
+ *     en particular (Interfaz.html los lee de la URL al cargar), en vez de dejar a quien lo recibe en la pantalla
+ *     de inicio para que busque el contrato él mismo.
+ *   - firma: nombre (y puesto) de quien hizo la acción, para mostrarlo al pie del correo — ej. la coordinadora
+ *     que aprobó. Se toma del campo "Nombre" de la hoja Asesores, así que siempre corresponde a quien de verdad
+ *     hizo la acción, sea Lizbeth o cualquier otra persona que tenga rol de coordinación más adelante.
+ */
+function APS_notificar_(para, asunto, mensaje, opts) {
+  if (!APS_CONFIG.NOTIFICAR_CORREOS || !para || !para.length) return;
+  opts = opts || {};
+  try {
+    var url = ScriptApp.getService().getUrl();
+    if (url && opts.params) {
+      var qs = Object.keys(opts.params).map(function (k) { return k + '=' + encodeURIComponent(opts.params[k]); }).join('&');
+      url += (url.indexOf('?') === -1 ? '?' : '&') + qs;
+    }
+    var correo = { to: para.join(','), subject: '[APS Hipoo] ' + asunto, name: 'APS Hipoo',
+      htmlBody: APS_correoHtml_(asunto, mensaje, url, opts.firma) };
+    // Si hay un alias de "Enviar como" configurado y verificado en la cuenta que ejecuta el script, se usa como
+    // remitente real; si no (CORREO_REMITENTE vacío), Apps Script manda el correo desde esa misma cuenta (la tuya),
+    // que es el comportamiento de hoy.
+    if (APS_CONFIG.CORREO_REMITENTE) correo.from = APS_CONFIG.CORREO_REMITENTE;
+    try { correo.inlineImages = { logoHipoo: DriveApp.getFileById(APS_CONFIG.LOGO_FILE_ID).getBlob().setName('logoHipoo') }; }
+    catch (eLogo) { Logger.log('No se pudo adjuntar el logo al correo: ' + eLogo.message); }   // si falla, el correo se manda sin logo, no se cae el aviso
+    MailApp.sendEmail(correo);
+  } catch (e) { Logger.log('No se pudo enviar correo: ' + e.message); }
+}
+
+/* ═════════════ API PARA LA PANTALLA (google.script.run) ═════════════ */
+
+function APS_iniciar() {
+  var u = APS_usuario_();
+  return { usuario: u, logo: u.email ? APS_logoDataUri_() : '' };
+}
+
+/** filtro: 'mios' | 'revision' | 'todos'. El asesor solo ve lo suyo, aunque pida 'todos'. */
+function APS_listar(filtro) {
+  var u = APS_requiereAps_();
+  var filas = APS_todos_().filter(function (r) {
+    if (u.rol !== 'coordinador') return r.asesor === u.email;
+    if (filtro === 'revision') return r.estado === 'EN_REVISION';
+    if (filtro === 'mios') return r.asesor === u.email;
+    return true;
+  });
+  filas.sort(function (a, b) { return a.actualizado < b.actualizado ? 1 : -1; });
+  return filas.slice(0, 200).map(APS_meta_);
+}
+
+function APS_abrir(id) {
+  var u = APS_requiereAps_(), f = APS_buscar_(id);
+  if (!f || !APS_puedeVer_(f.reg, u)) throw new Error('No se encontró el registro o no tienes acceso a él.');
+  return { meta: APS_meta_(f.reg), datos: JSON.parse(f.reg.json) };
+}
+
+/** Crea (id vacío) o actualiza un borrador. */
+function APS_guardar(datos, id) {
+  var u = APS_requiereAps_(), o = APS_limpiarDatos_(datos), res = APS_resumen_(o), pend = APS_nucleo_().D.validar(o).length;
+  return APS_conLock_(function () {
+    var ahora = APS_ahora_();
+    if (!id) {
+      var tomados = {};
+      APS_todos_().forEach(function (r) { tomados[r.id] = 1; });
+      var reg = { id: APS_nuevoId_(tomados), creado: ahora, actualizado: ahora, asesor: u.email, estado: 'BORRADOR', tipo: res.tipo,
+        propietarios: res.propietarios, inmueble: res.inmueble, json: JSON.stringify(o), pdfUrl: '', pdfId: '', comentario: '', revisadoPor: '', pendientes: pend, docUrl: '', docFecha: '' };
+      var sh = APS_hoja_(), fila = sh.getLastRow() + 1;
+      if (fila > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), 200);   // la hoja crece sola
+      APS_escribir_(sh, fila, reg);
+      APS_audit_('APS', 'CREAR', reg.id, res.propietarios);
+      return APS_meta_(reg);
+    }
+    var f = APS_buscar_(id);
+    if (!f) throw new Error('No existe el registro ' + id + '.');
+    if (!APS_puedeEditar_(f.reg, u)) throw new Error('No puedes editar este registro (estado: ' + f.reg.estado + ').');
+    f.reg.actualizado = ahora; f.reg.tipo = res.tipo; f.reg.propietarios = res.propietarios; f.reg.inmueble = res.inmueble; f.reg.json = JSON.stringify(o); f.reg.pendientes = pend;
+    APS_escribir_(f.hoja, f.fila, f.reg);
+    APS_audit_('APS', 'EDITAR', f.reg.id, 'Estado: ' + f.reg.estado);
+    return APS_meta_(f.reg);
+  });
+}
+
+/** Asesor (dueño) o coordinador: BORRADOR → EN_REVISION. Exige datos completos. A partir de aquí, la coordinación
+ * tiene control total: puede corregir cualquier dato y aprobar; el contrato ya no se le regresa al asesor. */
+function APS_enviarRevision(id) {
+  var u = APS_requiereAps_(), N = APS_nucleo_();
+  return APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f || !APS_puedeVer_(f.reg, u)) throw new Error('No se encontró el registro.');
+    if (f.reg.estado !== 'BORRADOR') throw new Error('Solo se puede enviar un borrador (estado actual: ' + f.reg.estado + ').');
+    if (u.rol !== 'coordinador' && f.reg.asesor !== u.email) throw new Error('Solo el asesor que lo creó puede enviarlo.');
+    var pend = N.D.validar(JSON.parse(f.reg.json));
+    if (pend.length) throw new Error('Faltan ' + pend.length + ' dato(s): ' + pend.slice(0, 3).map(function (p) { return p.msg; }).join('; ') + (pend.length > 3 ? '…' : ''));
+    f.reg.estado = 'EN_REVISION'; f.reg.actualizado = APS_ahora_();
+    APS_escribir_(f.hoja, f.fila, f.reg);
+    APS_audit_('APS', 'ENVIAR_REVISION', f.reg.id, f.reg.propietarios);
+    APS_notificar_(APS_CONFIG.COORDINADORES, 'Contrato por revisar — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
+      'El asesor <b>' + f.reg.asesor + '</b> envió a revisión el contrato de <b>' + f.reg.propietarios + '</b> (folio ' + f.reg.id + ').');
+    return APS_meta_(f.reg);
+  });
+}
+
+/** Solo coordinador: EN_REVISION → APROBADO. Genera el PDF definitivo y lo guarda en la carpeta de Drive. */
+function APS_aprobar(id) {
+  var u = APS_requiereUsuario_(), N = APS_nucleo_();
+  if (u.rol !== 'coordinador') throw new Error('Solo el coordinador puede aprobar registros.');
+  return APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f) throw new Error('No se encontró el registro.');
+    if (f.reg.estado !== 'EN_REVISION') throw new Error('Solo se puede aprobar un registro en revisión (estado actual: ' + f.reg.estado + ').');
+    var datos = JSON.parse(f.reg.json), pend = N.D.validar(datos);
+    if (pend.length) throw new Error('Faltan ' + pend.length + ' dato(s): ' + pend.slice(0, 3).map(function (p) { return p.msg; }).join('; '));
+    var blob = APS_pdfBlob_(datos, APS_nombrePdf_(f.reg, datos), false);
+    var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(blob);
+    APS_CONFIG.COORDINADORES.forEach(function (c) { try { archivo.addViewer(c); } catch (e) { Logger.log('No se pudo compartir el PDF con ' + c + ': ' + e.message); } });   // para poder verlo en Drive
+    f.reg.estado = 'APROBADO'; f.reg.pdfUrl = archivo.getUrl(); f.reg.pdfId = archivo.getId(); f.reg.revisadoPor = u.email; f.reg.actualizado = APS_ahora_();
+    APS_escribir_(f.hoja, f.fila, f.reg);
+    APS_audit_('APS', 'APROBAR', f.reg.id, 'PDF ' + f.reg.pdfId);
+    APS_notificar_([f.reg.asesor], 'Contrato aprobado — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
+      'Tu contrato de <b>' + f.reg.propietarios + '</b> (folio ' + f.reg.id + ') fue aprobado por la coordinación. Ya puedes entrar al sistema y descargar el PDF definitivo.',
+      { params: { modulo: 'aps', id: f.reg.id }, firma: u.nombre ? ('Aprobado por ' + u.nombre) : 'Aprobado por la coordinación' });
+    return APS_meta_(f.reg);
+  });
+}
+
+/**
+ * Devuelve el PDF aprobado en base64, sin dar acceso a la carpeta de Drive.
+ * Regla: el coordinador siempre puede. El asesor SOLO puede descargar el PDF de un contrato que sea suyo
+ * (REG.asesor === su correo) y única y exclusivamente cuando ESE contrato ya está en estado APROBADO.
+ * Antes de la aprobación, aunque el asesor pida este PDF directamente, se le niega.
+ */
+/**
+ * SOLO COORDINACIÓN: borra un contrato por completo (borrador, en revisión o ya aprobado) — "poder absoluto": no hay
+ * "devolver con comentario" en este flujo; si algo está mal, la coordinación lo corrige directo (ya puede editar
+ * cualquier contrato enviado) o, si no tiene remedio, lo elimina. Border irreversible: no hay papelera.
+ */
+function APS_eliminar(id) {
+  var u = APS_requiereAdmin_();
+  return APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f) throw new Error('No se encontró el registro.');
+    var detalle = f.reg.id + ' (' + f.reg.propietarios + ') · estaba en ' + f.reg.estado;
+    f.hoja.deleteRow(f.fila);
+    APS_audit_('APS', 'ELIMINAR', id, detalle);
+    return { ok: true };
+  });
+}
+
+function APS_obtenerPdf(id) {
+  var u = APS_requiereAps_(), f = APS_buscar_(id);
+  if (!f || !APS_puedeVer_(f.reg, u)) throw new Error('No se encontró el registro o no tienes acceso a él.');
+  var esDueno = f.reg.asesor === u.email;
+  if (u.rol !== 'coordinador' && !esDueno) throw new Error('No tienes acceso al PDF de este registro.');
+  if (f.reg.estado !== 'APROBADO' || !f.reg.pdfId) {
+    throw new Error(esDueno && u.rol !== 'coordinador'
+      ? 'Todavía no puedes descargar este PDF: solo se habilita cuando la coordinación aprueba el contrato.'
+      : 'Este registro todavía no tiene PDF aprobado.');
+  }
+  var blob = DriveApp.getFileById(f.reg.pdfId).getBlob();
+  APS_audit_('APS', 'DESCARGA_PDF', f.reg.id, '');
+  return { nombre: blob.getName() || (f.reg.id + '.pdf'), base64: Utilities.base64Encode(blob.getBytes()) };
+}
+
+/**
+ * SOLO ADMINISTRADORES: genera el contrato en Google Docs (Word nativo convertido: editable, con márgenes y número de página reales)
+ * y se lo comparte. Es el documento oficial, sin leyendas. Requiere el servicio avanzado "Drive API".
+ */
+function APS_docEditable(id) {
+  var u = APS_requiereAdmin_(), f = APS_buscar_(id);
+  if (!f) throw new Error('No se encontró el registro.');
+  var datos = JSON.parse(f.reg.json);
+  var archivo = APS_docDesdeDocx_(datos, APS_nombrePdf_(f.reg, datos), '');
+  try { archivo.addEditor(u.email); } catch (e) { Logger.log('No se pudo compartir el documento: ' + e.message); }
+  APS_audit_('APS', 'COPIA_DOCS', f.reg.id, archivo.getUrl());
+  var url = archivo.getUrl();
+  APS_conLock_(function () {                                     // se anota en el registro: la coordinación ve "Docs generado"
+    var f2 = APS_buscar_(id);
+    if (f2) { f2.reg.docUrl = url; f2.reg.docFecha = APS_ahora_(); APS_escribir_(f2.hoja, f2.fila, f2.reg); }
+  });
+  return { url: url };
+}
+
+/* ═════════════ PRUEBAS (ejecutar desde el editor) ═════════════ */
+
+var APS_DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+/** Logo (PNG) en base64, leído de Drive; '' si no está disponible. */
+function APS_logoBase64_() {
+  var m = /^data:image\/png;base64,(.+)$/.exec(APS_logoDataUri_() || '');
+  return m ? m[1] : '';
+}
+/** Word (.docx) NATIVO del contrato: A4, márgenes de 20 mm, tablas al ancho de la hoja, encabezado, pie y número de página reales. */
+function APS_docxBlob_(datos, nombre, marca) {
+  var r = APS_nucleo_().X.docx(datos, { logoBase64: APS_logoBase64_(), marca: marca || '' });
+  var blobs = Object.keys(r.xml).map(function (k) { return Utilities.newBlob(r.xml[k], 'text/xml', k); });
+  Object.keys(r.media).forEach(function (k) { blobs.push(Utilities.newBlob(Utilities.base64Decode(r.media[k]), 'image/png', k)); });
+  return Utilities.zip(blobs, nombre + '.docx').setContentType(APS_DOCX_MIME);
+}
+/**
+ * Sube el Word a Drive convirtiéndolo en Google Doc (editable, con la misma estructura y márgenes).
+ * REQUIERE el servicio avanzado "Drive API" (editor → Servicios ＋ → Drive API, versión v3).
+ */
+function APS_docDesdeDocx_(datos, nombre, marca) {
+  if (typeof Drive === 'undefined') throw new Error('Falta activar el servicio avanzado "Drive API" (Servicios ＋ → Drive API → v3).');
+  var f = Drive.Files.create({ name: nombre, mimeType: 'application/vnd.google-apps.document', parents: [APS_ids_().carpeta] }, APS_docxBlob_(datos, nombre, marca));
+  return DriveApp.getFileById(f.id);
+}
+
+/**
+ * PRUEBA CLAVE: ¿qué tan bien convierte Apps Script el documento a PDF? Compara 3 métodos con 2 ejemplos:
+ *   _modoNormal   → HTML directo a PDF (pie fijo)         _modoServidor → HTML directo a PDF (pie en el flujo)
+ *   _viaDocx      → Word nativo → Google Doc → PDF (márgenes y número de página reales)   [requiere "Drive API"]
+ * Deja en la carpeta de Drive los PDF (y el Doc de cada ejemplo, y el HTML para abrirlo en Chrome y comparar).
+ * Revisa: tamaño de página (A4 vs Carta), MÁRGENES, encabezado/pie, grises, tablas, saltos de página y firmas.
+ */
+function APS_probarPDF() {
+  var N = APS_nucleo_(), carpeta = DriveApp.getFolderById(APS_ids_().carpeta);
+  var casos = [['B', 'Prueba_Venta_y_Renta_2_propietarios'], ['D', 'Prueba_Venta_3_propietarios_mixto']];
+  casos.forEach(function (c) {
+    var datos = N.M.ejemplos[c[0]]();
+    carpeta.createFile(Utilities.newBlob(APS_htmlDocumento_(datos, false), 'text/html', c[1] + '.html'));
+    [false, true].forEach(function (servidor) {
+      var nombre = c[1] + (servidor ? '_modoServidor' : '_modoNormal');
+      try { Logger.log(nombre + ' → ' + carpeta.createFile(APS_pdfBlob_(datos, nombre, servidor)).getUrl()); }
+      catch (e) { Logger.log(nombre + ' → ERROR: ' + e.message); }
+    });
+    try {
+      var doc = APS_docDesdeDocx_(datos, c[1] + '_viaDocx', '');
+      var pdf = carpeta.createFile(doc.getAs('application/pdf').setName(c[1] + '_viaDocx.pdf'));
+      Logger.log(c[1] + '_viaDocx → PDF: ' + pdf.getUrl() + ' | Doc: ' + doc.getUrl());
+    } catch (e) { Logger.log(c[1] + '_viaDocx → NO SE PUDO: ' + e.message); }
+  });
+  Logger.log('Listo. Revisa la carpeta: ' + carpeta.getUrl());
+}
+
+/** Prueba rápida de que el núcleo carga bien en el servidor y valida los ejemplos. */
+function APS_probarNucleo() {
+  var N = APS_nucleo_(), ok = true;
+  ['A', 'B', 'C', 'D'].forEach(function (k) {
+    var pend = N.D.validar(N.M.ejemplos[k]()).length;
+    Logger.log('Ejemplo ' + k + ': ' + pend + ' pendientes (esperado 0)'); if (pend) ok = false;
+  });
+  Logger.log('Monto de prueba: ' + N.U.montoCompleto(1500000));
+  Logger.log('Logo: ' + (APS_logoDataUri_() ? 'leído de Drive (' + APS_logoDataUri_().length + ' caracteres)' : 'NO disponible (se usará el texto hipoo.mx)'));
+  Logger.log('Usuario que ejecuta: ' + (APS_correo_() || Session.getEffectiveUser().getEmail()));
+  Logger.log(ok ? '✅ Núcleo OK' : '❌ Hay ejemplos con pendientes');
+}
