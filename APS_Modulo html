@@ -1,0 +1,738 @@
+<!-- ═══ APS · MÓDULO «Contrato APS» (Hipoo): estilos acotados + pantalla + lógica. Requiere APS_Nucleo cargado antes. ═══ -->
+<style>
+#aps-root{--primary:#35B7C5;--bg-card:#364494;--text-dim:#B2B2B2;--text-soft:#D6DAEE;--bg-dark:#1a224a;--bg-input:#232d61;--text-main:#fff;--border-dark:#0d122b;--border-width:3px;--radius:12px;--ok:#10b981;--err:#ef4444;--warn:#f59e0b;--hipoo:#0E9E97}
+#aps-root .app{max-width:1280px;margin:0 auto;padding:30px 22px 60px;position:relative;z-index:1}
+#aps-root .hdr{text-align:center;margin-bottom:18px}
+#aps-root .hdr h1{font-family:'Montserrat',sans-serif;font-weight:900;font-size:40px;color:var(--primary);letter-spacing:1px;text-shadow:2px 2px 0 var(--border-dark);margin-bottom:10px}
+#aps-root .hdr p{color:#fff;font-size:13px;font-weight:600;background:var(--border-dark);display:inline-block;padding:6px 16px;border-radius:20px;border:1px solid var(--primary)}
+#aps-root .modbar{display:flex;gap:12px;max-width:620px;margin:0 auto 26px}
+#aps-root .mod{flex:1;padding:13px 14px;background:var(--bg-input);border:2px solid var(--text-dim);border-radius:10px;color:var(--text-dim);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;cursor:pointer}
+#aps-root .mod.active{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:4px 4px 0 var(--border-dark);transform:translate(-1px,-1px)}
+#aps-root .mod[disabled]{opacity:.55;cursor:not-allowed}
+#aps-root .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+#aps-root .col-form,#aps-root .col-prev{min-width:0}
+@media(min-width:1050px){#aps-root .layout{grid-template-columns:minmax(0,1fr) 500px;align-items:start}#aps-root .col-prev{position:sticky;top:18px}}
+#aps-root .steps{display:flex;gap:8px;flex-wrap:wrap;padding:2px 2px 14px;margin-bottom:4px}
+#aps-root .chip{flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:8px 12px;background:var(--bg-input);border:2px solid rgba(178,178,178,.5);border-radius:999px;color:var(--text-soft);font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+#aps-root .chip b{display:inline-flex;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;align-items:center;justify-content:center;font-size:11px}
+#aps-root .chip.ok b{background:var(--ok);color:#06281c}
+#aps-root .chip.active{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark)}
+#aps-root .chip.active b{background:var(--border-dark);color:#fff}
+#aps-root .card{background:var(--bg-card);border:var(--border-width) solid var(--primary);border-radius:var(--radius);padding:26px;margin-bottom:22px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
+#aps-root .card-header{display:flex;align-items:center;gap:16px;margin-bottom:22px;border-bottom:2px dashed rgba(53,183,197,.4);padding-bottom:14px}
+#aps-root .icon-box{width:44px;height:44px;background:var(--primary);border:2px solid var(--border-dark);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 var(--border-dark);flex-shrink:0}
+#aps-root .icon-emoji{font-size:22px;line-height:1}
+#aps-root .card-header h2{font-family:'Montserrat',sans-serif;font-size:19px;font-weight:800;text-shadow:1px 1px 0 var(--border-dark)}
+#aps-root .subtitle{font-size:12px;color:var(--text-soft);display:block;font-weight:500;margin-top:4px}
+#aps-root .field-group{margin-bottom:18px}
+#aps-root .field-group:last-child{margin-bottom:0}
+#aps-root .grid2{display:grid;grid-template-columns:1fr;gap:0 16px}
+#aps-root .grid2>.field-group{margin-bottom:18px}
+#aps-root .card>.grid2:last-child{margin-bottom:-18px}
+@media(min-width:700px){#aps-root .grid2{grid-template-columns:1fr 1fr}}
+#aps-root label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#55D3E0;margin-bottom:8px}
+#aps-root label em{font-style:normal;color:var(--text-soft);text-transform:none;letter-spacing:0;font-weight:600}
+#aps-root .input-text{width:100%;background:var(--bg-input);border:2px solid var(--text-dim);border-radius:8px;padding:13px 15px;color:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;transition:all .15s}
+#aps-root textarea.input-text{resize:vertical;min-height:64px;line-height:1.4}
+#aps-root .input-text::placeholder{color:rgba(178,178,178,.55);font-weight:500}
+#aps-root .input-text:focus{outline:none;background:var(--bg-dark);border-color:var(--primary);box-shadow:4px 4px 0 rgba(53,183,197,.3);transform:translate(-2px,-2px)}
+#aps-root .input-text[type=date]{color-scheme:dark}
+#aps-root .money{display:flex;align-items:center;background:var(--bg-input);border:2px solid var(--text-dim);border-radius:8px;padding-left:14px}
+#aps-root .money:focus-within{border-color:var(--primary);box-shadow:4px 4px 0 rgba(53,183,197,.3)}
+#aps-root .money>span{font-weight:800;color:var(--primary);font-size:14px}
+#aps-root .money .mn{padding:0 14px;color:var(--text-soft);font-size:12px}
+#aps-root .money .input-text{min-width:0;border:0;background:transparent;box-shadow:none!important;transform:none!important}
+#aps-root .help{font-size:12px;color:var(--text-soft);margin-top:6px;line-height:1.4}
+#aps-root .hint{font-size:12px;color:#9be7ee;font-weight:600;margin-top:7px;line-height:1.4}
+#aps-root .hint.dim{color:var(--text-soft);font-weight:500}
+#aps-root .regime-toggle{display:flex;gap:10px;flex-wrap:wrap}
+#aps-root .regime-btn{flex:1 1 110px;min-width:0;border:2px solid var(--text-dim);background:var(--bg-input);padding:12px 14px;border-radius:8px;color:var(--text-soft);font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .1s}
+#aps-root .regime-btn:hover{border-color:var(--primary);color:#fff}
+#aps-root .regime-btn.active{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:3px 3px 0 var(--border-dark);transform:translate(-1px,-1px)}
+#aps-root .regime-btn.check.active::before{content:'✓ '}
+#aps-root .invalid.input-text,#aps-root .invalid.money,#aps-root .invalid.regime-toggle{border-color:var(--err)!important;box-shadow:0 0 0 3px rgba(239,68,68,.25)}
+#aps-root .regime-toggle.invalid{padding:4px;border:2px solid var(--err);border-radius:10px}
+#aps-root .row-item{display:flex;gap:12px;align-items:flex-end;margin-bottom:14px;padding:14px;border:2px dashed rgba(53,183,197,.35);border-radius:10px}
+#aps-root .row-item .ri-main{flex:1}
+#aps-root .row-item .field-group{margin-bottom:12px}
+#aps-root .row-item .field-group:last-child{margin-bottom:0}
+#aps-root .btn-mini{background:transparent;border:2px solid var(--text-dim);color:var(--text-soft);border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:12px}
+#aps-root .btn-mini:hover{border-color:var(--err);color:#fff}
+#aps-root .btn-add{background:transparent;border:2px dashed var(--primary);color:var(--primary);border-radius:8px;padding:11px 16px;font-weight:800;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif}
+#aps-root .btn-add:hover{background:rgba(53,183,197,.12)}
+#aps-root .info-note{display:flex;gap:10px;background:rgba(0,0,0,.25);border:1px solid rgba(53,183,197,.4);border-radius:8px;padding:12px 14px;font-size:12.5px;color:#dbe3ff;line-height:1.45;margin-top:16px}
+#aps-root .actions{display:flex;justify-content:space-between;gap:12px;margin-top:4px}
+#aps-root .btn-main{background:var(--primary);color:var(--border-dark);border:3px solid var(--border-dark);border-radius:10px;padding:15px 24px;font-family:'Montserrat',sans-serif;font-weight:900;font-size:14px;letter-spacing:.4px;cursor:pointer;box-shadow:5px 5px 0 var(--border-dark);transition:all .1s}
+#aps-root .btn-main:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--border-dark)}
+#aps-root .btn-main:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:5px 5px 0 var(--border-dark)}
+#aps-root .btn-sec{background:var(--border-dark);color:#fff;border:2px solid #8fa0d8;border-radius:10px;padding:14px 20px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;cursor:pointer}
+#aps-root .btn-sec.danger{border-color:#ff6b6b;color:#ffb3b3}
+#aps-root .btn-sec.danger:hover{background:#4a1414;border-color:#ff8a8a;color:#fff}
+#aps-root .btn-sec:hover{border-color:var(--primary)}
+#aps-root .btn-sec:disabled{opacity:.35;cursor:not-allowed}
+#aps-root .msg-step{background:rgba(239,68,68,.15);border:2px solid var(--err);border-radius:10px;padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:16px}
+#aps-root .prev-card{background:var(--bg-card);border:var(--border-width) solid var(--primary);border-radius:var(--radius);padding:16px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
+#aps-root .prev-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+#aps-root .prev-head h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800}
+#aps-root .badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;border:2px solid var(--border-dark)}
+#aps-root .badge.warn{background:var(--warn);color:#3b2600}
+#aps-root .badge.ok{background:var(--ok);color:#06281c}
+#aps-root .prev-tools{display:flex;gap:8px;margin-bottom:12px}
+#aps-root .prev-tools button{flex:1;padding:10px 8px;font-size:12px}
+#aps-root .prev-scroll{max-height:66vh;overflow:auto;border-radius:8px;background:#5b6480;padding:10px}
+#aps-root .prev-sizer{position:relative;margin:0 auto}
+#aps-root .paper{width:794px;background:#fff;color:#1b2a2a;padding:0;transform-origin:0 0;position:absolute;top:0;left:0;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+#aps-root .pend{margin-top:12px;font-size:12.5px}
+#aps-root .pend .ok-line{color:#7ff0c3;font-weight:700}
+#aps-root .pend .bad-line{color:#ffd28a;font-weight:800;margin-bottom:6px}
+#aps-root .pend button{display:block;width:100%;text-align:left;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:6px;padding:7px 10px;margin-bottom:5px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif}
+#aps-root .pend button:hover{border-color:var(--primary)}
+#aps-root .ejs{margin-top:12px;padding-top:12px;border-top:2px dashed rgba(53,183,197,.35);font-size:12px;color:var(--text-soft)}
+#aps-root .ejs button{background:var(--bg-input);border:2px solid var(--text-dim);color:#fff;border-radius:6px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;margin:6px 6px 0 0;font-family:'Inter',sans-serif}
+#aps-root .ejs button:hover{border-color:var(--primary)}
+#aps-root .integ{margin-top:10px;font-size:11.5px;color:var(--text-soft);line-height:1.45}
+#aps-root .modal{position:fixed;inset:0;background:rgba(13,18,43,.92);z-index:50;display:none;overflow:auto;padding:16px}
+#aps-root .modal.open{display:block}
+#aps-root .modal-bar{position:sticky;top:0;z-index:2;display:flex;justify-content:flex-end;gap:10px;padding-bottom:12px}
+#aps-root .modal-bar button{padding:10px 16px;font-size:12px}
+#aps-root .modal-stage{position:relative;margin:0 auto}
+@media(max-width:600px){#aps-root .app{padding:20px 12px 50px}#aps-root .card{padding:18px;box-shadow:5px 5px 0 rgba(0,0,0,.5)}#aps-root .hdr h1{font-size:30px}#aps-root .row-item{flex-direction:column;align-items:stretch}#aps-root .btn-mini{align-self:flex-start}}
+#aps-root .userbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+#aps-root .userbar .btn-sec{padding:8px 14px;font-size:12px}
+#aps-root .user-chip{font-size:12px;font-weight:700;color:#fff;background:var(--border-dark);border:2px solid var(--primary);padding:7px 14px;border-radius:999px}
+#aps-root .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+#aps-root .banner{border-radius:10px;padding:11px 14px;font-size:13px;font-weight:600;margin-bottom:14px;background:var(--border-dark);color:#fff;border:2px solid var(--text-dim)}
+#aps-root .banner.nuevo{border-color:var(--primary)}
+#aps-root .banner.e-BORRADOR{border-color:var(--text-dim)}
+#aps-root .banner.e-COMPLETO{border-color:#7dd3fc}
+#aps-root .banner.e-EN_REVISION{border-color:var(--warn)}
+#aps-root .banner.e-APROBADO{border-color:var(--ok)}
+#aps-root .reg-box{max-width:980px;margin:0 auto;background:var(--bg-card);border:var(--border-width) solid var(--primary);border-radius:var(--radius);padding:22px}
+#aps-root .reg-box h2{font-family:'Montserrat',sans-serif;font-size:20px;margin-bottom:14px}
+#aps-root .reg-wrap{overflow-x:auto}
+#aps-root table.reg{width:100%;border-collapse:collapse;font-size:12.5px}
+#aps-root table.reg th{text-align:left;color:var(--primary);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:8px;border-bottom:2px solid rgba(53,183,197,.4)}
+#aps-root table.reg td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.1);vertical-align:top}
+#aps-root .est{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;border:2px solid var(--border-dark)}
+#aps-root .est.e-BORRADOR,#aps-root .est.e-SIN_TERMINAR{background:#cbd5e1;color:#1e293b}
+#aps-root .est.e-COMPLETO{background:#7dd3fc;color:#0c2a3d}
+#aps-root .est.e-EN_REVISION{background:var(--warn);color:#3b2600}
+#aps-root .est.e-APROBADO{background:var(--ok);color:#06281c}
+#aps-root .busy{position:fixed;inset:0;background:rgba(8,11,28,.97);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:80;display:none;align-items:center;justify-content:center}
+#aps-root .busy-card{display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--bg-card);border:var(--border-width) solid var(--primary);border-radius:16px;padding:32px 44px;box-shadow:8px 8px 0 rgba(0,0,0,.5)}
+#aps-root .busy-card span{font-weight:800;color:#fff;font-size:14px;font-family:'Inter',sans-serif}
+#aps-root .busy.on{display:flex}
+#aps-root .spin{width:32px;height:32px;border:4px solid rgba(255,255,255,.2);border-top-color:var(--primary);border-radius:50%;animation:gira .75s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+#aps-root .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:var(--ok);color:#06281c;border:3px solid var(--border-dark);border-radius:10px;padding:12px 18px;font-weight:800;font-size:13px;z-index:90;transition:all .25s;max-width:90vw}
+#aps-root .toast.show{opacity:1;transform:translate(-50%,0)}
+#aps-root .toast.err{background:var(--err);color:#fff}
+#aps-root button:disabled{cursor:not-allowed}
+#aps-root .btn-sec.lnk{display:inline-block;text-decoration:none;color:#fff}
+#aps-root .dirbox{border:2px dashed rgba(53,183,197,.35);border-radius:10px;padding:16px;margin-bottom:6px}
+#aps-root .dir-t{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#9be7ee;margin-bottom:12px}
+#aps-root select.input-text{appearance:auto;cursor:pointer}
+#aps-root select.input-text option{background:#232d61;color:#fff}
+#aps-root .adj-n{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+#aps-root .adj-n input{width:110px}
+#aps-root .adj-box .row-item{margin-bottom:10px}
+/* neutraliza estilos globales del Pre-PLD que se filtrarían al módulo (.btn-main del PLD es de ancho completo) */
+#aps-root .btn-main{width:auto;margin-bottom:0;font-size:14px}
+#aps-root .btn-main:hover{background:var(--primary)}
+#aps-root .btn-main:disabled{background:var(--primary);border-color:var(--border-dark);color:var(--border-dark);box-shadow:5px 5px 0 var(--border-dark);opacity:.4}
+#aps-root .info-note{border-left:1px solid rgba(53,183,197,.4)}
+#aps-root .card-header h2{margin:0}
+
+</style>
+<style id="aps_docCss"></style>
+<div id="aps-root">
+<div class="app">
+  <div class="userbar" id="aps_userbar" style="display:none"><span id="aps_userChip" class="user-chip"></span><button type="button" class="btn-sec" id="aps_btnRegistros">📂 Registros</button><button type="button" class="btn-sec" id="aps_btnNuevo">➕ Nuevo</button></div>
+  <header class="hdr">
+    <div class="logo-container">
+      <img src="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000" alt="hipoo.mx" class="header-logo">
+    </div>
+    <h1>Contrato APS</h1>
+    <p>Aviso de Prestación de Servicios de Corretaje Inmobiliario</p>
+  </header>
+  <div class="layout">
+    <main class="col-form">
+      <div class="steps" id="aps_steps"></div>
+      <div id="aps_stepHost"></div>
+      <div class="actions"><button type="button" class="btn-sec" id="aps_btnPrev">← Anterior</button><button type="button" class="btn-main" id="aps_btnNext">Siguiente →</button></div>
+    </main>
+    <aside class="col-prev">
+      <div class="prev-card">
+        <div class="prev-head"><h3>Vista previa en vivo</h3><span class="badge warn" id="aps_estado"></span></div>
+        <div class="prev-tools"><button type="button" class="btn-sec" id="aps_btnZoom">🔍 Ampliar</button><button type="button" class="btn-sec" id="aps_btnPrint">🖨️ Imprimir / Guardar PDF</button></div>
+        <div class="prev-scroll" id="aps_pvScroll"><div class="prev-sizer" id="aps_pvSizer"><div class="paper" id="aps_pvPaper"></div></div></div>
+        <div class="pend" id="aps_pend"></div>
+        <div class="ejs">Datos de ejemplo (prototipo):<br>
+          <button type="button" data-ej="A">Venta · persona moral</button><button type="button" data-ej="B">Venta y arrendamiento · 2 propietarios</button><button type="button" data-ej="D">Venta · 3 propietarios (mixto)</button><button type="button" data-ej="C">Arrendamiento</button><button type="button" data-ej="reset">Limpiar</button></div>
+      </div>
+    </aside>
+  </div>
+</div>
+<div class="modal" id="aps_modal">
+  <div class="modal-bar"><button type="button" class="btn-sec" id="aps_modalPrint">🖨️ Imprimir / Guardar PDF</button><button type="button" class="btn-main" id="aps_modalClose" style="padding:10px 18px;font-size:12px">Cerrar ✕</button></div>
+  <div class="modal-stage" id="aps_modalStage"><div class="paper" id="aps_modalPaper"></div></div>
+</div>
+<div class="modal" id="aps_regModal"><div class="modal-bar"><button type="button" class="btn-main" id="aps_regClose" style="padding:10px 18px;font-size:12px">Cerrar ✕</button></div>
+  <div class="reg-box"><h2>Registros APS</h2><div class="steps" id="aps_regTabs"></div><div id="aps_regList"></div></div></div>
+<div class="busy" id="aps_busy"><div class="busy-card"><div class="spin"></div><span id="aps_busyTxt">Procesando…</span></div></div>
+<div class="toast" id="aps_toast"></div>
+
+
+</div>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   APS · INTERFAZ (formulario por pasos + vista previa en vivo)
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var U = APS_U, D = APS_DOC, esc = U.esc;
+
+  var M = APS_MODELO, newProp = M.newProp, defaults = M.defaults;
+  var IN_GAS = !!(typeof google !== 'undefined' && google.script && google.script.run);
+  var S = defaults(), STEP = 'operacion', showErr = {}, ISS = [], REG = null, USER = { email: '', rol: 'local' };
+  var ESTADOS = { BORRADOR: 'Borrador', EN_REVISION: 'En revisión', APROBADO: 'Aprobado' };
+  var ESTADOS_UI = { SIN_TERMINAR: 'Guardado sin terminar', COMPLETO: 'Completado', EN_REVISION: 'En revisión', APROBADO: 'Aprobado' };
+  function etiquetaEstado() { return REG.estado === 'BORRADOR' ? (ISS.length ? ESTADOS_UI.SIN_TERMINAR : ESTADOS_UI.COMPLETO + ' (sin enviar)') : ESTADOS[REG.estado]; }
+  var STEP_INFO = { operacion: 'Operación', cliente: 'Propietarios', inmueble: 'Inmueble', venta: 'Venta', renta: 'Arrendamiento', firma: 'Revisión y firma' };
+
+  var ROOT = document.getElementById('aps-root');
+  function $(id) { return document.getElementById(id); }
+  function getP(p) { return p.split('.').reduce(function (o, k) { return o == null ? o : o[k]; }, S); }
+  function setP(p, v) { var ks = p.split('.'), o = S; for (var i = 0; i < ks.length - 1; i++) o = o[ks[i]]; o[ks[ks.length - 1]] = v; }
+  function hasIssue(k) { return ISS.some(function (x) { return x.k === k; }); }
+  function inv(k) { return (showErr[STEP] && hasIssue(k)) ? ' invalid' : ''; }
+  function puedeImprimir() { return !IN_GAS || USER.rol === 'coordinador'; }      // el PDF y su vista de impresión: solo coordinación
+  function ro() {                       // solo lectura (el servidor también lo valida)
+    if (!REG) return false;
+    if (REG.estado === 'APROBADO') return true;
+    if (USER.rol === 'coordinador') return false;
+    return !(REG.asesor === USER.email && REG.estado === 'BORRADOR');   // enviado ya solo lo maneja la coordinación
+  }
+  function claseBanner() { return 'banner e-' + (REG.estado === 'BORRADOR' ? (ISS.length ? 'BORRADOR' : 'COMPLETO') : REG.estado); }
+  function textoBanner() { return '📄 <b>' + esc(REG.id) + '</b> · ' + etiquetaEstado() + (ro() ? ' · solo lectura' : ''); }
+  function banner() {
+    if (!IN_GAS) return '';
+    if (!REG) return '<div class="banner nuevo">📝 Registro nuevo · aún sin guardar</div>';
+    return '<div id="aps_estadoBanner" class="' + claseBanner() + '">' + textoBanner() + '</div>';
+  }
+  function accionesHtml() {
+    var b = '', st = REG ? REG.estado : null, coord = USER.rol === 'coordinador', hay = ISS.length > 0;
+    if (IN_GAS) {
+      if (!ro()) b += '<button type="button" class="btn-sec" data-act="save">💾 Guardar borrador</button>';
+      if (!ro() && (!st || st === 'BORRADOR'))
+        b += '<button type="button" class="btn-main" data-act="submit"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>📤 Enviar al coordinador</button>';
+      if (coord && st === 'EN_REVISION')
+        b += '<button type="button" class="btn-main" data-act="approve"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>✅ Aprobar y generar PDF</button>';
+      if (st === 'APROBADO') {
+        // Regla: el coordinador siempre puede descargar. El asesor SOLO si es dueño de este contrato en particular
+        // (y éste ya está APROBADO, por eso basta estar dentro de "st === 'APROBADO'"; antes de eso el botón ni existe).
+        b += ((coord || REG.asesor === USER.email) ? '<button type="button" class="btn-main" data-act="download" data-keep="1">⬇️ Descargar PDF aprobado</button>' : '<div class="help" style="flex:1 1 100%">✅ Aprobado por la coordinación. El contrato definitivo lo entrega la coordinación.</div>') +
+             '<button type="button" class="btn-sec" data-act="clone" data-keep="1">📑 Usar como base de uno nuevo</button>' +
+             (coord && REG.pdfUrl ? '<a class="btn-sec lnk" href="' + esc(REG.pdfUrl) + '" target="_blank" rel="noopener">👁 Ver PDF aprobado en Drive</a>' : '');
+      }
+    }
+    if (puedeImprimir()) b += '<button type="button" class="btn-main" data-act="print" data-keep="1">🖨️ Imprimir / Guardar PDF</button>';
+    if (IN_GAS && coord) b += '<button type="button" class="btn-sec" data-act="docs" data-keep="1" title="Descarga el contrato en Google Docs">📝 Descargar en Google Docs</button>';
+    b += '<button type="button" class="btn-sec" data-act="zoom" data-keep="1">🔍 Ampliar</button>';
+    if (IN_GAS && coord && REG) b += '<button type="button" class="btn-sec danger" data-act="eliminar" data-keep="1">🗑️ Eliminar</button>';
+    return b;
+  }
+  function visible() { var a = ['operacion', 'cliente', 'inmueble']; if (D.tieneVenta(S)) a.push('venta'); if (D.tieneRenta(S)) a.push('renta'); a.push('firma'); return a; }
+
+  /* ── constructores de campos ── */
+  function help(h) { return h ? '<div class="help">' + h + '</div>' : ''; }
+  function fText(k, label, o) {
+    o = o || {}; var v = getP(k) || '', c = 'input-text' + inv(k);
+    var dataDir = o.dir ? ' data-dir="' + (o.dir === true ? '1' : o.dir) + '"' : '';
+    var el = o.area ? '<textarea class="' + c + '" data-k="' + k + '" rows="' + (o.rows || 2) + '" placeholder="' + esc(o.ph || '') + '"' + dataDir + '>' + esc(v) + '</textarea>'
+      : '<input class="' + c + '" data-k="' + k + '" type="' + (o.type || 'text') + '" value="' + esc(v) + '" placeholder="' + esc(o.ph || '') + '"' + (o.upper ? ' data-upper="1"' : '') + dataDir + (o.digits ? ' data-digits="1"' : '') + (o.mode ? ' inputmode="' + o.mode + '"' : '') + ' autocomplete="off">';
+    return '<div class="field-group"><label>' + label + (o.opt ? ' <em>(opcional)</em>' : '') + '</label>' + el + help(o.help) + '</div>';
+  }
+  function fUnit(k, label, kind, suffix, o) {           // money | pct | meses
+    o = o || {}; var v = getP(k) || '';
+    var pre = kind === 'money' ? '<span>$</span>' : '';
+    return '<div class="field-group"><label>' + label + '</label><div class="money' + inv(k) + '">' + pre +
+      '<input class="input-text" data-k="' + k + '" data-fmt="' + kind + '" inputmode="decimal" value="' + esc(v) + '" placeholder="' + esc(o.ph || (kind === 'money' ? '0.00' : '')) + '" autocomplete="off">' +
+      '<span class="mn">' + suffix + '</span></div><div class="hint dim" data-hint="' + kind + '" data-for="' + k + '"></div>' + help(o.help) + '</div>';
+  }
+  function fSelect(k, label, lista) {
+    var v = getP(k) || '';
+    return '<div class="field-group"><label>' + label + '</label><select class="input-text' + inv(k) + '" data-k="' + k + '" data-rerender="1"><option value="">Selecciona…</option>' +
+      lista.map(function (e) { return '<option value="' + esc(e) + '"' + (v === e ? ' selected' : '') + '>' + esc(e) + '</option>'; }).join('') + '</select></div>';
+  }
+  /* Dirección en partes: la pantalla arma la dirección completa y en forma (sin comas ni espacios de más) */
+  function fDir(pre, titulo, ayuda) {
+    var d = getP(pre) || {}, cdmx = U.esCDMX(d.estado);
+    return '<div class="dirbox"><div class="dir-t">' + titulo + '</div>' +
+      fText(pre + '.calle', 'Calle o avenida', { ph: 'Ej. av insurgentes sur', dir: true }) +
+      '<div class="grid2">' + fText(pre + '.numExt', 'Número exterior', { ph: 'Ej. 1971 (o S/N)', upper: true }) + fText(pre + '.numInt', 'Número interior', { ph: 'Ej. 802', opt: true, upper: true }) + '</div>' +
+      '<div class="grid2">' + fText(pre + '.colonia', 'Colonia', { ph: 'Ej. guadalupe inn', dir: true }) + fText(pre + '.cp', 'Código postal', { ph: '5 dígitos', mode: 'numeric', digits: true }) + '</div>' +
+      '<div class="grid2">' + fSelect(pre + '.estado', 'Ciudad o Estado', U.ESTADOS_MX) + fText(pre + '.alcaldia', cdmx ? 'Alcaldía' : 'Municipio', { ph: cdmx ? 'Ej. alvaro obregon' : 'Ej. zapopan', dir: true }) + '</div>' +
+      '<div class="hint dim" data-hint="dir" data-for="' + pre + '"></div>' + help((ayuda ? ayuda + ' ' : '') + 'Puedes escribir sin acentos ni mayúsculas: se ponen solos en las palabras comunes (Juárez, Álvaro Obregón…). Si alguna palabra queda sin acento, escríbela con acento.') + '</div>';
+  }
+  function ajustesRows() {
+    var A = S.ajustes || [];
+    if (!A.length) return '<div class="help">Sin ajustes de precio: en la carátula se imprimirá "No aplica".</div>';
+    return A.map(function (a, i) {
+      return '<div class="row-item"><div class="ri-main"><div class="grid2">' + fText('ajustes.' + i + '.fecha', 'Fecha del ajuste ' + (i + 1), { type: 'date' }) +
+        fUnit('ajustes.' + i + '.monto', 'Nuevo precio desde esa fecha', 'money', 'M.N.', { ph: '0.00' }) + '</div></div></div>'; }).join('') +
+      help('Cada ajuste va en una fecha posterior a la anterior, dentro de la vigencia, y con un precio menor (los ajustes son a la baja).');
+  }
+  function ajustesUi() {
+    return '<div class="field-group adj"><label>Ajustes de precio</label><div class="adj-n"><input type="number" min="0" max="15" step="1" class="input-text" data-nadj="1" value="' + (S.ajustes || []).length + '">' +
+      '<span class="help">¿Cuántos ajustes se pactaron? (0 a 15). Al indicar la cantidad aparecen los campos de fecha y precio.</span></div><div class="adj-box">' + ajustesRows() + '</div></div>';
+  }
+  function fSeg(k, label, opts, h) {
+    var cur = getP(k);
+    return '<div class="field-group"><label>' + label + '</label><div class="regime-toggle' + inv(k) + '">' + opts.map(function (o) {
+      return '<button type="button" class="regime-btn' + (cur === o[0] ? ' active' : '') + '" data-seg="' + k + '" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>' + help(h) + '</div>';
+  }
+  function fMulti(k, label, opts, h) {
+    var cur = getP(k) || [];
+    return '<div class="field-group"><label>' + label + '</label><div class="regime-toggle' + inv(k) + '">' + opts.map(function (o) {
+      return '<button type="button" class="regime-btn check' + (cur.indexOf(o[0]) >= 0 ? ' active' : '') + '" data-multi="' + k + '" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>' + help(h) + '</div>';
+  }
+  function card(icon, title, sub, body) {
+    return '<div class="card"><div class="card-header"><div class="icon-box"><span class="icon-emoji">' + icon + '</span></div><div><h2>' + title + '</h2><span class="subtitle">' + sub + '</span></div></div>' + body + '</div>';
+  }
+  function note(t) { return '<div class="info-note"><span>ℹ️</span><span>' + t + '</span></div>'; }
+  function bloqueRfc(pre, p, pm) {
+    var modo = p.rfcModo || 'normal', etiqueta = pm ? 'RFC de la empresa' : 'RFC';
+    var cuerpo = modo === 'normal' ? fText(pre + 'rfc', etiqueta, { ph: pm ? '12 caracteres' : '13 caracteres', upper: true })
+      : note('Se imprimirá: <b>“No proporcionado”</b>.');
+    return fSeg(pre + 'rfcModo', etiqueta + ': ¿cuenta con RFC?', [['normal', 'Sí'], ['no', 'No']],
+      'Si no lo tiene o no lo quiere proporcionar, el contrato queda igual, sin exigirlo.') + cuerpo;
+  }
+
+  /* ── pasos ── */
+  function stepOperacion() {
+    return card('📋', 'Tipo de operación', 'Define qué apartados llevará la carátula',
+      fSeg('tipo', '¿Qué se va a hacer con el inmueble?', [['venta', 'Venta'], ['renta', 'Arrendamiento'], ['ambas', 'Venta y arrendamiento']]) +
+      note('La carátula solo imprime los apartados que aplican: si es venta no aparece nada de arrendamiento, y viceversa.'));
+  }
+  function ownerCard(p, i) {
+    var n = S.propietarios.length, pre = 'propietarios.' + i + '.', pm = p.naturaleza === 'PM', b = '';
+    b += fSeg(pre + 'naturaleza', 'Tipo de propietario', [['PF', 'Persona física'], ['PM', 'Persona moral']], 'Persona moral = una empresa (S.A., S.C., etc.).');
+    b += fText(pre + 'nombre', pm ? 'Razón social' : 'Nombre completo', { ph: pm ? 'Ej. Constructora Lomas del Valle, S.A. de C.V.' : 'Nombre(s) y apellidos' });
+    if (pm) {
+      b += '<label style="margin-top:6px">Quién firma por la empresa</label>' + p.representantes.map(function (r, j) {
+        return '<div class="row-item"><div class="ri-main">' + fSeg(pre + 'representantes.' + j + '.trato', 'Trato', [['Sr.', 'Sr.'], ['Sra.', 'Sra.']]) +
+          fText(pre + 'representantes.' + j + '.nombre', 'Nombre completo del representante ' + (j + 1), { ph: 'Nombre(s) y apellidos' }) + '</div>' +
+          (p.representantes.length > 1 ? '<button type="button" class="btn-mini" data-act="delRep" data-i="' + i + '" data-j="' + j + '">Quitar</button>' : '') + '</div>'; }).join('') +
+        (p.representantes.length < 2 ? '<div class="field-group"><button type="button" class="btn-add" data-act="addRep" data-i="' + i + '">＋ Agregar otro representante</button></div>' : '');
+      b += bloqueRfc(pre, p, true);
+      b += fText(pre + 'rfcRep', 'RFC del representante', { ph: '13 caracteres', upper: true });
+    } else {
+      b += bloqueRfc(pre, p, false);
+    }
+    b += '<div class="grid2">' + fText(pre + 'idDoc', 'Documento y número de identificación', { ph: 'Ej. INE 0123456789012', help: pm ? 'Identificación del representante.' : '' }) +
+      fText(pre + 'idAutoridad', 'Autoridad que la emitió', { ph: 'Ej. Instituto Nacional Electoral' }) + '</div>';
+    if (pm) b += '<label style="margin-top:6px">Poder del representante (acta o escritura)</label><div class="grid2">' +
+      fText(pre + 'poderNotario', 'Notario público', { ph: 'Nombre del notario' }) + fText(pre + 'poderNotariaNum', 'Núm. de notaría', { ph: 'Ej. 244' }) +
+      fText(pre + 'poderEscrituraNum', 'Núm. de escritura', { ph: 'Ej. 5686' }) + fText(pre + 'poderFecha', 'Fecha de la escritura', { type: 'date' }) + '</div>';
+    return card(pm ? '🏢' : '👤', n > 1 ? 'Propietario ' + (i + 1) : 'Datos del propietario', pm ? 'Empresa y su representante' : 'Persona física', b);
+  }
+  function stepCliente() {
+    var n = S.propietarios.length;
+    var h = card('👥', 'Propietarios', 'Quienes son dueños del inmueble y firmarán el contrato',
+      '<div class="field-group"><label>¿Cuántos propietarios hay?</label><div class="regime-toggle">' + [1, 2, 3, 4].map(function (c) {
+        return '<button type="button" class="regime-btn' + (n === c ? ' active' : '') + '" data-count="' + c + '">' + (c === 1 ? '1 propietario' : c) + '</button>'; }).join('') + '</div>' +
+        help('Cada propietario aparece en la carátula con sus datos y tiene su propio espacio de firma. Puede haber personas físicas y empresas en el mismo contrato (máximo 4).') + '</div>');
+    S.propietarios.forEach(function (p, i) { h += ownerCard(p, i); });
+    h += card('📞', 'Contacto', 'Un solo contacto para notificaciones del contrato',
+      fDir('contactoDir', 'Domicilio para notificaciones') +
+      '<div class="grid2">' + fText('telMovil', 'Teléfono móvil', { ph: '10 dígitos', mode: 'tel' }) + fText('telFijo', 'Teléfono fijo', { ph: '10 dígitos', mode: 'tel', opt: true }) + '</div>' +
+      fText('correo', 'Correo electrónico', { type: 'email', ph: 'nombre@correo.com' }));
+    return h;
+  }
+  function stepInmueble() {
+    var cont = U.direccion(S.contactoDir);
+    var copiar = cont ? '<button type="button" class="btn-mini" data-act="copiarContacto">📋 Partir del domicilio de contacto</button>' : '';
+    return card('🏠', 'Inmueble', 'Tal y como aparece en su título de propiedad',
+      fText('inmDomicilio', 'Domicilio del inmueble', { area: true, rows: 3, dir: 'libre',
+        ph: 'Ej. Lote 5, Manzana 12, Fraccionamiento Los Encinos, Municipio de Tequisquiapan, Qro.',
+        help: 'Escríbelo igual que en la escritura: puede traer lote, manzana, fraccionamiento u otra estructura distinta al domicilio de contacto. Los acentos y las mayúsculas se corrigen solos al salir del campo.' }) + copiar) +
+      card('📑', 'Datos del título de propiedad', 'Los toma de la escritura del inmueble',
+        '<div class="grid2">' + fText('escrituraNum', 'Núm. de escritura', { ph: 'Ej. 12345' }) + fText('escrituraFecha', 'Fecha de la escritura', { type: 'date' }) +
+        fText('notarioNombre', 'Notario público', { ph: 'Nombre del notario' }) + fText('notariaNumDe', 'Notaría núm. y lugar', { ph: 'Ej. 45 de la Ciudad de México', help: 'Es el "Núm. / De" de la carátula.' }) + '</div>' +
+        fText('folioReal', 'Folio Real o Partida (RPP)', { ph: 'Ej. 9012345' }) +
+        fText('instalaciones', 'Instalaciones incluidas', { area: true, opt: true, ph: 'Ej. Cocina integral, cisterna, calentador solar', help: 'Si no hay, déjalo vacío y se imprimirá "No aplica".' }));
+  }
+  function stepVenta() {
+    return card('💰', 'Condiciones de venta', 'Apartado 4 de la carátula',
+      fUnit('precio', 'Precio de venta base', 'money', 'M.N.', { ph: 'Ej. 4,500,000.00', help: 'Escribe solo números. La cantidad con letra se genera sola.' }) +
+      ajustesUi() +
+      '<div class="grid2">' + fUnit('vigenciaVentaMeses', 'Vigencia del acuerdo', 'meses', 'meses', { ph: 'Ej. 6' }) + fUnit('honorariosPct', 'Honorarios por venta', 'pct', '%', { ph: 'Ej. 4' }) + '</div>' +
+      fSeg('ivaVenta', 'Honorarios por venta: ¿más IVA o IVA incluido?', [['mas', 'Más IVA'], ['incluido', 'IVA incluido']]) +
+      fSeg('modalidadVenta', 'Modalidad de corretaje', [['exclusiva', 'En exclusiva'], ['no_exclusiva', 'No exclusiva']]) +
+      note('La forma de liquidación, la operación referida y la cuenta bancaria son fijas: ya vienen en el documento.'));
+  }
+  function stepRenta() {
+    return card('🔑', 'Condiciones de arrendamiento', 'Apartado 5 de la carátula',
+      fUnit('rentaMonto', 'Renta mensual base', 'money', 'M.N.', { ph: 'Ej. 18,000.00' }) +
+      fSeg('mantenimiento', 'Mantenimiento mensual', [['incluido', 'Incluido'], ['no_incluido', 'No incluido']]) +
+      '<div class="grid2">' + fUnit('vigenciaRentaMeses', 'Vigencia del acuerdo', 'meses', 'meses', { ph: 'Ej. 3' }) +
+      fUnit('rentasAdelantadas', 'Rentas adelantadas', 'meses', 'meses', { ph: 'Ej. 1 (o 0)' }) + '</div>' +
+      fSeg('duracion', 'Duración mínima del arrendamiento', [['1', '1 año forzoso'], ['2', '2 años'], ['otro', 'Otro plazo']]) +
+      (S.duracion === 'otro' ? fText('duracionOtro', 'Especifica el plazo', { ph: 'Ej. 3 años' }) : '') +
+      fMulti('garantias', 'Garantías requeridas', [['poliza', 'Póliza de Servicios Jurídicos'], ['fiador', 'Fiador con inmueble libre de gravamen']], 'Puedes elegir una o ambas.') +
+      fUnit('deposito', 'Depósito en garantía', 'money', 'M.N.', { ph: 'Ej. 18,000.00' })) +
+      card('📋', 'Uso y restricciones', 'Del inmueble en renta',
+        fSeg('destino', 'Destino / uso autorizado', [['habitacional', 'Habitacional'], ['comercial', 'Comercial'], ['oficinas', 'Oficinas']]) +
+        '<div class="grid2">' + fSeg('menores', '¿Aceptan menores de 12 años?', [['SI', 'Sí'], ['NO', 'No']]) + fSeg('mascotas', '¿Aceptan mascotas?', [['SI', 'Sí'], ['NO', 'No']]) + '</div>' +
+        fSeg('modalidadRenta', 'Modalidad de corretaje', [['exclusiva', 'En exclusiva'], ['no_exclusiva', 'No exclusiva']]) +
+        fSeg('ivaRenta', 'Honorarios profesionales: ¿más IVA o IVA incluido?', [['mas', 'Más IVA'], ['incluido', 'IVA incluido']], 'El monto (1 mes de renta, etc.) ya viene fijo en el documento; esto solo define cómo se redacta el IVA.') +
+        note('Los honorarios profesionales y la cuenta bancaria son fijos: ya vienen en el documento.'));
+  }
+  function stepFirma() {
+    var n = ISS.length, firm = D.firmantes(S).length;
+    return card('✍️', 'Lugar y fecha de firma', 'Se imprime en la carátula y en el Anexo 1',
+      '<div class="grid2">' + fText('lugar', 'Lugar de firma', { ph: 'Ciudad de México' }) + fText('fecha', 'Fecha de firma', { type: 'date' }) + '</div>' +
+      note('Firmas que llevará el documento: ' + firm + ' del cliente (según los propietarios y representantes capturados) y 1 de "EL PROFESIONAL".')) +
+      card('✅', 'Revisión final', n ? 'Todavía faltan datos' : 'Todo listo',
+        (n ? '<div class="msg-step">Faltan ' + n + ' dato' + (n === 1 ? '' : 's') + '. Mientras falten, el documento sale con la marca BORRADOR. Revísalos en el panel de la derecha.</div>'
+           : '<div class="info-note"><span>🎉</span><span>Datos completos. Revisa la vista previa (botón "Ampliar") y, si todo está bien, imprime o guarda el PDF.</span></div>') +
+        '<div class="acciones">' + accionesHtml() + '</div>' +
+        (IN_GAS ? '' : '<div class="integ">Al integrarse al sistema, aquí aparecerán "Guardar borrador" y "Enviar a revisión del coordinador".</div>'));
+  }
+  var RENDER = { operacion: stepOperacion, cliente: stepCliente, inmueble: stepInmueble, venta: stepVenta, renta: stepRenta, firma: stepFirma };
+
+  /* ── render de piezas ── */
+  function renderStep() {
+    $('aps_stepHost').innerHTML = banner() + RENDER[STEP]();
+    if (ro()) { var els = $('aps_stepHost').querySelectorAll('input,textarea,button'); for (var i = 0; i < els.length; i++) if (!els[i].hasAttribute('data-keep')) els[i].disabled = true; }
+    updateHints(); paintNav();
+  }
+  function paintNav() {
+    var v = visible();
+    $('aps_steps').innerHTML = v.map(function (id, i) {
+      var okS = !ISS.some(function (x) { return x.step === id; });
+      return '<button type="button" class="chip' + (id === STEP ? ' active' : '') + (okS && id !== 'firma' ? ' ok' : '') + '" data-goto="' + id + '"><b>' + (okS && id !== 'firma' && id !== STEP ? '✓' : (i + 1)) + '</b>' + STEP_INFO[id] + '</button>'; }).join('');
+    var idx = v.indexOf(STEP);
+    $('aps_btnPrev').style.visibility = idx > 0 ? 'visible' : 'hidden';
+    $('aps_btnNext').style.display = idx < v.length - 1 ? '' : 'none';
+  }
+  function updateHints() {
+    var els = ROOT.querySelectorAll('[data-hint]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i], k = el.getAttribute('data-for'), kind = el.getAttribute('data-hint'), n = U.parseNum(getP(k)), t = '', dim = true;
+      if (!isNaN(n)) {
+        if (kind === 'money') { t = 'Se imprimirá: ' + U.montoCompleto(n); dim = false; }
+        else if (kind === 'pct' && n > 0 && n <= 100) {
+          var ivaTxt = S.ivaVenta === 'incluido' ? ', IVA incluido' : (S.ivaVenta === 'mas' ? ' más IVA' : '');
+          t = 'Se imprimirá: ' + U.porcientoCompleto(n) + ivaTxt; dim = false;
+        }
+        else if (kind === 'meses' && n >= 1) { t = 'Se imprimirá: ' + U.mesesCompleto(Math.round(n)); dim = false; }
+        else if (kind === 'meses' && n === 0) { t = 'Se imprimirá: Ninguna'; dim = false; }
+      }
+      if (kind === 'dir') { var dtx = U.direccion(getP(k)); t = dtx ? 'Se imprimirá: ' + dtx : ''; dim = !dtx; }
+      el.textContent = t; el.className = 'hint' + (dim ? ' dim' : '');
+    }
+  }
+  function paintInvalid() {
+    var els = ROOT.querySelectorAll('#aps_stepHost [data-k]');
+    for (var i = 0; i < els.length; i++) {
+      var k = els[i].getAttribute('data-k'), on = !!showErr[STEP] && hasIssue(k), tgt = els[i].parentElement.classList.contains('money') ? els[i].parentElement : els[i];
+      tgt.classList.toggle('invalid', on);
+    }
+  }
+  function docHtml() { return D.render(S, { borrador: ISS.length > 0 }); }
+  function renderPreview() {
+    var h = docHtml();
+    $('aps_pvPaper').innerHTML = h; 
+    var b = $('aps_estado'); b.className = 'badge ' + (ISS.length ? 'warn' : 'ok'); b.textContent = ISS.length ? 'Borrador · ' + ISS.length + ' pendiente' + (ISS.length === 1 ? '' : 's') : 'Completo';
+    if ($('aps_modal').classList.contains('open')) { $('aps_modalPaper').innerHTML = h; fitModal(); }
+    fitPreview();
+  }
+  function fitPreview() {
+    var sc = $('aps_pvScroll'), sizer = $('aps_pvSizer'), paper = $('aps_pvPaper');
+    var w = sc.clientWidth - 20; if (w < 200) return;
+    var s = w / 794; paper.style.transform = 'scale(' + s + ')';
+    sizer.style.width = (794 * s) + 'px'; sizer.style.height = (paper.offsetHeight * s) + 'px';
+  }
+  function fitModal() {
+    var stage = $('aps_modalStage'), paper = $('aps_modalPaper'), w = Math.min(window.innerWidth - 32, 900), s = w / 794;
+    paper.style.transform = 'scale(' + s + ')'; stage.style.width = (794 * s) + 'px'; stage.style.height = (paper.offsetHeight * s) + 'px';
+  }
+  function renderPend() {
+    var h = '';
+    if (!ISS.length) h = '<div class="ok-line">✓ Documento completo. Listo para imprimir o guardar como PDF.</div>';
+    else {
+      h = '<div class="bad-line">Faltan ' + ISS.length + ' dato' + (ISS.length === 1 ? '' : 's') + ':</div>' + ISS.slice(0, 6).map(function (x) {
+        return '<button type="button" data-goto="' + x.step + '" data-focus="' + x.k + '">• ' + esc(x.msg) + '</button>'; }).join('') +
+        (ISS.length > 6 ? '<div class="help">…y ' + (ISS.length - 6) + ' más</div>' : '');
+    }
+    $('aps_pend').innerHTML = h;
+  }
+  function refresh(struct) {
+    if (visible().indexOf(STEP) < 0) STEP = 'operacion';
+    ISS = D.validar(S);
+    if (struct) renderStep(); else { updateHints(); paintNav(); paintInvalid(); }
+    var bn = REG && document.getElementById('aps_estadoBanner'); if (bn) { bn.className = claseBanner(); bn.innerHTML = textoBanner(); }      // el estado (sin terminar / completado) se actualiza al escribir
+    renderPreview(); renderPend();
+  }
+
+  /* ── acciones ── */
+  function goStep(id, focusKey) {
+    STEP = id; refresh(true); window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (focusKey) setTimeout(function () { var el = ROOT.querySelector('#aps_stepHost [data-k="' + focusKey + '"], #aps_stepHost [data-seg="' + focusKey + '"], #aps_stepHost [data-multi="' + focusKey + '"]'); if (el) { try { el.focus(); } catch (e) {} el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }, 60);
+  }
+  function next() {
+    var v = visible(), idx = v.indexOf(STEP);
+    if (ISS.some(function (x) { return x.step === STEP; })) {
+      showErr[STEP] = true; refresh(true);
+      var first = ROOT.querySelector('#aps_stepHost .invalid'); if (first) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      var m = document.createElement('div'); m.className = 'msg-step'; m.textContent = 'Faltan datos en este paso (marcados en rojo). Complétalos para continuar.';
+      $('aps_stepHost').insertBefore(m, $('aps_stepHost').firstChild); return;
+    }
+    if (idx < v.length - 1) goStep(v[idx + 1]);
+  }
+  function prev() { var v = visible(), idx = v.indexOf(STEP); if (idx > 0) goStep(v[idx - 1]); }
+  function tieneDatos(p) { return ['nombre', 'rfc', 'idDoc', 'rfcRep'].some(function (k) { return String(p[k] || '').trim(); }); }
+  function setCount(c) {
+    var cur = S.propietarios.length;
+    if (c > cur) { while (S.propietarios.length < c) S.propietarios.push(newProp()); }
+    else if (c < cur) {
+      if (S.propietarios.slice(c).some(tieneDatos) && !window.confirm('Se quitarán los datos de ' + (cur - c) + ' propietario(s) (los últimos). ¿Continuar?')) return;
+      S.propietarios.length = c;
+    }
+    refresh(true);
+  }
+
+  /* Página completa e independiente del documento (se imprime dentro de un iframe: así no le afecta el scroll ni los estilos de la interfaz) */
+  function paginaImprimible() {
+    return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>APS Hipoo</title><style>html,body{margin:0;background:#fff}' + D.css() + '</style></head><body>' + docHtml() + '<script>' + D.ajusteJS + '<\/script></body></html>';
+  }
+  function nombreArchivo() {
+    var p = S.propietarios[0] || {}, base = String(p.nombre || '').replace(/[\\\/:*?"<>|]/g, '').trim();
+    return 'APS Hipoo' + (base ? ' - ' + base : '');
+  }
+  function imprimir() {
+    if (!puedeImprimir()) { toast('El PDF solo lo obtiene la coordinación.', true); return; }
+    if (ISS.length && !window.confirm('Hay ' + ISS.length + ' dato(s) pendiente(s). El documento se imprimirá con la marca BORRADOR. ¿Continuar?')) return;
+    var t0 = document.title, fr = document.createElement('iframe'), hecho = false;
+    fr.setAttribute('aria-hidden', 'true'); fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+    document.body.appendChild(fr);
+    function limpia() { document.title = t0; if (fr.parentNode) fr.parentNode.removeChild(fr); }
+    try {
+      var w = fr.contentWindow, d = w.document; d.open(); d.write(paginaImprimible()); d.close();
+      w.onafterprint = limpia; setTimeout(limpia, 120000);
+      var imgs = [].slice.call(d.images);
+      function ir() { if (hecho) return; hecho = true; try { document.title = nombreArchivo(); w.focus(); w.print(); } catch (e) { limpia(); toast('No se pudo abrir la impresión desde aquí. Usa el PDF aprobado.', true); } }
+      function listo() { if (imgs.every(function (i) { return i.complete; })) setTimeout(ir, 150); }
+      if (imgs.every(function (i) { return i.complete; })) setTimeout(ir, 300);
+      else { imgs.forEach(function (i) { i.addEventListener('load', listo); i.addEventListener('error', listo); }); setTimeout(ir, 5000); }   // espera el logo (máx. 5 s)
+    } catch (e) { limpia(); toast('No se pudo abrir la impresión desde aquí. Usa el PDF aprobado.', true); }
+  }
+  function openModal() { $('aps_modal').classList.add('open'); $('aps_modalPaper').innerHTML = docHtml(); fitModal(); }
+  function closeModal() { $('aps_modal').classList.remove('open'); }
+
+  var EJ = M.ejemplos;
+  function cargar(id) { S = id ? EJ[id]() : defaults(); showErr = {}; STEP = id ? 'firma' : 'operacion'; refresh(true); }
+
+
+  /* ── capa Apps Script (solo si corre dentro de la aplicación web) ── */
+  function toast(msg, error) {
+    var t = $('aps_toast'); t.textContent = msg; t.className = 'toast show' + (error ? ' err' : '');
+    clearTimeout(toast._t); toast._t = setTimeout(function () { t.className = 'toast'; }, error ? 7000 : 3000);
+  }
+  function busy(on, txt) { $('aps_busy').className = 'busy' + (on ? ' on' : ''); if (txt) $('aps_busyTxt').textContent = txt; }
+  /* Nunca se queda "cargando" para siempre: si el servidor no contesta en 25 s, se libera la pantalla sola, con
+     aviso para reintentar — sin tener que refrescar la página. */
+  function srv(fn, args, ok, txt) {
+    if (!IN_GAS) { toast('Esta función solo está disponible dentro de la aplicación de Apps Script.', true); return; }
+    busy(true, txt || 'Procesando…');
+    var listo = false;
+    var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); toast('El servidor está tardando más de lo normal. Vuelve a intentarlo.', true); }, 25000);
+    var r = google.script.run
+      .withSuccessHandler(function (res) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); if (ok) ok(res); })
+      .withFailureHandler(function (err) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); toast(String((err && err.message) || err).replace(/^Error:\s*/, ''), true); });
+    r[fn].apply(r, args);
+  }
+  function normaliza(d) {
+    var base = defaults(), o = Object.assign(base, d || {});
+    o.propietarios = (d && d.propietarios && d.propietarios.length ? d.propietarios : [newProp()]).map(function (p) { return Object.assign(newProp(), p); });
+    o.contactoDir = Object.assign(M.newDir(), o.contactoDir || {});
+    if (!o.inmDomicilio && o.inmDir && o.inmDir.calle) o.inmDomicilio = U.direccion(o.inmDir);   // registros de antes de este campo (dirección ya estructurada)
+    delete o.inmDir; delete o.inmMismoDomicilio;
+    if (d && d.domicilioNotif && !o.contactoDir.calle) o.contactoDir.calle = String(d.domicilioNotif);
+    if (!Array.isArray(o.ajustes)) o.ajustes = [];
+    return o;
+  }
+  function conRegistro(meta) { REG = meta; renderStep(); renderPend(); renderPreview(); }
+  function guardar(despues) {
+    srv('APS_guardar', [S, REG ? REG.id : null], function (meta) { conRegistro(meta); if (despues) despues(meta); else toast('Borrador guardado · ' + meta.id); }, 'Guardando…');
+  }
+  function enviar() {
+    if (ISS.length) { toast('Completa los datos pendientes antes de enviar.', true); return; }
+    if (!window.confirm('¿Enviar a revisión del coordinador? Ya no podrás editarlo salvo que te lo devuelva.')) return;
+    guardar(function (meta) { srv('APS_enviarRevision', [meta.id], function (m) { conRegistro(m); toast('Enviado a revisión · ' + m.id); }, 'Enviando a revisión…'); });
+  }
+  function aprobar() {
+    if (ISS.length) { toast('Completa los datos pendientes antes de aprobar.', true); return; }
+    if (!window.confirm('¿Aprobar y generar el PDF definitivo? Después ya no se puede editar.')) return;
+    guardar(function (meta) { srv('APS_aprobar', [meta.id], function (m) { conRegistro(m); toast('Aprobado · PDF generado'); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Generando PDF…'); });
+  }
+  function descargar() {
+    srv('APS_obtenerPdf', [REG.id], function (r) {
+      var a = document.createElement('a'); a.href = 'data:application/pdf;base64,' + r.base64; a.download = r.nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      toast('Descarga iniciada: ' + r.nombre);
+    }, 'Preparando PDF…');
+  }
+  function copiaDocs() {
+    function crear(id) {
+      srv('APS_docEditable', [id], function (r) { window.open(r.url, '_blank', 'noopener'); toast('Documento generado en Google Docs.'); }, 'Generando el documento en Google Docs…');
+    }
+    if (REG) { crear(REG.id); return; }
+    guardar(function (meta) { crear(meta.id); });          // registro nuevo: se guarda como borrador y de inmediato se crea la copia
+  }
+  function clonar() { REG = null; S.fecha = M.hoyISO(); showErr = {}; STEP = 'operacion'; refresh(true); toast('Nuevo registro basado en el anterior (sin guardar).'); }
+  function eliminar() {
+    if (!REG) return;
+    if (!window.confirm('¿Eliminar el contrato ' + REG.id + ' de forma permanente? Esto no se puede deshacer.')) return;
+    srv('APS_eliminar', [REG.id], function () { toast('Contrato eliminado.'); S = defaults(); REG = null; showErr = {}; STEP = 'operacion'; refresh(true); }, 'Eliminando…');
+  }
+  function nuevo() {
+    if (!window.confirm('¿Empezar un registro nuevo? Se descartan los cambios no guardados.')) return;
+    S = defaults(); REG = null; showErr = {}; STEP = 'operacion'; refresh(true);
+  }
+  function abrirRegistro(id) {
+    srv('APS_abrir', [id], function (r) { S = normaliza(r.datos); REG = r.meta; showErr = {}; STEP = 'firma'; cerrarRegistros(); refresh(true); }, 'Abriendo…');
+  }
+  var regFiltro = 'mios';
+  function abrirRegistros(f) {
+    regFiltro = f || (USER.rol === 'coordinador' ? 'revision' : 'mios');
+    $('aps_regModal').classList.add('open');
+    var tabs = USER.rol === 'coordinador' ? [['revision', 'Por revisar'], ['todos', 'Todos'], ['mios', 'Míos']] : [['mios', 'Mis registros']];
+    $('aps_regTabs').innerHTML = tabs.map(function (t) { return '<button type="button" class="chip' + (t[0] === regFiltro ? ' active' : '') + '" data-regtab="' + t[0] + '">' + t[1] + '</button>'; }).join('');
+    $('aps_regList').innerHTML = '<div class="help">Cargando…</div>';
+    srv('APS_listar', [regFiltro], function (rows) {
+      $('aps_regList').innerHTML = rows.length ? '<div class="reg-wrap"><table class="reg"><thead><tr><th>ID</th><th>Estado</th><th>Propietarios</th><th>Tipo</th><th>Actualizado</th>' + (USER.rol === 'coordinador' ? '<th>Asesor</th>' : '') + '<th></th></tr></thead><tbody>' +
+        rows.map(function (r) { return '<tr><td>' + esc(r.id) + '</td><td><span class="est e-' + (r.estadoUI || r.estado) + '">' + (ESTADOS_UI[r.estadoUI] || ESTADOS[r.estado]) + '</span></td><td>' + esc(r.propietarios) + '</td><td>' + esc(r.tipo) + '</td><td>' + esc(r.actualizado) + '</td>' +
+          (USER.rol === 'coordinador' ? '<td>' + esc(r.asesor) + '</td>' : '') + '<td><button type="button" class="btn-mini" data-open="' + esc(r.id) + '">Abrir</button></td></tr>'; }).join('') + '</tbody></table></div>'
+        : '<div class="help">No hay registros en esta vista.</div>';
+    }, 'Cargando registros…');
+  }
+  function cerrarRegistros() { $('aps_regModal').classList.remove('open'); }
+  function iniciarServidor() {
+    if (!IN_GAS) return;
+    $('aps_userbar').style.display = 'flex';
+    srv('APS_iniciar', [], function (r) {
+      USER = r.usuario;
+      if (USER.rol === 'coordinador') ROOT.querySelector('.ejs').style.display = '';
+      var pi = puedeImprimir(); $('aps_btnPrint').style.display = pi ? '' : 'none'; $('aps_modalPrint').style.display = pi ? '' : 'none';
+      $('aps_userChip').textContent = USER.email ? USER.email + ' · ' + (USER.rol === 'coordinador' ? 'Coordinador' : 'Asesor') : 'Sin identificar';
+      if (r.logo) {
+        D.CFG.logoSrc = r.logo;
+        var li = ROOT.querySelector('.logo-img'); if (li) { li.src = r.logo; li.style.display = 'block'; if (li.nextElementSibling) li.nextElementSibling.style.display = 'none'; }
+      }
+      if (!USER.email) { $('aps_stepHost').innerHTML = '<div class="card"><div class="msg-step">No se pudo identificar tu cuenta de Google. Abre el enlace con tu cuenta corporativa (Cualli o Hipoo) y vuelve a intentar.</div></div>'; $('aps_btnNext').style.display = 'none'; return; }
+      refresh(true);
+    }, 'Cargando…');
+  }
+
+  /* ── eventos ── */
+  var host = $('aps_stepHost');
+  /* Separador de miles EN VIVO mientras se escribe (sin esperar a salir del campo). Solo agrupa dígitos con comas;
+     los 2 decimales se completan al salir del campo (ver focusout), para no estorbar mientras se sigue escribiendo. */
+  function formatoMoneyVivo(v) {
+    v = String(v).replace(/[^\d.]/g, '');
+    var i = v.indexOf('.');
+    if (i >= 0) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');   // solo el primer punto cuenta como decimal
+    var partes = v.split('.'), ent = partes[0].replace(/^0+(?=\d)/, '');
+    return ent.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (partes.length > 1 ? '.' + partes[1].slice(0, 2) : '');
+  }
+  host.addEventListener('input', function (e) {
+    var t = e.target, k = t.getAttribute && t.getAttribute('data-k'); if (!k || ro()) return;
+    var v = t.value;
+    if (t.getAttribute('data-upper')) { var pos = t.selectionStart; v = v.toUpperCase(); t.value = v; try { t.setSelectionRange(pos, pos); } catch (er) {} }
+    if (t.getAttribute('data-digits')) { v = v.replace(/\D/g, '').slice(0, 5); t.value = v; }
+    if (t.getAttribute('data-fmt') === 'money') {
+      var cursor = t.selectionStart, digitosAntes = (v.slice(0, cursor).match(/\d/g) || []).length;
+      v = formatoMoneyVivo(v); t.value = v;
+      var i2 = 0, vistos = 0;
+      while (i2 < v.length && vistos < digitosAntes) { if (/\d/.test(v[i2])) vistos++; i2++; }
+      try { t.setSelectionRange(i2, i2); } catch (er) {}
+    }
+    setP(k, v); refresh(!!t.getAttribute('data-rerender'));
+  });
+  function setAjustes(n, campo) {
+    var A = S.ajustes || (S.ajustes = []);
+    if (n < A.length) {
+      if (A.slice(n).some(function (a) { return String(a.fecha || '').trim() || String(a.monto || '').trim(); }) && !window.confirm('Se quitarán los últimos ' + (A.length - n) + ' ajuste(s) ya capturados. ¿Continuar?')) { campo.value = A.length; return; }
+      A.length = n;
+    } else { while (A.length < n) A.push({ fecha: '', monto: '' }); }
+    campo.value = n; ROOT.querySelector('.adj-box').innerHTML = ajustesRows(); refresh(false);
+  }
+  host.addEventListener('change', function (e) {
+    var t = e.target; if (!t.getAttribute || !t.getAttribute('data-nadj') || ro()) return;
+    setAjustes(Math.max(0, Math.min(15, parseInt(t.value, 10) || 0)), t);
+  });
+  host.addEventListener('focusout', function (e) {
+    var t = e.target;
+    if (t.getAttribute && t.getAttribute('data-dir') && !ro()) {
+      var libre = t.getAttribute('data-dir') === 'libre', nv = libre ? U.normDireccionLibre(t.value) : U.normDir(t.value);
+      if (nv !== t.value) { t.value = nv; setP(t.getAttribute('data-k'), nv); refresh(false); }
+    }
+    if (t.getAttribute && t.getAttribute('data-fmt') === 'money') {
+      var n = U.parseNum(t.value); if (!isNaN(n)) { t.value = U.formatoNum(n); setP(t.getAttribute('data-k'), t.value); refresh(false); } }
+  });
+  host.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (ro() && !b.hasAttribute('data-keep')) return;
+    if (b.hasAttribute('data-count')) { setCount(parseInt(b.getAttribute('data-count'), 10)); return; }
+    if (b.hasAttribute('data-seg')) {
+      var kSeg = b.getAttribute('data-seg'), vSeg = b.getAttribute('data-v');
+      setP(kSeg, vSeg);
+      if (/\.rfcModo$/.test(kSeg)) setP(kSeg.replace(/rfcModo$/, 'rfc'), '');      // al cambiar "Sí"/"No" el campo de RFC se limpia, para escribirlo de nuevo o dejarlo vacío
+      refresh(true); return;
+    }
+    if (b.hasAttribute('data-multi')) {
+      var k = b.getAttribute('data-multi'), v = b.getAttribute('data-v'), arr = (getP(k) || []).slice(), i = arr.indexOf(v);
+      if (i >= 0) arr.splice(i, 1); else arr.push(v); setP(k, arr); refresh(true); return; }
+    var a = b.getAttribute('data-act'), oi = parseInt(b.getAttribute('data-i'), 10), rj = parseInt(b.getAttribute('data-j'), 10);
+    if (a === 'copiarContacto') { setP('inmDomicilio', U.direccion(S.contactoDir)); refresh(true); }
+    else if (a === 'addRep' && S.propietarios[oi].representantes.length < 2) { S.propietarios[oi].representantes.push({ trato: '', nombre: '' }); refresh(true); }
+    else if (a === 'delRep') { S.propietarios[oi].representantes.splice(rj, 1); refresh(true); }
+    else if (a === 'print') imprimir();
+    else if (a === 'zoom') openModal();
+    else if (a === 'save') guardar();
+    else if (a === 'submit') enviar();
+    else if (a === 'approve') aprobar();
+    else if (a === 'download') descargar();
+    else if (a === 'clone') clonar();
+    else if (a === 'docs') copiaDocs();
+    else if (a === 'eliminar') eliminar();
+  });
+  ROOT.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-goto]'); if (b) { goStep(b.getAttribute('data-goto'), b.getAttribute('data-focus')); return; }
+    var x = e.target.closest('[data-ej]'); if (x) { var id = x.getAttribute('data-ej'); cargar(id === 'reset' ? null : id); }
+  });
+  ROOT.addEventListener('click', function (e) {
+    var o = e.target.closest('[data-open]'); if (o) { abrirRegistro(o.getAttribute('data-open')); return; }
+    var t = e.target.closest('[data-regtab]'); if (t) abrirRegistros(t.getAttribute('data-regtab'));
+  });
+  $('aps_btnRegistros').addEventListener('click', function () { abrirRegistros(); });
+  $('aps_btnNuevo').addEventListener('click', nuevo);
+  $('aps_regClose').addEventListener('click', cerrarRegistros);
+  $('aps_btnNext').addEventListener('click', next); $('aps_btnPrev').addEventListener('click', prev);
+  $('aps_btnZoom').addEventListener('click', openModal); $('aps_btnPrint').addEventListener('click', imprimir);
+  $('aps_modalClose').addEventListener('click', closeModal); $('aps_modalPrint').addEventListener('click', function () { closeModal(); imprimir(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ROOT.offsetParent !== null) { closeModal(); cerrarRegistros(); } });
+  window.addEventListener('resize', function () { fitPreview(); if ($('aps_modal').classList.contains('open')) fitModal(); });
+  
+  $('aps_docCss').textContent = D.css(null, { sinPagina: true });
+  var activado = false;
+  function activar() { if (!activado) { activado = true; iniciarServidor(); } refresh(true); fitPreview(); }
+  window.APS_UI = { activar: activar, paginaImprimible: paginaImprimible, abrir: abrirRegistro, misRegistros: abrirRegistros, cargar: cargar, estado: function () { return S; }, pendientes: function () { return ISS.slice(); }, ir: goStep, step: function () { return STEP; } };
+  if (IN_GAS) { $('aps_btnPrint').style.display = 'none'; $('aps_modalPrint').style.display = 'none'; }      // el PDF solo lo ve la coordinación (se muestran al identificar)
+  if (IN_GAS) ROOT.querySelector('.ejs').style.display = 'none';       // datos de ejemplo: solo coordinador (se muestran al identificar)
+  refresh(true);
+})();
+
+</script>
