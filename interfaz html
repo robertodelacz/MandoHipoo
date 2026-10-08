@@ -767,9 +767,9 @@
       background: radial-gradient(120% 90% at 50% 0%, #364494 0%, #232d61 48%, #11163a 100%); transition: transform .75s cubic-bezier(.77, 0, .18, 1), opacity .5s .25s; }
     #splash.out { transform: translateY(-102%); opacity: .6; pointer-events: none; }
     #splash::before { content: ""; position: absolute; inset: 0; opacity: .5; background-image: linear-gradient(rgba(53, 183, 197, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(53, 183, 197, .07) 1px, transparent 1px); background-size: 46px 46px; -webkit-mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 70%); mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 70%); }
-    .sp-logo { position: relative; background: #fff; border-radius: 18px; padding: 16px 34px; box-shadow: 0 24px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(255, 255, 255, .5); animation: spIn .9s cubic-bezier(.2, .9, .25, 1) both; }
-    .sp-logo img { display: block; height: 54px; width: auto; }
-    .sp-logo b { display: block; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 38px; color: #364494; letter-spacing: -.5px; }
+    .sp-logo { position: relative; background: #fff; border-radius: 22px; padding: 22px 48px; box-shadow: 0 24px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(255, 255, 255, .5); animation: spIn .9s cubic-bezier(.2, .9, .25, 1) both; }
+    .sp-logo img { display: block; height: 110px; width: auto; max-width: 320px; object-fit: contain; }
+    .sp-logo b { display: block; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 64px; color: #364494; letter-spacing: -.5px; }
     .sp-logo b i { color: #0f8594; font-style: normal; }
     .sp-tag { position: relative; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 6px; text-transform: uppercase; color: #bff3f8; animation: spUp .8s .45s both; }
     .sp-bar { position: relative; width: 190px; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .14); overflow: hidden; animation: spUp .6s .6s both; }
@@ -787,13 +787,13 @@
     .hm-sky { position: absolute; right: -10px; bottom: -6px; width: min(560px, 70%); height: 78%; opacity: .2; pointer-events: none; }
     .hm-hero::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px); background-size: 44px 44px; -webkit-mask-image: linear-gradient(100deg, #000 0%, transparent 65%); mask-image: linear-gradient(100deg, #000 0%, transparent 65%); pointer-events: none; }
     .hm-in { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; }
-    .hm-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
+    .hm-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 34px; }
     .hm-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
-    .hm-logo { background: #fff; border-radius: 12px; padding: 6px 14px; display: inline-flex; align-items: center; box-shadow: 0 6px 18px rgba(0, 0, 0, .22); }
-    .hm-logo img { height: 28px; width: auto; display: block; }
-    .hm-logo b { font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 22px; color: #364494; letter-spacing: -.3px; }
-    .hm-logo b i { color: #0f8594; font-style: normal; }
-    .hm-sep { width: 1px; height: 26px; background: rgba(255, 255, 255, .3); }
+    .hm-logo { background: #fff; border-radius: 16px; padding: 10px 26px; display: inline-flex; align-items: center; box-shadow: 0 10px 26px rgba(0, 0, 0, .28); }
+    .hm-logo img { height: 72px; width: auto; max-width: 250px; object-fit: contain; display: block; }
+    .hm-logo b { font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 44px; color: #364494; letter-spacing: -.3px; }
+    .hm-logo b i, .sp-logo b i { color: #0f8594; font-style: normal; }
+    .hm-sep { width: 1px; height: 44px; background: rgba(255, 255, 255, .3); }
     .hm-sys { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 2.6px; text-transform: uppercase; color: #bff3f8; }
     .hm-live { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; color: #dbe3ff; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .22); padding: 7px 14px; border-radius: 999px; backdrop-filter: blur(6px); }
     .hm-live i { width: 8px; height: 8px; border-radius: 50%; background: #3be8a5; box-shadow: 0 0 0 0 rgba(59, 232, 165, .6); animation: hmPulse 2s infinite; }
@@ -936,6 +936,7 @@
       .hm-fl { max-height: 340px; }
     }
     @media (max-width: 560px) {
+      .hm-logo img { height: 56px; } .hm-logo { padding: 8px 18px; } .sp-logo img { height: 84px; }
       .hm-hero { padding: 16px 16px 100px; } .hm-main { padding: 0 14px 40px; margin-top: -64px; }
       .hm-top { margin-bottom: 26px; } .hm-sys, .hm-sep { display: none; }
       .hm-kpis { grid-template-columns: 1fr; } .hm-cell .n { font-size: 32px; }
@@ -945,7 +946,7 @@
       .hm *, #splash, #splash * { animation-duration: .01s !important; animation-delay: 0s !important; transition-duration: .01s !important; }
     }
     /* Pantallas claras (contratos APS y revisión): superficie propia, por encima del video y su capa oscura de fondo */
-    #modulo-aps, #modulo-consola, #modulo-tablero { position: relative; z-index: 2; min-height: calc(100vh - 62px); background: linear-gradient(180deg, #dfe6f4 0, #f4f7fc 340px); padding: 22px 14px 48px; }
+    #modulo-aps, #modulo-consola, #modulo-tablero { position: relative; min-height: calc(100vh - 62px); background: linear-gradient(180deg, #dfe6f4 0, #f4f7fc 340px); padding: 22px 14px 48px; }
     @media (max-width: 560px) { #modulo-aps, #modulo-consola, #modulo-tablero { padding: 10px 0 36px; } }
     @media print { #splash, .hm, .barra-nav { display: none !important; } }
     /* Legibilidad del Pre PLD: solo el color de los textos grises (los bordes no cambian) */
@@ -1599,7 +1600,7 @@
     var visto = false; try { visto = window.sessionStorage.getItem('hm_splash') === '1'; } catch (e) { visto = false; }
     if (visto || /[?&]modulo=/.test(window.location.search)) { sp.parentNode.removeChild(sp); return; }
     try { window.sessionStorage.setItem('hm_splash', '1'); } catch (e) { /* sin almacenamiento: se verá en cada carga, sin problema */ }
-    document.getElementById('spLogo').innerHTML = HM_LOGO ? '<img src="' + HM_LOGO + '" alt="Hipoo" style="display:block;height:54px;width:auto">' : '<b style="display:block;font:700 38px Fraunces,Georgia,serif;color:#364494;letter-spacing:-.5px">hipoo<i style="color:#0f8594;font-style:normal">.mx</i></b>';
+    document.getElementById('spLogo').innerHTML = '<img src="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000" alt="Hipoo" onerror="respaldoLogo(this)">';
     document.body.classList.add('splash-on');
     var reducido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, cerrado = false;
     function cerrar() { if (cerrado) return; cerrado = true; sp.classList.add('out'); document.body.classList.remove('splash-on'); setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900); }
@@ -1611,6 +1612,7 @@
   function hayPantalla(s) { return !!document.getElementById(CONTENEDOR[s]); }
   function irA(s) {
     if (s === 'consola') s = 'revaps';
+    if (window.APS_UI && APS_UI.cerrarModales) APS_UI.cerrarModales();      // una ventana ampliada no debe quedarse abierta al cambiar de pantalla
     var destino = (s === 'inicio') ? 'pantalla-inicio' : CONTENEDOR[s];
     if (!destino || !document.getElementById(destino)) return;               // pantalla no disponible para este usuario
     ['pantalla-inicio', 'modulo-pld', 'modulo-aps', 'modulo-consola', 'modulo-tablero'].forEach(function (id) {
@@ -1663,9 +1665,14 @@
   };
   function hmEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function almacen(op, k, v) { try { return op === 'get' ? window.localStorage.getItem(k) : window.localStorage.setItem(k, v); } catch (e) { return null; } }
-  function logoHtml(grande) {
-    return HM_LOGO ? '<img src="' + HM_LOGO + '" alt="Hipoo">' : '<b>hipoo<i>.mx</i></b>';
+  var LOGO_URL = 'https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000';     // el mismo logo que siempre ha llevado el encabezado
+  function respaldoLogo(img) {                                                                        // si la miniatura de Drive no carga: logo guardado en el sistema, o el rótulo de texto
+    if (!img || !img.parentNode) return;
+    if (!img.dataset.r && HM_LOGO) { img.dataset.r = '1'; img.src = HM_LOGO; return; }
+    var b = document.createElement('b'); b.innerHTML = 'hipoo<i>.mx</i>'; img.parentNode.replaceChild(b, img);
   }
+  window.respaldoLogo = respaldoLogo;
+  function logoHtml(grande) { return '<img src="' + LOGO_URL + '" alt="Hipoo" onerror="respaldoLogo(this)">'; }
   function tarjeta(id, titulo, texto, o) {
     o = o || {};
     var badge = o.badge ? '<span class="hm-badge">' + (o.badge > 99 ? '99+' : o.badge) + '</span>' : '';

@@ -7,8 +7,8 @@
 /* ── Encabezado: franja azul delgada con los colores institucionales ── */
 #aps-root .hdr{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:linear-gradient(100deg,#364494 0%,#2b377a 100%);padding:14px 22px;border-bottom:4px solid var(--primary)}
 #aps-root .hdr-l{display:flex;align-items:center;gap:14px;min-width:0}
-#aps-root .hdr .logo-container{margin:0;padding:4px 12px;border-radius:10px;box-shadow:none}
-#aps-root .hdr .header-logo{width:auto;height:30px}
+#aps-root .hdr .logo-container{margin:0;padding:6px 18px;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+#aps-root .hdr .header-logo{width:auto;height:54px;max-width:210px;object-fit:contain}
 #aps-root .hdr h1{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:24px;line-height:1.1;color:#fff;letter-spacing:.2px;text-shadow:none;margin:0}
 #aps-root .hdr p{color:#cfe9ee;font-size:12px;font-weight:500;background:none;border:0;padding:0;margin:3px 0 0;display:block;border-radius:0}
 #aps-root .userbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin:0}
@@ -918,10 +918,11 @@
   $('aps_docCss').textContent = D.css(null, { sinPagina: true });
   var activado = false;
   function activar() {
-    if (!activado) { activado = true; iniciarServidor(); var hl = ROOT.querySelector('.hdr .header-logo'); if (hl && window.HM_LOGO) hl.src = window.HM_LOGO; }
+    if (!activado) { activado = true; iniciarServidor(); }
     refresh(true); fitPreview();
   }
-  window.APS_UI = { activar: activar, abrir: abrirRegistro, misRegistros: abrirRegistros, cargar: cargar, estado: function () { return S; }, pendientes: function () { return ISS.slice(); }, ir: goStep, step: function () { return STEP; } };
+  function cerrarModales() { closeModal(); cerrarRegistros(); $('aps_hisModal').classList.remove('open'); }
+  window.APS_UI = { activar: activar, cerrarModales: cerrarModales, abrir: abrirRegistro, misRegistros: abrirRegistros, cargar: cargar, estado: function () { return S; }, pendientes: function () { return ISS.slice(); }, ir: goStep, step: function () { return STEP; } };
   if (IN_GAS) { $('aps_btnPrint').style.display = 'none'; $('aps_modalPrint').style.display = 'none'; $('aps_sinPdf').style.display = ''; }      // el PDF solo lo ve la coordinación (se muestran al identificar)
   if (IN_GAS) ROOT.querySelector('.ejs').style.display = 'none';       // datos de ejemplo: solo coordinador (se muestran al identificar)
   refresh(true);
