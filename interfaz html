@@ -945,6 +945,81 @@
     @media (prefers-reduced-motion: reduce) {
       .hm *, #splash, #splash * { animation-duration: .01s !important; animation-delay: 0s !important; transition-duration: .01s !important; }
     }
+
+    /* ═══ Pulido: superficies sin bordes de color, sombras suaves, logos grandes ═══ */
+    :root { --navh: 62px; }
+    .hm-bc::before, .hm-card.coord::before, .hm-cell::before { display: none; }
+    .hm-bc { border: none; background: linear-gradient(180deg, #fff 0%, #f8faff 100%); box-shadow: 0 2px 4px rgba(26, 34, 74, .04), 0 26px 54px -18px rgba(26, 34, 74, .32); }
+    .hm-bc.pld { background: linear-gradient(180deg, #fff 0%, #f5fbfc 100%); }
+    .hm-kpi, .hm-feed { border: none; box-shadow: 0 2px 4px rgba(26, 34, 74, .04), 0 22px 44px -18px rgba(26, 34, 74, .26); }
+    .hm-card { border: none; box-shadow: 0 2px 4px rgba(26, 34, 74, .04), 0 14px 30px -16px rgba(26, 34, 74, .28); }
+    .hm-card:hover { border: none; box-shadow: 0 2px 4px rgba(26, 34, 74, .05), 0 22px 40px -16px rgba(26, 34, 74, .38); }
+    .hm-card.coord .hm-ico { box-shadow: inset 0 0 0 1px rgba(224, 161, 0, .25); }
+    .hm-cell { border: none; background: #fff; box-shadow: 0 1px 2px rgba(26, 34, 74, .06), 0 0 0 1px rgba(26, 34, 74, .035); }
+    .hm-cell:hover { border: none; box-shadow: 0 12px 24px -12px rgba(26, 34, 74, .4), 0 0 0 1px rgba(26, 34, 74, .05); }
+    .hm-cell .n { color: var(--c, var(--ink)); }
+    .hm-cell.t-mute .n { color: var(--ink); }
+    .hm-cell.hot { background: var(--warn-bg); box-shadow: 0 8px 20px -12px rgba(224, 161, 0, .6); }
+    .hm-cell.hot.t-bad { background: var(--err-bg); box-shadow: 0 8px 20px -12px rgba(217, 45, 63, .5); }
+    .hm-aviso { border: none; box-shadow: 0 12px 28px -16px rgba(154, 103, 0, .55); }
+    .hm-reg { border: none; background: #eef2fb; box-shadow: none; }
+    .hm-reg:hover { background: #e1e8f8; }
+    .hm-bc.pld .hm-reg { background: #e5f5f7; } .hm-bc.pld .hm-reg:hover { background: #d3edf0; }
+    .hm-card-sub { border-top: none; }
+    .hm-fh { border-bottom: none; box-shadow: 0 1px 0 rgba(26, 34, 74, .06); } .hm-ff { border-top: none; box-shadow: 0 -1px 0 rgba(26, 34, 74, .06); }
+    .hm-logo { padding: 12px 34px; border-radius: 18px; }
+    .hm-logo img { height: auto; width: 320px; max-width: 62vw; max-height: 110px; }
+    .sp-logo img { height: auto; width: 440px; max-width: 78vw; max-height: 170px; }
+    @media (max-width: 560px) { .hm-logo img { width: 230px; height: auto; } .hm-logo { padding: 10px 22px; } .sp-logo img { width: 300px; height: auto; } }
+
+    /* ═══ Ayuda («?»): botón flotante, menú, recorrido y reporte ═══ */
+    #ayBtn { position: fixed; right: 20px; bottom: 20px; z-index: 880; width: 58px; height: 58px; border-radius: 50%; border: none; cursor: pointer; background: linear-gradient(145deg, #4256c4, #2b377a); color: #fff; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 30px; line-height: 1; display: grid; place-items: center; box-shadow: 0 14px 30px -8px rgba(26, 34, 74, .6), 0 0 0 4px rgba(255, 255, 255, .9); transition: transform .18s, box-shadow .18s; }
+    #ayBtn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 20px 36px -10px rgba(26, 34, 74, .65), 0 0 0 4px #fff; }
+    #ayBtn:focus-visible { outline: 4px solid #ffb03b; outline-offset: 3px; }
+    #ayBtn.pulso::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 3px solid #35B7C5; animation: ayPulso 1.8s infinite; }
+    @keyframes ayPulso { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(1.7); opacity: 0; } }
+    body.splash-on #ayBtn, body.ay-tour #ayBtn, body.splash-on #ayNota, body.ay-tour #ayNota { display: none !important; }
+    #ayNota { position: fixed; right: 88px; bottom: 28px; z-index: 880; max-width: 250px; background: #1a224a; color: #fff; border-radius: 14px 14px 4px 14px; padding: 12px 14px; font: 600 13px/1.4 'Inter', sans-serif; box-shadow: 0 16px 34px -10px rgba(13, 18, 43, .55); cursor: pointer; animation: hmRise .5s both; display: none; }
+    #ayNota.on { display: block; } #ayNota b { color: #7be0ea; }
+    #ayMenu { position: fixed; right: 20px; bottom: 90px; z-index: 881; width: min(340px, calc(100vw - 28px)); background: #fff; border-radius: 18px; padding: 8px; box-shadow: 0 30px 60px -14px rgba(13, 18, 43, .5), 0 0 0 1px rgba(26, 34, 74, .06); font-family: 'Inter', sans-serif; transform-origin: 100% 100%; transform: scale(.92) translateY(10px); opacity: 0; pointer-events: none; transition: transform .2s, opacity .2s; }
+    #ayMenu.on { transform: none; opacity: 1; pointer-events: auto; }
+    #ayMenu h4 { margin: 8px 12px 6px; font: 800 11px 'Montserrat', sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #5a6488; }
+    .ay-op { display: flex; align-items: center; gap: 13px; width: 100%; text-align: left; background: none; border: none; border-radius: 13px; padding: 12px; cursor: pointer; color: #1a224a; transition: background .15s; font-family: inherit; }
+    .ay-op:hover, .ay-op:focus-visible { background: #f0f4fc; outline: none; }
+    .ay-op i { flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: #e3e8fb; color: #364494; font-style: normal; }
+    .ay-op.rep i { background: #ffefd0; color: #8a5a00; }
+    .ay-op i svg { width: 22px; height: 22px; }
+    .ay-op b { display: block; font: 800 14.5px 'Montserrat', sans-serif; margin-bottom: 2px; } .ay-op span { display: block; font-size: 12.5px; line-height: 1.4; color: #5a6488; }
+    #ayVel { position: fixed; inset: 0; z-index: 890; display: none; }
+    #ayVel.on { display: block; }
+    #ayLuz { position: fixed; z-index: 891; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(10, 14, 40, .74), 0 0 0 4px #35B7C5, 0 0 34px 6px rgba(53, 183, 197, .65); pointer-events: none; transition: top .35s cubic-bezier(.3, .8, .3, 1), left .35s cubic-bezier(.3, .8, .3, 1), width .35s, height .35s; }
+    #ayTip { position: fixed; z-index: 892; width: min(380px, calc(100vw - 24px)); background: #fff; border-radius: 18px; padding: 18px 20px 16px; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, .6); font-family: 'Inter', sans-serif; color: #1a224a; transition: top .35s, left .35s; }
+    #ayTip small { font: 800 10.5px 'Montserrat', sans-serif; letter-spacing: 1.8px; text-transform: uppercase; color: #0f8594; }
+    #ayTip h5 { margin: 4px 0 6px; font: 600 22px/1.15 'Fraunces', Georgia, serif; color: #1a224a; }
+    #ayTip p { margin: 0 0 14px; font-size: 14px; line-height: 1.55; color: #3d476e; }
+    #ayTip .pie { display: flex; align-items: center; gap: 8px; }
+    #ayTip .pts { display: flex; gap: 5px; margin-right: auto; } #ayTip .pts i { width: 7px; height: 7px; border-radius: 50%; background: #d3dbee; } #ayTip .pts i.on { background: #364494; width: 20px; border-radius: 4px; }
+    .ay-b { border: none; border-radius: 999px; padding: 10px 18px; font: 700 13.5px 'Inter', sans-serif; cursor: pointer; background: #eef2fb; color: #364494; }
+    .ay-b:hover { background: #dfe6f8; } .ay-b.pri { background: #364494; color: #fff; } .ay-b.pri:hover { background: #2b377a; } .ay-b:disabled { opacity: .55; cursor: default; }
+    #ayRep { position: fixed; inset: 0; z-index: 895; display: none; align-items: center; justify-content: center; padding: 14px; background: rgba(13, 18, 43, .62); backdrop-filter: blur(4px); }
+    #ayRep.on { display: flex; }
+    .ay-card { width: min(560px, 100%); max-height: calc(100vh - 28px); overflow: auto; background: #fff; border-radius: 22px; padding: 26px 26px 22px; box-shadow: 0 40px 80px -16px rgba(0, 0, 0, .6); font-family: 'Inter', sans-serif; color: #1a224a; animation: hmRise .35s both; }
+    .ay-card h3 { margin: 0 0 4px; font: 600 26px/1.15 'Fraunces', Georgia, serif; color: #1a224a; }
+    .ay-card > p { margin: 0 0 16px; font-size: 14px; line-height: 1.5; color: #5a6488; }
+    .ay-tipos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .ay-tipo { text-align: left; background: #f4f7fc; border: none; border-radius: 12px; padding: 11px 13px; font: 700 13px 'Inter', sans-serif; color: #364494; cursor: pointer; box-shadow: inset 0 0 0 2px transparent; transition: background .15s, box-shadow .15s; }
+    .ay-tipo:hover { background: #e9eefa; } .ay-tipo.on { background: #e3e8fb; box-shadow: inset 0 0 0 2px #364494; }
+    .ay-card label { display: block; margin: 0 0 6px; font: 800 11px 'Montserrat', sans-serif; letter-spacing: 1.6px; text-transform: uppercase; color: #5a6488; }
+    .ay-card textarea { width: 100%; min-height: 130px; resize: vertical; border: none; border-radius: 14px; padding: 13px 14px; background: #f4f7fc; box-shadow: inset 0 0 0 1.5px #dbe2ef; font: 400 15px/1.5 'Inter', sans-serif; color: #1a224a; }
+    .ay-card textarea:focus { outline: none; box-shadow: inset 0 0 0 2px #364494; background: #fff; }
+    .ay-meta { display: flex; justify-content: space-between; gap: 10px; margin: 6px 0 0; font-size: 12px; color: #7a85a8; }
+    .ay-para { margin: 14px 0 0; padding: 11px 13px; border-radius: 12px; background: #eef7f8; font-size: 12.5px; line-height: 1.5; color: #28555c; }
+    .ay-err { margin: 12px 0 0; padding: 10px 13px; border-radius: 12px; background: #fdecee; color: #a3192a; font-size: 13px; font-weight: 600; display: none; } .ay-err.on { display: block; }
+    .ay-acc { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+    .ay-ok { text-align: center; padding: 10px 6px 4px; } .ay-ok .chk { width: 68px; height: 68px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; background: #e3f6ee; color: #0f9d6e; } .ay-ok .chk svg { width: 34px; height: 34px; }
+    .ay-ok .fol { display: inline-block; margin: 6px 0 14px; padding: 6px 14px; border-radius: 999px; background: #eef2fb; font: 800 13px 'Montserrat', sans-serif; letter-spacing: 1px; color: #364494; }
+    #hmToast { bottom: 92px; }
+    @media (max-width: 560px) { #ayBtn { right: 14px; bottom: 14px; width: 54px; height: 54px; } #ayMenu { right: 14px; bottom: 80px; } #ayNota { right: 76px; bottom: 22px; } .ay-tipos { grid-template-columns: 1fr; } .ay-card { padding: 22px 18px 18px; } }
     /* Pantallas claras (contratos APS y revisión): superficie propia, por encima del video y su capa oscura de fondo */
     #modulo-aps, #modulo-consola, #modulo-tablero { position: relative; min-height: calc(100vh - 62px); background: linear-gradient(180deg, #dfe6f4 0, #f4f7fc 340px); padding: 22px 14px 48px; }
     @media (max-width: 560px) { #modulo-aps, #modulo-consola, #modulo-tablero { padding: 10px 0 36px; } }
@@ -1024,6 +1099,17 @@
   </main>
 </div>
 <div id="hmToast" role="status" aria-live="polite"></div>
+
+<!-- ══════════════════ AYUDA («?») ══════════════════ -->
+<button type="button" id="ayBtn" aria-label="Ayuda y reportes" aria-haspopup="true" aria-expanded="false">?</button>
+<div id="ayNota" role="note"><b>¿Dudas?</b> Toca el «?» y te explico la pantalla, o reporta algo que no funcione.</div>
+<div id="ayMenu" role="menu" aria-label="Ayuda">
+  <h4>¿En qué te ayudamos?</h4>
+  <button type="button" class="ay-op" role="menuitem" id="ayOpTour"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.500 8.500-2 5-5 2 2-5z"/></svg></i><div><b>¿Para qué sirve cada cosa?</b><span>Te voy mostrando, iluminado, qué hace cada botón y sección de esta pantalla.</span></div></button>
+  <button type="button" class="ay-op rep" role="menuitem" id="ayOpRep"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.500 2.500 20h19z"/><path d="M12 10v4.500M12 17.500v.5"/></svg></i><div><b>Reportar un problema</b><span>¿Algo no funciona o se ve mal? Cuéntanos y le llega a la coordinación y a sistemas.</span></div></button>
+</div>
+<div id="ayVel"></div><div id="ayLuz" style="display:none"></div><div id="ayTip" style="display:none" role="dialog" aria-live="polite"></div>
+<div id="ayRep" role="dialog" aria-modal="true" aria-labelledby="ayRepT"><div class="ay-card" id="ayRepC"></div></div>
 
 <!-- ══════════════════ MÓDULO: PRE PLD ══════════════════ -->
 <div id="modulo-pld" style="display:none;">
@@ -1480,7 +1566,7 @@
             showStatus('success', 
               '✅ ¡LISTO! Documento generado e inscrito en Bitácora.<br>' + 
               '<a href="'+res.url+'" target="_blank">ABRIR PRE-AVISO PLD</a>' + 
-              '<button type="button" class="btn-reset" onclick="PLDREV.enviar(\'' + res.id + '\', this)">📤 ENVIAR A REVISIÓN</button>' + 
+              '<button type="button" class="btn-reset" data-pldid="' + String(res.id).replace(/[^A-Za-z0-9_-]/g, '') + '" onclick="PLDREV.enviar(this.getAttribute(\'data-pldid\'), this)">📤 ENVIAR A REVISIÓN</button>' + 
               '<button onclick="resetForm()" class="btn-reset">NUEVA OPERACIÓN</button>'
             );
           } else {
@@ -1612,6 +1698,8 @@
   function hayPantalla(s) { return !!document.getElementById(CONTENEDOR[s]); }
   function irA(s) {
     if (s === 'consola') s = 'revaps';
+    window.PANTALLA = s;
+    if (typeof ayFin === 'function') { ayFin(); ayMenu(false); ayCerrarRep(); }
     if (window.APS_UI && APS_UI.cerrarModales) APS_UI.cerrarModales();      // una ventana ampliada no debe quedarse abierta al cambiar de pantalla
     var destino = (s === 'inicio') ? 'pantalla-inicio' : CONTENEDOR[s];
     if (!destino || !document.getElementById(destino)) return;               // pantalla no disponible para este usuario
@@ -1821,6 +1909,7 @@
     HM.panel = r; PENDIENTES = { aps: r.aps.enRevision || 0, pld: r.pld ? r.pld.enRevision || 0 : 0 };
     if (nuevos.length) { var e0 = nuevos[0]; hmToast(nuevos.length > 1 ? nuevos.length + ' novedades nuevas' : e0.titulo, nuevos.length > 1 ? e0.titulo + ' · ' + e0.texto : e0.texto, true); }
     pintaInicio(); actualizaNavPend();
+    if (!primera && window.PLDREV && r.eventos.some(function (e) { return e.modulo === 'PLD' && HM.recien[evId(e)]; })) PLDREV.refrescar();      // si tiene abierta su lista de Pre PLD, se actualiza sola
   }
   function refrescarPanel() {
     if (typeof google === 'undefined' || !google.script || !google.script.run || !USUARIO.email || HM.cargando) return;
@@ -1862,6 +1951,125 @@
         if (qp.get('misreg') && (modulo === 'pld' || modulo === 'aps')) irMisRegistros(modulo);
       }
     } catch (e) { /* URL sin parámetros válidos: sin problema, se queda en inicio */ }
+  })();
+
+  /* ═══ Ayuda («?»): recorrido de la pantalla principal + reporte de problemas ═══ */
+  var AY = { errores: [], paso: 0, pasos: [], objetivo: null };
+  window.addEventListener('error', function (e) { try { AY.errores.push(String(e.message || 'error').slice(0, 120)); AY.errores = AY.errores.slice(-5); } catch (x) { } });
+  window.addEventListener('unhandledrejection', function (e) { try { AY.errores.push(String((e.reason && e.reason.message) || e.reason || 'promesa rechazada').slice(0, 120)); AY.errores = AY.errores.slice(-5); } catch (x) { } });
+  function ayEl(id) { return document.getElementById(id); }
+  function ayMenu(abrir) {
+    var m = ayEl('ayMenu'), b = ayEl('ayBtn'); if (abrir == null) abrir = !m.classList.contains('on');
+    m.classList.toggle('on', abrir); b.setAttribute('aria-expanded', abrir ? 'true' : 'false'); b.classList.remove('pulso'); ayEl('ayNota').classList.remove('on');
+    ayEl('ayOpTour').style.display = (window.PANTALLA || 'inicio') === 'inicio' ? '' : 'none';
+    if (abrir) { almacen('set', 'ay_visto', '1'); var p = m.querySelector('.ay-op:not([style*="none"])'); if (p) p.focus(); }
+  }
+  function ayPasos() {
+    var q = function (sel) { return document.querySelector('#pantalla-inicio ' + sel); }, P = [], coord = USUARIO.rol === 'coordinador';
+    P.push({ el: q('.hm-hero .hm-in'), t: 'Tu pantalla principal', x: 'Desde aquí llegas a todo. Arriba ves quién eres y tu rol (' + (coord ? 'Coordinación' : 'Asesor') + '), que define lo que puedes hacer.' });
+    P.push({ el: ayEl('hmLive'), t: 'Se actualiza sola', x: 'Esta luz verde indica que la información está en vivo: no necesitas recargar la página. Si se pone ámbar, está reconectando.' });
+    P.push({ el: q('.hm-bc.aps'), t: 'Generar contrato APS', x: 'Aquí capturas el Aviso de Prestación de Servicios paso a paso. Al terminar lo envías a revisión de la coordinación. «Ver mis registros» abre todos tus contratos y su estado.' });
+    P.push({ el: q('.hm-bc.pld'), t: 'Generar documento Pre PLD', x: 'Crea el Pre-Aviso PLD de una operación, agrega pagos a una operación que ya existe o consulta los documentos que ya hiciste.' });
+    P.push({ el: q('.hm-kpi'), t: 'Tus números de un vistazo', x: 'Cuántos contratos tienes en borrador, en revisión y aprobados' + (coord ? ' (de todo el equipo)' : '') + '. Toca cualquier cuadro para ir directo a esa lista.' });
+    var k2 = document.querySelectorAll('#pantalla-inicio .hm-kpi')[1]; if (k2) P.push({ el: k2, t: 'Pre PLD: su avance', x: 'Lo mismo para Pre PLD. En rojo aparece lo que ' + (coord ? 'ya observaste y espera corrección' : 'la coordinación te regresó con observaciones y debes corregir') + '.' });
+    if (coord) {
+      var cr = q('.hm-card [data-ir="revaps"]'); if (cr) P.push({ el: cr.parentNode, t: 'Revisión de contratos APS', x: 'Tu bandeja: revisas cada contrato, corriges lo necesario y lo apruebas. El globo naranja indica cuántos esperan revisión.' });
+      var cp = q('.hm-card [data-ir="revpld"]'); if (cp) P.push({ el: cp.parentNode, t: 'Revisión de Pre PLD', x: 'Aquí ves los documentos enviados, puedes marcarlos como revisados o regresarlos con observaciones.' });
+      var ct = q('.hm-card [data-ir="tablero"]'); if (ct) P.push({ el: ct.parentNode, t: 'Tablero Hipoo', x: 'Indicadores de la actividad inmobiliaria.' });
+    }
+    P.push({ el: q('.hm-feed'), t: 'Novedades en vivo', x: 'Cada vez que un contrato se envía, se aprueba, se cancela o recibe observaciones, aparece aquí al instante. Las nuevas traen la etiqueta NUEVO.' });
+    P.push({ el: ayEl('hmLeer'), t: 'Marcar como leídas', x: 'Cuando ya las viste, presiona este botón y la lista se limpia de etiquetas NUEVO.' });
+    P.push({ el: ayEl('ayBtn'), t: 'Este botón «?»', x: 'Siempre está a la mano: te repite este recorrido o te deja reportar cualquier problema en un minuto.', fijo: true });
+    return P.filter(function (p) { return p.el && p.el.offsetParent !== null || (p.el && p.fijo); });
+  }
+  function ayTour() {
+    ayMenu(false); AY.pasos = ayPasos(); if (!AY.pasos.length) return; AY.paso = 0;
+    document.body.classList.add('ay-tour'); ayEl('ayVel').classList.add('on'); ayEl('ayLuz').style.display = ''; ayEl('ayTip').style.display = '';
+    ayPaso(0);
+  }
+  function ayPaso(i) {
+    var p = AY.pasos[i]; if (!p) return ayFin(); AY.paso = i;
+    if (p.fijo) { ayEl('ayBtn').style.display = 'grid'; document.body.classList.remove('ay-tour'); ayEl('ayBtn').style.zIndex = 893; }
+    else { ayEl('ayBtn').style.zIndex = ''; document.body.classList.add('ay-tour'); }
+    var r0 = p.el.getBoundingClientRect(), alto = window.innerHeight;
+    if (!p.fijo && (r0.top < 70 || r0.bottom > alto - 40)) { window.scrollTo({ top: Math.max(0, window.scrollY + r0.top - Math.max(90, (alto - Math.min(r0.height, alto * .55)) / 3)), behavior: 'smooth' }); }
+    var n = AY.pasos.length, pts = AY.pasos.map(function (_, j) { return '<i' + (j === i ? ' class="on"' : '') + '></i>'; }).join('');
+    ayEl('ayTip').innerHTML = '<small>Paso ' + (i + 1) + ' de ' + n + '</small><h5>' + hmEsc(p.t) + '</h5><p>' + hmEsc(p.x) + '</p><div class="pie"><span class="pts">' + pts + '</span>' +
+      '<button type="button" class="ay-b" data-ay="salir">Salir</button>' + (i ? '<button type="button" class="ay-b" data-ay="ant">Atrás</button>' : '') +
+      '<button type="button" class="ay-b pri" data-ay="sig">' + (i === n - 1 ? 'Terminar' : 'Siguiente') + '</button></div>';
+    clearTimeout(AY.h); AY.h = setTimeout(ayColoca, p.fijo ? 30 : 420);
+    ayColoca();
+  }
+  function ayColoca() {
+    var p = AY.pasos[AY.paso]; if (!p || !p.el) return;
+    var r = p.el.getBoundingClientRect(), m = 8, luz = ayEl('ayLuz'), tip = ayEl('ayTip'), W = window.innerWidth, H = window.innerHeight;
+    luz.style.left = (r.left - m) + 'px'; luz.style.top = (r.top - m) + 'px'; luz.style.width = (r.width + m * 2) + 'px'; luz.style.height = (r.height + m * 2) + 'px';
+    luz.style.borderRadius = p.fijo ? '50%' : '18px';
+    var tw = tip.offsetWidth, th = tip.offsetHeight, x, y;
+    if (r.bottom + th + 24 < H) y = r.bottom + m + 14; else if (r.top - th - 24 > 0) y = r.top - m - 14 - th; else y = Math.max(12, H - th - 14);
+    x = Math.min(Math.max(12, r.left + r.width / 2 - tw / 2), W - tw - 12);
+    if (y === H - th - 14 || (y < r.bottom && y + th > r.top)) { x = r.left > W / 2 ? Math.max(12, r.left - tw - 20) : Math.min(W - tw - 12, r.right + 20); }
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function ayFin() {
+    clearTimeout(AY.h); document.body.classList.remove('ay-tour'); ayEl('ayBtn').style.zIndex = ''; ayEl('ayBtn').style.display = '';
+    ayEl('ayVel').classList.remove('on'); ayEl('ayLuz').style.display = 'none'; ayEl('ayTip').style.display = 'none'; AY.pasos = [];
+  }
+  var AY_TIPOS = [['falla', 'Algo no funciona'], ['visual', 'Se ve mal o no se entiende'], ['dato', 'Un dato está mal'], ['otro', 'Otra cosa']];
+  function ayReporte() {
+    ayMenu(false);
+    var pant = TITULOS[window.PANTALLA] || 'Pantalla principal';
+    ayEl('ayRepC').innerHTML = '<h3 id="ayRepT">Reportar un problema</h3><p>Cuéntanos qué pasó con tus palabras. Mientras más claro, más rápido lo resolvemos.</p>' +
+      '<div class="ay-tipos" id="ayTipos">' + AY_TIPOS.map(function (t, i) { return '<button type="button" class="ay-tipo' + (i === 0 ? ' on' : '') + '" data-tipo="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>' +
+      '<label for="ayMsg">¿Qué sucedió?</label><textarea id="ayMsg" maxlength="1500" placeholder="Ej.: Estaba en «' + hmEsc(pant) + '», le di clic a Ampliar y ya no pude cerrar la ventana."></textarea>' +
+      '<div class="ay-meta"><span id="ayMin">Escribe al menos 10 caracteres</span><span id="ayCnt">0 / 1500</span></div>' +
+      '<div class="ay-para">📨 Se enviará a <b>Lizbeth (coordinación)</b> y a <b>sistemas</b>, junto con la pantalla donde estabas y datos técnicos básicos de tu navegador. Te llegará un acuse con folio a ' + hmEsc(USUARIO.email) + '.</div>' +
+      '<div class="ay-err" id="ayErr"></div><div class="ay-acc"><button type="button" class="ay-b" data-ay="cerrarRep">Cancelar</button><button type="button" class="ay-b pri" id="ayEnviar" data-ay="enviar">Enviar reporte</button></div>';
+    ayEl('ayRep').classList.add('on'); setTimeout(function () { var t = ayEl('ayMsg'); if (t) t.focus(); }, 60);
+  }
+  function ayEnviar() {
+    var msg = ayEl('ayMsg').value.trim(), err = ayEl('ayErr'), b = ayEl('ayEnviar');
+    if (msg.length < 10) { err.textContent = 'Cuéntanos un poco más (al menos 10 caracteres).'; err.classList.add('on'); ayEl('ayMsg').focus(); return; }
+    err.classList.remove('on'); b.disabled = true; b.textContent = 'Enviando…';
+    var tipo = (ayEl('ayTipos').querySelector('.on') || {}).dataset ? ayEl('ayTipos').querySelector('.on').dataset.tipo : 'otro', fin = false;
+    var tec = { navegador: (navigator.userAgent || '').slice(0, 120), ventana: window.innerWidth + 'x' + window.innerHeight, hora: new Date().toLocaleString('es-MX'), errores: AY.errores.join(' | ') };
+    var lento = setTimeout(function () { if (!fin) { b.disabled = false; b.textContent = 'Enviar reporte'; err.textContent = 'Está tardando más de lo normal. Revisa tu conexión e inténtalo de nuevo.'; err.classList.add('on'); fin = true; } }, 45000);
+    google.script.run.withSuccessHandler(function (r) {
+      if (fin) return; fin = true; clearTimeout(lento);
+      ayEl('ayRepC').innerHTML = '<div class="ay-ok"><div class="chk">' + IC.ok + '</div><h3>¡Reporte enviado!</h3><p style="margin:6px 0 0;color:#5a6488;font-size:14px">Ya le llegó a la coordinación y a sistemas.</p><span class="fol">Folio ' + hmEsc(r && r.folio) + '</span><p style="margin:0 0 16px;color:#5a6488;font-size:13px">Te enviamos un acuse por correo. Si necesitan más información, te escribirán.</p><button type="button" class="ay-b pri" data-ay="cerrarRep">Listo</button></div>';
+    }).withFailureHandler(function (e) {
+      if (fin) return; fin = true; clearTimeout(lento); b.disabled = false; b.textContent = 'Enviar reporte';
+      err.textContent = String((e && e.message) || e || 'No se pudo enviar.').replace(/^Error:\s*/, ''); err.classList.add('on');
+    }).APS_reportar({ tipo: tipo, mensaje: msg, pantalla: TITULOS[window.PANTALLA] || 'Pantalla principal', tecnico: tec });
+  }
+  function ayCerrarRep() { ayEl('ayRep').classList.remove('on'); }
+  (function ayInit() {
+    ayEl('ayBtn').addEventListener('click', function () { ayMenu(); });
+    ayEl('ayOpTour').addEventListener('click', ayTour); ayEl('ayOpRep').addEventListener('click', ayReporte);
+    ayEl('ayNota').addEventListener('click', function () { ayMenu(true); });
+    document.addEventListener('click', function (ev) {
+      var m = ayEl('ayMenu'); if (m.classList.contains('on') && !m.contains(ev.target) && !ayEl('ayBtn').contains(ev.target)) ayMenu(false);
+      var a = ev.target.closest && ev.target.closest('[data-ay]'); if (a) {
+        var k = a.getAttribute('data-ay');
+        if (k === 'sig') ayPaso(AY.paso + 1); else if (k === 'ant') ayPaso(AY.paso - 1); else if (k === 'salir') ayFin();
+        else if (k === 'enviar') ayEnviar(); else if (k === 'cerrarRep') ayCerrarRep();
+      }
+      var t = ev.target.closest && ev.target.closest('.ay-tipo'); if (t) { Array.prototype.forEach.call(ayEl('ayTipos').children, function (c) { c.classList.toggle('on', c === t); }); }
+      if (ev.target === ayEl('ayRep')) ayCerrarRep();
+      if (ev.target === ayEl('ayVel')) ayFin();
+    });
+    document.addEventListener('input', function (ev) {
+      if (ev.target.id !== 'ayMsg') return; ayEl('ayErr').classList.remove('on'); var n = ev.target.value.trim().length; ayEl('ayCnt').textContent = ev.target.value.length + ' / 1500';
+      ayEl('ayMin').textContent = n >= 10 ? 'Listo para enviar' : 'Escribe al menos 10 caracteres';
+    });
+    document.addEventListener('keydown', function (ev) {
+      if (AY.pasos.length) { if (ev.key === 'Escape') ayFin(); else if (ev.key === 'ArrowRight' || ev.key === 'Enter') { ev.preventDefault(); ayPaso(AY.paso + 1); } else if (ev.key === 'ArrowLeft') ayPaso(AY.paso - 1); return; }
+      if (ev.key === 'Escape') { if (ayEl('ayRep').classList.contains('on')) ayCerrarRep(); else if (ayEl('ayMenu').classList.contains('on')) { ayMenu(false); ayEl('ayBtn').focus(); } }
+    });
+    window.addEventListener('resize', function () { if (AY.pasos.length) ayColoca(); });
+    window.addEventListener('scroll', function () { if (AY.pasos.length) ayColoca(); }, { passive: true });
+    // Primera vez: el botón late y aparece una nota (una sola vez por navegador, después del splash)
+    if (!almacen('get', 'ay_visto')) setTimeout(function () { var b = ayEl('ayBtn'); if (!b) return; b.classList.add('pulso'); ayEl('ayNota').classList.add('on'); setTimeout(function () { ayEl('ayNota').classList.remove('on'); }, 12000); }, 3200);
   })();
 </script>
 </body>

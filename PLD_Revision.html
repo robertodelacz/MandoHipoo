@@ -70,6 +70,12 @@
 #rv-root .cx-tab-abrir .cx-note{max-width:520px;margin:0 auto 20px}
 #rv-root .cx-btn.big{font-size:15px;padding:14px 26px;margin-top:6px}
 #rv-root .cx-doc{display:inline-block;margin:4px 4px 0 0;font-size:10.5px;font-weight:800;color:#9be7ee;border:1px solid var(--primary);border-radius:6px;padding:1px 6px;text-decoration:none}
+#rv-root .rv-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+#rv-root .rv-chip{border:1px solid var(--line,#3a4478);background:transparent;color:#cfd7f5;border-radius:999px;padding:6px 13px;font:700 12.5px inherit;cursor:pointer}
+#rv-root .rv-chip.on{background:var(--primary,#364494);color:#fff;border-color:transparent}
+#rv-root .rv-chip.hot{border-color:#ff8a96;color:#ffc2c8}
+#rv-root .rv-q{margin-left:auto;min-width:200px;max-width:100%;padding:7px 12px;border-radius:999px;border:1px solid var(--line,#3a4478);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-size:13px}
+#rv-root .rv-sub{display:block;font-size:11px;color:#9aa6d8;margin-top:2px}
 #rv-root .cx-kpis.mini{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-bottom:16px}
 #rv-root .cx-kpis.mini .cx-kpi b{font-size:26px}
 #rv-root .cx-kpis.mini .cx-kpi{padding:12px}
@@ -80,6 +86,7 @@
     <h3>📋 Mis Pre PLD y revisión</h3>
     <div class="cx-note" style="margin-bottom:14px">Después de generar tu Pre PLD, <b>envíalo a revisión</b> para que la coordinación lo revise. Si lo observa, verás aquí su comentario: corrígelo en el documento y vuelve a enviarlo.</div>
     <div class="cx-tools"><button type="button" class="cx-btn" data-a="refrescar">↻ Actualizar</button></div>
+    <div class="rv-chips" data-r="chips" style="display:none"></div>
     <div data-r="lista"><div class="cx-empty">Abre esta pestaña para ver tus documentos.</div></div>
   </div>
 </div>
@@ -99,38 +106,54 @@
   function busy(on, txt) { q('busy').className = 'cx-busy' + (on ? ' on' : ''); if (txt) q('busyTxt').textContent = txt; }
   /* Nunca se queda "cargando" para siempre: si el servidor no contesta en 25 s, se libera la pantalla sola, con
      aviso para reintentar — sin tener que refrescar la página. */
-  function srv(fn, args, ok, txt) {
+  function srv(fn, args, ok, txt, silencioso) {
     if (!(typeof google !== 'undefined' && google.script && google.script.run)) { toast('Solo disponible dentro de la aplicación de Apps Script.', true); return; }
-    busy(true, txt || 'Cargando…');
+    if (!silencioso) busy(true, txt || 'Cargando…');
     var listo = false;
-    var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); toast('El servidor está tardando más de lo normal. Vuelve a intentarlo.', true); }, 25000);
+    var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); if (!silencioso) toast('El servidor está tardando más de lo normal. Vuelve a intentarlo.', true); }, 25000);
     var r = google.script.run
       .withSuccessHandler(function (x) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); ok(x); })
-      .withFailureHandler(function (e) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); toast(String((e && e.message) || e).replace(/^Error:\s*/, ''), true); });
+      .withFailureHandler(function (e) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); if (!silencioso) toast(String((e && e.message) || e).replace(/^Error:\s*/, ''), true); });
     r[fn].apply(r, args);
   }
-  function cargar() {
-    srv('PLD_misDocumentos', [], function (rows) {
-      q('lista').innerHTML = rows.length ? '<div class="cx-wrap"><table class="cx-tb"><thead><tr><th>Generado</th><th>Documento</th><th>Operación</th><th>Estado</th><th>Comentario de la coordinación</th><th></th></tr></thead><tbody>' +
-        rows.map(function (r) {
-          var puede = r.estado === 'SIN_ENVIAR' || r.estado === 'OBSERVADO' || (r.estado === 'REVISADO' && r.modificadoDespues);
-          return '<tr><td>' + esc(r.creado) + '</td><td><a href="' + esc(r.url) + '" target="_blank" rel="noopener" style="color:#9be7ee">' + esc(r.nombre) + '</a></td><td>' + esc(r.operacion) + '</td>' +
-            '<td><span class="cx-est e-' + r.estado + '">' + EST[r.estado] + '</span>' + (r.modificadoDespues ? '<div class="cx-flag">⚠ modificado después</div>' : '') + '</td><td class="cx-dim">' + esc(r.comentario) + '</td>' +
-            '<td class="ac">' + (puede ? '<button type="button" class="cx-btn pri" data-env="' + esc(r.id) + '">📤 ' + (r.estado === 'OBSERVADO' ? 'Reenviar a revisión' : 'Enviar a revisión') + '</button>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>'
-        : '<div class="cx-empty">Todavía no has generado ningún Pre PLD con esta cuenta.</div>';
-    });
+  var FILAS = [], FILTRO = 'todos', BUSCA = '', ORDEN = { OBSERVADO: 0, SIN_ENVIAR: 1, EN_REVISION: 2, REVISADO: 3 };
+  var CHIPS = [['todos', 'Todos'], ['OBSERVADO', 'Por corregir'], ['SIN_ENVIAR', 'Sin enviar'], ['EN_REVISION', 'En revisión'], ['REVISADO', 'Revisados']];
+  function norm(t) { return String(t || '').toLowerCase().normalize ? String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '') : String(t || '').toLowerCase(); }
+  function pinta() {
+    var cuenta = { todos: FILAS.length }; FILAS.forEach(function (r) { cuenta[r.estado] = (cuenta[r.estado] || 0) + 1; });
+    var ch = q('chips'); ch.style.display = FILAS.length ? '' : 'none';
+    ch.innerHTML = CHIPS.map(function (c) { return '<button type="button" class="rv-chip' + (FILTRO === c[0] ? ' on' : '') + (c[0] === 'OBSERVADO' && cuenta.OBSERVADO ? ' hot' : '') + '" data-f="' + c[0] + '">' + c[1] + ' · ' + (cuenta[c[0]] || 0) + '</button>'; }).join('') +
+      '<input type="search" class="rv-q" data-r="q" placeholder="Buscar documento u operación…" value="' + esc(BUSCA) + '">';
+    var b = norm(BUSCA);
+    var rows = FILAS.filter(function (r) { return (FILTRO === 'todos' || r.estado === FILTRO) && (!b || norm(r.nombre + ' ' + r.operacion + ' ' + r.asociados).indexOf(b) >= 0); })
+      .sort(function (x, y) { var d = ORDEN[x.estado] - ORDEN[y.estado]; return d || (x.creado < y.creado ? 1 : -1); });   // lo que requiere acción del asesor va primero
+    q('lista').innerHTML = rows.length ? '<div class="cx-wrap"><table class="cx-tb"><thead><tr><th>Generado</th><th>Documento</th><th>Operación</th><th>Estado</th><th>Comentario de la coordinación</th><th></th></tr></thead><tbody>' +
+      rows.map(function (r) {
+        var puede = r.estado === 'SIN_ENVIAR' || r.estado === 'OBSERVADO' || (r.estado === 'REVISADO' && r.modificadoDespues);
+        var cuando = r.estado === 'EN_REVISION' && r.fechaEnvio ? 'Enviado ' + r.fechaEnvio : (r.fechaRevision ? 'Revisó ' + (r.revisadoPor || '').split('@')[0] + ' · ' + r.fechaRevision : '');
+        return '<tr><td>' + esc(r.creado) + '</td><td><a href="' + esc(r.url) + '" target="_blank" rel="noopener" style="color:#9be7ee">' + esc(r.nombre) + '</a></td><td>' + esc(r.operacion) + '</td>' +
+          '<td><span class="cx-est e-' + esc(r.estado) + '">' + esc(EST[r.estado] || r.estado) + '</span>' + (cuando ? '<span class="rv-sub">' + esc(cuando) + '</span>' : '') + (r.modificadoDespues ? '<div class="cx-flag">⚠ modificado después</div>' : '') + '</td><td class="cx-dim">' + esc(r.comentario) + '</td>' +
+          '<td class="ac">' + (puede ? '<button type="button" class="cx-btn pri" data-env="' + esc(r.id) + '">📤 ' + (r.estado === 'OBSERVADO' ? 'Reenviar a revisión' : 'Enviar a revisión') + '</button>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>'
+      : '<div class="cx-empty">' + (FILAS.length ? 'Ningún documento coincide con ese filtro o búsqueda.' : 'Todavía no has generado ningún Pre PLD con esta cuenta.') + '</div>';
   }
+  function cargar(silencioso) {
+    srv('PLD_misDocumentos', [], function (rows) { FILAS = rows || []; if (FILTRO !== 'todos' && !FILAS.some(function (r) { return r.estado === FILTRO; })) FILTRO = 'todos'; pinta(); }, null, silencioso);
+  }
+  /* Actualización silenciosa (sin pantalla de "cargando"): la llama la pantalla principal cuando llegan novedades de Pre PLD. */
+  function refrescar() { if (ROOT.offsetParent !== null) cargar(true); }
   function enviar(id, btn) {
     if (!window.confirm('¿Enviar este Pre PLD a revisión de la coordinación?')) return;
     srv('PLD_enviarRevision', [id], function () {
       toast('Enviado a revisión.'); if (btn) { btn.textContent = '✅ Enviado a revisión'; btn.disabled = true; } cargar();
     }, 'Enviando…');
   }
+  ROOT.addEventListener('input', function (e) { if (e.target.getAttribute('data-r') === 'q') { BUSCA = e.target.value; var pos = e.target.selectionStart; pinta(); var n = q('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) { } } } });
   ROOT.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
+    if (b.getAttribute('data-f')) { FILTRO = b.getAttribute('data-f'); pinta(); return; }
     if (b.getAttribute('data-env')) enviar(b.getAttribute('data-env'), b); else if (b.getAttribute('data-a') === 'refrescar') cargar();
   });
-  window.PLDREV = { cargar: cargar, enviar: enviar };
+  window.PLDREV = { cargar: cargar, enviar: enviar, refrescar: refrescar };
 })();
 
 </script>

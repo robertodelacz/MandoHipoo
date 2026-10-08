@@ -191,6 +191,55 @@
 #aps-root .btn-main{border-bottom:3px solid var(--primary)}
 #aps-root .hdr::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px;-webkit-mask-image:linear-gradient(100deg,#000,transparent 70%);mask-image:linear-gradient(100deg,#000,transparent 70%)}
 #aps-root .hdr{position:relative;overflow:hidden}#aps-root .hdr>*{position:relative;z-index:1}
+
+/* ═════ Refinamiento visual: superficies con sombra suave; el estado se comunica con fondo tenue, sin tiras ni bordes de color ═════ */
+#aps-root .card{border:0;border-radius:22px;box-shadow:0 1px 2px rgba(26,34,74,.05),0 18px 40px -18px rgba(26,34,74,.28)}
+#aps-root .tenga{border:0;border-radius:18px;background:linear-gradient(135deg,#eaf7f9,#f4f7fc);box-shadow:none}
+#aps-root .banner{border:0;border-radius:18px;background:#f1f4fa;box-shadow:0 1px 2px rgba(26,34,74,.05),0 12px 28px -16px rgba(26,34,74,.3)}
+#aps-root .banner.nuevo{background:#e8f6f8}
+#aps-root .banner.e-BORRADOR{background:#f1f4fa}
+#aps-root .banner.e-COMPLETO{background:#e8f4fc}
+#aps-root .banner.e-EN_REVISION{background:#fff6dc}
+#aps-root .banner.e-APROBADO{background:#e3f6ee}
+#aps-root .banner.e-CANCELADO{background:#fdecee}
+#aps-root .prev-card{border:0;border-radius:22px;box-shadow:0 1px 2px rgba(26,34,74,.05),0 18px 40px -18px rgba(26,34,74,.28)}
+#aps-root .chip{border:0;background:#fff;box-shadow:0 1px 2px rgba(26,34,74,.08),0 0 0 1px rgba(26,34,74,.06)}
+#aps-root .chip:hover{box-shadow:0 4px 12px -4px rgba(26,34,74,.25),0 0 0 1px rgba(53,183,197,.7)}
+#aps-root .chip.active{background:var(--navy);box-shadow:0 8px 18px -8px rgba(54,68,148,.7)}
+/* Riel de progreso: se queda a la vista al bajar por el formulario */
+#aps-root .rail{position:sticky;top:var(--navh,62px);z-index:20;margin:0 -8px 14px;padding:14px 16px 4px;border-radius:20px;background:rgba(244,247,252,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 12px 24px -16px rgba(26,34,74,.35)}
+#aps-root .rail .progress b{font-size:14px}
+#aps-root .rail .bar{height:8px;background:#dfe6f4}
+#aps-root .rail .bar i{background:linear-gradient(90deg,var(--navy),var(--primary))}
+#aps-root .rail .steps{padding-bottom:10px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+#aps-root .rail .steps::-webkit-scrollbar{display:none}
+@media(max-width:600px){#aps-root .rail{margin:0 -4px 12px;padding:10px 12px 2px}#aps-root .rail .chip:not(.active) span{display:none}#aps-root .rail .chip:not(.active){padding-right:8px}}
+/* Hojas (Mis contratos, historial): cierre siempre visible, también al tocar fuera o con Esc */
+#aps-root .modal.sheetwrap{background:rgba(26,34,74,.5);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);padding:28px 16px}
+#aps-root .sheet{max-width:1040px;margin:0 auto;background:#fff;border-radius:26px;box-shadow:0 30px 80px -20px rgba(13,18,43,.6);color:var(--ink);overflow:hidden;animation:apsSheet .28s cubic-bezier(.2,.9,.25,1)}
+@keyframes apsSheet{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+#aps-root .sheet-h{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;background:linear-gradient(100deg,#364494,#2b377a);color:#fff}
+#aps-root .sheet-h h2{margin:0;font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:25px;color:#fff;letter-spacing:-.3px}
+#aps-root .sheet-h p{margin:3px 0 0;font-size:13px;color:#cfd8ff}
+#aps-root .sheet-x{flex:none;display:inline-flex;align-items:center;gap:9px;min-height:46px;padding:0 20px;border:0;border-radius:999px;background:#fff;color:var(--navy);font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 8px 18px -8px rgba(0,0,0,.5);transition:transform .15s,background .15s}
+#aps-root .sheet-x:hover{transform:translateY(-1px);background:#e8f6f8}
+#aps-root .sheet-x:focus-visible,#aps-root .sheet-q:focus-visible{outline:3px solid #ffb03b;outline-offset:2px}
+#aps-root .sheet-x.solid{background:var(--navy);color:#fff}
+#aps-root .sheet-t{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:16px 24px 6px;background:#f4f7fc}
+#aps-root .sheet-t .steps{padding:0}
+#aps-root .sheet-q{flex:1;min-width:220px;max-width:380px;height:44px;border:0;border-radius:999px;padding:0 18px;background:#fff;font:500 14px 'Inter',sans-serif;color:var(--ink);box-shadow:0 0 0 1px rgba(26,34,74,.1) inset}
+#aps-root .sheet-b{padding:10px 24px 18px;min-height:160px}
+#aps-root .sheet-f{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 24px;background:#f4f7fc;font-size:12.5px;color:var(--muted)}
+#aps-root .sheet-b table.reg th{border-bottom:0;background:#f4f7fc}
+#aps-root .sheet-b table.reg th:first-child{border-radius:10px 0 0 10px}#aps-root .sheet-b table.reg th:last-child{border-radius:0 10px 10px 0}
+#aps-root .sheet-b table.reg td{border-bottom:1px solid #eef1f8}
+#aps-root .modal-bar{align-items:center}
+#aps-root .modal-bar .sheet-x{min-height:44px}
+@media(max-width:600px){#aps-root .modal.sheetwrap{padding:0}#aps-root .sheet{border-radius:0;min-height:100vh}#aps-root .sheet-h{padding:14px 16px}#aps-root .sheet-h h2{font-size:21px}#aps-root .sheet-x{padding:0 16px}#aps-root .sheet-t,#aps-root .sheet-b,#aps-root .sheet-f{padding-left:14px;padding-right:14px}}
+/* Logo del encabezado: grande, como siempre */
+#aps-root .hdr .logo-container{padding:8px 22px;border-radius:14px}
+#aps-root .hdr .header-logo{width:210px;height:auto;max-width:42vw;max-height:none;object-fit:contain}
+#aps-root .fab{right:92px}
 </style>
 <style id="aps_docCss"></style>
 <div id="aps-root">
@@ -204,9 +253,11 @@
 <div class="app">
   <div class="layout">
     <main class="col-form">
-      <div class="progress"><b id="aps_progT"></b><span id="aps_progS"></span></div>
-      <div class="bar"><i id="aps_progB" style="width:0"></i></div>
-      <div class="steps" id="aps_steps"></div>
+      <div class="rail" id="aps_rail">
+        <div class="progress"><b id="aps_progT"></b><span id="aps_progS"></span></div>
+        <div class="bar"><i id="aps_progB" style="width:0"></i></div>
+        <div class="steps" id="aps_steps"></div>
+      </div>
       <div id="aps_stepHost"></div>
       <div class="actions"><button type="button" class="btn-sec" id="aps_btnPrev">← Anterior</button><button type="button" class="btn-main" id="aps_btnNext">Siguiente →</button></div>
     </main>
@@ -224,13 +275,26 @@
 </div>
 <button type="button" class="fab" id="aps_fab">📄 Ver contrato</button>
 <div class="modal" id="aps_modal">
-  <div class="modal-bar"><button type="button" class="btn-sec" id="aps_modalPrint">🖨️ Imprimir / Guardar PDF</button><button type="button" class="btn-main" id="aps_modalClose" style="padding:10px 18px;font-size:12px">Cerrar ✕</button></div>
+  <div class="modal-bar"><button type="button" class="btn-sec" id="aps_modalPrint">🖨️ Imprimir / Guardar PDF</button><button type="button" class="sheet-x solid" id="aps_modalClose" aria-label="Cerrar la vista ampliada"><span aria-hidden="true">✕</span> Cerrar</button></div>
   <div class="modal-stage" id="aps_modalStage"><div class="paper" id="aps_modalPaper"></div></div>
 </div>
-<div class="modal" id="aps_regModal"><div class="modal-bar"><button type="button" class="btn-main" id="aps_regClose" style="padding:10px 18px;font-size:12px">Cerrar ✕</button></div>
-  <div class="reg-box"><h2>Mis contratos</h2><div class="steps" id="aps_regTabs"></div><div id="aps_regList"></div></div></div>
-<div class="modal" id="aps_hisModal"><div class="modal-bar"><button type="button" class="btn-main" id="aps_hisClose" style="padding:10px 18px;font-size:12px">Cerrar ✕</button></div>
-  <div class="reg-box"><h2>Historial de cambios</h2><div id="aps_hisBody"></div></div></div>
+<div class="modal sheetwrap" id="aps_regModal" role="dialog" aria-modal="true" aria-labelledby="aps_regTit">
+  <div class="sheet">
+    <div class="sheet-h">
+      <div><h2 id="aps_regTit">Mis contratos</h2><p id="aps_regSub"></p></div>
+      <button type="button" class="sheet-x" id="aps_regClose" aria-label="Cerrar esta ventana"><span aria-hidden="true">✕</span> Cerrar</button>
+    </div>
+    <div class="sheet-t"><div class="steps" id="aps_regTabs"></div><input type="search" class="sheet-q" id="aps_regQ" placeholder="Buscar por folio, propietario o inmueble…" autocomplete="off"></div>
+    <div class="sheet-b" id="aps_regList"></div>
+    <div class="sheet-f"><button type="button" class="btn-sec" id="aps_regVolver">← Volver al contrato</button><span id="aps_regPie"></span></div>
+  </div>
+</div>
+<div class="modal sheetwrap" id="aps_hisModal" role="dialog" aria-modal="true" aria-labelledby="aps_hisTit">
+  <div class="sheet">
+    <div class="sheet-h"><div><h2 id="aps_hisTit">Historial de cambios</h2><p>Cada versión guardada del contrato, con quién la hizo y qué cambió.</p></div><button type="button" class="sheet-x" id="aps_hisClose" aria-label="Cerrar esta ventana"><span aria-hidden="true">✕</span> Cerrar</button></div>
+    <div class="sheet-b" id="aps_hisBody"></div>
+  </div>
+</div>
 <div class="busy" id="aps_busy"><div class="busy-card"><div class="spin"></div><span id="aps_busyTxt">Procesando…</span></div></div>
 <div class="toast" id="aps_toast"></div>
 
@@ -788,20 +852,32 @@
     srv('APS_abrir', [id], function (r) { S = normaliza(r.datos); REG = r.meta; SUCIO = false; GUARDADO = ''; showErr = {}; STEP = 'firma'; cerrarRegistros(); refresh(true); }, 'Abriendo…');
   }
   var regFiltro = 'mios';
+  var regFilas = [], regEstado = 'todos', regTotal = 0;
+  var REG_CHIPS = [['todos', 'Todos'], ['BORRADOR', 'Borradores'], ['EN_REVISION', 'En revisión'], ['APROBADO', 'Aprobados'], ['CANCELADO', 'Cancelados']];
+  function pintaRegistros() {
+    var coord = USER.rol === 'coordinador', q = ($('aps_regQ').value || '').toLowerCase().trim();
+    var cuenta = { todos: regFilas.length }; regFilas.forEach(function (r) { cuenta[r.estado] = (cuenta[r.estado] || 0) + 1; });
+    if (!coord) $('aps_regTabs').innerHTML = REG_CHIPS.map(function (t) { return '<button type="button" class="chip' + (t[0] === regEstado ? ' active' : '') + '" data-regest="' + t[0] + '"><span>' + t[1] + ' · ' + (cuenta[t[0]] || 0) + '</span></button>'; }).join('');
+    var rows = regFilas.filter(function (r) {
+      if (!coord && regEstado !== 'todos' && r.estado !== regEstado) return false;
+      return !q || [r.id, r.propietarios, r.inmueble, r.asesor, r.tipo].join(' ').toLowerCase().indexOf(q) >= 0;
+    });
+    $('aps_regList').innerHTML = rows.length ? '<div class="reg-wrap"><table class="reg"><thead><tr><th>Folio</th><th>Estado</th><th>Propietarios</th><th>Tipo</th><th>Actualizado</th>' + (coord ? '<th>Asesor</th>' : '') + '<th></th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr><td>' + esc(r.id) + '</td><td><span class="est e-' + (r.estadoUI || r.estado) + '">' + (ESTADOS_UI[r.estadoUI] || ESTADOS[r.estado]) + '</span></td><td>' + esc(r.propietarios) + '</td><td>' + esc(r.tipo) + '</td><td>' + esc(r.actualizado) + '</td>' +
+        (coord ? '<td>' + esc(r.asesor) + '</td>' : '') + '<td><button type="button" class="btn-mini" data-open="' + esc(r.id) + '">Abrir</button></td></tr>'; }).join('') + '</tbody></table></div>'
+      : '<div class="help" style="padding:26px 4px;font-size:14px">' + (regFilas.length ? 'Ningún contrato coincide con tu búsqueda o filtro.' : 'Todavía no hay contratos en esta vista.') + '</div>';
+    $('aps_regSub').textContent = (rows.length === regFilas.length ? regFilas.length : rows.length + ' de ' + regFilas.length) + (regFilas.length === 1 ? ' contrato' : ' contratos');
+    $('aps_regPie').textContent = regTotal > regFilas.length ? 'Se muestran los ' + regFilas.length + ' más recientes de ' + regTotal + '.' : '';
+  }
   function abrirRegistros(f) {
     regFiltro = f || (USER.rol === 'coordinador' ? 'revision' : 'mios');
-    $('aps_regModal').classList.add('open');
-    var tabs = USER.rol === 'coordinador' ? [['revision', 'Por revisar'], ['todos', 'Todos'], ['mios', 'Míos']] : [['mios', 'Mis registros']];
-    $('aps_regTabs').innerHTML = tabs.map(function (t) { return '<button type="button" class="chip' + (t[0] === regFiltro ? ' active' : '') + '" data-regtab="' + t[0] + '">' + t[1] + '</button>'; }).join('');
-    $('aps_regList').innerHTML = '<div class="help">Cargando…</div>';
-    srv('APS_listar', [regFiltro, '', 300], function (res) {
-      var rows = res.filas;
-      $('aps_regList').innerHTML = rows.length ? '<div class="reg-wrap"><table class="reg"><thead><tr><th>ID</th><th>Estado</th><th>Propietarios</th><th>Tipo</th><th>Actualizado</th>' + (USER.rol === 'coordinador' ? '<th>Asesor</th>' : '') + '<th></th></tr></thead><tbody>' +
-        rows.map(function (r) { return '<tr><td>' + esc(r.id) + '</td><td><span class="est e-' + (r.estadoUI || r.estado) + '">' + (ESTADOS_UI[r.estadoUI] || ESTADOS[r.estado]) + '</span></td><td>' + esc(r.propietarios) + '</td><td>' + esc(r.tipo) + '</td><td>' + esc(r.actualizado) + '</td>' +
-          (USER.rol === 'coordinador' ? '<td>' + esc(r.asesor) + '</td>' : '') + '<td><button type="button" class="btn-mini" data-open="' + esc(r.id) + '">Abrir</button></td></tr>'; }).join('') + '</tbody></table></div>'
-        : '<div class="help">No hay registros en esta vista.</div>';
-      if (res.total > rows.length) $('aps_regList').insertAdjacentHTML('beforeend', '<div class="help">Se muestran los ' + rows.length + ' m\u00e1s recientes de ' + res.total + '.</div>');
-    }, 'Cargando registros…');
+    var coord = USER.rol === 'coordinador';
+    $('aps_regTit').textContent = coord ? 'Contratos APS' : 'Mis contratos';
+    $('aps_regModal').classList.add('open'); $('aps_regQ').value = ''; regEstado = 'todos';
+    if (coord) $('aps_regTabs').innerHTML = [['revision', 'Por revisar'], ['todos', 'Todos'], ['mios', 'Míos']].map(function (t) { return '<button type="button" class="chip' + (t[0] === regFiltro ? ' active' : '') + '" data-regtab="' + t[0] + '"><span>' + t[1] + '</span></button>'; }).join('');
+    $('aps_regList').innerHTML = '<div class="help" style="padding:26px 4px">Cargando…</div>';
+    try { $('aps_regClose').focus(); } catch (e) {}
+    srv('APS_listar', [regFiltro, '', 300], function (res) { regFilas = res.filas; regTotal = res.total; pintaRegistros(); }, 'Cargando registros…');
   }
   function cerrarRegistros() { $('aps_regModal').classList.remove('open'); }
   function iniciarServidor() {
@@ -905,14 +981,19 @@
   ROOT.addEventListener('click', function (e) {
     var o = e.target.closest('[data-open]'); if (o) { abrirRegistro(o.getAttribute('data-open')); return; }
     var t = e.target.closest('[data-regtab]'); if (t) abrirRegistros(t.getAttribute('data-regtab'));
+    var s = e.target.closest('[data-regest]'); if (s) { regEstado = s.getAttribute('data-regest'); pintaRegistros(); }
   });
   $('aps_btnRegistros').addEventListener('click', function () { abrirRegistros(); });
   $('aps_btnNuevo').addEventListener('click', nuevo);
-  $('aps_regClose').addEventListener('click', cerrarRegistros); $('aps_hisClose').addEventListener('click', function () { $('aps_hisModal').classList.remove('open'); });
+  $('aps_regClose').addEventListener('click', cerrarRegistros);
+  $('aps_regVolver').addEventListener('click', cerrarRegistros); $('aps_regQ').addEventListener('input', pintaRegistros);
+  ['aps_regModal', 'aps_hisModal', 'aps_modal'].forEach(function (id) {       // tocar fuera de la ventana también la cierra
+    $(id).addEventListener('mousedown', function (e) { if (e.target === this) this.classList.remove('open'); });
+  }); $('aps_hisClose').addEventListener('click', function () { $('aps_hisModal').classList.remove('open'); });
   $('aps_btnNext').addEventListener('click', next); $('aps_btnPrev').addEventListener('click', prev);
   $('aps_btnZoom').addEventListener('click', openModal); $('aps_btnPrint').addEventListener('click', imprimir); $('aps_fab').addEventListener('click', openModal);
   $('aps_modalClose').addEventListener('click', closeModal); $('aps_modalPrint').addEventListener('click', function () { closeModal(); imprimir(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ROOT.offsetParent !== null) { closeModal(); cerrarRegistros(); } });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ROOT.offsetParent !== null) { cerrarModales(); } });
   window.addEventListener('resize', function () { fitPreview(); if ($('aps_modal').classList.contains('open')) fitModal(); });
   
   $('aps_docCss').textContent = D.css(null, { sinPagina: true });

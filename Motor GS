@@ -65,6 +65,8 @@ var APS_CONFIG = {
   CORREO_REMITENTE: '',
   // ¿Puede una coordinadora aprobar un contrato que ella misma creó? true = sí (como estaba). false = no: lo debe aprobar otra persona de coordinación.
   PERMITIR_AUTOAPROBACION: true,
+  // A quién le llegan los reportes de fallas que los usuarios envían con el botón de ayuda («?») de la pantalla principal.
+  REPORTES_CORREOS: ['lizbethserrato@hipoo.mx', 'robertodelacruz@cualli.mx'],
   ZONA: 'America/Mexico_City'
 };
 
@@ -117,7 +119,7 @@ function APS_setup() {
   var sh = ss.getSheetByName('Registros') || ss.getSheets()[0].setName('Registros');
   sh.getRange(1, 1, 1, APS_COLS.length).setValues([APS_COLS]).setFontWeight('bold');      // el encabezado se actualiza siempre (columnas nuevas)
   sh.setFrozenRows(1);
-  APS_hojaAux_('Auditoria', APS_AUD_COLS); APS_hojaAux_('PLD_Revisiones', PLD_REV_COLS); APS_hojaAux_('Versiones', APS_VER_COLS);
+  APS_hojaAux_('Auditoria', APS_AUD_COLS); APS_hojaAux_('PLD_Revisiones', PLD_REV_COLS); APS_hojaAux_('Versiones', APS_VER_COLS); APS_hojaAux_('Reportes', APS_REP_COLS);
   APS_aseguraColumnasAsesores_(APS_hojaAux_('Asesores', ['Correo', 'Nombre', 'Género', 'Rol', 'Activo']));   // si la pestaña ya existía (de antes de "Género"/"Rol"), les agrega las columnas que falten, sin tocar lo que ya hay
   Logger.log('Carpeta de PDFs : ' + carpeta.getUrl());
   Logger.log('Hoja de registro: ' + ss.getUrl());
@@ -127,6 +129,7 @@ function APS_setup() {
 /* ═════════════ HOJAS AUXILIARES Y AUDITORÍA ═════════════ */
 
 var APS_AUD_COLS = ['Fecha', 'Usuario', 'Módulo', 'Acción', 'Referencia', 'Detalle'];
+var APS_REP_COLS = ['Folio', 'Fecha', 'Usuario', 'Nombre', 'Rol', 'Tipo', 'Pantalla', 'Mensaje', 'Datos técnicos', 'Estado'];
 /** Hoja auxiliar dentro del mismo archivo de registro (se crea sola si no existe). */
 function APS_hojaAux_(nombre, cols) {
   var ss = SpreadsheetApp.openById(APS_ids_().hoja), sh = ss.getSheetByName(nombre);
@@ -513,7 +516,8 @@ function APS_notificar_(para, asunto, mensaje, opts) {
       url += (url.indexOf('?') === -1 ? '?' : '&') + qs;
     }
     var correo = { to: para.join(','), subject: '[' + (opts.sistema || 'APS Hipoo') + '] ' + asunto, name: opts.sistema || 'APS Hipoo',
-      htmlBody: APS_correoHtml_(opts.titulo || asunto, mensaje, url, opts.firma, opts) };
+      htmlBody: APS_correoHtml_(opts.titulo || asunto, mensaje, opts.sinBoton ? '' : url, opts.firma, opts) };
+    if (opts.replyTo) correo.replyTo = opts.replyTo;
     // Si hay un alias de "Enviar como" configurado y verificado en la cuenta que ejecuta el script, se usa como
     // remitente real; si no (CORREO_REMITENTE vacío), Apps Script manda el correo desde esa misma cuenta (la tuya),
     // que es el comportamiento de hoy.
@@ -529,6 +533,41 @@ function APS_notificar_(para, asunto, mensaje, opts) {
 function APS_iniciar() {
   var u = APS_usuario_();
   return { usuario: u, logo: u.email ? APS_logoDataUri_() : '' };
+}
+
+/* ═════════════ AYUDA: reportes de fallas desde el botón «?» ═════════════ */
+
+/**
+ * Un usuario reporta algo que no funciona. Queda en la hoja «Reportes» (con folio), en la bitácora, y llega por correo
+ * a REPORTES_CORREOS con «Responder» apuntando a quien reportó. A quien reporta le llega un acuse con el folio.
+ * Límite: un reporte por minuto por persona, para que nadie sature los correos sin querer.
+ */
+function APS_reportar(r) {
+  var u = APS_requiereUsuario_(); r = r || {};
+  var tipos = { falla: 'Algo no funciona', visual: 'Se ve mal o no se entiende', dato: 'Un dato está mal', otro: 'Otra cosa' };
+  var limpia = function (t, n) { return String(t == null ? '' : t).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, ' ').trim().slice(0, n); };
+  var tipo = tipos[r.tipo] ? r.tipo : 'otro', msg = limpia(r.mensaje, 1500);
+  if (msg.length < 10) throw new Error('Cuéntanos un poco más: escribe al menos 10 caracteres.');
+  var cache = CacheService.getScriptCache(), llave = 'APS_REP_' + u.email;
+  if (cache.get(llave)) throw new Error('Ya enviaste un reporte hace un momento. Espera un minuto para mandar otro.');
+  var pantalla = limpia(r.pantalla, 80) || 'Pantalla principal', tec = (r.tecnico && typeof r.tecnico === 'object') ? r.tecnico : {};
+  var tecTxt = limpia(JSON.stringify(tec), 1800), nombre = u.nombre || u.email;
+  var folio = 'REP-' + Utilities.formatDate(new Date(), APS_CONFIG.ZONA, 'yyMMdd') + '-' + Utilities.getUuid().replace(/-/g, '').slice(0, 4).toUpperCase();
+  var sh = APS_hojaAux_('Reportes', APS_REP_COLS), fila = sh.getLastRow() + 1;
+  if (fila > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), 200);
+  var rg = sh.getRange(fila, 1, 1, APS_REP_COLS.length); rg.setNumberFormat('@');
+  rg.setValues([[folio, APS_ahora_(), u.email, nombre, u.rol, tipos[tipo], pantalla, msg, tecTxt, 'NUEVO']]);
+  try { cache.put(llave, '1', 60); } catch (e) { /* sin caché: no hay límite por minuto, no pasa nada */ }
+  APS_audit_('SOPORTE', 'REPORTE', folio, tipos[tipo] + ' · ' + pantalla + ': ' + msg.slice(0, 120));
+  var h = APS_escHtml_;
+  var datos = [['Folio', folio], ['Tipo', tipos[tipo]], ['Pantalla', pantalla], ['Quién', nombre + ' · ' + u.email + ' · ' + (u.rol === 'coordinador' ? 'Coordinación' : 'Asesor')],
+    ['Navegador', limpia(tec.navegador, 120)], ['Tamaño de pantalla', limpia(tec.ventana, 40)], ['Hora del equipo', limpia(tec.hora, 40)], ['Errores recientes', limpia(tec.errores, 400)]];
+  APS_notificar_(APS_CONFIG.REPORTES_CORREOS, tipos[tipo] + ' — ' + pantalla + ' (' + folio + ')',
+    '<b>' + h(nombre) + '</b> reportó lo siguiente:<div style="margin:12px 0 0;padding:13px 15px;background:#f4f7fc;border-radius:10px;white-space:pre-wrap;color:#1a224a">' + h(msg) + '</div><p style="margin:12px 0 0;font-size:12.5px;color:#5a6488">Para contestarle, usa «Responder»: el correo le llega a ' + h(u.email) + '.</p>',
+    { titulo: 'Reporte de un usuario', etiqueta: tipos[tipo], tono: 'warn', datos: datos, replyTo: u.email, sinBoton: true, sistema: 'APS Hipoo · Soporte' });
+  APS_notificar_([u.email], 'Recibimos tu reporte (' + folio + ')', 'Gracias por avisarnos. Ya le llegó a la coordinación y a sistemas; te contestarán por correo si necesitan más información.',
+    { titulo: 'Recibimos tu reporte', etiqueta: 'Folio ' + folio, tono: 'ok', sinBoton: true, datos: [['Folio', folio], ['Tipo', tipos[tipo]], ['Pantalla', pantalla], ['Lo que nos contaste', msg.slice(0, 300)]], sistema: 'APS Hipoo · Soporte' });
+  return { folio: folio };
 }
 
 /* ═════════════ PANTALLA PRINCIPAL: indicadores y actividad en vivo ═════════════ */
