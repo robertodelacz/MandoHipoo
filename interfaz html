@@ -1557,16 +1557,18 @@
     
     showStatus('loading', '<div class="clock-spinner"></div> PROCESANDO: Generando archivo protegido...');
     document.getElementById('btnGenerar').disabled = true;
+    // Si en 5 minutos no hay respuesta, se libera el botón con un aviso (el documento pudo haberse creado: revisar «Mis Pre PLD» antes de repetir).
+    clearTimeout(window.__genVig); window.__genVig = setTimeout(function () { var b = document.getElementById('btnGenerar'); if (b && b.disabled) { b.disabled = false; showStatus('error', '⏳ Está tardando demasiado. Revisa «Mis Pre PLD» por si ya se creó antes de intentarlo de nuevo.'); } }, 300000);
 
     if (typeof google !== 'undefined' && google.script) {
       google.script.run
         .withSuccessHandler(function(res) {
-          document.getElementById('btnGenerar').disabled = false;
+          clearTimeout(window.__genVig); document.getElementById('btnGenerar').disabled = false;
           if (res.success) {
             showStatus('success', 
-              '✅ ¡LISTO! Documento generado e inscrito en Bitácora.<br>' + 
+              (res.bitacora === false ? '⚠️ Documento generado, pero NO se pudo inscribir en la bitácora: no aparecerá en «Mis Pre PLD» ni podrá enviarse a revisión. Avisa a sistemas con el botón «?».<br>' : '✅ ¡LISTO! Documento generado e inscrito en Bitácora.<br>') + 
               '<a href="'+res.url+'" target="_blank">ABRIR PRE-AVISO PLD</a>' + 
-              '<button type="button" class="btn-reset" data-pldid="' + String(res.id).replace(/[^A-Za-z0-9_-]/g, '') + '" onclick="PLDREV.enviar(this.getAttribute(\'data-pldid\'), this)">📤 ENVIAR A REVISIÓN</button>' + 
+              (res.bitacora === false ? '' : '<button type="button" class="btn-reset" data-pldid="' + String(res.id).replace(/[^A-Za-z0-9_-]/g, '') + '" onclick="PLDREV.enviar(this.getAttribute(\'data-pldid\'), this)">📤 ENVIAR A REVISIÓN</button>') + 
               '<button onclick="resetForm()" class="btn-reset">NUEVA OPERACIÓN</button>'
             );
           } else {
@@ -1626,11 +1628,12 @@
       : 'VERIFICANDO DOCUMENTO Y AGREGANDO ' + cantidadPagoExtra + ' PAGOS...';
     showStatusPago('loading', '<div class="clock-spinner"></div> ' + etiquetaCarga);
     document.getElementById('btnAgregarPago').disabled = true;
+    clearTimeout(window.__pagoVig); window.__pagoVig = setTimeout(function () { var b = document.getElementById('btnAgregarPago'); if (b && b.disabled) { b.disabled = false; showStatusPago('error', '⏳ Está tardando demasiado. Abre el documento y revisa si el pago ya se agregó antes de intentarlo de nuevo.'); } }, 300000);
 
     if (typeof google !== 'undefined' && google.script) {
       google.script.run
         .withSuccessHandler(function(res) {
-          document.getElementById('btnAgregarPago').disabled = false;
+          clearTimeout(window.__pagoVig); document.getElementById('btnAgregarPago').disabled = false;
           if (res.success) {
             var mensajeExito = res.cantidadAgregada === 1
               ? 'Se agregó el Pago ' + res.numeroPago + ' a la operación.'
