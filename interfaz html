@@ -864,6 +864,32 @@
     .hm-card.off .hm-card-main { cursor: not-allowed; }
     .hm-card.off .hm-ico { background: #e4e9f4; color: #8c97b6; }
     .hm-card .aviso { display: block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--warn); }
+
+    /* ── Próximamente: contratos de Venta y Renta ── */
+    .hm-soon { position: relative; overflow: hidden; margin-top: 30px; border-radius: 22px; padding: 26px 26px 24px; color: #fff; background: radial-gradient(80% 120% at 100% 0%, #3d4fb0 0%, transparent 55%), linear-gradient(120deg, #2b3680 0%, #1f2957 55%, #161d44 100%); box-shadow: 0 22px 44px -22px rgba(26, 34, 74, .6); isolation: isolate; }
+    .hm-soon::before { content: ""; position: absolute; inset: 0; z-index: -1; background-image: linear-gradient(rgba(123, 224, 234, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(123, 224, 234, .08) 1px, transparent 1px); background-size: 28px 28px; -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 95%); mask-image: linear-gradient(180deg, #000 0%, transparent 95%); }
+    .hm-soon::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 90px; z-index: -1; background: linear-gradient(180deg, transparent, rgba(53, 183, 197, .14), transparent); animation: hmSoonScan 7s linear infinite; }
+    @keyframes hmSoonScan { 0% { transform: translateY(-100px); } 100% { transform: translateY(420px); } }
+    .hm-soon-h { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; margin-bottom: 6px; }
+    .hm-soon-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: #7be0ea; border: 1px solid rgba(123, 224, 234, .45); border-radius: 999px; padding: 5px 12px 5px 10px; background: rgba(53, 183, 197, .10); }
+    .hm-soon-tag i { width: 7px; height: 7px; border-radius: 50%; background: #35B7C5; box-shadow: 0 0 0 0 rgba(53, 183, 197, .7); animation: hmSoonPulse 2s ease-out infinite; }
+    @keyframes hmSoonPulse { 0% { box-shadow: 0 0 0 0 rgba(53, 183, 197, .7); } 100% { box-shadow: 0 0 0 10px rgba(53, 183, 197, 0); } }
+    .hm-soon h3 { margin: 0; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 21px; letter-spacing: -.2px; }
+    .hm-soon-p { margin: 4px 0 18px; font-size: 13.5px; line-height: 1.55; color: #c3cdee; max-width: 62ch; }
+    .hm-soon-g { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 16px; }
+    .hm-soon-c { position: relative; display: flex; gap: 16px; align-items: center; padding: 18px 18px 16px; border-radius: 16px; background: rgba(255, 255, 255, .045); border: 1.5px dashed rgba(123, 224, 234, .38); cursor: default; transition: background .25s, border-color .25s; }
+    .hm-soon-c:hover { background: rgba(255, 255, 255, .08); border-color: rgba(123, 224, 234, .7); }
+    .hm-soon-c svg { flex: none; width: 74px; height: 74px; }
+    .hm-soon-c b { display: block; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; margin-bottom: 3px; }
+    .hm-soon-c span.d { display: block; font-size: 12.5px; line-height: 1.5; color: #b6c2ea; }
+    .hm-soon-bar { position: relative; height: 5px; margin-top: 12px; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, .12); }
+    .hm-soon-bar::before { content: ""; position: absolute; top: 0; bottom: 0; width: 38%; border-radius: 999px; background: linear-gradient(90deg, transparent, #35B7C5, #7be0ea, transparent); animation: hmSoonBar 2.6s ease-in-out infinite; }
+    @keyframes hmSoonBar { 0% { left: -40%; } 100% { left: 102%; } }
+    .hm-soon-st { display: block; margin-top: 7px; font-size: 10px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; color: #7be0ea; }
+    .hm-soon .crane { transform-origin: 14px 8px; animation: hmSoonCrane 6s ease-in-out infinite alternate; }
+    @keyframes hmSoonCrane { 0% { transform: rotate(-3deg); } 100% { transform: rotate(3deg); } }
+    @media (max-width: 560px) { .hm-soon { padding: 22px 18px 20px; margin-top: 24px; } .hm-soon h3 { font-size: 18px; } .hm-soon-c svg { width: 60px; height: 60px; } }
+    @media (prefers-reduced-motion: reduce) { .hm-soon::after, .hm-soon-tag i, .hm-soon-bar::before, .hm-soon .crane { animation: none; } .hm-soon-bar::before { left: 0; width: 38%; } }
     .hm-badge { position: absolute; top: 12px; right: 12px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; display: grid; place-items: center; background: #e0a100; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; box-shadow: 0 0 0 4px #fff; }
 
     /* Acciones principales: grandes, de alto contraste y con letra amplia (pensadas para leerse y tocarse sin esfuerzo) */
@@ -1375,6 +1401,28 @@
         <div id="inicioTarjetas"></div>
       </section>
     </div>
+    <section class="hm-soon" aria-label="Próximamente: contratos de venta y de renta">
+      <div class="hm-soon-h"><span class="hm-soon-tag"><i></i>Próximamente</span><h3>Se está construyendo algo nuevo</h3></div>
+      <p class="hm-soon-p">Muy pronto podrás generar aquí los contratos de <b>Venta</b> y de <b>Renta</b>, con el mismo flujo que ya conoces: captura, revisión y aprobación.</p>
+      <div class="hm-soon-g">
+        <div class="hm-soon-c" role="note">
+          <svg viewBox="0 0 80 80" fill="none" stroke="#7be0ea" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 74h68" stroke-opacity=".6"/><path d="M14 74V40h20v34M34 74V28h16v46" /><path d="M20 48h8M20 56h8M20 64h8M39 38h6M39 46h6M39 54h6M39 62h6" stroke-opacity=".7"/>
+            <g class="crane"><path d="M60 74V12M60 12H24M60 12l10 6M24 12l-6 8" /><path d="M30 12v14" stroke-dasharray="2 3" stroke="#35B7C5"/><rect x="26" y="26" width="8" height="5" rx="1" stroke="#35B7C5"/></g>
+            <path d="M54 74v-6h12v6" stroke-opacity=".5" stroke-dasharray="3 3"/>
+          </svg>
+          <div><b>Contrato de Venta</b><span class="d">Compraventa de inmuebles, con tus datos ya capturados.</span><div class="hm-soon-bar"></div><span class="hm-soon-st">En construcción</span></div>
+        </div>
+        <div class="hm-soon-c" role="note">
+          <svg viewBox="0 0 80 80" fill="none" stroke="#7be0ea" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 74h68" stroke-opacity=".6"/><path d="M12 40L40 14l28 26" /><path d="M18 36v38h44V36" /><path d="M34 74V54h12v20" stroke-opacity=".7"/>
+            <circle cx="52" cy="46" r="5.5" stroke="#35B7C5"/><path d="M57.5 46H70M65 46v6M70 46v5" stroke="#35B7C5"/>
+            <path d="M26 46h6v6h-6z" stroke-opacity=".6" stroke-dasharray="2 3"/>
+          </svg>
+          <div><b>Contrato de Renta</b><span class="d">Arrendamiento de inmuebles, listo para revisión y aprobación.</span><div class="hm-soon-bar"></div><span class="hm-soon-st">En construcción</span></div>
+        </div>
+      </div>
+    </section>
     <div class="hm-pie">Hipoo — Mesa de control</div>
   </main>
 </div>
