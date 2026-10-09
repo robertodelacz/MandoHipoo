@@ -72,9 +72,9 @@
     }
 
     .logo-container {
-      background: #eaeaea;
-      padding: 5px 20px; 
-      border-radius: 12px;
+      background: #fff;
+      padding: 10px 26px; 
+      border-radius: 16px;
       width: fit-content; 
       margin: 0 auto 24px auto;
       border: 1px solid rgba(255, 255, 255, 0.8);
@@ -83,7 +83,7 @@
     }
 
     .header-logo {
-      width: 180px; 
+      width: 200px; 
       height: auto; 
       display: block;
     }
@@ -2291,8 +2291,8 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     if (nuevos.length) { var e0 = nuevos[0]; hmToast(nuevos.length > 1 ? nuevos.length + ' novedades nuevas' : e0.titulo, nuevos.length > 1 ? e0.titulo + ' · ' + e0.texto : e0.texto, true); }
     /* Sello de marca de agua: se inserta (detrás del contenido) en cada encabezado oscuro de la plataforma. */
   (function marcaDeAgua() {
-    var L = [['.hm-hero', 170, '-34px', 0, '30%'], ['.barra-nav', 120, '-1%'], ['.hm-sh', 160, '-28px'], ['#con-root .cx-hero', 170, '-36px', 0, '26%'], ['#con-root .cx-dph', 110, '130px'],
-      ['#aps-root .hdr', 160, '1%'], ['#aps-root .sheet-h', 150, '190px'], ['.header', 170, '2%'], ['#splash', 680, '', 1], ['#bloqueoVivo', 700, '', 1]];
+    var L = [['.hm-hero', 300, '', 1, '46%'], ['.barra-nav', 120, '-1%'], ['.hm-sh', 160, '-28px'], ['#con-root .cx-hero', 270, '', 1, '40%'], ['#con-root .cx-dph', 110, '130px'],
+      ['#aps-root .hdr', 210, '', 1, '50%'], ['#aps-root .sheet-h', 150, '190px'], ['.header', 230, '', 1, '50%'], ['#splash', 680, '', 1], ['#bloqueoVivo', 700, '', 1]];
     L.forEach(function (c) {
       var els = document.querySelectorAll(c[0]);
       for (var i = 0; i < els.length; i++) {

@@ -76,7 +76,12 @@
 #con-root .cx-sx{position:absolute;right:10px;top:50%;translate:0 -50%;width:40px;height:40px;border:0;border-radius:50%;background:#eef2fb;color:var(--navy);cursor:pointer;display:none;place-items:center}
 #con-root .cx-sx.on{display:grid}
 #con-root .cx-sx svg{width:17px;height:17px}
-#con-root .cx-chips{display:flex;gap:10px;flex-wrap:wrap}
+#con-root .cx-chips{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#con-root .cx-asel{position:relative;display:inline-flex;align-items:center;margin-left:auto;min-height:46px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(26,34,74,.06),inset 0 0 0 1.5px #dbe2ef;color:var(--navy)}
+#con-root .cx-asel>svg{position:absolute;left:15px;width:18px;height:18px;pointer-events:none;color:#35B7C5}
+#con-root .cx-asel select{appearance:none;-webkit-appearance:none;border:0;background:transparent;min-height:46px;max-width:100%;padding:0 20px 0 42px;border-radius:999px;font:700 14.5px 'Inter',sans-serif;color:var(--navy);cursor:pointer}
+#con-root .cx-asel select:focus{outline:none;box-shadow:0 0 0 4px rgba(53,183,197,.25)}
+#con-root .cx-asel:focus-within{box-shadow:inset 0 0 0 2px var(--primary)}
 #con-root .cx-chip{display:inline-flex;align-items:center;gap:9px;min-height:46px;padding:0 18px;border:0;border-radius:999px;background:#fff;color:var(--muted);font:700 14.5px 'Inter',sans-serif;cursor:pointer;box-shadow:0 1px 2px rgba(26,34,74,.06),inset 0 0 0 1.5px #dbe2ef;transition:background .15s,color .15s,box-shadow .15s,transform .12s}
 #con-root .cx-chip:hover{color:var(--ink);box-shadow:0 6px 14px -8px rgba(26,34,74,.35),inset 0 0 0 1.5px var(--primary)}
 #con-root .cx-chip:active{transform:scale(.97)}
@@ -308,7 +313,7 @@
 }
 @media(max-width:700px){
   #con-root .cx-hero{border-radius:22px;padding:22px 20px 84px}
-  #con-root .cx-hero::after{width:230px;height:125px;right:12px;bottom:54px;opacity:.7}
+  #con-root .cx-asel{margin-left:0;width:100%} #con-root .cx-asel select{width:100%} #con-root .cx-hero::after{width:230px;height:125px;right:12px;bottom:54px;opacity:.7}
   #con-root .cx-sub{font-size:14.5px}
   #con-root .cx-refresh{width:100%;justify-content:center}
   #con-root .cx-hr{width:100%}#con-root .cx-live{flex:1;justify-content:center}
@@ -324,6 +329,7 @@
   #con-root .cx-tab{flex:1 0 auto;padding:0 18px;min-height:52px}
   #con-root .cx-chips{flex-wrap:nowrap;overflow-x:auto;margin:0 -12px;padding:2px 12px 8px;scrollbar-width:none}
   #con-root .cx-chips::-webkit-scrollbar{display:none}
+  #con-root .cx-chips:has(.cx-asel){flex-wrap:wrap;overflow:visible;margin:0;padding:2px 0 4px} #con-root .cx-asel{order:-1}
   #con-root .cx-chip{flex:none}
   #con-root .cx-card{padding:20px 18px 18px 24px;border-radius:22px}
   #con-root .cx-top{flex-wrap:wrap}
@@ -429,7 +435,7 @@
     acc: { eyebrow: 'Coordinación · Accesos', t1: 'Accesos del ', t2: 'equipo', sub: 'Quién puede entrar a la plataforma. Agrega asesores nuevos y activa o desactiva el acceso con un toque: la baja aplica a todo (contratos APS, Pre PLD y revisión) en su siguiente acción.',
       tabs: [['acc', 'Equipo', 'equipo'], ['aud', 'Registro de accesos', 'audit']] }
   };
-  var st = { seccion: 'aps', vista: 'aps', fa: 'revision', fp: 'revision', textoA: '', textoP: '', textoU: '', textoM: '', textoE: '', fe: 'todos', eq: [], yo: '', bloqueoActivo: true, fu: 'todo',
+  var st = { seccion: 'aps', vista: 'aps', fa: 'revision', fp: 'revision', textoA: '', textoP: '', asA: '', asP: '', textoU: '', textoM: '', textoE: '', fe: 'todos', eq: [], yo: '', bloqueoActivo: true, fu: 'todo',
     aps: [], total: 0, conteos: {}, pld: [], mods: null, aud: null, res: null, admin: '', prev: {}, kpiSig: '', firma: {}, ocupado: false };
   var tmr = null, tmrAuto = null;
 
@@ -510,6 +516,7 @@
     if (seccion === 'aps' && filtro) st.fa = filtro;
     if (seccion === 'pld' && filtro) st.fp = filtro;
     if (seccion === 'acc') { st.eq = st.eq || []; }
+    if ((seccion === 'aps' || seccion === 'pld') && !st.nomCargados) { st.nomCargados = 1; srv('ASESORES_listar', [], function (res) { st.eq = res.equipo || []; if (!q('chips')) return; if (st.vista === 'aps' && st.aps) pintaAps(false); else if (st.vista === 'pld' && st.pld) pintaPld(false); }, null, 'silencio'); }
     var S = SECCIONES[seccion];
     q('eyebrow').innerHTML = I.sparkle + esc(S.eyebrow); q('titulo').innerHTML = esc(S.t1) + '<em>' + esc(S.t2) + '</em>'; q('sub').textContent = S.sub;
     q('icoRef').innerHTML = I.ref;
@@ -565,6 +572,14 @@
     ['aprobados', 'Aprobados', 'APROBADO'], ['cancelados', 'Cancelados', 'CANCELADO'], ['docs', 'Con Google Docs', 'DOCS']];
   function cuenta(est) { var c = st.conteos || {}; return est === null ? (c.total || 0) : (est === 'DOCS' ? (c.conDocs || 0) : (c[est] || 0)); }
   function coincide(r, est) { return !est || (est === 'DOCS' ? !!r.docUrl : r.estadoUI === est); }
+  function nomAs(e) { var E = st.eq || [], k = String(e || '').toLowerCase(); for (var i = 0; i < E.length; i++) { if (String(E[i].correo || '').toLowerCase() === k && E[i].nombre) return E[i].nombre; } return e; }
+  function selAs(clave, valores, actual) {
+    var m = {}, tot = valores.length; valores.forEach(function (v) { if (v) m[v] = (m[v] || 0) + 1; });
+    if (actual && !m[actual]) m[actual] = 0;
+    var ks = Object.keys(m).sort(function (a, b) { return nomAs(a).localeCompare(nomAs(b), 'es'); });
+    return '<label class="cx-asel">' + I.user + '<select data-sel="' + clave + '" aria-label="Filtrar por asesor"><option value="">Todos los asesores (' + tot + ')</option>' +
+      ks.map(function (k) { return '<option value="' + esc(k) + '"' + (k === actual ? ' selected' : '') + '>' + esc(nomAs(k)) + ' (' + m[k] + ')</option>'; }).join('') + '</select></label>';
+  }
   function vAps(anim, silencio) {
     srv('APS_listar', ['todos', st.textoA, 1000], function (res) {
       var nuevo = cambiaDatos('aps', [res.filas, res.conteos, res.total]);
@@ -603,11 +618,11 @@
   }
   function pintaAps(anim) {
     if (!q('lista')) armaApsBase();
-    var act = FA.filter(function (x) { return x[0] === st.fa; })[0] || FA[0], est = act[2], rows = st.aps.filter(function (r) { return coincide(r, est); });
-    q('chips').innerHTML = FA.map(function (x) { return '<button type="button" class="cx-chip' + (st.fa === x[0] ? ' on' : '') + '" data-fa="' + x[0] + '">' + x[1] + '<span class="n">' + cuenta(x[2]) + '</span></button>'; }).join('');
+    var act = FA.filter(function (x) { return x[0] === st.fa; })[0] || FA[0], est = act[2], porEst = st.aps.filter(function (r) { return coincide(r, est); }), rows = st.asA ? porEst.filter(function (r) { return r.asesor === st.asA; }) : porEst, baseA = st.asA ? st.aps.filter(function (r) { return r.asesor === st.asA; }) : st.aps;
+    q('chips').innerHTML = FA.map(function (x) { return '<button type="button" class="cx-chip' + (st.fa === x[0] ? ' on' : '') + '" data-fa="' + x[0] + '">' + x[1] + '<span class="n">' + (st.asA ? baseA.filter(function (r) { return coincide(r, x[2]); }).length : cuenta(x[2])) + '</span></button>'; }).join('') + selAs('a', porEst.map(function (r) { return r.asesor; }), st.asA);
     q('cnt').textContent = rows.length ? 'Mostrando ' + rows.length + ' contrato' + (rows.length === 1 ? '' : 's') + (st.total > st.aps.length ? ' · se cargaron los ' + st.aps.length + ' más recientes de ' + st.total + ': usa la búsqueda para encontrar uno específico' : '') : '';
     if (anim) animar();
-    q('lista').innerHTML = rows.length ? rows.map(tarjetaAps).join('') : vacio('vacio', st.textoA ? 'Sin coincidencias' : 'Nada por aquí', st.textoA ? 'Ningún contrato coincide con «' + st.textoA + '». Revisa el nombre o prueba con el folio.' : 'No hay contratos en esta vista. Cuando un asesor envíe uno, aparecerá aquí.');
+    q('lista').innerHTML = rows.length ? rows.map(tarjetaAps).join('') : vacio('vacio', st.textoA ? 'Sin coincidencias' : 'Nada por aquí', st.textoA ? 'Ningún contrato coincide con «' + st.textoA + '». Revisa el nombre o prueba con el folio.' : (st.asA ? 'No hay contratos de ' + nomAs(st.asA) + ' en esta vista.' : 'No hay contratos en esta vista. Cuando un asesor envíe uno, aparecerá aquí.'));
   }
 
   /* ── Alertas ── */
@@ -644,7 +659,7 @@
   }
   function filtraPld() {
     var t = st.textoP.toLowerCase().trim();
-    return st.pld.filter(function (r) { return !t || [r.nombre, r.operacion, r.asociados, r.creador].join(' ').toLowerCase().indexOf(t) >= 0; });
+    return st.pld.filter(function (r) { return (!st.asP || r.creador === st.asP) && (!t || [r.nombre, r.operacion, r.asociados, r.creador].join(' ').toLowerCase().indexOf(t) >= 0); });
   }
   function tarjetaPld(r) {
     var w = r.estado === 'EN_REVISION' ? espera(r.fechaEnvio) : null, aviso = '';
@@ -661,12 +676,12 @@
   }
   function pintaPld(anim) {
     if (!q('lista')) armaPldBase();
-    var base = filtraPld(), n = {}; base.forEach(function (r) { n[r.estado] = (n[r.estado] || 0) + 1; });
+    var base = filtraPld(), n = {}, asP0 = st.asP; st.asP = ''; var sinAs = filtraPld(); st.asP = asP0; base.forEach(function (r) { n[r.estado] = (n[r.estado] || 0) + 1; });
     var act = FP.filter(function (x) { return x[0] === st.fp; })[0] || FP[0], rows = base.filter(function (r) { return !act[2] || r.estado === act[2]; });
-    q('chips').innerHTML = FP.map(function (x) { return '<button type="button" class="cx-chip' + (st.fp === x[0] ? ' on' : '') + '" data-fp="' + x[0] + '">' + x[1] + '<span class="n">' + (x[2] ? (n[x[2]] || 0) : base.length) + '</span></button>'; }).join('');
+    q('chips').innerHTML = FP.map(function (x) { return '<button type="button" class="cx-chip' + (st.fp === x[0] ? ' on' : '') + '" data-fp="' + x[0] + '">' + x[1] + '<span class="n">' + (x[2] ? (n[x[2]] || 0) : base.length) + '</span></button>'; }).join('') + selAs('p', sinAs.filter(function (r) { return !act[2] || r.estado === act[2]; }).map(function (r) { return r.creador; }), st.asP);
     q('cnt').textContent = rows.length ? 'Mostrando ' + rows.length + ' documento' + (rows.length === 1 ? '' : 's') : '';
     if (anim) animar();
-    q('lista').innerHTML = rows.length ? rows.map(tarjetaPld).join('') : vacio(st.fp === 'revision' && !st.textoP ? 'checkc' : 'vacio', st.textoP ? 'Sin coincidencias' : (st.fp === 'revision' ? 'Todo al día' : 'Nada por aquí'), st.textoP ? 'Ningún documento coincide con «' + st.textoP + '».' : (st.fp === 'revision' ? 'No hay Pre PLD esperando tu revisión. Cuando un asesor envíe uno, aparecerá aquí y te llegará aviso.' : 'No hay documentos en esta vista.'));
+    q('lista').innerHTML = rows.length ? rows.map(tarjetaPld).join('') : vacio(st.fp === 'revision' && !st.textoP ? 'checkc' : 'vacio', (st.textoP || st.asP) ? 'Sin coincidencias' : (st.fp === 'revision' ? 'Todo al día' : 'Nada por aquí'), st.textoP ? 'Ningún documento coincide con «' + st.textoP + '».' : st.asP ? 'No hay documentos de ' + nomAs(st.asP) + ' en esta vista.' : (st.fp === 'revision' ? 'No hay Pre PLD esperando tu revisión. Cuando un asesor envíe uno, aparecerá aquí y te llegará aviso.' : 'No hay documentos en esta vista.'));
   }
   function vMods() {
     function pinta(rows) {
@@ -856,6 +871,10 @@
     else if (g('data-a') === 'dlgNo') dlgCerrar();
     else if (g('data-a') === 'dlgSi') dlgOk();
     else if (/^limpia[APMUE]$/.test(g('data-a') || '')) { var c = g('data-a').slice(-1); if (c === 'A') { st.textoA = ''; vAps(false); } else if (c === 'P') { st.textoP = ''; var i = ROOT.querySelector('[data-s="p"]'); if (i) i.value = ''; b.classList.remove('on'); pintaPld(false); } else if (c === 'M') { st.textoM = ''; vMods(); } else if (c === 'E') { st.textoE = ''; pintaAcc(false); } else { st.textoU = ''; vAud(); } var inp = ROOT.querySelector('.cx-search'); if (inp) { inp.value = ''; inp.focus(); } b.classList.remove('on'); }
+  });
+  ROOT.addEventListener('change', function (e) {
+    var t = e.target, k = t.getAttribute && t.getAttribute('data-sel'); if (!k) return;
+    if (k === 'a') { st.asA = t.value; pintaAps(false); } else if (k === 'p') { st.asP = t.value; pintaPld(false); }
   });
   ROOT.addEventListener('input', function (e) {
     var t = e.target, s = t.getAttribute && t.getAttribute('data-s');
