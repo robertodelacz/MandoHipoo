@@ -983,7 +983,9 @@
     .hm-novbtn b { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; display: none; place-items: center; background: #d92d3f; color: #fff; font-size: 11.5px; }
     .hm-novbtn b.on { display: grid; animation: hmPop .4s; }
     .hm-side { position: fixed; top: 0; right: 0; bottom: 0; z-index: 60; width: 390px; max-width: 100vw; display: flex; flex-direction: column; background: #fff; box-shadow: -24px 0 60px -24px rgba(13, 18, 43, .55); transform: translateX(105%); transition: transform .38s cubic-bezier(.3, .8, .25, 1); visibility: hidden; }
-    .hm.nov-on .hm-side { transform: none; visibility: visible; }
+    .hm.hm-ext { min-height: 0; background: none; position: static; z-index: auto; }
+    body.nov-open .hm-side { transform: none; visibility: visible; }
+    body[data-pantalla]:not([data-pantalla=inicio]).nov-open .hm-scrim { opacity: 1; pointer-events: auto; }
     .hm-sh { flex: none; padding: 20px 20px 14px; color: #fff; background: radial-gradient(120% 140% at 100% 0%, #3d4fb0 0%, transparent 60%), linear-gradient(120deg, #364494, #1a224a); }
     .hm-sh-t { display: flex; align-items: center; gap: 12px; }
     .hm-sh-i { flex: none; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; background: rgba(255, 255, 255, .14); color: #bff3f8; }
@@ -1010,7 +1012,7 @@
       body.nov-open #ayBtn { right: 410px; } body.nov-open #hmToast { right: 410px; } body.nov-open #ayNota { right: 478px; }
     }
     @media (max-width: 1199px) {
-      .hm.nov-on .hm-scrim { opacity: 1; pointer-events: auto; }
+      body.nov-open .hm-scrim { opacity: 1; pointer-events: auto; }
       body.nov-open #ayBtn, body.nov-open #ayNota { display: none !important; }
     }
     /* ═══ Ayuda («?»): botón flotante, menú, recorrido y reporte ═══ */
@@ -1182,7 +1184,6 @@
       .barra-nav { padding: 8px 12px; gap: 8px; }
       #navUsuario { display: none; }
       .barra-nav .nav-titulo { flex: 1 1 0; min-width: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      #navNov { display: none !important; }
       .nav-volver { min-height: 44px; } #navPend { min-height: 40px; display: inline-flex; align-items: center; }
       input, select, textarea { font-size: 16px !important; }      /* menos de 16 px hace que el iPhone acerque la pantalla solo al tocar un campo */
       #aps-root .chip, #con-root .cx-btn, #rv-root .cx-btn, #aps-root .btn-mini { min-height: 44px; }
@@ -1212,7 +1213,10 @@
     .nv-sw .b { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center; background: #ffb03b; color: #2b1700; font: 800 11px 'Inter', sans-serif; }
     .nv-der { display: flex; align-items: center; gap: 10px; flex: none; }
     .barra-nav .nav-pend { display: none !important; }      /* los pendientes ya salen como globo naranja en «Revisión APS / Pre PLD» del selector */
-    .barra-nav .nav-nov { min-height: 42px; padding: 0 16px; font-size: 12.5px; }
+    .barra-nav .nav-nov { min-height: 42px; padding: 0 16px; font-size: 12.5px; gap: 8px; transition: transform .15s; }
+    .barra-nav .nav-nov:hover { transform: translateY(-1px); }
+    .barra-nav .nav-nov b { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center; background: #1a224a; color: #fff; font: 800 11.5px 'Inter', sans-serif; }
+    .barra-nav .nav-nov.nuevo { background: linear-gradient(135deg, #ffc65a 0%, #ff8a3d 100%); color: #3b1c00; border: 0; box-shadow: 0 10px 22px -8px rgba(255, 122, 40, .85); }
     .nav-usuario { display: inline-flex; align-items: center; gap: 10px; min-height: 46px; padding: 4px 16px 4px 5px; border-radius: 999px; background: rgba(255, 255, 255, .1); border: 0; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2); font: 700 13.5px 'Inter', sans-serif; color: #fff; max-width: 230px; }
     .nav-usuario i { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(145deg, #35B7C5, #0f8594); color: #fff; font: 800 13px 'Montserrat', sans-serif; font-style: normal; }
     .nav-usuario span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1224,7 +1228,7 @@
       .nav-volver { min-height: 48px; padding: 0 16px 0 12px; }
       .nv-ttl { flex: 1 1 0; } .nv-ttl small { display: none; }
       .barra-nav .nav-titulo { font-size: 18px; }
-      .nv-der { margin-left: auto; } .nav-usuario { display: none; } .barra-nav .nav-nov { display: none !important; }
+      .nv-der { margin-left: auto; } .nav-usuario { display: none; } .barra-nav .nav-nov .t { display: none; } .barra-nav .nav-nov { padding: 0 14px; min-width: 48px; justify-content: center; }
       .nv-sw { order: 5; flex: 1 1 100%; margin: 0; overflow-x: auto; scrollbar-width: none; border-radius: 16px; }
       .nv-sw::-webkit-scrollbar { display: none; }
       .nv-sw button { flex: 1 0 auto; min-height: 44px; } .nv-sw button span.t { display: inline; }
@@ -1303,6 +1307,9 @@
     </div>
     <div class="hm-pie">Hipoo — Mesa de control</div>
   </main>
+</div>
+<!-- Novedades: vive fuera de la pantalla principal para poder abrirse desde cualquier sección -->
+<div class="hm hm-ext" id="hmExt">
   <div class="hm-scrim" id="hmScrim"></div>
   <aside class="hm-side" id="hmSide" aria-label="Novedades en vivo" aria-hidden="true">
     <div class="hm-sh">
@@ -1985,7 +1992,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   function hayPantalla(s) { return !!document.getElementById(CONTENEDOR[s]); }
   function irA(s) {
     if (s === 'consola') s = 'revaps';
-    window.PANTALLA = s;
+    window.PANTALLA = s; window.NOV_OTRA = false;
     document.body.setAttribute('data-pantalla', s);
     setTimeout(navAltura, 30);
     setTimeout(function () { if (typeof novSync === 'function') novSync(); }, 0);
@@ -2178,14 +2185,16 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   function evId(e) { return e.fecha + '|' + e.modulo + '|' + e.id + '|' + e.titulo; }
   function esNuevo(e) { return e.fecha > HM.visto; }
   /* Panel lateral: en pantallas grandes arranca abierto (se recuerda lo que elija cada quien); en chicas es un cajón que se abre con el botón «Novedades». */
+  function enInicio() { return document.getElementById('pantalla-inicio').style.display !== 'none'; }
   function novAbierto() { return document.getElementById('pantalla-inicio').classList.contains('nov-on'); }
   function novSync() {
-    var inicio = document.getElementById('pantalla-inicio'), on = novAbierto() && inicio.style.display !== 'none';
+    var on = enInicio() ? novAbierto() : !!window.NOV_OTRA;      // en la pantalla principal manda la preferencia guardada; en otra sección, es un cajón temporal
     document.body.classList.toggle('nov-open', on);
     document.getElementById('hmSide').setAttribute('aria-hidden', on ? 'false' : 'true');
     document.getElementById('hmNovBtn').setAttribute('aria-expanded', on ? 'true' : 'false');
   }
   function novAbre(v, recordar) {
+    if (!enInicio()) { window.NOV_OTRA = !!v; novSync(); return; }
     document.getElementById('pantalla-inicio').classList.toggle('nov-on', !!v); novSync();
     if (recordar !== false && window.innerWidth >= 1200) almacen('set', 'hm_nov', v ? '1' : '0');
   }
@@ -2195,9 +2204,10 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     document.getElementById('hmNovBtn').querySelector('.ic').innerHTML = IC.campana;
     document.querySelector('.hm-sh-i').innerHTML = IC.campana;
     document.getElementById('hmNovBtn').addEventListener('click', function () { novAbre(!novAbierto()); });
+    document.getElementById('navNov').addEventListener('click', function () { novAbre(!(enInicio() ? novAbierto() : window.NOV_OTRA)); });
     document.getElementById('hmSideX').addEventListener('click', function () { novAbre(false); });
     document.getElementById('hmScrim').addEventListener('click', function () { novAbre(false, false); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && novAbierto() && window.innerWidth < 1200 && !(window.AY && AY.pasos.length)) novAbre(false, false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && (enInicio() ? (novAbierto() && window.innerWidth < 1200) : window.NOV_OTRA) && !(window.AY && AY.pasos.length)) novAbre(false, false); });
   })();
   function etiquetaDia(d) {
     var hoy = String(HM.ahoraSrv || '').slice(0, 10) || d, p = function (iso) { var m = iso.split('-'); return new Date(+m[0], +m[1] - 1, +m[2]); };
@@ -2232,7 +2242,8 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   function actualizaNavNov() {
     var el = document.getElementById('navNov'); if (!el) return;
     var n = HM.panel ? HM.panel.eventos.filter(esNuevo).length : 0;
-    if (n > 0) { el.style.display = ''; el.innerHTML = IC.campana.replace('<svg', '<svg width="15" height="15"') + n + ' novedad' + (n === 1 ? '' : 'es'); el.onclick = function () { irA('inicio'); }; } else el.style.display = 'none';
+    if (n > 0) { el.style.display = ''; el.classList.add('nuevo'); el.innerHTML = IC.campana.replace('<svg', '<svg width="18" height="18"') + '<b>' + n + '</b><span class="t">novedad' + (n === 1 ? '' : 'es') + '</span>'; } else { el.classList.remove('nuevo'); el.style.display = ''; el.innerHTML = IC.campana.replace('<svg', '<svg width="18" height="18"') + '<span class="t">Novedades</span>'; }
+    el.setAttribute('aria-controls', 'hmSide'); el.setAttribute('aria-expanded', window.NOV_OTRA ? 'true' : 'false');
   }
   function marcaLeidas() {
     if (!HM.panel) return; HM.visto = HM.panel.ahora; almacen('set', 'hm_visto_' + USUARIO.email, HM.visto); pintaFeed();
@@ -2282,14 +2293,16 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   setInterval(function () { if (!document.hidden && HM.panel) { pintaFeed(); } }, 30000);       // solo para que "hace 3 min" avance
   document.addEventListener('visibilitychange', function () { if (!document.hidden) refrescarPanel(); });
 
-  document.getElementById('pantalla-inicio').addEventListener('click', function (e) {
+  function clicInicio(e) {
     var k = e.target.closest('[data-kir]');
     if (k) { var d = k.getAttribute('data-kir'); if (USUARIO.rol === 'coordinador' && hayPantalla('rev' + d)) irA('rev' + d); else irMisRegistros(d); return; }
     var m = e.target.closest('[data-misreg]'); if (m) { irMisRegistros(m.getAttribute('data-misreg')); return; }
     var ev = e.target.closest('[data-ev]'); if (ev) { abreEvento(ev.getAttribute('data-ev')); return; }
     if (e.target.id === 'hmLeer') { marcaLeidas(); return; }
     var b = e.target.closest('button[data-ir]'); if (b && !b.disabled) { abrirTarjeta(b.getAttribute('data-ir')); }
-  });
+  }
+  document.getElementById('pantalla-inicio').addEventListener('click', clicInicio);
+  document.getElementById('hmExt').addEventListener('click', clicInicio);
   // Desde la tarjeta de inicio: entra al módulo y, de una vez, abre la pestaña/lista de "mis registros" en vez de
   // dejar a la persona en el formulario en blanco de "nuevo registro".
   function irMisRegistros(id) {
