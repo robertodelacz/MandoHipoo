@@ -378,6 +378,13 @@ function PLD_nombreBloque_(t) {
   return String(t || '').trim();
 }
 
+/** Listas permitidas por el generador (las mismas de los desplegables). */
+function PLD_catalogos_() {
+  var l = function (t) { return String(t || '').split(',').filter(Boolean); };
+  return { estados: l(CONFIG.ESTADOS), paises: l(CONFIG.PAISES), tipoInmueble: l(CONFIG.TIPO_INMUEBLE), monedas: l(CONFIG.MONEDAS), forma: l(CONFIG.FORMA_PAGO), instrumento: l(CONFIG.INSTRUMENTO_PAGO), figura: l(CONFIG.FIGURA_CLIENTE),
+    actividades: (typeof ACTIVIDADES !== 'undefined' && ACTIVIDADES) ? ACTIVIDADES.slice() : [] };
+}
+
 /** Lee la hoja de un Pre PLD: valores de los campos marcados por el sistema + datos sueltos (C.P., correo, teléfono) + campos vacíos por bloque. */
 function PLD_leerHoja_(id) {
   var ss;
@@ -393,7 +400,7 @@ function PLD_leerHoja_(id) {
     campos[n] = val(c.getValue()); celdas[n] = c.getA1Notation();
   });
   if (!Object.keys(campos).length) throw new Error('Este documento no trae los campos marcados por el sistema (¿se generó con una versión anterior?). No se puede revisar automáticamente.');
-  var data = sh.getDataRange().getValues(), extra = { cps: [], correos: [], telefonos: [], vacios: [] }, bloque = 'Encabezado', seccion = '', ultEstado = '', ultEstadoFila = -9;
+  var data = sh.getDataRange().getValues(), extra = { cps: [], correos: [], telefonos: [], vacios: [], todos: [], catalogos: PLD_catalogos_() }, bloque = 'Encabezado', seccion = '', ultEstado = '', ultEstadoFila = -9;
   function a1(r, c) { return sh.getRange(r + 1, c + 1).getA1Notation(); }
   for (var r = 0; r < data.length; r++) {
     var row = data[r], A = String(row[0] === null ? '' : row[0]).trim(), B = String(row[1] === null ? '' : row[1]).trim();
@@ -411,6 +418,7 @@ function PLD_leerHoja_(id) {
       if (/^entidad federativa:/.test(l)) { ultEstado = vacio ? '' : String(v).trim(); ultEstadoFila = r; }
       var donde = bloque === 'Inmueble' ? 'del inmueble' : 'de ' + bloque.charAt(0).toLowerCase() + bloque.slice(1);
       if (!vacio) {
+        extra.todos.push({ etiqueta: lab, valor: val(v), celda: celda, donde: donde });
         if (/^c\.?p\.?:/.test(l)) extra.cps.push({ valor: val(v), estado: (r - ultEstadoFila <= 4) ? ultEstado : '', donde: donde, celda: celda });
         else if (/^correo/.test(l)) extra.correos.push({ valor: String(v), donde: donde, celda: celda });
         else if (/^tel\.?/.test(l)) extra.telefonos.push({ valor: String(v), donde: donde, celda: celda });
@@ -429,5 +437,5 @@ function PLD_revisarReglas(id) {
   var L = PLD_leerHoja_(b.id), res = APS_nucleo_().R.pld(L.campos, L.celdas, L.extra, { hoy: APS_hoy_() });
   res.avisos.forEach(function (a) { if (a.celda) a.url = b.url + (b.url.indexOf('#') < 0 ? '#' : '&') + 'gid=' + L.gid + '&range=' + encodeURIComponent(a.celda); });
   APS_audit_('PLD', 'REVISION_REGLAS', b.id, 'Revisión por reglas: ' + res.resumen.error + ' error(es), ' + res.resumen.revisar + ' por revisar, ' + res.resumen.estilo + ' de estilo');
-  return { id: b.id, nombre: b.nombre, operacion: b.operacion, url: b.url, avisos: res.avisos, resumen: res.resumen, camposLeidos: Object.keys(L.campos).length, revisado: APS_ahora_(), por: u.email };
+  return { id: b.id, nombre: b.nombre, operacion: b.operacion, url: b.url, avisos: res.avisos, resumen: res.resumen, cobertura: res.cobertura, camposLeidos: Object.keys(L.campos).length, revisado: APS_ahora_(), por: u.email };
 }

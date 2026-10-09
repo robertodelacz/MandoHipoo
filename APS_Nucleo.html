@@ -1270,15 +1270,68 @@ var APS_REV = (function (U) {
     (extra.cps || []).forEach(function (x) { revisaCp(A, x.valor, x.estado, x.donde || '', { celda: x.celda, k: 'CP' }); });
     (extra.correos || []).forEach(function (x) { revisaCorreo(A, x.valor, x.donde || '', { celda: x.celda, k: 'Correo' }); });
     (extra.telefonos || []).forEach(function (x) { revisaTelefono(A, x.valor, x.donde || '', { celda: x.celda, k: 'Teléfono' }); });
+    // ── Revisión integral: TODA celda llena con etiqueta (domicilios, catálogos, metros, avalúos…) ──
+    var cob = { leidos: 0, especifica: 0, formato: 0, catalogo: 0 };
+    var CUB = /^(NOMBRES|AP\. PATERNO|AP\. MATERNO|FECHA NAC|RFC|CURP|DENOMINACION|FECHA CONSTITUCION|FECHA DE LA OP|VALOR PACTADO|FOLIO REAL|NUM\. DEL INSTRUMENTO|FECHA DEL INSTRUMENTO|NUM\. NOTARIO|FECHA DE PAGO|MONTO DEL PAGO|C\.P\.|CORREO|TEL\.)/;
+    var CATS = { 'ENTIDAD FEDERATIVA': 'estados', 'ENTIDAD FED. DEL NOTARIO': 'estados', 'PAIS DE NACIONALIDAD': 'paises', 'PAIS': 'paises', 'ACTIVIDAD ECONOMICA': 'actividades', 'ACTIVIDAD O GIRO MERCANTIL': 'actividades',
+      'TIPO DE INMUEBLE': 'tipoInmueble', 'FIGURA DEL CLIENTE': 'figura', 'MONEDA O DIVISA': 'monedas', 'FORMA DE PAGO': 'forma', 'INSTRUMENTO DE PAGO': 'instrumento' };
+    var cat = extra.catalogos || {}, normC = function (x) { return sinAcento(x).replace(/\s+/g, ' ').trim(); }, catNorm = {};
+    Object.keys(cat).forEach(function (k) { catNorm[k] = (cat[k] || []).map(normC); });
+    var nacionalidadDe = {};
+    (extra.todos || []).forEach(function (x) {
+      var v = s(x.valor); if (!v) return;
+      cob.leidos++;
+      var et = sinAcento(String(x.etiqueta || '')).replace(/\(.*?\)/g, '').replace(/[\s:$]+$/, '').replace(/\s+/g, ' ').trim(), donde = x.donde || '', ex = { celda: x.celda, k: x.etiqueta };
+      var nombreCampo = String(x.etiqueta || '').replace(/[\s:$]+$/, '').replace(/\s*\(.*?\)\s*$/, '').trim() + (donde ? ' ' + donde : '');
+      if (CUB.test(et)) { cob.especifica++; return; }
+      if (CATS[et]) {
+        cob.catalogo++;
+        if (catNorm[CATS[et]] && catNorm[CATS[et]].length && catNorm[CATS[et]].indexOf(normC(v)) < 0) A.add('error', 'CATALOGO', '«' + nombreCampo + '» no es una opción del catálogo', 'Se lee «' + v.slice(0, 80) + '».', 'Debe elegirse de la lista desplegable de la celda (puede haberse pegado un texto distinto).', ex);
+        if (et === 'PAIS DE NACIONALIDAD') nacionalidadDe[x.bloqueClave || donde] = v;
+        return;
+      }
+      if (/^NUM\. (EXT|INT)$/.test(et)) {
+        cob.formato++;
+        if (!/^(S\/N|SN|[0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ][0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ\-\/ ]{0,19})$/i.test(v)) A.add('revisar', 'NUM_DOM', 'El ' + nombreCampo.toLowerCase() + ' tiene un formato raro', 'Se lee «' + v.slice(0, 40) + '».', 'Normalmente es un número, una letra o S/N.', ex);
+        return;
+      }
+      if (/^(M2 TERRENO|M2 CONSTRUCCION)$/.test(et)) {
+        cob.especifica++;
+        var m2 = numero(v);
+        if (isNaN(m2) || m2 <= 0) A.add('error', 'M2_INVALIDO', 'Los metros cuadrados no son un número válido (' + nombreCampo.toLowerCase() + ')', 'Se lee «' + v.slice(0, 40) + '».', 'Escribir solo el número, mayor a cero.', ex);
+        else if (m2 > 200000) A.add('revisar', 'M2_RARO', 'Los metros cuadrados parecen demasiados (' + nombreCampo.toLowerCase() + ')', 'Se lee ' + m2.toLocaleString('en-US') + ' m².', 'Revisar que no sobre un cero.', ex);
+        return;
+      }
+      if (/^VALOR (AVALUO|CATASTRAL)$/.test(et)) {
+        cob.especifica++;
+        var va = numero(v);
+        if (isNaN(va) || va <= 0) A.add('error', 'AVALUO_INVALIDO', 'El ' + nombreCampo.toLowerCase() + ' no es un monto válido', 'Se lee «' + v.slice(0, 40) + '».', 'Escribir solo el número, mayor a cero.', ex);
+        else if (et === 'VALOR AVALUO' && !isNaN(valor) && valor > 0 && (va / valor > 2 || va / valor < 0.5)) A.add('revisar', 'AVALUO_VS_VALOR', 'El valor de avalúo y el valor pactado difieren mucho', 'Avalúo ' + dinero(va) + ' · valor pactado ' + dinero(valor) + '.', 'Revisar que no haya un cero de más o de menos, o que el avalúo sea del inmueble correcto.', ex);
+        return;
+      }
+      // Cualquier otro texto llenado (municipio, colonia, calle, tipo de operación, comprobante…): espacios, puntuación, letras repetidas, símbolos
+      cob.formato++;
+      revisaTexto(A, v, nombreCampo.toLowerCase(), ex, { permiteSimbolos: /COMPROBANTE/.test(et) });
+    });
+    // Nacionalidad contra la CURP (NE = nacido en el extranjero)
+    Object.keys(partes).forEach(function (pref) {
+      var cp = parseCurp(g(pref + '_CURP')); if (!cp.ok) return;
+      var pais = nacionalidadDe['de ' + (partes[pref].rol === 'Vendedor' ? 'vendedor ' : 'comprador ') + partes[pref].num];
+      if (!pais) return;
+      var mx = /^MEXICO$/.test(normC(pais));
+      if (cp.estado === 'NE' && mx) A.add('revisar', 'CURP_NE_MEXICO', 'La CURP dice nacido en el extranjero pero la nacionalidad es México', 'CURP «' + cp.curp + '» (NE) y nacionalidad «' + pais + '».', 'Revisar cuál de los dos datos es el correcto. Puede haber nacionalidad mexicana por padres mexicanos.', { k: pref + '_CURP', celda: celdas[pref + '_CURP'] || '' });
+      if (cp.estado !== 'NE' && !mx) A.add('revisar', 'CURP_NACIONALIDAD', 'La nacionalidad no es México pero la CURP indica nacimiento en México', 'CURP «' + cp.curp + '» y nacionalidad «' + pais + '».', 'Revisar si la persona tiene doble nacionalidad o si hay un error de captura.', { k: pref + '_CURP', celda: celdas[pref + '_CURP'] || '' });
+    });
     // Campos vacíos: un solo aviso por bloque
     var porBloque = {}, orden = [];
     (extra.vacios || []).forEach(function (v) { if (!porBloque[v.bloque]) { porBloque[v.bloque] = []; orden.push(v.bloque); } porBloque[v.bloque].push(v); });
     orden.forEach(function (b) {
-      var l = porBloque[b], nombres = l.slice(0, 6).map(function (v) { return v.etiqueta.replace(/[:$]+\s*$/, '').replace(/\s*\(.*?\)\s*$/, '').trim(); });
+      var l = porBloque[b], nombres = l.slice(0, 6).map(function (v) { return v.etiqueta.replace(/[\s:$]+$/, '').replace(/\s*\(.*?\)\s*$/, '').trim(); });
       A.add('revisar', 'VACIOS', b + ': faltan ' + l.length + ' dato' + (l.length === 1 ? '' : 's'), nombres.join(', ') + (l.length > 6 ? ' y ' + (l.length - 6) + ' más' : '') + '.',
         'Llenarlos o confirmar que no aplican.', { k: 'Vacíos', celda: l[0].celda || '' });
     });
-    return A.fin();
+    var fin = A.fin(); fin.cobertura = cob;
+    return fin;
   }
 
   return { aps: aps, pld: pld, iso: iso, rfcDigito: rfcDigito, curpDigito: curpDigito, parseRfc: parseRfc, parseCurp: parseCurp, codigosNombre: codigosNombre };
