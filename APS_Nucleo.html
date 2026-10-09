@@ -406,7 +406,7 @@ var APS_DOC = (function (U, T) {
       l3 = 'Representada por ' + (art ? art + ' ' : '') + txt(f.nombre);
     } else {
       l2 = 'Por propio derecho';
-      l3 = 'Nombre: ' + txt(f.nombre);
+      l3 = txt(f.nombre);
     }
     return '<td' + (centrada ? ' colspan="2" class="one"' : '') + '><div class="fl">&nbsp;</div><div class="fe">' + etq + '</div><div class="fs">' + l2 + '</div><div class="fs">' + l3 + '</div></td>';
   }
