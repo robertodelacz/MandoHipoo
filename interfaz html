@@ -1128,6 +1128,35 @@
     .hm-cta:disabled::after { display: none; }
     @media (prefers-reduced-motion: reduce) { #ayLuz, #ayTip .ay-in, .hm-cta::after { animation: none; transition: none; } }
 
+    /* ═══ v5: animaciones e inmersión ═══ */
+    .scr-in { animation: scrIn .55s cubic-bezier(.2, .8, .2, 1) both; }
+    @keyframes scrIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+    .hm-hero::after { background-position: calc(var(--px, 0) * 1px) calc(var(--py, 0) * 1px); transition: background-position .5s ease-out; }
+    .hm-bc::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; opacity: 0; transition: opacity .3s; background: radial-gradient(440px circle at var(--mx, 50%) var(--my, 0%), rgba(53, 183, 197, .16), transparent 62%); }
+    .hm-bc:hover::after { opacity: 1; }
+    .hm-bc { transition: translate .25s cubic-bezier(.2, .8, .2, 1), box-shadow .25s; }
+    .hm-bc:hover { translate: 0 -5px; box-shadow: 0 2px 4px rgba(26, 34, 74, .05), 0 36px 64px -18px rgba(26, 34, 74, .42); }
+    .hm-bc.off:hover { translate: none; }
+    .hm-bc .hm-ico { transition: transform .35s cubic-bezier(.3, 1.6, .5, 1); } .hm-bc:hover .hm-ico { transform: rotate(-6deg) scale(1.08); }
+    .hm-bc:nth-child(1) { animation-delay: .05s; } .hm-bc:nth-child(2) { animation-delay: .18s; }
+    .hm-kpi:nth-child(1) { animation-delay: .1s; } .hm-kpi:nth-child(2) { animation-delay: .22s; }
+    .hm-cell .n { display: inline-block; transition: transform .25s; } .hm-cell:hover .n { transform: scale(1.12); }
+    .fx-ripple { position: absolute; border-radius: 50%; pointer-events: none; background: rgba(255, 255, 255, .45); transform: scale(0); animation: fxRipple .6s ease-out forwards; }
+    @keyframes fxRipple { to { transform: scale(1); opacity: 0; } }
+    .hm-reg .fx-ripple, .ay-b:not(.pri) .fx-ripple { background: rgba(54, 68, 148, .22); }
+    .hm-reg, .ay-b { position: relative; overflow: hidden; }
+    #fxCanvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 2000; pointer-events: none; }
+    .hm-novbtn.ring .ic { animation: fxCampana .9s ease-in-out; transform-origin: 50% 0; }
+    @keyframes fxCampana { 0%, 100% { transform: rotate(0); } 15% { transform: rotate(18deg); } 30% { transform: rotate(-16deg); } 45% { transform: rotate(11deg); } 60% { transform: rotate(-8deg); } 75% { transform: rotate(4deg); } }
+    #splash .sp-logo { overflow: hidden; }
+    #splash .sp-logo::after { content: ""; position: absolute; top: 0; bottom: 0; left: -70%; width: 45%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .9), transparent); transform: skewX(-20deg); animation: spBrillo 1.4s .9s ease-in-out both; }
+    @keyframes spBrillo { to { left: 140%; } }
+    .sp-msg { position: relative; font: 600 13px 'Inter', sans-serif; color: #8fb3d9; transition: opacity .18s; letter-spacing: .3px; animation: spUp .6s .8s both; }
+    .sp-p { position: absolute; bottom: -12px; border-radius: 50%; background: rgba(143, 225, 234, .55); pointer-events: none; animation: spSube linear infinite; }
+    @keyframes spSube { from { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } to { transform: translateY(-105vh); opacity: 0; } }
+    .hm-pie { opacity: .8; letter-spacing: .4px; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } .sp-p { display: none; } }
+
     /* v3: barra superior compacta en celular (sin nombre repetido) */
     @media (max-width: 600px) {
       .barra-nav { padding: 8px 12px; gap: 8px; }
@@ -1171,6 +1200,7 @@
   <div class="sp-logo"><span id="spLogo"></span></div>
   <div class="sp-tag">Mesa de control</div>
   <div class="sp-bar"></div>
+  <div class="sp-msg" id="spMsg">Abriendo tu mesa de control…</div>
 </div>
 
 <!-- ══════════════════ BARRA DE NAVEGACIÓN (aparece al elegir una opción; regresa a la bienvenida) ══════════════════ -->
@@ -1209,7 +1239,7 @@
         <div id="inicioTarjetas"></div>
       </section>
     </div>
-    <div class="hm-pie">Hipoo · Financiera Cualli — Mesa de control</div>
+    <div class="hm-pie">Hipoo — Mesa de control</div>
   </main>
   <div class="hm-scrim" id="hmScrim"></div>
   <aside class="hm-side" id="hmSide" aria-label="Novedades en vivo" aria-hidden="true">
@@ -1719,6 +1749,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
         .withSuccessHandler(function(res) {
           clearTimeout(window.__genVig); document.getElementById('btnGenerar').disabled = false;
           if (res.success) {
+            if (window.HIPOO_FX) HIPOO_FX.confeti();
             showStatus('success', 
               (res.bitacora === false ? '⚠️ Documento generado, pero NO se pudo inscribir en la bitácora: no aparecerá en «Mis Pre PLD» ni podrá enviarse a revisión. Avisa a sistemas con el botón «?».<br>' : '✅ ¡LISTO! Documento generado e inscrito en Bitácora.<br>') + 
               '<a href="'+res.url+'" target="_blank">ABRIR PRE-AVISO PLD</a>' + 
@@ -1789,6 +1820,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
         .withSuccessHandler(function(res) {
           clearTimeout(window.__pagoVig); document.getElementById('btnAgregarPago').disabled = false;
           if (res.success) {
+            if (window.HIPOO_FX) HIPOO_FX.confeti();
             var mensajeExito = res.cantidadAgregada === 1
               ? 'Se agregó el Pago ' + res.numeroPago + ' a la operación.'
               : 'Se agregaron los Pagos ' + res.primerNumeroPago + ' a ' + res.numeroPago + ' a la operación.';
@@ -1847,7 +1879,12 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     document.body.classList.add('splash-on');
     var reducido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, cerrado = false;
     function cerrar() { if (cerrado) return; cerrado = true; sp.classList.add('out'); document.body.classList.remove('splash-on'); setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900); }
-    sp.addEventListener('click', cerrar); setTimeout(cerrar, reducido ? 400 : 2300);
+    sp.addEventListener('click', cerrar); setTimeout(cerrar, reducido ? 400 : 2500);
+    if (!reducido) {
+      var m = document.getElementById('spMsg'), tx = ['Abriendo tu mesa de control…', 'Sincronizando tus contratos…', 'Todo listo'];
+      [900, 1700].forEach(function (t, i) { setTimeout(function () { if (m && !cerrado) { m.style.opacity = 0; setTimeout(function () { m.textContent = tx[i + 1]; m.style.opacity = 1; }, 180); } }, t); });
+      for (var k = 0; k < 16; k++) { var p = document.createElement('i'); p.className = 'sp-p'; p.style.cssText = 'left:' + (Math.random() * 100) + '%;animation-delay:' + (Math.random() * 2).toFixed(2) + 's;animation-duration:' + (3 + Math.random() * 3).toFixed(2) + 's;width:' + (3 + Math.random() * 5).toFixed(1) + 'px;height:' + (3 + Math.random() * 5).toFixed(1) + 'px'; sp.appendChild(p); }
+    }
   })();
   var TABLERO_URL = <?!= APS_tableroUrlJson() ?>;      // solo trae valor si el usuario es coordinador Y ya está configurado
   var TITULOS = { pld: 'Generar documento Pre PLD', aps: 'Generar contrato APS', revpld: 'Revisión de Pre PLD', revaps: 'Revisión de contratos APS', tablero: 'Tablero Hipoo' };
@@ -1885,6 +1922,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     document.getElementById('navUsuario').textContent = USUARIO.nombre || USUARIO.email;
     actualizaNavPend();
     window.scrollTo(0, 0);
+    (function () { var d = document.getElementById(destino); d.classList.remove('scr-in'); void d.offsetWidth; d.classList.add('scr-in'); setTimeout(function () { d.classList.remove('scr-in'); }, 650); })();
     if (s === 'inicio' && window.refrescarPanel) refrescarPanel();
     if (s === 'aps' && window.APS_UI) { APS_UI.activar(); }
     if (s === 'revaps' && window.CON) { CON.abrir('aps'); }
@@ -1975,7 +2013,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     var rol = document.getElementById('hmRol'); rol.textContent = coord ? 'Coordinación' : 'Asesor'; rol.className = 'hm-rol' + (coord ? ' coord' : '');
     document.getElementById('inicioQuien').textContent = USUARIO.email;
     var f = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
-    document.getElementById('hmFecha').textContent = f;
+    var hr = new Date().getHours(); document.getElementById('hmFecha').textContent = (hr < 12 ? 'Buenos días' : (hr < 19 ? 'Buenas tardes' : 'Buenas noches')) + ' · ' + f;
     var pAps = PENDIENTES.aps, pPld = PENDIENTES.pld;
     document.getElementById('hmPrincipal').innerHTML =
       grande('aps', 'Generar contrato APS', 'Aviso de Prestación de Servicios de Corretaje de Hipoo. Captura los datos paso a paso y envíalo a revisión.', 'Generar contrato APS', aps, 'No tienes autorización para generar contratos APS. Solicítala a la coordinación.') +
@@ -1991,9 +2029,12 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     pintaKpis(); pintaAviso(); pintaFeed(); pintaLive();
   }
   /* ── Indicadores ── */
+  var DEF = { a_b: 'Contratos que guardaste pero aún no envías a revisión.', a_r: 'Contratos enviados a revisión que la coordinación aún no ha resuelto.', a_o: 'Contratos que la coordinación ya aprobó.',
+    p_s: 'Pre PLD generados que todavía no se han enviado a revisión. Incluye todos los que ya existían en la bitácora antes de usar este sistema.', p_r: 'Pre PLD enviados a revisión que aún no se marcan como revisados ni observados.',
+    p_x: 'Pre PLD que la coordinación regresó con observaciones por corregir.', p_o: 'Pre PLD que la coordinación ya revisó.' };
   function celda(clave, num, etiqueta, tono, destino, caliente) {
     var cargando = (num == null);
-    return '<button type="button" class="hm-cell t-' + tono + (caliente && num > 0 ? ' hot' : '') + (cargando ? ' hm-sk' : '') + '" data-kir="' + destino + '" data-k="' + clave + '"><span class="n" data-n="' + (cargando ? '' : num) + '">' + (cargando ? '0' : num) + '</span><span class="l">' + etiqueta + '</span></button>';
+    return '<button type="button" class="hm-cell t-' + tono + (caliente && num > 0 ? ' hot' : '') + (cargando ? ' hm-sk' : '') + '" title="' + hmEsc(DEF[clave] || '') + '" data-kir="' + destino + '" data-k="' + clave + '"><span class="n" data-n="' + (cargando ? '' : num) + '">' + (cargando ? '0' : num) + '</span><span class="l">' + etiqueta + '</span></button>';
   }
   function tarjetaKpi(icono, titulo, sub, celdas) {
     return '<div class="hm-kpi"><div class="hm-kh"><span class="hm-ico">' + icono + '</span><div><b>' + titulo + '</b><small>' + sub + '</small></div></div><div class="hm-cells">' + celdas + '</div></div>';
@@ -2306,6 +2347,39 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     });
     window.addEventListener('resize', function () { if (AY.pasos.length) ayColoca(); });
     window.addEventListener('scroll', function () { if (AY.pasos.length) ayColoca(); }, { passive: true });
+  })();
+
+  /* ═══ Efectos: confeti de celebración, ondas al tocar, brillo en tarjetas, parallax y campana ═══ */
+  window.HIPOO_FX = (function () {
+    var reducido = function () { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; };
+    function confeti() {
+      if (reducido()) return;
+      var c = document.createElement('canvas'); c.id = 'fxCanvas'; var W = c.width = window.innerWidth, H = c.height = window.innerHeight; document.body.appendChild(c);
+      var g = c.getContext('2d'), col = ['#364494', '#35B7C5', '#8fe1ea', '#ffb03b', '#3be8a5', '#ffffff'], P = [], i;
+      for (i = 0; i < 130; i++) { var a = Math.random() * Math.PI - Math.PI / 2 * 3 + Math.PI / 2, v = 9 + Math.random() * 11; P.push({ x: W / 2, y: H * .62, vx: Math.cos(a) * v * (.5 + Math.random()), vy: -Math.abs(Math.sin(a)) * v - 4, w: 6 + Math.random() * 7, h: 4 + Math.random() * 5, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: col[i % col.length] }); }
+      var t0 = performance.now();
+      (function paso(t) {
+        var dt = t - t0; g.clearRect(0, 0, W, H);
+        P.forEach(function (p) { p.vy += .32; p.vx *= .992; p.x += p.vx; p.y += p.vy; p.r += p.vr; g.save(); g.globalAlpha = Math.max(0, 1 - dt / 2300); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); g.restore(); });
+        if (dt < 2300) requestAnimationFrame(paso); else if (c.parentNode) c.parentNode.removeChild(c);
+      })(t0);
+    }
+    document.addEventListener('pointerdown', function (e) {
+      if (reducido()) return; var b = e.target.closest && e.target.closest('.hm-cta, .hm-reg, .ay-b'); if (!b || b.disabled) return;
+      var r = b.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2, s = document.createElement('span'); s.className = 'fx-ripple';
+      s.style.cssText = 'width:' + d + 'px;height:' + d + 'px;left:' + (e.clientX - r.left - d / 2) + 'px;top:' + (e.clientY - r.top - d / 2) + 'px'; b.appendChild(s); setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 650);
+    });
+    if (window.matchMedia && window.matchMedia('(hover: hover)').matches) {
+      document.addEventListener('pointermove', function (e) {
+        var c = e.target.closest && e.target.closest('.hm-bc'); if (c) { var r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px'); }
+        if (!reducido()) { var h = document.querySelector('.hm-hero'); if (h && e.clientY < 700) { h.style.setProperty('--px', ((e.clientX / window.innerWidth - .5) * -22).toFixed(1)); h.style.setProperty('--py', ((e.clientY / window.innerHeight - .5) * -14).toFixed(1)); } }
+      }, { passive: true });
+    }
+    var n = document.getElementById('hmNovN'), prev = 0;
+    if (n && window.MutationObserver) new MutationObserver(function () { var v = parseInt(n.textContent, 10) || 0, b = document.getElementById('hmNovBtn'); if (v > prev && b) { b.classList.remove('ring'); void b.offsetWidth; b.classList.add('ring'); } prev = v; }).observe(n, { childList: true, characterData: true, subtree: true });
+    return { confeti: confeti };
+  })();
+  (function () {
     // Primera vez: el botón late y aparece una nota (una sola vez por navegador, después del splash)
     if (!almacen('get', 'ay_visto')) setTimeout(function () { var b = ayEl('ayBtn'); if (!b) return; b.classList.add('pulso'); ayEl('ayNota').classList.add('on'); setTimeout(function () { ayEl('ayNota').classList.remove('on'); }, 12000); }, 3200);
   })();

@@ -249,3 +249,22 @@ function CONSOLA_auditoria(texto, modulo) {
   }).reverse();
   return filas.filter(function (x) { return (!modulo || x.modulo === modulo) && (!q || [x.usuario, x.modulo, x.accion, x.ref, x.detalle].join(' ').toLowerCase().indexOf(q) >= 0); }).slice(0, 300);
 }
+
+
+/**
+ * DIAGNÓSTICO (se ejecuta a mano desde el editor de Apps Script, menú Ejecutar → PLD_diagnostico).
+ * Responde «¿de dónde sale el número de Pre PLD?»: lista cada documento de la bitácora con su estado.
+ * Fuente: hoja "Seguimiento de Entregables" (CONFIG.BITACORA_SPREADSHEET_ID) + hoja "PLD_Revisiones".
+ * Un documento SIN fila en PLD_Revisiones cuenta como "SIN_ENVIAR" (nunca se ha enviado a revisión).
+ */
+function PLD_diagnostico() {
+  var items = PLD_items_(), por = {};
+  items.forEach(function (x) { (por[x.estado] = por[x.estado] || []).push(x); });
+  var out = ['Bitácora: ' + PLD_ssBitacora_().getName() + ' · total de documentos: ' + items.length];
+  Object.keys(por).forEach(function (k) {
+    out.push('', k + ' (' + por[k].length + ')');
+    por[k].forEach(function (x) { out.push('  · ' + x.creado + ' · ' + x.nombre + ' · creó: ' + x.creador + (x.fechaEnvio ? ' · enviado: ' + x.fechaEnvio : '')); });
+  });
+  Logger.log(out.join('\n'));
+  return out.join('\n');
+}
