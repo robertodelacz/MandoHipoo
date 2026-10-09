@@ -31,6 +31,7 @@ var APS_CONFIG = {
   // nativo, con márgenes y número de página reales, lo convierte a Google Doc y lo exporta a PDF; requiere el servicio
   // avanzado "Drive API"). Compáralos con APS_probarPDF y elige el mejor.
   PDF_METODO: 'html',
+  AJUSTAR_HOJAS: true,   // true = si compactando un poco el espaciado el contrato cabe en una hoja menos, el PDF sale así (la firma no queda sola en una hoja)
   // ASESORES AUTORIZADOS para GENERAR contratos APS (los coordinadores siempre pueden). Se toman de tres lugares, todos se suman:
   //  1) esta lista; 2) un archivo de Google Sheets con los correos (pega su ID en ASESORES_HOJA_ID); 3) la pestaña "Asesores"
   //  del archivo de registro que crea APS_setup. En el archivo: una columna con encabezado "Correo" (opcionales "Nombre",
@@ -395,12 +396,12 @@ function APS_logoDataUri_() {
 }
 
 /** HTML completo del contrato listo para convertir a PDF. servidor=true → pie sin position:fixed. */
-function APS_htmlDocumento_(datos, servidor, marca) {
+function APS_htmlDocumento_(datos, servidor, marca, dens) {
   var N = APS_nucleo_(), logo = APS_logoDataUri_();
   if (logo) N.D.CFG.logoSrc = logo;
   var banda = marca ? '<div style="text-align:center;font:bold 9pt Arial,sans-serif;color:#333;border:1pt solid #555;padding:4pt;margin:0 0 8pt">' + N.U.esc(marca) + '</div>' : '';
   return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>APS Hipoo</title><style>html,body{margin:0;background:#fff}' +
-    N.D.css() + '</style></head><body>' + banda + N.D.render(datos, { borrador: false, servidor: !!servidor }) + '</body></html>';
+    N.D.css() + '</style></head><body>' + banda + N.D.render(datos, { borrador: false, servidor: !!servidor, dens: dens || 0 }) + '</body></html>';
 }
 /** El contrato es un documento para firma: NO lleva leyendas ni sellos añadidos (la huella queda guardada en el sistema, no en el papel). */
 function APS_pdfBlob_(datos, nombre, servidor) {
@@ -410,8 +411,25 @@ function APS_pdfBlob_(datos, nombre, servidor) {
     try { doc.setTrashed(true); } catch (e) { Logger.log('No se pudo borrar el Doc temporal: ' + e.message); }
     return pdf;
   }
-  var html = APS_htmlDocumento_(datos, servidor, '');
-  return Utilities.newBlob(html, 'text/html', nombre + '.html').getAs('application/pdf').setName(nombre + '.pdf');
+  var conv = function (dens) { return Utilities.newBlob(APS_htmlDocumento_(datos, servidor, '', dens), 'text/html', nombre + '.html').getAs('application/pdf').setName(nombre + '.pdf'); };
+  var normal = conv(0);
+  if (!APS_CONFIG.AJUSTAR_HOJAS) return normal;
+  /* Ajuste de hojas: si compactando un poco el espaciado (misma letra) el contrato cabe en UNA HOJA MENOS, se usa la versión compacta
+     con el nivel más suave que lo logre. Así la firma o unas pocas líneas no quedan solas en una hoja. */
+  var n = APS_paginasPdf_(normal);
+  if (n < 2) return normal;
+  var maximo = conv(3), m = APS_paginasPdf_(maximo);
+  if (!(m > 0 && m < n)) return normal;
+  for (var nivel = 1; nivel < 3; nivel++) {
+    var b = conv(nivel);
+    if (APS_paginasPdf_(b) <= m) return b;
+  }
+  return maximo;
+}
+/** Número de hojas de un PDF (cuenta los objetos /Type /Page). 0 si no se pudo contar. */
+function APS_paginasPdf_(blob) {
+  var m = blob.getDataAsString('ISO-8859-1').match(/\/Type\s*\/Page(?![s\w])/g);
+  return m ? m.length : 0;
 }
 function APS_nombrePdf_(reg, datos) {
   var p = (datos.propietarios && datos.propietarios[0]) ? String(datos.propietarios[0].nombre || '') : '';
