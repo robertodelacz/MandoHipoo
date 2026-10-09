@@ -782,7 +782,7 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
     var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); toast('El servidor está tardando más de lo normal. No repitas la acción todavía: abre «Mis contratos» y revisa si ya quedó.', true); if (onFail) onFail(); }, ms || 25000);
     var r = google.script.run
       .withSuccessHandler(function (res) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); if (ok) ok(res); })
-      .withFailureHandler(function (err) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); toast(String((err && err.message) || err).replace(/^Error:\s*/, ''), true); if (onFail) onFail(); });
+      .withFailureHandler(function (err) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); if (window.HIPOO_acceso && HIPOO_acceso(err)) return; toast(String((err && err.message) || err).replace(/^Error:\s*/, ''), true); if (onFail) onFail(); });
     r[fn].apply(r, args);
   }
   function normaliza(d) {

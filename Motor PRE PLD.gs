@@ -198,6 +198,8 @@ var CONFIG = {
 };
 
 function doGet() {
+  var acceso = APS_acceso_();      // la pestaña «Asesores» (Motor GS) decide quién entra a TODA la plataforma
+  if (!acceso.ok) return APS_paginaBloqueo_(acceso);
   return HtmlService.createTemplateFromFile('Interfaz').evaluate()
     .setTitle('Generador de Documentos Hipoo')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
@@ -205,6 +207,7 @@ function doGet() {
 }
 
 function generarPreAvisoPLD(params) {
+  APS_requiereAcceso_();      // sin acceso activo no se genera nada (ni llamando a la función directo)
   try {
     var fechaHoy = Utilities.formatDate(new Date(), 'America/Mexico_City', 'dd-MM-yyyy');
     var nombreArchivo = 'Pre_PLD_' + params.operacion.substring(0, 30) + '_' + fechaHoy;
@@ -900,6 +903,7 @@ function registrarEnBitacora(idArchivo, urlArchivo, nombreArchivo, operacion, as
 var FILAS_POR_BLOQUE_PAGO = 6; // barra de sección (1) + 4 campos + spacer (1)
 
 function agregarPagoAOperacion(inputIdOUrl, cantidadPagos) {
+  APS_requiereAcceso_();
   var lock = LockService.getScriptLock();
   try {
     lock.waitLock(30000);
@@ -1166,6 +1170,7 @@ function registrarModificacionEnBitacora(idArchivo, operacion, usuario, detalle)
  * esos documentos antiguos.
  */
 function retrofitearAncla(inputIdOUrl) {
+  APS_requiereAcceso_();
   var idArchivo = extraerIdDeSpreadsheet(inputIdOUrl);
   if (!idArchivo) { Logger.log('No se reconoce el link o ID.'); return; }
 

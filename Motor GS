@@ -50,6 +50,7 @@ var APS_CONFIG = {
   TABLERO_URL: 'https://script.google.com/a/macros/cualli.mx/s/AKfycbyAcu60En08nsL68IWT1sPNEXcOC-KD8B6C6mMYbuzD4yNFI7LJG1lqo8JtT0BUYn5M8Q/exec',
   // Al enviar un Pre PLD a revisión, ¿se comparte el archivo con la coordinación como "comentarista"?
   PLD_COMPARTIR_REVISOR: true,
+  BLOQUEO_ACCESO: true,      // true = la pestaña «Asesores» manda sobre TODA la plataforma (APS, Pre PLD, consola, tablero): quien no esté, o esté con Activo = NO, ve la pantalla de acceso restringido. false = apaga el bloqueo.
   PLD_DESDE: '2026-10-08 18:45',      // «Corte» del Pre PLD: solo cuentan los documentos generados desde esta fecha y hora (aaaa-mm-dd hh:mm). Vacío ('') = cuenta toda la bitácora.
   // Logo "Logo Hipo.png" en Drive (se lee desde el servidor, no depende de enlaces públicos).
   LOGO_FILE_ID: '14hryvZUI3VK_xzaOnVjIc_x8MYVjns2R',
@@ -292,8 +293,62 @@ function APS_requiereAps_() {
 }
 function APS_requiereUsuario_() {
   var u = APS_usuario_();
-  if (!u.email) throw new Error('No se pudo identificar tu cuenta de Google. Abre el enlace con tu cuenta corporativa.');
+  if (!u.email) throw new Error('ACCESO_DENEGADO: No se pudo identificar tu cuenta de Google. Abre el enlace con tu cuenta corporativa.');
+  APS_requiereAcceso_();      // candado único: aplica a TODAS las funciones del servidor que pasan por aquí (APS, Pre PLD, consola)
   return u;
+}
+/**
+ * ¿Esta cuenta tiene acceso ACTIVO a la plataforma? La pestaña «Asesores» (más COORDINADORES y las otras fuentes de
+ * APS_asesores_) es la única fuente: quien no aparezca, o aparezca con Activo = NO, queda fuera de TODO (no solo de APS).
+ * Siempre pasa quien publicó la aplicación (para no dejar fuera al administrador). Si todavía no hay NADIE configurado
+ * (sistema recién instalado, o la hoja no se pudo leer), no se bloquea a nadie.
+ */
+function APS_acceso_() {
+  var email = APS_correo_(), dueno = '';
+  try { dueno = String(Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) { dueno = ''; }
+  if (APS_CONFIG.BLOQUEO_ACCESO === false) return { ok: true, email: email };
+  if (!email) return { ok: false, email: '', motivo: 'identidad' };
+  if (dueno && email === dueno) return { ok: true, email: email };
+  if (APS_usuario_().puedeAps) return { ok: true, email: email };
+  var hayConfigurados = Object.keys(APS_asesores_()).length + (APS_CONFIG.COORDINADORES || []).length;
+  if (!hayConfigurados) return { ok: true, email: email };
+  return { ok: false, email: email, motivo: 'desactivado' };
+}
+/** Lanza error (con la marca ACCESO_DENEGADO, que la pantalla reconoce) si la cuenta no tiene acceso. */
+function APS_requiereAcceso_() {
+  var a = APS_acceso_();
+  if (!a.ok) throw new Error('ACCESO_DENEGADO: ' + (a.motivo === 'identidad' ? 'No se pudo identificar tu cuenta de Google.' : 'Tu acceso a la plataforma está desactivado. Solicítalo a la coordinación.'));
+  return a;
+}
+/** Página «Acceso restringido» (archivo Bloqueo.html). Registra el intento en Auditoría (máx. uno cada 10 min por cuenta). */
+function APS_paginaBloqueo_(a) {
+  try {
+    var cache = CacheService.getScriptCache(), k = 'APS_BLQ_' + (a.email || 'anon');
+    if (!cache.get(k)) { cache.put(k, '1', 600); APS_audit_('ACCESO', 'DENEGADO', a.email || '', a.motivo === 'identidad' ? 'Sin identificar' : 'Cuenta sin acceso activo'); }
+  } catch (e) { Logger.log('No se pudo registrar el intento de acceso: ' + e.message); }
+  var t = HtmlService.createTemplateFromFile('Bloqueo');
+  t.email = a.email || ''; t.motivo = a.motivo || 'desactivado'; t.logo = ''; t.contacto = (APS_CONFIG.REPORTES_CORREOS || []).join(',');
+  try { t.logo = APS_logoDataUri_(); } catch (e) { t.logo = ''; }
+  return t.evaluate().setTitle('Acceso no disponible').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL).addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+/**
+ * ANTES DE ACTIVAR EL BLOQUEO: ejecútala a mano (Ejecutar → ACCESO_diagnostico). Lista a TODAS las personas que han usado la
+ * plataforma (contratos APS, Pre PLD de la bitácora, intentos registrados) y dice cuáles quedarían BLOQUEADAS por no estar
+ * activas en la pestaña «Asesores». Agrega a quien deba seguir entrando ANTES de publicar la versión nueva.
+ */
+function ACCESO_diagnostico() {
+  APS_soloMantenimiento_();
+  var vistos = {};
+  try { APS_todos_().forEach(function (r) { var e = String(r.asesor || '').toLowerCase(); if (e) vistos[e] = (vistos[e] || []).concat('contratos APS'); }); } catch (e) { }
+  try { PLD_bitacora_().forEach(function (r) { var e = String(r.creador || '').toLowerCase(); if (e) vistos[e] = (vistos[e] || []).concat('Pre PLD'); }); } catch (e) { }
+  var activos = APS_asesores_(), coords = APS_coordinadores_(), bloqueados = [], ok = [];
+  Object.keys(vistos).sort().forEach(function (e) {
+    var tiene = !!activos[e] || coords.indexOf(e) >= 0, fuentes = vistos[e].filter(function (x, i, a) { return a.indexOf(x) === i; }).join(' + ');
+    (tiene ? ok : bloqueados).push('  · ' + e + '  (ha usado: ' + fuentes + ')');
+  });
+  var txt = ['Personas que han usado la plataforma: ' + Object.keys(vistos).length, '', 'QUEDARÍAN BLOQUEADAS (' + bloqueados.length + ') — agrégalas en «Asesores» si deben seguir entrando:'].concat(bloqueados.length ? bloqueados : ['  (ninguna)'])
+    .concat(['', 'Seguirán entrando (' + ok.length + '):'], ok.length ? ok : ['  (ninguna)']).join('\n');
+  Logger.log(txt); return txt;
 }
 function APS_puedeVer_(reg, u) { return u.rol === 'coordinador' || reg.asesor === u.email; }
 function APS_puedeEditar_(reg, u) {

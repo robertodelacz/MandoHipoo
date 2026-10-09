@@ -1155,6 +1155,24 @@
     .sp-p { position: absolute; bottom: -12px; border-radius: 50%; background: rgba(143, 225, 234, .55); pointer-events: none; animation: spSube linear infinite; }
     @keyframes spSube { from { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } to { transform: translateY(-105vh); opacity: 0; } }
     .hm-pie { opacity: .8; letter-spacing: .4px; }
+
+    /* ═══ v6: sin parpadeo, chip de novedades encendido y aviso de acceso desactivado ═══ */
+    .hm-ya .hm-bc, .hm-ya .hm-kpi, .hm-ya .hm-card, .hm-ya .hm-acc > * { animation: none !important; }
+    .hm-novbtn.nuevo { background: linear-gradient(135deg, #ffc65a 0%, #ff8a3d 100%); color: #3b1c00; box-shadow: 0 0 0 0 rgba(255, 138, 61, .75), 0 12px 28px -8px rgba(255, 122, 40, .85); animation: hmChip 1.8s ease-out infinite; }
+    .hm-novbtn.nuevo .ic svg { color: #5a2a00; }
+    .hm-novbtn.nuevo b { background: #1a224a; color: #fff; box-shadow: 0 0 0 2px rgba(255, 255, 255, .85); }
+    .hm.nov-on .hm-novbtn.nuevo { animation: none; }
+    @keyframes hmChip { 0% { box-shadow: 0 0 0 0 rgba(255, 138, 61, .75), 0 12px 28px -8px rgba(255, 122, 40, .85); } 70% { box-shadow: 0 0 0 16px rgba(255, 138, 61, 0), 0 12px 28px -8px rgba(255, 122, 40, .85); } 100% { box-shadow: 0 0 0 0 rgba(255, 138, 61, 0), 0 12px 28px -8px rgba(255, 122, 40, .85); } }
+    #bloqueoVivo { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(90% 90% at 50% 0%, #3d4fb0 0%, transparent 60%), #141a3d; font-family: 'Inter', sans-serif; }
+    #bloqueoVivo.on { display: flex; animation: scrIn .5s both; }
+    #bloqueoVivo .bv-c { width: min(460px, 100%); text-align: center; background: #fff; border-radius: 26px; padding: 34px 30px 28px; box-shadow: 0 40px 90px -20px rgba(0, 0, 0, .7); color: #1a224a; }
+    #bloqueoVivo .bv-i { width: 82px; height: 82px; margin: 0 auto 16px; border-radius: 50%; display: grid; place-items: center; background: #fff1d6; color: #b36200; }
+    #bloqueoVivo .bv-i svg { width: 42px; height: 42px; }
+    #bloqueoVivo h2 { margin: 0 0 8px; font: 600 28px/1.15 'Fraunces', Georgia, serif; }
+    #bloqueoVivo p { margin: 0 0 22px; font-size: 15px; line-height: 1.6; color: #4a5479; }
+    #bloqueoVivo .bv-b { display: flex; align-items: center; justify-content: center; min-height: 52px; margin-top: 10px; border-radius: 14px; background: #364494; color: #fff; text-decoration: none; font: 800 15.5px 'Montserrat', sans-serif; border-bottom: 4px solid #35B7C5; }
+    #bloqueoVivo .bv-b.sec { background: #eef2fb; color: #364494; border-bottom: 0; }
+    body.bloqueado { overflow: hidden; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } .sp-p { display: none; } }
 
     /* v3: barra superior compacta en celular (sin nombre repetido) */
@@ -1222,7 +1240,7 @@
     <div class="hm-in">
       <div class="hm-top">
         <div class="hm-brand"><span class="hm-logo" id="hmLogo"></span><span class="hm-sep"></span><span class="hm-sys">Mesa de control inmobiliaria</span></div>
-        <div class="hm-tr"><button type="button" class="hm-novbtn" id="hmNovBtn" aria-controls="hmSide" aria-expanded="false"><span class="ic"></span><span>Novedades</span><b id="hmNovN">0</b></button>
+        <div class="hm-tr"><button type="button" class="hm-novbtn" id="hmNovBtn" aria-controls="hmSide" aria-expanded="false"><span class="ic"></span><span id="hmNovL">Novedades</span><b id="hmNovN">0</b></button>
           <div class="hm-live" id="hmLive" title="La información se actualiza sola"><i></i><b>En vivo</b><span id="hmLiveT">conectando…</span></div></div>
       </div>
       <p class="hm-fecha" id="hmFecha"></p>
@@ -1251,6 +1269,11 @@
     <ul class="hm-fl" id="hmFeed"></ul>
     <div class="hm-ff"><span id="hmFeedPie">Se actualiza sola</span><button type="button" id="hmLeer" disabled>Marcar como leídas</button></div>
   </aside>
+</div>
+<div id="bloqueoVivo" role="alertdialog" aria-modal="true" aria-labelledby="bvT">
+  <div class="bv-c"><div class="bv-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.500" y="10.500" width="15" height="10" rx="2.500"/><path d="M8 10.500V8a4 4 0 0 1 8 0v2.500"/><path d="M12 14.500v2.500"/></svg></div>
+    <h2 id="bvT">Tu acceso fue desactivado</h2><p>La coordinación desactivó tu acceso a la plataforma de Hipoo mientras la tenías abierta. Para seguir trabajando, solicita que lo reactiven.</p>
+    <a class="bv-b" id="bvSol" href="#">Solicitar acceso</a><a class="bv-b sec" id="bvRec" href="#" target="_top">Ya me lo activaron: recargar</a></div>
 </div>
 <div id="hmToast" role="status" aria-live="polite"></div>
 
@@ -1762,6 +1785,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
         })
         .withFailureHandler(function(err) {
           document.getElementById('btnGenerar').disabled = false;
+          if (window.HIPOO_acceso && HIPOO_acceso(err)) return;
           showStatus('error', '💥 ERROR CRÍTICO: ' + err.message);
         })
         .generarPreAvisoPLD({
@@ -1835,6 +1859,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
         })
         .withFailureHandler(function(err) {
           document.getElementById('btnAgregarPago').disabled = false;
+          if (window.HIPOO_acceso && HIPOO_acceso(err)) return;
           showStatusPago('error', '💥 ERROR CRÍTICO: ' + err.message);
         })
         .agregarPagoAOperacion(link, cantidadPagoExtra);
@@ -1998,6 +2023,8 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
       '<button type="button" class="hm-cta" data-ir="' + id + '"' + (permitido ? '' : ' disabled') + '><span>' + boton + '</span>' + (permitido ? IC.go : '') + '</button>' +
       (permitido ? '<button type="button" class="hm-reg" data-misreg="' + id + '">' + IC.carpeta + '<span>Ver mis registros</span></button>' : '<span class="aviso">' + aviso + '</span>') + '</div>';
   }
+  /* Solo se vuelve a dibujar un bloque cuando su contenido CAMBIÓ: antes, cada refresco del panel (cada 25 s y tras cada acción) reconstruía los botones y repetía su animación de entrada = parpadeo. */
+  function pon(el, html) { if (!el || el.__h === html) return false; el.__h = html; el.innerHTML = html; return true; }
   function pintaInicio() {
     var host = document.getElementById('inicioTarjetas');
     document.getElementById('hmLogo').innerHTML = logoHtml();
@@ -2015,9 +2042,9 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     var f = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
     var hr = new Date().getHours(); document.getElementById('hmFecha').textContent = (hr < 12 ? 'Buenos días' : (hr < 19 ? 'Buenas tardes' : 'Buenas noches')) + ' · ' + f;
     var pAps = PENDIENTES.aps, pPld = PENDIENTES.pld;
-    document.getElementById('hmPrincipal').innerHTML =
+    pon(document.getElementById('hmPrincipal'),
       grande('aps', 'Generar contrato APS', 'Aviso de Prestación de Servicios de Corretaje de Hipoo. Captura los datos paso a paso y envíalo a revisión.', 'Generar contrato APS', aps, 'No tienes autorización para generar contratos APS. Solicítala a la coordinación.') +
-      grande('pld', 'Generar documento Pre PLD', 'Crea el Pre-Aviso PLD de una operación, agrega pagos a una operación existente o consulta tus documentos.', 'Generar Pre PLD', true);
+      grande('pld', 'Generar documento Pre PLD', 'Crea el Pre-Aviso PLD de una operación, agrega pagos a una operación existente o consulta tus documentos.', 'Generar Pre PLD', true));
     var h = '';
     if (coord && hayPantalla('revaps')) {
       h += '<h2>Coordinación</h2><div class="hm-acc dos">' +
@@ -2025,8 +2052,9 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
         tarjeta('revpld', 'Revisión de Pre PLD', 'Documentos enviados a revisión, observaciones y bitácora de modificaciones.', { coord: true, badge: pPld }) +
         (hayPantalla('tablero') ? tarjeta('tablero', 'Tablero Hipoo', 'Indicadores de la actividad inmobiliaria.' + (TABLERO_URL ? ' Se abre en una pestaña nueva.' : ''), { coord: true }) : '') + '</div>';
     }
-    host.innerHTML = h;
+    pon(host, h);
     pintaKpis(); pintaAviso(); pintaFeed(); pintaLive();
+    if (!document.body.classList.contains('hm-ya')) setTimeout(function () { document.body.classList.add('hm-ya'); }, 1400);      // tras la primera entrada, las tarjetas ya no repiten su animación
   }
   /* ── Indicadores ── */
   var DEF = { a_b: 'Contratos que guardaste pero aún no envías a revisión.', a_r: 'Contratos enviados a revisión que la coordinación aún no ha resuelto.', a_o: 'Contratos que la coordinación ya aprobó.',
@@ -2040,14 +2068,14 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     return '<div class="hm-kpi"><div class="hm-kh"><span class="hm-ico">' + icono + '</span><div><b>' + titulo + '</b><small>' + sub + '</small></div></div><div class="hm-cells">' + celdas + '</div></div>';
   }
   function pintaKpis() {
-    var host = document.getElementById('hmKpis'); if (!USUARIO.email) { host.innerHTML = ''; return; }
+    var host = document.getElementById('hmKpis'); if (!USUARIO.email) { host.innerHTML = ''; host.__h = ''; return; }
     var P = HM.panel, coord = USUARIO.rol === 'coordinador', a = P ? P.aps : null, d = P ? P.pld : null, sub = coord ? 'Todo el equipo' : 'Tus registros', h = '';
     var v = function (o, k) { return o ? o[k] : null; };
     if (USUARIO.puedeAps) h += tarjetaKpi(IC.aps, 'Contratos APS', sub,
       celda('a_b', v(a, 'borradores'), 'Borradores<br>sin enviar', 'mute', 'aps') + celda('a_r', v(a, 'enRevision'), coord ? 'Por revisar' : 'En revisión', 'warn', 'aps', coord) + celda('a_o', v(a, 'aprobados'), 'Aprobados', 'ok', 'aps'));
     if (!P || d) h += tarjetaKpi(IC.pld, 'Pre PLD', sub,
       celda('p_s', v(d, 'sinEnviar'), 'Sin enviar', 'mute', 'pld') + celda('p_r', v(d, 'enRevision'), coord ? 'Por revisar' : 'En revisión', 'warn', 'pld', coord) + celda('p_x', v(d, 'observados'), coord ? 'Observados' : 'Por corregir', 'bad', 'pld', !coord) + celda('p_o', v(d, 'revisados'), 'Revisados', 'ok', 'pld'));
-    host.innerHTML = h;
+    if (!pon(host, h)) return;      // mismos números: nada que redibujar
     host.querySelectorAll('.n[data-n]').forEach(function (el) {
       var k = el.parentNode.getAttribute('data-k'), fin = el.getAttribute('data-n'); if (fin === '') return; fin = +fin;
       var ini = HM.prev[k] == null ? 0 : HM.prev[k], t0 = performance.now(), dur = 700;
@@ -2058,7 +2086,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
   }
   function pintaAviso() {
     var host = document.getElementById('hmAviso'), coord = USUARIO.rol === 'coordinador', P = HM.panel, h = '';
-    if (!P) { host.innerHTML = ''; return; }
+    if (!P) { pon(host, ''); return; }
     if (coord && hayPantalla('revaps') && (PENDIENTES.aps + PENDIENTES.pld) > 0) {
       h = '<div class="hm-aviso">' + IC.alerta + '<b>Tienes pendientes por revisar</b><div class="hm-av-b">' +
         (PENDIENTES.aps ? '<button type="button" data-ir="revaps"><b>' + PENDIENTES.aps + '</b>contrato' + (PENDIENTES.aps === 1 ? '' : 's') + ' APS</button>' : '') +
@@ -2066,7 +2094,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     } else if (!coord && P.pld && P.pld.observados > 0) {
       h = '<div class="hm-aviso">' + IC.alerta + '<b>Tienes ' + P.pld.observados + ' Pre PLD con observaciones por corregir</b><div class="hm-av-b"><button type="button" data-misreg="pld">Ver mis Pre PLD</button></div></div>';
     }
-    host.innerHTML = h;
+    pon(host, h);
   }
   /* ── Novedades en vivo ── */
   function aMs(s) { var m = String(s).match(/(\d+)-(\d+)-(\d+)[ T](\d+):(\d+)(?::(\d+))?/); return m ? new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0)).getTime() : 0; }
@@ -2112,6 +2140,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     var ev = P.eventos, n = ev.filter(esNuevo).length;
     nuevo.textContent = n + (n === 1 ? ' nueva' : ' nuevas'); nuevo.classList.toggle('on', n > 0); btn.disabled = n === 0;
     var nb = document.getElementById('hmNovN'); if (nb) { nb.textContent = n > 99 ? '99+' : n; nb.classList.toggle('on', n > 0); }
+    var cb = document.getElementById('hmNovBtn'), cl = document.getElementById('hmNovL'); if (cb) { cb.classList.toggle('nuevo', n > 0); if (cl) cl.textContent = n > 0 ? (n === 1 ? 'Tienes 1 novedad' : 'Tienes ' + (n > 99 ? '99+' : n) + ' novedades') : 'Novedades'; }
     if (!ev.length) { ul.innerHTML = '<li class="hm-vacio">' + IC.campana + '<br>Todo en orden: por ahora no hay novedades.<br>Aquí aparecerá, en cuanto ocurra, cada contrato enviado, aprobado o con observaciones.</li>'; actualizaNavNov(); return; }
     var ultimoDia = '';
     ul.innerHTML = ev.map(function (e) {
@@ -2163,11 +2192,18 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     if (!primera && window.PLDREV && r.eventos.some(function (e) { return e.modulo === 'PLD' && HM.recien[evId(e)]; })) PLDREV.refrescar();      // si tiene abierta su lista de Pre PLD, se actualiza sola
   }
   function refrescarPanel() {
-    if (typeof google === 'undefined' || !google.script || !google.script.run || !USUARIO.email || HM.cargando) return;
+    if (typeof google === 'undefined' || !google.script || !google.script.run || !USUARIO.email || HM.cargando || HM.bloqueado) return;
     HM.cargando = true;
     google.script.run.withSuccessHandler(function (r) { HM.cargando = false; aplicaPanel(r); })
-      .withFailureHandler(function () { HM.cargando = false; HM.errores++; pintaLive(); }).APS_panel();
+      .withFailureHandler(function (e) { HM.cargando = false; if (window.HIPOO_acceso && HIPOO_acceso(e)) return; HM.errores++; pintaLive(); }).APS_panel();
   }
+  window.HIPOO_acceso = function (e) {      // el servidor responde ACCESO_DENEGADO cuando la cuenta fue dada de baja con la página abierta
+    var m = String((e && e.message) || e || ''); if (!/ACCESO_DENEGADO/.test(m)) return false;
+    HM.bloqueado = true; var o = document.getElementById('bloqueoVivo'); if (!o) return true;
+    var sol = document.getElementById('bvSol'); if (sol) sol.href = 'mailto:' + <?!= JSON.stringify((APS_CONFIG.REPORTES_CORREOS || []).join(',')) ?> + '?subject=' + encodeURIComponent('Solicitud de acceso a la plataforma Hipoo') + '&body=' + encodeURIComponent('Hola, solicito que reactiven mi acceso. Mi cuenta es ' + (USUARIO.email || '') + '.');
+    var rec = document.getElementById('bvRec'); if (rec) rec.href = <?!= JSON.stringify(ScriptApp.getService().getUrl() || '') ?> || '#';
+    o.classList.add('on'); document.body.classList.add('bloqueado'); return true;
+  };
   window.APS_refrescarPendientes = refrescarPanel;     // los módulos lo llaman tras guardar, enviar, aprobar o cancelar: los números cambian sin recargar
   setInterval(function () { if (!document.hidden) refrescarPanel(); }, 25000);
   setInterval(function () { if (!document.hidden && HM.panel) { pintaFeed(); } }, 30000);       // solo para que "hace 3 min" avance
@@ -2229,7 +2265,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
       P.push({ el: function () { var b = q('.hm-card [data-ir="revpld"]'); return b && b.parentNode; }, ic: 'revpld', t: 'Revisión de Pre PLD', x: 'Aquí ves los documentos enviados, puedes marcarlos como revisados o regresarlos con observaciones.' });
       P.push({ el: function () { var b = q('.hm-card [data-ir="tablero"]'); return b && b.parentNode; }, ic: 'tablero', t: 'Tablero Hipoo', x: 'Indicadores de la actividad inmobiliaria.' });
     }
-    P.push({ el: function () { return ayEl('hmSide'); }, fijo: true, antes: function () { if (!novAbierto()) novAbre(true, false); }, ic: 'campana', t: 'Novedades en vivo', x: 'Cada vez que un contrato se envía, se aprueba, se cancela o recibe observaciones, aparece aquí al instante, con su historial por día. Las nuevas traen la etiqueta NUEVO. Con el botón «Novedades» de arriba lo abres o lo cierras.' });
+    P.push({ el: function () { return ayEl('hmSide'); }, fijo: true, antes: function () { if (!novAbierto()) novAbre(true, false); }, ic: 'campana', t: 'Novedades en vivo', x: 'Cada vez que un contrato se envía, se aprueba, se cancela o recibe observaciones, aparece aquí al instante, con su historial por día. Las nuevas traen la etiqueta NUEVO. Con el botón de novedades de arriba (se ilumina en naranja cuando hay algo nuevo) lo abres o lo cierras.' });
     P.push({ el: function () { return ayEl('hmLeer'); }, fijo: true, ic: 'ok', t: 'Marcar como leídas', x: 'Cuando ya las viste, presiona este botón y la lista se limpia de etiquetas NUEVO.' });
     P.push({ el: function () { return ayEl('ayBtn'); }, fijo: true, ic: 'ayuda', t: 'Este botón «?»', x: 'Siempre está a la mano: te repite este recorrido o te deja reportar cualquier problema en un minuto.' });
     return P;

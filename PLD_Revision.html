@@ -113,7 +113,7 @@
     var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); if (!silencioso) toast('El servidor está tardando más de lo normal. Vuelve a intentarlo.', true); }, 25000);
     var r = google.script.run
       .withSuccessHandler(function (x) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); ok(x); })
-      .withFailureHandler(function (e) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); if (!silencioso) toast(String((e && e.message) || e).replace(/^Error:\s*/, ''), true); });
+      .withFailureHandler(function (e) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); if (window.HIPOO_acceso && HIPOO_acceso(e)) return; if (!silencioso) toast(String((e && e.message) || e).replace(/^Error:\s*/, ''), true); });
     r[fn].apply(r, args);
   }
   var FILAS = [], FILTRO = 'todos', BUSCA = '', ORDEN = { OBSERVADO: 0, SIN_ENVIAR: 1, EN_REVISION: 2, REVISADO: 3 };

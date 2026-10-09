@@ -137,7 +137,7 @@
     var vencido = setTimeout(function () { if (listo) return; listo = true; busy(false); toast('El servidor está tardando más de lo normal. Vuelve a intentarlo.', true); }, 40000);
     var r = google.script.run
       .withSuccessHandler(function (x) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); ok(x); })
-      .withFailureHandler(function (e) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); toast(String((e && e.message) || e).replace(/^Error:\s*/, ''), true); });
+      .withFailureHandler(function (e) { if (listo) return; listo = true; clearTimeout(vencido); busy(false); if (window.HIPOO_acceso && HIPOO_acceso(e)) return; toast(String((e && e.message) || e).replace(/^Error:\s*/, ''), true); });
     r[fn].apply(r, args);
   }
   function corto(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
