@@ -1458,7 +1458,33 @@ var APS_REV = (function (U) {
     return fin;
   }
 
-  return { aps: aps, pld: pld, iso: iso, rfcDigito: rfcDigito, curpDigito: curpDigito, parseRfc: parseRfc, parseCurp: parseCurp, codigosNombre: codigosNombre };
+
+  /* ═══ Campos de texto libre que la revisión con IA puede leer (sin RFC, CURP, teléfonos ni correos) ═══ */
+  function camposIA(d) {
+    var L = [], P = (d && d.propietarios) || [], multi = P.length > 1;
+    function add(k, etq, valor, tipo) { var v = s(valor); if (v) L.push({ k: k, step: STEP_DE(k), etq: etq, valor: v, tipo: tipo }); }
+    P.forEach(function (o, i) {
+      var pre = 'propietarios.' + i + '.', pm = o.naturaleza === 'PM', suf = multi ? ' ' + (i + 1) : '';
+      add(pre + 'nombre', (pm ? 'Razón social' : 'Nombre completo') + ' del propietario' + suf, o.nombre, pm ? 'razon_social' : 'nombre_persona');
+      (o.representantes || []).forEach(function (r, j) { add(pre + 'representantes.' + j + '.nombre', 'Nombre del representante ' + (j + 1) + ' del propietario' + suf, r.nombre, 'nombre_persona'); });
+      add(pre + 'idAutoridad', 'Autoridad que emite la identificación del propietario' + suf, o.idAutoridad, 'texto');
+      add(pre + 'poderNotario', 'Notario del poder del propietario' + suf, o.poderNotario, 'nombre_persona');
+    });
+    var cd = (d && d.contactoDir) || {};
+    add('contactoDir.calle', 'Calle del domicilio de notificaciones', cd.calle, 'calle');
+    add('contactoDir.colonia', 'Colonia del domicilio de notificaciones', cd.colonia, 'colonia');
+    add('contactoDir.alcaldia', 'Alcaldía o municipio del domicilio de notificaciones', cd.alcaldia, 'municipio');
+    add('inmDomicilio', 'Domicilio del inmueble', d && d.inmDomicilio, 'domicilio');
+    add('notarioNombre', 'Notario de la escritura', d && d.notarioNombre, 'nombre_persona');
+    add('notariaNumDe', 'Notaría (número y lugar)', d && d.notariaNumDe, 'texto');
+    add('lugar', 'Lugar de firma', d && d.lugar, 'municipio');
+    ['instalaciones', 'destino', 'duracionOtro', 'mascotas', 'menores'].forEach(function (k) {
+      if (d && typeof d[k] === 'string') add(k, { instalaciones: 'Instalaciones y equipamiento', destino: 'Destino del inmueble', duracionOtro: 'Duración (otra)', mascotas: 'Mascotas', menores: 'Menores' }[k], d[k], 'texto');
+    });
+    return L;
+  }
+
+  return { aps: aps, pld: pld, camposIA: camposIA, iso: iso, rfcDigito: rfcDigito, curpDigito: curpDigito, parseRfc: parseRfc, parseCurp: parseCurp, codigosNombre: codigosNombre };
 })(APS_U);
 
 </script>

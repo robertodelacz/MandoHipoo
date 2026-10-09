@@ -317,6 +317,14 @@
 #con-root .cx-rvi p{margin:3px 0;font-size:13px;color:var(--ink)}
 #con-root .cx-rvi p i{display:inline-block;min-width:74px;font:800 11px 'Inter',sans-serif;font-style:normal;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 #con-root .cx-rvi .cx-btn{margin-top:8px;min-height:36px;padding:0 14px;font-size:12.5px;width:auto}
+#con-root .cx-iabar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#f3effc;border:1px solid #ddd3f4;border-radius:12px;padding:11px 14px;margin:0 0 14px}
+#con-root .cx-iabar b{display:block;font:700 13.5px 'Inter',sans-serif;color:#3f2a82}
+#con-root .cx-iabar .t{display:block;font-size:12px;color:#5d4f8a;margin-top:2px;max-width:420px}
+#con-root .cx-iabar .e{display:block;margin-top:6px;font-size:12.5px;color:#a02339;font-weight:600}
+#con-root .cx-iabar .cx-btn{min-height:36px;padding:0 14px;font-size:12.5px;width:auto;white-space:nowrap}
+#con-root .cx-iatag{display:inline-block;margin-right:6px;padding:1px 7px;border-radius:6px;background:#e7defa;color:#4b2f94;font:800 10.5px 'Inter',sans-serif;font-style:normal;letter-spacing:.6px;vertical-align:1px}
+#con-root .cx-spin{display:inline-block;width:12px;height:12px;border:2px solid #cbbcf0;border-top-color:#4b2f94;border-radius:50%;animation:cxspin .8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes cxspin{to{transform:rotate(360deg)}}
 #con-root .cx-rvn{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-size:12.5px;color:var(--muted);margin:14px 0}
 #con-root .cx-rvn svg{flex:none;width:18px;height:18px;margin-top:1px}
 
@@ -704,7 +712,7 @@
     return '<article class="cx-card e-' + r.estado + '"><div><div class="cx-top"><span class="cx-av pld">' + I.pld + '</span><div class="cx-tt"><h3>' + esc(r.operacion || r.nombre) + '</h3><div class="cx-id"><code>' + esc(corto(r.nombre, 48)) + '</code></div></div>' +
       '<span class="cx-est e-' + r.estado + '">' + I[ICEST[r.estado] || 'info'] + (ESTP[r.estado] || r.estado) + '</span></div>' +
       '<div class="cx-meta"><span class="cx-m">' + I.user + '<span>' + esc(r.asociados || 'Sin asociados') + '</span></span><span class="cx-m">' + I.user + '<span>Lo generó ' + esc(r.creador) + '</span></span><span class="cx-m" title="' + esc(r.creado) + '">' + I.reloj + '<span>' + esc(hace(r.creado)) + '</span></span></div>' + aviso + '</div>' +
-      '<div class="cx-act">' + (rev ? '<button type="button" class="cx-btn pri" data-chk="' + esc(r.id) + '" data-nom="' + esc(r.nombre) + '" style="grid-column:1/-1" title="Revisa RFC, CURP, fechas, nombres y pagos con reglas fijas (sin IA)">' + I.lupa + 'Revisión automática</button><button type="button" class="cx-btn ok" data-rev="' + esc(r.id) + '">' + I.check + 'Marcar revisado</button><button type="button" class="cx-btn warn" data-obs="' + esc(r.id) + '">' + I.alertas + 'Observar</button>' : '') +
+      '<div class="cx-act">' + (rev ? '<button type="button" class="cx-btn pri" data-chk="' + esc(r.id) + '" data-nom="' + esc(r.nombre) + '" style="grid-column:1/-1" title="Revisa RFC, CURP, fechas, nombres y pagos">' + I.lupa + 'Revisión automática</button><button type="button" class="cx-btn ok" data-rev="' + esc(r.id) + '">' + I.check + 'Marcar revisado</button><button type="button" class="cx-btn warn" data-obs="' + esc(r.id) + '">' + I.alertas + 'Observar</button>' : '') +
       '<div class="cx-row2"><a class="cx-btn' + (rev ? '' : ' pri') + '" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="' + (rev ? '' : 'grid-column:1/-1;min-height:54px') + '">' + I.doc + 'Abrir documento</a>' + '<button type="button" class="cx-btn" data-his="' + esc(r.id) + '" data-nom="' + esc(r.nombre) + '" style="' + (rev ? '' : 'grid-column:1/-1') + '">' + I.hist + 'Historial</button></div></div></article>';
   }
   function pintaPld(anim) {
@@ -861,27 +869,61 @@
   }
   /* Revisión automática del Pre PLD (reglas fijas: el servidor lee la hoja del asesor; nada sale de Hipoo) */
   var RV = null;
-  function textoObservacion(r) {
-    var l = r.avisos.filter(function (a) { return a.sev !== 'estilo'; }), out = '', i;
+  function textoObservacion() {
+    var l = avisosRV().filter(function (a) { return a.sev !== 'estilo'; }), out = '', i;
     for (i = 0; i < l.length; i++) { var li = '• ' + l[i].t + '\n'; if ((out + li).length > 470) break; out += li; }
     if (i < l.length) out += '• …y ' + (l.length - i) + ' más.';
     return out.trim();
   }
+  /* Revisión con IA (opcional): sus avisos se suman a los de las reglas fijas y llevan la etiqueta «IA» */
+  var IAD = null;
+  function iaDisponible(cb) {
+    if (IAD !== null) { cb(); return; }
+    srv('IA_estado', [], function (r) { IAD = !!(r && r.activa); cb(); }, '', 'silencio');
+    setTimeout(function () { if (IAD === null) { IAD = false; cb(); } }, 8000);
+  }
+  function avisosRV() { return RV ? RV.r.avisos.concat(RV.ia ? RV.ia.avisos : []).map(function (a, i) { return { a: a, i: i }; }).sort(function (x, y) { var o = { error: 0, revisar: 1, estilo: 2 }; return (o[x.a.sev] - o[y.a.sev]) || (x.i - y.i); }).map(function (x) { return x.a; }) : []; }
+  function barraIA() {
+    if (!IAD || !RV) return '';
+    var hecho = !!RV.ia;
+    return '<div class="cx-iabar"><div><b>Revisión con IA</b><span class="t">' + (hecho
+      ? 'Revisado ' + esc(RV.ia.revisado ? 'a las ' + String(RV.ia.revisado).slice(-5) : '') + ' · ' + RV.ia.avisos.length + ' aviso' + (RV.ia.avisos.length === 1 ? '' : 's') + ' de IA.'
+      : 'Busca palabras mal escritas y textos sin sentido. Solo se envían nombres, domicilios y textos de la hoja; RFC, CURP, teléfonos y correos no salen de Hipoo.') + '</span>' +
+      (RV.iaErr ? '<span class="e">' + esc(RV.iaErr) + '</span>' : '') + '</div>' +
+      '<button type="button" class="cx-btn" data-ria="1"' + (RV.iaCarga ? ' disabled' : '') + '>' + (RV.iaCarga ? '<span class="cx-spin"></span>Revisando…' : I.lupa + (hecho ? 'Volver a revisar con IA' : 'Revisar con IA')) + '</button></div>';
+  }
+  function pintaRV() {
+    if (!RV) return;
+    var r = RV.r, todos = avisosRV(), c = { error: 0, revisar: 0, estilo: 0 };
+    todos.forEach(function (a) { c[a.sev]++; });
+    var nombres = { error: ['error', 'errores'], revisar: ['por revisar', 'por revisar'], estilo: ['detalle de estilo', 'detalles de estilo'] };
+    var h = barraIA() + '<div class="cx-rvs">' + ['error', 'revisar', 'estilo'].filter(function (k) { return c[k]; }).map(function (k) { return '<span class="cx-rvp ' + k + '">' + c[k] + ' ' + nombres[k][c[k] === 1 ? 0 : 1] + '</span>'; }).join('') + '</div>';
+    var sev = { error: 'Error', revisar: 'Revisar', estilo: 'Estilo' };
+    h += todos.length ? todos.map(function (a) {
+      return '<div class="cx-rvi ' + a.sev + '"><div class="h"><b>' + (a.src === 'IA' ? '<i class="cx-iatag">IA</i>' : '') + esc(a.t) + '</b><span class="sev">' + sev[a.sev] + '</span></div>' + (a.dice ? '<p><i>Dice</i>' + esc(a.dice) + '</p>' : '') + (a.sug ? '<p><i>Qué hacer</i>' + esc(a.sug) + '</p>' : '') +
+        (a.url ? '<a class="cx-btn" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + I.flecha + 'Abrir la celda</a>' : '') + '</div>';
+    }).join('') : vacio('checkc', 'No encontré nada raro', 'Las reglas fijas (RFC, CURP, fechas, nombres, pagos) no detectaron problemas en lo que llenó el asesor. Confirma siempre con el documento original.');
+    if (todos.some(function (a) { return a.sev !== 'estilo'; })) h += '<div class="cx-dbtn" style="margin:6px 0 4px"><button type="button" class="cx-btn warn" data-obsrv="1">' + I.alertas + 'Usar como observaciones para el asesor</button></div>';
+    h += '<div class="cx-rvn">' + I.info + '<span>Se revisaron ' + (r.cobertura ? r.cobertura.leidos : r.camposLeidos) + ' campos llenos de la hoja del asesor' + (r.cobertura ? ' (' + r.cobertura.especifica + ' con regla propia, ' + r.cobertura.catalogo + ' contra catálogo y ' + r.cobertura.formato + ' por formato y captura)' : '') + '. «Error» es casi seguro; «Revisar» puede estar bien. Confirma siempre con el documento original.</span></div>';
+    q('drBody').innerHTML = h;
+  }
+  function pedirIA() {
+    if (!RV || RV.iaCarga) return;
+    var id = RV.id, ref = RV;
+    ref.iaCarga = true; ref.iaErr = ''; pintaRV();
+    var vencido = setTimeout(function () { if (!ref.iaCarga) return; ref.iaCarga = false; ref.iaErr = 'La IA está tardando más de lo normal. Intenta de nuevo en un momento.'; if (RV === ref) pintaRV(); }, 90000);
+    google.script.run
+      .withSuccessHandler(function (r) { clearTimeout(vencido); if (!ref.iaCarga) return; ref.iaCarga = false; ref.ia = r || { avisos: [] }; if (RV === ref) pintaRV(); })
+      .withFailureHandler(function (e) { clearTimeout(vencido); if (!ref.iaCarga) return; ref.iaCarga = false; if (window.HIPOO_acceso && HIPOO_acceso(e)) return; ref.iaErr = String((e && e.message) || e).replace(/^Error:\s*/, ''); if (RV === ref) pintaRV(); })
+      .PLD_revisarIA(id);
+  }
   function revisarCampos(id, nombre) {
     srv('PLD_revisarReglas', [id], function (r) {
-      RV = { id: id, r: r };
+      RV = { id: id, r: r, ia: null, iaCarga: false, iaErr: '' };
       q('drIc').innerHTML = I.lupa; q('drX').innerHTML = I.x; q('drTit').textContent = nombre;
       var sm = q('drTit').parentNode.querySelector('small'); if (sm) sm.textContent = 'Revisión automática';
-      var c = r.resumen, nombres = { error: ['error', 'errores'], revisar: ['por revisar', 'por revisar'], estilo: ['detalle de estilo', 'detalles de estilo'] };
-      var h = '<div class="cx-rvs">' + ['error', 'revisar', 'estilo'].filter(function (k) { return c[k]; }).map(function (k) { return '<span class="cx-rvp ' + k + '">' + c[k] + ' ' + nombres[k][c[k] === 1 ? 0 : 1] + '</span>'; }).join('') + '</div>';
-      var sev = { error: 'Error', revisar: 'Revisar', estilo: 'Estilo' };
-      h += r.avisos.length ? r.avisos.map(function (a) {
-        return '<div class="cx-rvi ' + a.sev + '"><div class="h"><b>' + esc(a.t) + '</b><span class="sev">' + sev[a.sev] + '</span></div>' + (a.dice ? '<p><i>Dice</i>' + esc(a.dice) + '</p>' : '') + (a.sug ? '<p><i>Qué hacer</i>' + esc(a.sug) + '</p>' : '') +
-          (a.url ? '<a class="cx-btn" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + I.flecha + 'Abrir la celda</a>' : '') + '</div>';
-      }).join('') : vacio('checkc', 'No encontré nada raro', 'Las reglas fijas (RFC, CURP, fechas, nombres, pagos) no detectaron problemas en lo que llenó el asesor. La ortografía sigue siendo cosa de una lectura humana.');
-      if (r.avisos.some(function (a) { return a.sev !== 'estilo'; })) h += '<div class="cx-dbtn" style="margin:6px 0 4px"><button type="button" class="cx-btn warn" data-obsrv="1">' + I.alertas + 'Usar como observaciones para el asesor</button></div>';
-      h += '<div class="cx-rvn">' + I.info + '<span>Se revisaron ' + (r.cobertura ? r.cobertura.leidos : r.camposLeidos) + ' campos llenos de la hoja del asesor' + (r.cobertura ? ' (' + r.cobertura.especifica + ' con regla propia, ' + r.cobertura.catalogo + ' contra catálogo y ' + r.cobertura.formato + ' por formato y captura)' : '') + '. «Error» es casi seguro; «Revisar» puede estar bien. No se valida la ortografía de calles, colonias y municipios. Confirma siempre con el documento original.</span></div>';
-      q('drBody').innerHTML = h; q('drawer').classList.add('on');
+      pintaRV(); q('drawer').classList.add('on');
+      iaDisponible(function () { if (RV && RV.id === id) pintaRV(); });
     }, 'Revisando los campos del documento…');
   }
   function historial(id, nombre) {
@@ -927,7 +969,8 @@
     else if (g('data-rev')) revisar(g('data-rev'));
     else if (g('data-obs')) observar(g('data-obs'));
     else if (g('data-chk')) revisarCampos(g('data-chk'), g('data-nom'));
-    else if (g('data-obsrv')) { if (RV) { var tx = textoObservacion(RV.r), idr = RV.id; q('drawer').classList.remove('on'); observar(idr, tx); } }
+    else if (g('data-ria')) pedirIA();
+    else if (g('data-obsrv')) { if (RV) { var tx = textoObservacion(), idr = RV.id; q('drawer').classList.remove('on'); observar(idr, tx); } }
     else if (g('data-a') === 'cerrarDr') q('drawer').classList.remove('on');
     else if (g('data-a') === 'refrescar') { st.kpiSig = ''; st.mods = null; cargar(false); }
     else if (g('data-a') === 'dlgNo') dlgCerrar();
