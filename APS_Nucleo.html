@@ -1030,74 +1030,76 @@ var APS_REV = (function (U) {
   var DIC_NOMBRES = (
     'aaron abarca abigail abraham abril abundis acevedo acosta adame adela adelina adolfo adrian adriana aguayo ' +
     'aguilar aguilera aguirre agustin aide alanis alba alberto alcala alcantara alcaraz aldana aldo alejandra ' +
-    'alejandro alex alexander alexis alfaro alfredo alicia alma almanza almaraz alondra alonso altamirano alvarado ' +
-    'alvarez amador amalia amaya amparo ana anabel anahi anaya andrade andrea andres andy angel angeles angelica ' +
-    'anguiano angulo antonia antonio apodaca araceli aracely arana aranda araujo arce areli arellano arely arevalo ' +
-    'arguello ariadna arias ariel armando armenta arrieta arroyo arteaga arturo atilano aurora avila aviles axel ' +
-    'ayala ayon azucena azul baez baeza bahena balderas ballesteros banuelos barajas barba barbara barragan barraza ' +
-    'barrera barrientos barrios bastida bautista beatriz becerra bejarano belem bello beltran benavides benitez ' +
-    'benjamin berber berenice bermudez bernabe bernal bernardino berrones berta bertha betancourt blanca blanco ' +
-    'bolanos bonilla borja botello bravo brayan brenda brian briones brito bruno bryan bueno burgos bustamante ' +
-    'bustos caballero cabello cabrera cadena calderon calvo camacho camarena camargo camarillo camilo campos ' +
-    'campuzano canales candelaria candelas cano cantu carbajal cardenas cardoso carla carlos carmen carmona ' +
-    'carolina carranza carrasco carrera carrillo carvajal casanova casas castaneda castelan castellanos castillo ' +
-    'castro catalina cavazos cazares cecilia cedillo ceja celaya celia centeno cerda cerezo cervantes cesar chacon ' +
-    'chairez chaparro chavarria chavez chavira christian cienfuegos cinthia cisneros citlali citlalli clara claudia ' +
-    'claudio clemente colin collazo concepcion concha conde contreras cordero cordova cornejo corona coronado ' +
-    'corral correa cortes cortez cosio cota covarrubias crespo cristian cristina cruces cruz cuadra cuauhtemoc ' +
-    'cubillas cuellar cuevas curiel cynthia daniel daniela dario david davila dayana delacruz deleon delgadillo ' +
-    'delgado deyanira diana diaz diego dolores dominguez dora dorantes duarte dulce duran echeverria edgar edith ' +
-    'edmundo eduardo efrain elena elias elizabeth elizalde elsa emanuel emilia emilio emma enrique enriquez ' +
-    'erendira erick erika ernesto escalante escalera escamilla escareno escobar escutia esparza esperanza espindola ' +
-    'espino espinosa espinoza esquivel esteban estefania estela estevez esther estrada eugenio eva evelyn fabela ' +
-    'fabian fabiola farias fatima federico feliciano felipe felix fernanda fernandez fernando ferrer fierro fierros ' +
-    'figueras figueroa flavio flor flora florencia flores fonseca francisca francisco franco fregoso frias frida ' +
-    'fuentes gabriel gabriela gael galindo gallardo gallegos gallo galvan gamboa gamez gaona garay garcia garduno ' +
-    'garibay garza gasca gaytan gema genaro genoveva georgina gerardo german gil gilberto gina giron gisela giselle ' +
-    'gladys gloria godinez godoy gomez gonzalez graciela grajeda granados gregorio guadalupe gudino guerra guerrero ' +
-    'guevara guillen guillermina guillermo gurrola gustavo gutierrez guzman haro haydee hector helena heredia ' +
-    'heriberto herminio hermosillo hernandez herrera hidalgo hilda hinojosa holguin huerta hugo humberto hurtado ' +
-    'ian ibanez ibarra iglesias ignacio iker iliana ilse ines infante irais irene irigoyen irma isaac isabel ismael ' +
-    'israel itzayana itzel ivan ivette ivonne izquierdo jacobo jacqueline jaime jairo jaqueline jara jaramillo ' +
-    'jasso jatziri jauregui javier jazmin jenifer jennifer jessica jesus jimena jimenez joaquin joel jonathan jorge ' +
-    'jose josefina joselyn joshua josue juan juana juarez judith julia juliana julio karen karla kassandra ' +
-    'katherine katia kenia kevin kristal lagos lagunas lagunes landa landeros lara lariz laura lazaro leandro lemus ' +
-    'lenin leon leonardo leopoldo lerma leslie lesly leticia leyva librado lidia lilia lilian liliana limon linda ' +
-    'lino lira lisbeth lizarraga lizbeth lizette llamas lluvia loera lomeli longoria lopez lorena lorenza lorenzo ' +
-    'lourdes loya lozano lucas lucero lucia luciano lucila lugo luis luisa lujan luna lupita luz macaria macario ' +
-    'macedo machado macias maciel madera madrigal maestre magana magdalena maira malagon maldonado malinali ' +
-    'mancilla mandujano manriquez manuel manuela manzano mara marcela marcelo marco marcos mares margarita ' +
-    'margarito margot maria mariana maribel maricela marin marina marino mario marisol marlen marquez marroquin ' +
-    'marta martha martin martinez mascareno mata mateo matias matilde maturano mauricio maximiliano maya mayorga ' +
-    'mayra mayte mcdonald medina mejia melchor melissa mena menchaca mendez mendiola mendoza meneses meraz mercado ' +
-    'merced mercedes merino mesa meza michel michelle miguel mijares millan minerva minjarez miramontes miranda ' +
-    'mireles mireya miriam mirna mitzi moctezuma moises mojica molina moncada monica monje monreal monroy monserrat ' +
-    'montalvo montano montemayor montes montiel montoya monzon mora morales moreno moya mulato munoz murillo nadia ' +
-    'najera nallely nancy nanez naomi naranjo narvaez natalia natanael nava navarrete navarro nayeli nelson nestor ' +
-    'nevarez nicolas nidia nieto nieves nino noe noelia noemi nogueda nolasco nora norberto noriega norma nunez ' +
-    'ocampo ochoa octavio odalys ofelia olga olguin olivares olmos olvera omar orduna ordunez orlando oropeza ' +
-    'orozco orta ortega ortiz ortuno oscar osorio osvaldo otero oviedo pablo pacheco padilla palacios palafox palma ' +
-    'paloma pamela pantoja paola paredes parra pascual patino patricia patricio paulina paz pedraza pedro pedroza ' +
-    'pelaez pena peralta perea perez perla pichardo pilar pimentel pineda pinedo pinon pita plascencia plata ' +
-    'polanco ponce porras portillo posadas pozos prado preciado priego primitivo priscila puente quezada quinones ' +
-    'quintana quintero quiroga quiroz rafael rafaela ramirez ramon ramona ramos rangel raquel raul raya razo rebeca ' +
-    'rebollar recendiz refugio regina regino rene renteria revilla rey reyes reyna reynaldo reynoso ribera ricardo ' +
-    'rico rigoberto rincon rios rita rivas rivera rivero roberto robledo robles rocha rocio rodarte rodolfo rodrigo ' +
-    'rodriguez rogelio rojas rolando roldan romero roque rosa rosado rosalba rosales rosalinda rosario rosas ' +
-    'rosaura rosendo rosita roxana rubalcaba ruben rubio rueda ruelas ruiz ruth ruvalcaba saavedra sabino sabrina ' +
-    'saenz sahagun salas salazar salcedo salcido saldana saldivar salgado salinas salma salvador samaniego samano ' +
-    'samantha samuel sanabria sanchez sandoval sandra sanmartin santana santiago santos sara sarabia sarahi saray ' +
-    'sauceda saul sebastian sedano segura selena sepulveda sergio serrano servando servin severiano sevilla sheila ' +
-    'shirley sierra silva silvestre silvia sinai sirenia socorro sofia sol solano soledad solis sonia sosa sotelo ' +
-    'soto stephanie suarez susana susy tadeo tafoya talavera tamara tamayo tania tapia tatiana tejada tejeda tellez ' +
-    'tello tenorio teodoro teresa terrazas tiburcio timoteo tirado toledo tolentino tomas tomasa tonatiuh toro ' +
-    'torres torrez tovar trejo trevino triana trinidad trujillo ugalde ulises ulloa urbano urbina uriarte urias ' +
-    'uribe urquiza urrutia ursula valadez valdes valdez valdivia valencia valentin valenzuela valeria valerio ' +
-    'valladares vallarta valle vallejo vanesa vanessa vania varas varela vargas vasquez vazquez vega velarde ' +
-    'velasco velazquez velez venancio venegas ventura vera verdugo vergara veronica vianey vicente victor victoria ' +
-    'vidal viera villa villagomez villalobos villanueva villarreal villegas violeta viramontes virginia viridiana ' +
-    'viveros viviana vizcarra wendy wilfrido xavier xicotencatl ximena xiomara xochitl yadira yahir yair yamileth ' +
-    'yaneli yanet yanez yareli yaretzi yasmin yazmin yepez yesenia yolanda yolotzin yoselin yuridia zacarias zaira ' +
+    'alejandro alex alexander alexis alfaro alfredo alicia alma almanza almaraz alondra alonso altamirano alva ' +
+    'alvarado alvarez amador amalia amaya amor amparo ana anabel anahi anaya andrade andrea andres andy angel ' +
+    'angeles angelica anguiano angulo antonia antonio apodaca araceli aracely arana aranda araujo arce areli ' +
+    'arellano arely arevalo arguello ariadna arias ariel armando armenta arrieta arroyo arteaga arturo atilano ' +
+    'aurora avila aviles axel ayala ayon azucena azul baca baez baeza bahena balderas ballesteros banuelos barajas ' +
+    'barba barbara barragan barraza barrera barrientos barrios bastida bautista beatriz becerra bejarano belem ' +
+    'bello beltran benavides benitez benjamin berber berenice bermudez bernabe bernal bernardino berrones berta ' +
+    'bertha betancourt blanca blanco bolanos bonilla borja botello bravo brayan brenda brian briones brito bruno ' +
+    'bryan bueno burgos bustamante bustos caballero cabello cabrera cadena calderon calvo camacho camarena camargo ' +
+    'camarillo camilo campos campuzano canales candelaria candelas cano cantu carbajal cardenas cardoso carla ' +
+    'carlos carmen carmona carolina carranza carrasco carrera carrillo carvajal casanova casas castaneda castelan ' +
+    'castellanos castillo castro catalina cavazos cazares cecilia cedillo ceja celaya celia centeno cerda cerezo ' +
+    'cervantes cesar chacon chairez chaparro chavarria chavez chavira christian cienfuegos cinthia cisneros citlali ' +
+    'citlalli clara claudia claudio clemente cobo colin collazo concepcion concha conde contreras cordero cordova ' +
+    'cornejo corona coronado corral correa cortes cortez cosio cota covarrubias crespo cristian cristina cruces ' +
+    'cruz cuadra cuauhtemoc cubillas cuellar cuevas curiel cynthia daniel daniela dario david davila dayana ' +
+    'delacruz deleon delgadillo delgado deyanira diana diaz diego diez dolores dominguez dora dorantes duarte dulce ' +
+    'duran echeverria edgar edith edmundo eduardo efrain elena elias elizabeth elizalde elsa emanuel emilia emilio ' +
+    'emma enrique enriquez erendira erick erika ernesto escalante escalera escamilla escareno escobar escutia ' +
+    'esparza esperanza espindola espino espinosa espinoza esquivel esteban estefania estela estevez esther estrada ' +
+    'eugenio eva evelyn fabela fabian fabiola farias fatima federico feliciano felipe felix fernanda fernandez ' +
+    'fernando ferrer fierro fierros figueras figueroa flavio flor flora florencia flores fonseca francisca ' +
+    'francisco franco fregoso frias frida fuentes gabriel gabriela gael galindo gallardo gallegos gallo galvan ' +
+    'gamboa gamez gaona garay garcia garduno garibay garza gasca gaytan gema genaro genoveva georgina gerardo ' +
+    'german gil gilberto gina giron gisela giselle gladys gloria godinez godoy gomez gonzalez graciela grajeda ' +
+    'granados gregorio guadalupe gudino guerra guerrero guevara guillen guillermina guillermo gurrola gustavo ' +
+    'gutierrez guzman haro haydee hector helena heredia heriberto herminio hermosillo hernandez herrera hidalgo ' +
+    'hilda hinojosa holguin huerta hugo humberto hurtado ian ibanez ibarra iglesias ignacio iker iliana ilse ines ' +
+    'infante irais irene irigoyen irma isaac isabel ismael israel itzayana itzel ivan ivette ivonne izquierdo ' +
+    'jacobo jacqueline jaime jairo jaqueline jara jaramillo jasso jatziri jauregui javier jazmin jenifer jennifer ' +
+    'jessica jesus jimena jimenez joaquin joel jonathan jorge jose josefina joselyn joshua josue juan juana juarez ' +
+    'judith julia juliana julio karen karla kassandra katherine katia kenia kevin kristal lago lagos lagunas ' +
+    'lagunes lamas landa landeros lara lariz laura lazaro leandro lemus lenin leon leonardo leopoldo lerma leslie ' +
+    'lesly leticia leyva librado lidia lilia lilian liliana limon linda lino lira lisbeth lizarraga lizbeth lizette ' +
+    'llamas lluvia loera lomeli longoria lopez lorena lorenza lorenzo lourdes loya lozano lucas lucero lucia ' +
+    'luciano lucila lugo luis luisa lujan luna lupita luz macaria macario macedo machado macias maciel madera ' +
+    'madrigal maestre magana magdalena maira malagon maldonado malinali mancilla mandujano manriquez manuel manuela ' +
+    'manzano mara marcela marcelo marco marcos mares margarita margarito margot maria mariana maribel maricela ' +
+    'marin marina marino mario marisol marlen marquez marroquin marta martha martin martinez mascareno mata mateo ' +
+    'matias matilde maturano mauricio maximiliano maya mayorga mayra mayte maza mcdonald medina mejia melchor ' +
+    'melissa mena menchaca mendez mendiola mendoza meneses meraz mercado merced mercedes merino mesa meza michel ' +
+    'michelle miguel mijares millan minerva minjarez miramontes miranda mireles mireya miriam mirna mitzi moctezuma ' +
+    'moises mojica molina moncada monica monje monreal monroy monserrat montalvo montano montemayor montes montiel ' +
+    'montoya monzon mora morales moreno mota moya mulato munoz murillo nadia najera nallely nancy nanez naomi ' +
+    'naranjo narvaez natalia natanael nava navarrete navarro nayeli nelson nestor nevarez nicolas nidia nieto ' +
+    'nieves nino noe noelia noemi nogueda nolasco nora norberto noriega norma nunez ocampo ochoa octavio odalys ' +
+    'ofelia olea olga olguin olivares olmos olvera omar orduna ordunez orlando oropeza orozco orta ortega ortiz ' +
+    'ortuno oscar osorio osvaldo otero ovalle oviedo pablo pacheco padilla paez palacios palafox palma paloma ' +
+    'pamela pantoja paola paredes parra pascual patino patricia patricio paulina paz pedraza pedro pedroza pelaez ' +
+    'pena peralta perea perez perla pichardo pilar pimentel pina pineda pinedo pino pinon pita plascencia plata ' +
+    'polanco ponce pons porras portillo posadas pozo pozos prado preciado priego primitivo priscila puente quezada ' +
+    'quinones quintana quintero quiroga quiroz rada rafael rafaela ramirez ramon ramona ramos rangel raquel raul ' +
+    'raya razo rebeca rebollar recendiz refugio regina regino rene renteria revilla rey reyes reyna reynaldo ' +
+    'reynoso reza ribera ricardo rico rigoberto rincon rios rita rivas rivera rivero roberto robledo robles rocha ' +
+    'rocio rodarte rodolfo rodrigo rodriguez rogelio rojas rojo rolando roldan romero roque rosa rosado rosalba ' +
+    'rosales rosalinda rosario rosas rosaura rosendo rosita roxana rubalcaba ruben rubio rueda ruelas ruiz ruth ' +
+    'ruvalcaba saad saavedra sabino sabrina sada saenz sahagun sainz saiz sala salas salazar salcedo salcido ' +
+    'saldana saldivar salgado salinas salma salvador samaniego samano samantha samuel sanabria sanchez sandoval ' +
+    'sandra sanmartin santana santiago santos sanz sara sarabia sarahi saray sauceda saul sebastian sedano segura ' +
+    'selena sepulveda sergio serrano servando servin severiano sevilla sheila shirley sierra silva silvestre silvia ' +
+    'sinai sirenia socorro sofia sol sola solano soledad solis sonia sosa sotelo soto stephanie suarez susana susy ' +
+    'tadeo tafoya talavera tamara tamayo tania tapia tatiana teja tejada tejeda tellez tello tena tenorio teodoro ' +
+    'teresa terrazas tiburcio timoteo tirado toledo tolentino tomas tomasa tonatiuh toro torres torrez tovar trejo ' +
+    'trevino triana trinidad trujillo ugalde ulises ulloa urbano urbina uriarte urias uribe urquiza urrutia ursula ' +
+    'vaca valadez valdes valdez valdivia valencia valentin valenzuela valeria valerio valladares vallarta valle ' +
+    'vallejo vanesa vanessa vania varas varela vargas vasquez vazquez vega vela velarde velasco velazquez velez ' +
+    'venancio venegas ventura vera verdugo vergara veronica vianey vicente victor victoria vidal viera vigil vila ' +
+    'villa villagomez villalobos villanueva villarreal villegas violeta viramontes virginia viridiana viveros ' +
+    'viviana vizcarra wendy wilfrido xavier xicotencatl ximena xiomara xochitl yadira yahir yair yamileth yaneli ' +
+    'yanet yanez yareli yaretzi yasmin yazmin yepez yesenia yolanda yolotzin yoselin yuridia zacarias zaira ' +
     'zambrano zamora zamudio zapata zaragoza zarate zavala zavaleta zendejas zepeda zermeno zoe zubiran zulema ' +
     'zuniga zurita '
   ).split(' ');
@@ -1141,7 +1143,7 @@ var APS_REV = (function (U) {
       for (i = 0; i < DIC_LISTA.length; i++) {
         w = DIC_LISTA[i];
         if (w.length > k.length && w.length - k.length <= 3 && w.indexOf(k) === 0) trunca.push(w);
-        else if (k.length >= 5 && cercaDeUno(k, w)) parecida.push(w);
+        else if (k.length >= 4 && cercaDeUno(k, w)) parecida.push(w);
       }
       if (trunca.length) { n++; aviso('revisar', 'NOMBRE_CORTADO', '«' + raw + '» parece incompleto', 'Se lee «' + raw + '».', '¿Será «' + capitaliza(trunca[0]) + '»' + (trunca[1] ? ' o «' + capitaliza(trunca[1]) + '»' : '') + '? Confírmalo con la identificación.'); }
       else if (parecida.length) { n++; aviso('revisar', 'NOMBRE_PARECIDO', '«' + raw + '» podría tener una letra mal', 'Se lee «' + raw + '».', '¿Será «' + capitaliza(parecida[0]) + '»' + (parecida[1] ? ' o «' + capitaliza(parecida[1]) + '»' : '') + '? Si así se escribe en la identificación, ignora este aviso.'); }
