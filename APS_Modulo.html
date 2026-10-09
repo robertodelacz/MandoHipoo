@@ -216,7 +216,7 @@
 @media(max-width:600px){#aps-root .rail{margin:0 -4px 12px;padding:10px 12px 2px}#aps-root .rail .chip:not(.active) span{display:none}#aps-root .rail .chip:not(.active){padding-right:8px}}
 /* Hojas (Mis contratos, historial): cierre siempre visible, también al tocar fuera o con Esc */
 #aps-root .modal.sheetwrap{background:rgba(26,34,74,.5);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);padding:28px 16px}
-#aps-root .sheet{max-width:1040px;margin:0 auto;background:#fff;border-radius:26px;box-shadow:0 30px 80px -20px rgba(13,18,43,.6);color:var(--ink);overflow:hidden;animation:apsSheet .28s cubic-bezier(.2,.9,.25,1)}
+#aps-root div.sheet{max-width:1040px;margin:0 auto;background:#fff;border-radius:26px;box-shadow:0 30px 80px -20px rgba(13,18,43,.6);color:var(--ink);overflow:hidden;animation:apsSheet .28s cubic-bezier(.2,.9,.25,1)}
 @keyframes apsSheet{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
 #aps-root .sheet-h{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;background:linear-gradient(100deg,#364494,#2b377a);color:#fff}
 #aps-root .sheet-h h2{margin:0;font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:25px;color:#fff;letter-spacing:-.3px}
@@ -240,7 +240,7 @@
 #aps-root .sheet-b table.reg td{border-bottom:1px solid #eef1f8}
 #aps-root .modal-bar{align-items:center}
 #aps-root .modal-bar .sheet-x{min-height:44px}
-@media(max-width:600px){#aps-root .modal.sheetwrap{padding:0}#aps-root .sheet{border-radius:0;min-height:100vh}#aps-root .sheet-h{padding:14px 16px}#aps-root .sheet-h h2{font-size:21px}#aps-root .sheet-x{padding:0 16px}#aps-root .sheet-t,#aps-root .sheet-b,#aps-root .sheet-f{padding-left:14px;padding-right:14px}}
+@media(max-width:600px){#aps-root .modal.sheetwrap{padding:0}#aps-root div.sheet{border-radius:0;min-height:100vh}#aps-root .sheet-h{padding:14px 16px}#aps-root .sheet-h h2{font-size:21px}#aps-root .sheet-x{padding:0 16px}#aps-root .sheet-t,#aps-root .sheet-b,#aps-root .sheet-f{padding-left:14px;padding-right:14px}}
 /* Logo del encabezado: grande, como siempre */
 #aps-root .hdr .logo-container{padding:8px 22px;border-radius:14px}
 #aps-root .hdr .header-logo{width:250px;height:auto;max-width:42vw;max-height:none;object-fit:contain}
@@ -256,7 +256,7 @@
 @media(min-width:1050px){#aps-root .layout{grid-template-columns:minmax(0,1fr) 520px;gap:34px}}
 @media(min-width:1500px){#aps-root .layout{grid-template-columns:minmax(0,1fr) 600px}}
 #aps-root .modal.sheetwrap.open{display:flex;align-items:center;justify-content:center}
-#aps-root .sheet{width:100%;max-height:calc(100vh - 56px);margin:0;display:flex;flex-direction:column}
+#aps-root div.sheet{width:100%;max-height:calc(100vh - 56px);margin:0;display:flex;flex-direction:column}
 #aps-root .sheet-h,#aps-root .sheet-t,#aps-root .sheet-f{flex:none}
 #aps-root .sheet-b{flex:1 1 auto;min-height:0;overflow:auto}
 body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,body:has(.cx-modal.open) #ayBtn,body:has(.cx-modal.open) #ayNota{display:none!important}
@@ -279,7 +279,7 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
   #aps-root .fab{bottom:92px;right:76px}
   body[data-pantalla="aps"] #ayBtn{bottom:96px}
   #aps-root .modal.sheetwrap.open{align-items:flex-end}
-  #aps-root .sheet{border-radius:24px 24px 0 0;max-height:92vh;min-height:0}
+  #aps-root div.sheet{border-radius:24px 24px 0 0;max-height:92vh;min-height:0}
   #aps-root .sheet-b{padding:8px 14px 14px}
   #aps-root .sheet-q{max-width:none;min-width:100%}
   #aps-root .reg-wrap{overflow:visible}
@@ -293,7 +293,7 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
 }
 
 /* ═══ v4: «Mis contratos» y ventanas de historial con el diseño nuevo ═══ */
-#aps-root .sheet{border-radius:30px;background:#f4f7fc;box-shadow:0 50px 100px -30px rgba(13,18,43,.75)}
+#aps-root div.sheet{border-radius:30px;background:#f4f7fc;box-shadow:0 50px 100px -30px rgba(13,18,43,.75)}
 #aps-root .sheet-h{padding:24px 30px;gap:18px;background:radial-gradient(90% 160% at 100% 0%,#3d4fb0 0%,transparent 55%),linear-gradient(115deg,#364494 0%,#232d61 62%,#1a224a 100%);border-bottom:4px solid var(--primary)}
 #aps-root .sheet-h>div:first-child{display:flex;align-items:center;gap:16px;min-width:0}
 #aps-root .sh-ic{flex:none;width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);color:#bff3f8}
@@ -731,7 +731,10 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
   }
   /* Marca de agua BORRADOR: mientras el contrato no esté aprobado (o falten datos) NUNCA sale como definitivo */
   function marcaBorrador() { return ISS.length > 0 || (IN_GAS && !(REG && REG.estado === 'APROBADO')); }
-  function docHtml(pantalla) { return D.render(S, { borrador: pantalla ? false : marcaBorrador() }); }      // en pantalla la vista previa se ve completa y limpia; la marca BORRADOR queda en lo que se imprime
+  /* En pantalla (vista previa y «Ver contrato completo»): el coordinador ve el contrato limpio; el asesor lo ve con la marca BORRADOR mientras no esté aprobado; aprobado se ve completo para todos.
+     Lo que se imprime conserva la marca BORRADOR mientras el contrato no esté aprobado. */
+  function marcaPantalla() { return (IN_GAS && USER.rol === 'coordinador') ? false : marcaBorrador(); }
+  function docHtml(pantalla) { return D.render(S, { borrador: pantalla ? marcaPantalla() : marcaBorrador() }); }
   function renderPreview() {
     var h = docHtml(true);
     $('aps_pvPaper').innerHTML = h; 
