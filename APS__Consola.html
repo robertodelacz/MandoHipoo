@@ -196,6 +196,44 @@
 #con-root button.cx-ref{cursor:pointer}#con-root button.cx-ref:hover{background:#e3e8fb;color:var(--navy)}
 #con-root .cx-evd{margin:8px 0 0;font-size:14px;color:#3d476e;overflow-wrap:anywhere}
 
+
+/* ── Accesos del equipo ── */
+#con-root .cx-top2{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap}
+#con-root .cx-top2 .cx-sbox{flex:1 1 320px}
+#con-root .cx-add{flex:none;min-height:58px;padding:0 28px;font-size:16px;border-radius:18px}
+#con-root .cx-pc{position:relative;display:flex;flex-direction:column;gap:14px;background:#fff;border-radius:24px;padding:20px 22px;box-shadow:0 2px 4px rgba(26,34,74,.04),0 22px 44px -22px rgba(26,34,74,.32);transition:translate .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s,filter .3s}
+#con-root .cx-pc:hover{translate:0 -3px;box-shadow:0 2px 4px rgba(26,34,74,.04),0 30px 54px -22px rgba(26,34,74,.42)}
+#con-root .cx-pc.baja{background:linear-gradient(135deg,#fff 40%,#fdf0f1 100%)}
+#con-root .cx-pc.baja .cx-av{background:linear-gradient(145deg,#9aa3c0,#7b86a8);box-shadow:none}
+#con-root .cx-pc .cx-top{align-items:center}
+#con-root .cx-pc .cx-tt h3{font-size:18px}
+#con-root .cx-pc .mail{display:block;margin-top:2px;font-size:13.5px;color:var(--muted);overflow-wrap:anywhere}
+#con-root .cx-tags{display:flex;flex-wrap:wrap;gap:8px}
+#con-root .cx-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font:800 12px 'Inter',sans-serif;background:#eef0fb;color:var(--navy)}
+#con-root .cx-tag svg{width:14px;height:14px}
+#con-root .cx-tag.coord{background:#dff1fb;color:#0b4a6b}#con-root .cx-tag.on{background:var(--ok-bg);color:#0a6b4a}#con-root .cx-tag.off{background:var(--err-bg);color:#8f1b29}#con-root .cx-tag.you{background:#fff1d6;color:#7a5200}
+#con-root .cx-last{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted)}
+#con-root .cx-last svg{width:17px;height:17px;color:#8792b5}
+#con-root .cx-pa{display:flex;gap:10px;align-items:stretch}
+#con-root .cx-tg{flex:1;display:flex;align-items:center;gap:14px;min-height:56px;padding:0 18px 0 12px;border:0;border-radius:17px;cursor:pointer;background:var(--ok-bg);color:#0a6b4a;font:800 15px 'Montserrat',sans-serif;text-align:left;transition:background .2s,color .2s,transform .12s}
+#con-root .cx-tg:active{transform:scale(.98)}
+#con-root .cx-tg .trk{flex:none;position:relative;width:52px;height:30px;border-radius:999px;background:#0f9d6e;transition:background .25s}
+#con-root .cx-tg .trk i{position:absolute;top:3px;left:25px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:left .25s cubic-bezier(.3,1.4,.5,1)}
+#con-root .cx-tg.off{background:var(--err-bg);color:#8f1b29}
+#con-root .cx-tg.off .trk{background:#c2c8dc}#con-root .cx-tg.off .trk i{left:3px}
+#con-root .cx-tg:disabled{opacity:.55;cursor:not-allowed}
+#con-root .cx-ed{flex:none;width:56px;min-height:56px;padding:0;border-radius:17px}
+#con-root .cx-fld{margin:0 0 16px}
+#con-root .cx-fld input[type=text],#con-root .cx-fld input[type=email],#con-root .cx-fld select{width:100%;min-height:54px;border:0;border-radius:16px;padding:0 16px;background:var(--soft);box-shadow:inset 0 0 0 2px #dbe2ef;font:500 16px 'Inter',sans-serif;color:var(--ink)}
+#con-root .cx-fld input:focus,#con-root .cx-fld select:focus{outline:none;background:#fff;box-shadow:0 0 0 5px rgba(53,183,197,.22),inset 0 0 0 2px var(--primary)}
+#con-root .cx-fld input:disabled{opacity:.65}
+#con-root .cx-seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px;border-radius:18px;background:var(--soft);box-shadow:inset 0 0 0 2px #dbe2ef}
+#con-root .cx-seg button{min-height:48px;border:0;border-radius:13px;background:transparent;color:var(--muted);font:800 14.5px 'Montserrat',sans-serif;cursor:pointer;transition:background .2s,color .2s}
+#con-root .cx-seg button.on{background:linear-gradient(135deg,#4256c4,#2b377a);color:#fff;box-shadow:0 8px 16px -8px rgba(54,68,148,.8)}
+#con-root .cx-hint{margin:7px 2px 0;font-size:12.5px;line-height:1.5;color:#7a85a8}
+#con-root .cx-warnbar{display:flex;gap:12px;align-items:flex-start;margin:0 0 18px;padding:14px 18px;border-radius:16px;background:var(--warn-bg);color:#7a5200;font:600 14px/1.55 'Inter',sans-serif}
+#con-root .cx-warnbar svg{width:22px;height:22px;margin-top:1px}
+
 /* ── Estados vacíos y esqueletos ── */
 #con-root .cx-vacio{display:flex;flex-direction:column;align-items:center;text-align:center;padding:54px 24px;background:#fff;border-radius:26px;box-shadow:0 2px 4px rgba(26,34,74,.04),0 22px 44px -22px rgba(26,34,74,.28)}
 #con-root .cx-vacio .ic{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;margin-bottom:16px;background:radial-gradient(circle at 30% 25%,#f1fbfc,#d3edf0);color:var(--teal);animation:cxFlota 3.4s ease-in-out infinite}
@@ -292,6 +330,7 @@
   #con-root .cx-dc{padding:24px 20px 20px;border-radius:22px}
   #con-root .cx-dbtn{flex-direction:column-reverse}
   #con-root .cx-dph{padding:16px}
+  #con-root .cx-add{width:100%}
 }
 @media(prefers-reduced-motion:reduce){#con-root *,#con-root *::before,#con-root *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
@@ -371,6 +410,8 @@
     candado: svg('<rect x="4.500" y="10.500" width="15" height="10" rx="2.500"/><path d="M8 10.500V8a4 4 0 0 1 8 0v2.500"/>'),
     flecha: svg('<path d="M5 12h14M13 6l6 6-6 6"/>', 2.3),
     casa: svg('<path d="M4.200 11.400 12 4.800l7.800 6.600V19a1.500 1.500 0 0 1-1.500 1.500H5.700A1.500 1.500 0 0 1 4.200 19z"/><path d="M9.500 20.500v-5h5v5"/>'),
+    userplus: svg('<circle cx="9.500" cy="8.500" r="3.800"/><path d="M2.800 20c.8-3.600 3.400-5.500 6.700-5.500 1.600 0 3 .4 4.200 1.200M18 9v6M15 12h6"/>'),
+    equipo: svg('<circle cx="9" cy="8.500" r="3.400"/><path d="M2.800 19.500c.7-3.300 3.200-5 6.200-5s5.500 1.700 6.200 5M16 5.200a3.200 3.200 0 0 1 0 6.200M18.500 14.800c1.600.7 2.700 2.200 3 4.700"/>'),
     sparkle: svg('<path d="M12 3l1.800 5.200L19 10l-5.200 1.800L12 17l-1.800-5.200L5 10l5.200-1.800z"/>')
   };
   var ESTA = { SIN_TERMINAR: 'Guardado sin terminar', COMPLETO: 'Completado', EN_REVISION: 'En revisión', APROBADO: 'Aprobado', CANCELADO: 'Cancelado' };
@@ -380,9 +421,11 @@
     aps: { eyebrow: 'Coordinación · Contratos', t1: 'Revisión de ', t2: 'contratos APS', sub: 'Revisa cada contrato, corrígelo si hace falta y apruébalo. Aquí también están las alertas de ajustes y vigencias, y el registro de quién hizo qué.',
       tabs: [['aps', 'Contratos', 'contratos'], ['alertas', 'Alertas', 'alertas'], ['aud', 'Auditoría', 'audit']] },
     pld: { eyebrow: 'Coordinación · Pre PLD', t1: 'Revisión de ', t2: 'Pre PLD', sub: 'Documentos que los asesores enviaron a revisión: ábrelos, márcalos como revisados u obsérvalos. Incluye la bitácora de modificaciones y la auditoría.',
-      tabs: [['pld', 'Revisión', 'pld'], ['mods', 'Modificaciones', 'mods'], ['aud', 'Auditoría', 'audit']] }
+      tabs: [['pld', 'Revisión', 'pld'], ['mods', 'Modificaciones', 'mods'], ['aud', 'Auditoría', 'audit']] },
+    acc: { eyebrow: 'Coordinación · Accesos', t1: 'Accesos del ', t2: 'equipo', sub: 'Quién puede entrar a la plataforma. Agrega asesores nuevos y activa o desactiva el acceso con un toque: la baja aplica a todo (contratos APS, Pre PLD y revisión) en su siguiente acción.',
+      tabs: [['acc', 'Equipo', 'equipo']] }
   };
-  var st = { seccion: 'aps', vista: 'aps', fa: 'revision', fp: 'revision', textoA: '', textoP: '', textoU: '', textoM: '', fu: 'todo',
+  var st = { seccion: 'aps', vista: 'aps', fa: 'revision', fp: 'revision', textoA: '', textoP: '', textoU: '', textoM: '', textoE: '', fe: 'todos', eq: [], yo: '', bloqueoActivo: true, fu: 'todo',
     aps: [], total: 0, conteos: {}, pld: [], mods: null, aud: null, res: null, admin: '', prev: {}, kpiSig: '', firma: {}, ocupado: false };
   var tmr = null, tmrAuto = null;
 
@@ -451,6 +494,7 @@
   function dlgCerrar() { q('dlg').classList.remove('on'); dlgCb = null; }
   function dlgOk() {
     var c = q('dlgC'), o = c._o || {}, t = c.querySelector('textarea'), v = t ? t.value.trim() : '';
+    if (o.valida) { var f = o.valida(); if (!f) return; var cb0 = dlgCb; dlgCerrar(); if (cb0) cb0(f); return; }
     if (o.min && v.length < o.min) { var e = c.querySelector('[data-r="derr"]'); e.textContent = 'Escribe ' + (o.minMsg || 'al menos ' + o.min + ' caracteres') + '.'; e.classList.add('on'); if (t) t.focus(); return; }
     var cb = dlgCb; dlgCerrar(); if (cb) cb(v);
   }
@@ -461,6 +505,7 @@
     st.seccion = seccion; st.vista = SECCIONES[seccion].tabs[0][0];
     if (seccion === 'aps' && filtro) st.fa = filtro;
     if (seccion === 'pld' && filtro) st.fp = filtro;
+    if (seccion === 'acc') { st.eq = st.eq || []; }
     var S = SECCIONES[seccion];
     q('eyebrow').innerHTML = I.sparkle + esc(S.eyebrow); q('titulo').innerHTML = esc(S.t1) + '<em>' + esc(S.t2) + '</em>'; q('sub').textContent = S.sub;
     q('icoRef').innerHTML = I.ref;
@@ -475,11 +520,15 @@
       return [['revision', 'warn', 'reloj', 'Por revisar', c.EN_REVISION || 0], ['sin_terminar', 'mute', 'lapiz', 'Sin terminar', c.SIN_TERMINAR || 0], ['completos', 'info', 'checkc', 'Completados', c.COMPLETO || 0],
         ['aprobados', 'ok', 'check', 'Aprobados', c.APROBADO || 0], ['cancelados', 'bad', 'xc', 'Cancelados', c.CANCELADO || 0]];
     }
+    if (st.seccion === 'acc') {
+      var E = st.eq || [], na = E.filter(function (x) { return x.activo; }).length, nc = E.filter(function (x) { return x.activo && x.coordinador; }).length;
+      return [['todos', 'info', 'equipo', 'Personas', E.length], ['activos', 'ok', 'check', 'Con acceso', na], ['coords', 'warn', 'pld', 'Coordinación', nc], ['baja', 'bad', 'candado', 'Sin acceso', E.length - na]];
+    }
     var n = { EN_REVISION: 0, OBSERVADO: 0, REVISADO: 0, SIN_ENVIAR: 0 }; st.pld.forEach(function (r) { n[r.estado] = (n[r.estado] || 0) + 1; });
     return [['revision', 'warn', 'reloj', 'Por revisar', n.EN_REVISION], ['observados', 'bad', 'alertas', 'Observados', n.OBSERVADO], ['revisados', 'ok', 'check', 'Revisados', n.REVISADO], ['sin_enviar', 'mute', 'lapiz', 'Sin enviar', n.SIN_ENVIAR]];
   }
   function pintaKpis() {
-    var defs = kpiDefs(), act = st.seccion === 'aps' ? st.fa : st.fp, mostrar = st.vista === 'aps' || st.vista === 'pld';
+    var defs = kpiDefs(), act = st.seccion === 'aps' ? st.fa : (st.seccion === 'acc' ? st.fe : st.fp), mostrar = st.vista === 'aps' || st.vista === 'pld' || st.vista === 'acc';
     var sig = JSON.stringify([defs, act, mostrar]); if (sig === st.kpiSig) return; st.kpiSig = sig;
     q('kpis').innerHTML = defs.map(function (k) {
       return '<button type="button" class="cx-kpi t-' + k[1] + (k[0] === 'revision' && k[4] > 0 ? ' hot' : '') + (mostrar && act === k[0] ? ' on' : '') + '" data-kf="' + k[0] + '"><span class="ic">' + I[k[2]] + '</span><span><b data-k="' + k[0] + '" data-n="' + k[4] + '">' + k[4] + '</b><span class="l">' + k[3] + '</span></span></button>'; }).join('');
@@ -492,10 +541,12 @@
   function pintaTabs() {
     var T = SECCIONES[st.seccion].tabs, pend = st.seccion === 'aps' ? (st.conteos.EN_REVISION || 0) : 0;
     var html = T.map(function (v) { return '<button type="button" class="cx-tab' + (st.vista === v[0] ? ' on' : '') + '" data-t="' + v[0] + '">' + I[v[2]] + '<span>' + v[1] + '</span>' + (v[0] === 'alertas' && st.res && (st.res.ajustesProximos.length + st.res.vigenciasPorVencer.length) ? '<span class="n alerta">' + (st.res.ajustesProximos.length + st.res.vigenciasPorVencer.length) + '</span>' : '') + '</button>'; }).join('');
-    var tb = q('tabs'); if (tb.__h !== html) { tb.__h = html; tb.innerHTML = html; }
+    if (st.seccion === 'acc') html = '';
+    var tb = q('tabs'); if (tb.__h !== html) { tb.__h = html; tb.innerHTML = html; tb.style.display = html ? '' : 'none'; }
   }
   function cargar(anim) {
     pintaTabs(); pintaKpis();
+    if (st.vista === 'acc') return vAcc(anim);
     if (st.vista === 'aps') return vAps(anim);
     if (st.vista === 'alertas') return vAlertas();
     if (st.vista === 'pld') return vPld(anim);
@@ -660,6 +711,71 @@
     if (st.aud && q('chips') && st.vista === 'aud') hacer(); else { st.aud = null; q('vista').innerHTML = ''; hacer(); }
   }
 
+
+  /* ── Accesos del equipo ── */
+  var FE = [['todos', 'Todos'], ['activos', 'Con acceso'], ['coords', 'Coordinación'], ['baja', 'Sin acceso']];
+  function vAcc(anim, silencio) {
+    srv('ASESORES_listar', [], function (res) {
+      var nuevo = cambiaDatos('acc', res);
+      st.eq = res.equipo; st.yo = res.yo; st.bloqueoActivo = res.bloqueoActivo;
+      if (st.vista !== 'acc') return;
+      pintaKpis();
+      if (!nuevo && silencio) return;
+      pintaAcc(anim !== false && !silencio);
+    }, null, silencio ? 'silencio' : 'skel');
+  }
+  function armaAccBase() {
+    q('vista').innerHTML = '<div class="cx-warnbar" data-r="aviso" style="display:none"></div><div class="cx-bar"><div class="cx-top2"><div class="cx-sbox">' + I.lupa.replace('<svg', '<svg class="lupa"') + '<input class="cx-search" data-s="e" type="search" placeholder="Buscar por nombre o correo…" value="' + esc(st.textoE) + '" autocomplete="off"><button type="button" class="cx-sx' + (st.textoE ? ' on' : '') + '" data-a="limpiaE" aria-label="Borrar búsqueda">' + I.x + '</button></div><button type="button" class="cx-btn pri cx-add" data-a="nuevoAsesor">' + I.userplus + 'Agregar asesor</button></div><div class="cx-chips" data-r="chips"></div></div><div class="cx-cnt" data-r="cnt"></div><div class="cx-grid" data-r="lista"></div>';
+  }
+  function tarjetaAcc(x) {
+    var yo = x.correo === st.yo, bloqueado = yo || x.dueno;
+    var tags = '<span class="cx-tag ' + (x.coordinador ? 'coord' : '') + '">' + (x.coordinador ? I.pld.replace('<svg', '<svg width="14" height="14"') + 'Coordinación' : I.user.replace('<svg', '<svg width="14" height="14"') + 'Asesor') + '</span>' +
+      '<span class="cx-tag ' + (x.activo ? 'on' : 'off') + '">' + (x.activo ? 'Con acceso' : 'Sin acceso') + '</span>' + (yo ? '<span class="cx-tag you">Tu cuenta</span>' : (x.dueno ? '<span class="cx-tag you">Cuenta dueña del sistema</span>' : ''));
+    return '<article class="cx-pc' + (x.activo ? '' : ' baja') + '"><div class="cx-top"><span class="cx-av">' + esc(ini(x.nombre || x.correo)) + '</span><div class="cx-tt"><h3>' + esc(x.nombre || 'Sin nombre') + '</h3><span class="mail">' + esc(x.correo) + '</span></div></div>' +
+      '<div class="cx-tags">' + tags + '</div>' +
+      '<div class="cx-last">' + I.reloj + '<span>' + (x.ultimo ? 'Última actividad registrada ' + esc(hace(x.ultimo)) : 'Sin actividad registrada todavía') + '</span></div>' +
+      '<div class="cx-pa"><button type="button" class="cx-tg ' + (x.activo ? 'on' : 'off') + '" role="switch" aria-checked="' + (x.activo ? 'true' : 'false') + '" data-tg="' + esc(x.correo) + '"' + (bloqueado ? ' disabled title="No puedes darte de baja a ti mismo"' : '') + '><span class="trk"><i></i></span><span>' + (x.activo ? 'Acceso activo' : 'Sin acceso') + '</span></button>' +
+      '<button type="button" class="cx-btn cx-ed" data-edit="' + esc(x.correo) + '" aria-label="Editar a ' + esc(x.nombre || x.correo) + '" title="Editar">' + I.lapiz + '</button></div></article>';
+  }
+  function pintaAcc(anim) {
+    if (!q('lista')) armaAccBase();
+    var av = q('aviso'); av.style.display = st.bloqueoActivo ? 'none' : ''; av.innerHTML = st.bloqueoActivo ? '' : I.alertas + '<span><b>El bloqueo de acceso está apagado</b> (BLOQUEO_ACCESO en false en la configuración). Mientras esté así, dar de baja a alguien aquí NO le impide entrar a Pre PLD ni a la consola.</span>';
+    var t = st.textoE.toLowerCase().trim(), base = (st.eq || []).filter(function (x) { return !t || (x.nombre + ' ' + x.correo).toLowerCase().indexOf(t) >= 0; });
+    var F = { todos: function () { return true; }, activos: function (x) { return x.activo; }, coords: function (x) { return x.activo && x.coordinador; }, baja: function (x) { return !x.activo; } };
+    var rows = base.filter(F[st.fe] || F.todos);
+    q('chips').innerHTML = FE.map(function (c) { return '<button type="button" class="cx-chip' + (st.fe === c[0] ? ' on' : '') + '" data-fe="' + c[0] + '">' + c[1] + '<span class="n">' + base.filter(F[c[0]]).length + '</span></button>'; }).join('');
+    q('cnt').textContent = rows.length ? rows.length + (rows.length === 1 ? ' persona' : ' personas') : '';
+    if (anim) animar();
+    var L = q('lista'); L.className = rows.length ? 'cx-grid' : ''; 
+    L.innerHTML = rows.length ? rows.map(tarjetaAcc).join('') : vacio('equipo', t ? 'Sin coincidencias' : 'Nadie en esta vista', t ? 'Ninguna persona coincide con «' + st.textoE + '».' : 'Cuando agregues o desactives personas, aparecerán aquí.');
+  }
+  function formAsesor(x) {
+    var nuevo = !x, v = x || { correo: '', nombre: '', genero: '', coordinador: false, activo: true };
+    var c = q('dlgC'); dlgCb = null;
+    c.innerHTML = '<div class="ic">' + (nuevo ? I.userplus : I.lapiz) + '</div><h3>' + (nuevo ? 'Agregar asesor' : 'Editar persona') + '</h3><p>' + (nuevo ? 'Podrá entrar a la plataforma con su cuenta de Google en cuanto la agregues.' : 'Los cambios aplican en su siguiente acción dentro de la plataforma.') + '</p>' +
+      '<div class="cx-fld"><label for="cxN">Nombre completo</label><input id="cxN" type="text" maxlength="80" placeholder="Ej. Ana Pérez" value="' + esc(v.nombre) + '" autocomplete="off"></div>' +
+      '<div class="cx-fld"><label for="cxC">Correo de Google</label><input id="cxC" type="email" placeholder="nombre@hipoo.mx" value="' + esc(v.correo) + '"' + (nuevo ? '' : ' disabled') + ' autocomplete="off" inputmode="email"></div>' +
+      '<div class="cx-fld"><label for="cxG">Para saludarle (Bienvenido / Bienvenida)</label><select id="cxG"><option value="">Que el sistema lo deduzca del nombre</option><option value="f"' + (v.genero === 'f' ? ' selected' : '') + '>Mujer: «Bienvenida»</option><option value="m"' + (v.genero === 'm' ? ' selected' : '') + '>Hombre: «Bienvenido»</option></select></div>' +
+      '<div class="cx-fld"><label>Rol</label><div class="cx-seg" data-r="seg"><button type="button" data-rol="0" class="' + (v.coordinador ? '' : 'on') + '">Asesor</button><button type="button" data-rol="1" class="' + (v.coordinador ? 'on' : '') + '">Coordinación</button></div><div class="cx-hint">La coordinación revisa y aprueba contratos y Pre PLD, y administra estos accesos.</div></div>' +
+      '<div class="cx-derr" data-r="derr"></div><div class="cx-dbtn"><button type="button" class="cx-btn" data-a="dlgNo">Cancelar</button><button type="button" class="cx-btn pri" data-a="dlgSi">' + I.check + (nuevo ? 'Agregar' : 'Guardar') + '</button></div>';
+    c._o = { valida: function () {
+      var nombre = c.querySelector('#cxN').value.trim(), correo = c.querySelector('#cxC').value.trim().toLowerCase(), e = c.querySelector('[data-r="derr"]');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { e.textContent = 'Escribe un correo válido (ej. nombre@hipoo.mx).'; e.classList.add('on'); c.querySelector('#cxC').focus(); return null; }
+      if (nuevo && !nombre) { e.textContent = 'Escribe el nombre de la persona.'; e.classList.add('on'); c.querySelector('#cxN').focus(); return null; }
+      return { correo: correo, nombre: nombre, genero: c.querySelector('#cxG').value, coordinador: c.querySelector('[data-rol="1"]').classList.contains('on'), activo: v.activo !== false };
+    } };
+    dlgCb = function (acc) {
+      srv('ASESORES_guardar', [acc], function (r) { toast(r.nuevo ? 'Asesor agregado: ya puede entrar.' : 'Cambios guardados.'); vAcc(false, true); }, 'Guardando…');
+    };
+    q('dlg').classList.add('on'); setTimeout(function () { c.querySelector(nuevo ? '#cxN' : '#cxN').focus(); }, 60);
+  }
+  function cambiaAcceso(correo) {
+    var x = (st.eq || []).filter(function (y) { return y.correo === correo; })[0]; if (!x) return;
+    var aplica = function () { srv('ASESORES_guardar', [{ correo: x.correo, nombre: x.nombre, genero: x.genero, coordinador: x.coordinador, activo: !x.activo }], function () { toast(x.activo ? 'Acceso desactivado: ' + (x.nombre || x.correo) : 'Acceso activado: ' + (x.nombre || x.correo)); vAcc(false, true); }, x.activo ? 'Desactivando acceso…' : 'Activando acceso…'); };
+    if (!x.activo) return aplica();
+    dialogo({ titulo: '¿Desactivar el acceso?', icono: 'candado', tono: 'bad', texto: '<b>' + esc(x.nombre || x.correo) + '</b> verá la pantalla de acceso restringido en su siguiente acción y no podrá usar nada de la plataforma. Sus contratos y documentos se conservan, y puedes reactivarlo cuando quieras.', boton: 'Sí, desactivar', btnIcono: 'candado', btnClase: 'dgsolid' }, aplica);
+  }
+
   /* ── Acciones ── */
   function abrirAps(id) { if (window.irA) window.irA('aps'); if (window.APS_UI && APS_UI.abrir) APS_UI.abrir(id); }
   function descargaPdf(id) {
@@ -701,7 +817,7 @@
   function cierraMenus() { ROOT.querySelectorAll('.cx-more.on').forEach(function (m) { m.classList.remove('on'); }); }
   function autoRefresco() {
     if (document.hidden || !ROOT.offsetParent || st.ocupado || q('dlg').classList.contains('on') || q('drawer').classList.contains('on') || ROOT.querySelector('.cx-more.on') || ROOT.querySelector('.cx-busy.on')) return;
-    if (st.vista === 'aps') vAps(false, true); else if (st.vista === 'pld') vPld(false, true);
+    if (st.vista === 'aps') vAps(false, true); else if (st.vista === 'pld') vPld(false, true); else if (st.vista === 'acc') vAcc(false, true);
   }
 
   /* ── Eventos ── */
@@ -711,7 +827,12 @@
     if (g('data-more')) { var m = ROOT.querySelector('[data-menu="' + g('data-more').replace(/"/g, '') + '"]'), abierto = m && m.classList.contains('on'); cierraMenus(); if (m && !abierto) m.classList.add('on'); return; }
     if (!b.closest('.cx-more')) cierraMenus(); else cierraMenus();
     if (g('data-t')) { st.vista = g('data-t'); st.kpiSig = ''; q('vista').innerHTML = ''; cargar(true); }
-    else if (g('data-kf')) { var k = g('data-kf'); if (st.seccion === 'aps') { st.fa = k; if (st.vista !== 'aps') { st.vista = 'aps'; q('vista').innerHTML = ''; st.kpiSig = ''; cargar(true); } else { st.kpiSig = ''; pintaKpis(); pintaAps(true); } } else { st.fp = k; if (st.vista !== 'pld') { st.vista = 'pld'; q('vista').innerHTML = ''; st.kpiSig = ''; cargar(true); } else { st.kpiSig = ''; pintaKpis(); pintaPld(true); } } }
+    else if (g('data-kf')) { var k = g('data-kf'); if (st.seccion === 'acc') { st.fe = k; st.kpiSig = ''; pintaKpis(); pintaAcc(true); } else if (st.seccion === 'aps') { st.fa = k; if (st.vista !== 'aps') { st.vista = 'aps'; q('vista').innerHTML = ''; st.kpiSig = ''; cargar(true); } else { st.kpiSig = ''; pintaKpis(); pintaAps(true); } } else { st.fp = k; if (st.vista !== 'pld') { st.vista = 'pld'; q('vista').innerHTML = ''; st.kpiSig = ''; cargar(true); } else { st.kpiSig = ''; pintaKpis(); pintaPld(true); } } }
+    else if (g('data-fe')) { st.fe = g('data-fe'); st.kpiSig = ''; pintaKpis(); pintaAcc(true); }
+    else if (g('data-tg')) cambiaAcceso(g('data-tg'))
+    else if (g('data-edit')) formAsesor((st.eq || []).filter(function (y) { return y.correo === g('data-edit'); })[0])
+    else if (g('data-rol') != null && b.closest('[data-r="seg"]')) { b.parentNode.querySelectorAll('button').forEach(function (z) { z.classList.toggle('on', z === b); }); }
+    else if (g('data-a') === 'nuevoAsesor') formAsesor(null)
     else if (g('data-fa')) { st.fa = g('data-fa'); st.kpiSig = ''; pintaKpis(); pintaAps(true); }
     else if (g('data-fp')) { st.fp = g('data-fp'); st.kpiSig = ''; pintaKpis(); pintaPld(true); }
     else if (g('data-fu')) { st.fu = g('data-fu'); vAud(); }
@@ -727,13 +848,14 @@
     else if (g('data-a') === 'refrescar') { st.kpiSig = ''; st.mods = null; cargar(false); }
     else if (g('data-a') === 'dlgNo') dlgCerrar();
     else if (g('data-a') === 'dlgSi') dlgOk();
-    else if (/^limpia[APMU]$/.test(g('data-a') || '')) { var c = g('data-a').slice(-1); if (c === 'A') { st.textoA = ''; vAps(false); } else if (c === 'P') { st.textoP = ''; var i = ROOT.querySelector('[data-s="p"]'); if (i) i.value = ''; b.classList.remove('on'); pintaPld(false); } else if (c === 'M') { st.textoM = ''; vMods(); } else { st.textoU = ''; vAud(); } var inp = ROOT.querySelector('.cx-search'); if (inp) { inp.value = ''; inp.focus(); } b.classList.remove('on'); }
+    else if (/^limpia[APMUE]$/.test(g('data-a') || '')) { var c = g('data-a').slice(-1); if (c === 'A') { st.textoA = ''; vAps(false); } else if (c === 'P') { st.textoP = ''; var i = ROOT.querySelector('[data-s="p"]'); if (i) i.value = ''; b.classList.remove('on'); pintaPld(false); } else if (c === 'M') { st.textoM = ''; vMods(); } else if (c === 'E') { st.textoE = ''; pintaAcc(false); } else { st.textoU = ''; vAud(); } var inp = ROOT.querySelector('.cx-search'); if (inp) { inp.value = ''; inp.focus(); } b.classList.remove('on'); }
   });
   ROOT.addEventListener('input', function (e) {
     var t = e.target, s = t.getAttribute && t.getAttribute('data-s');
     if (t.id === 'cxCampo') { var o = q('dlgC')._o || {}, n = t.value.trim().length; q('dlgC').querySelector('[data-r="dmCnt"]').textContent = t.value.length + ' / ' + (o.max || 500); q('dlgC').querySelector('[data-r="derr"]').classList.remove('on'); var mm = q('dlgC').querySelector('[data-r="dmMin"]'); if (o.min) mm.textContent = n >= o.min ? 'Listo' : 'Escribe al menos ' + o.min + ' caracteres'; return; }
     if (!s) return; var v = t.value, x = t.parentNode.querySelector('.cx-sx'); if (x) x.classList.toggle('on', !!v);
     clearTimeout(tmr);
+    if (s === 'e') { st.textoE = v; pintaAcc(false); return; }
     if (s === 'p') { st.textoP = v; pintaPld(false); return; }                 // los Pre PLD ya están en memoria: la búsqueda es instantánea
     if (s === 'm') { st.textoM = v; vMods(); var im = ROOT.querySelector('[data-s="m"]'); if (im) { im.focus(); im.setSelectionRange(v.length, v.length); } return; }
     tmr = setTimeout(function () { if (s === 'a') { st.textoA = v; vAps(false, true); } else { st.textoU = v; vAud(); } }, 420);

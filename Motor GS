@@ -174,17 +174,18 @@ function APS_correo_() {
 }
 function APS_usuario_() {
   var email = APS_correo_();
-  var info = email ? APS_asesores_()[email] : null;      // una sola lectura (con caché de segundos) de la hoja: de ahí salen nombre, género Y si es coordinador
+  var info = email ? APS_asesores_()[email] : null;
+  var baja = !!(email && APS_inactivos_()[email]);      // Activo = NO en la hoja: pierde también el rol de coordinador fijo      // una sola lectura (con caché de segundos) de la hoja: de ahí salen nombre, género Y si es coordinador
   // "Coordinador" por CUALQUIERA de dos caminos: 1) el arreglo COORDINADORES de aquí abajo (fijo: quitar a alguien
   // de ahí exige publicar una versión nueva, Implementar → Administrar implementaciones → Nueva versión); o
   // 2) la columna "Rol"/"Coordinador" de la pestaña "Asesores" (en vivo: quitarlo de la hoja basta, sin publicar nada,
   // igual que dar de baja a alguien en el panel de Accesos de LPB — se refleja en su siguiente operación).
-  var coord = APS_CONFIG.COORDINADORES.some(function (x) { return String(x).toLowerCase() === email; }) || !!(info && info.coordinador);
+  var coord = !baja && (APS_CONFIG.COORDINADORES.some(function (x) { return String(x).toLowerCase() === email; }) || !!(info && info.coordinador));
   var nombre = info ? info.nombre : '';
   var genero = (info && info.genero) || APS_generoNombre_(nombre);       // primero lo explícito (columna "Género"), si no hay, se adivina
   // "pdf" ya no es un permiso de todo-o-nada: el coordinador siempre puede; el asesor solo lo sabrá contrato por
   // contrato (ver accionesHtml() en el cliente y el candado real en APS_obtenerPdf() del servidor).
-  return { email: email, nombre: nombre, genero: genero, rol: coord ? 'coordinador' : 'asesor', pdf: coord, puedeAps: !!email && (coord || !!info) };
+  return { email: email, nombre: nombre, genero: genero, rol: coord ? 'coordinador' : 'asesor', pdf: coord, puedeAps: !!email && !baja && (coord || !!info), baja: baja };
 }
 /* Nombres femeninos frecuentes que NO terminan en "a" (la heurística por defecto solo acertaría los que sí). Lista
  * corta, pensada para México; no pretende cubrir todos los nombres. */
@@ -213,7 +214,7 @@ function APS_generoNombre_(nombre) {
 }
 var APS_RE_CORREO_ = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** Lee una tabla (matriz) y devuelve { correo: {nombre} }. Detecta el encabezado ("Correo"/"Email"), y omite a quien tenga Activo = NO. */
-function APS_parseAsesores_(filas) {
+function APS_parseAsesores_(filas, inactivos) {
   var res = {}, hdr = -1, cCorreo = -1, cNombre = -1, cActivo = -1, cGenero = -1, cRol = -1, i, j;
   if (!filas || !filas.length) return res;
   for (i = 0; i < Math.min(filas.length, 5) && hdr < 0; i++) {
@@ -237,7 +238,7 @@ function APS_parseAsesores_(filas) {
   for (i = hdr + 1; i < filas.length; i++) {
     var em = String(filas[i][cCorreo] === undefined ? '' : filas[i][cCorreo]).toLowerCase().trim();
     if (!APS_RE_CORREO_.test(em)) continue;
-    if (cActivo >= 0 && /^(no|n|0|false|falso|baja|inactivo|inactiva)$/i.test(String(filas[i][cActivo]).trim())) continue;
+    if (cActivo >= 0 && /^(no|n|0|false|falso|baja|inactivo|inactiva)$/i.test(String(filas[i][cActivo]).trim())) { if (inactivos) inactivos[em] = 1; continue; }      // Activo = NO / FALSE: queda anotado (el "no" explícito le gana a cualquier otra fuente)
     var g = cGenero >= 0 ? String(filas[i][cGenero]).trim().toLowerCase() : '';                 // columna "Género" opcional: M/F, Hombre/Mujer, Sr./Sra., etc.
     var esF = /^(f|mujer|fem|sra\.?|srita\.?|señora)/.test(g);                                   // se revisa primero "femenino": "mujer" también empieza con "m"
     var rolTxt = cRol >= 0 ? String(filas[i][cRol]).trim().toLowerCase() : '';                  // columna "Rol"/"Coordinador" opcional: "Coordinador"/"Admin", o "Sí"/"X" si la columna ya se llama "Coordinador"
@@ -257,26 +258,33 @@ function APS_parseAsesores_(filas) {
  * sección), no se abra la hoja de Google una vez POR CADA llamada al mismo tiempo — eso fue lo que provocó que la
  * pantalla se quedara cargando la primera vez. Dar de baja a alguien se sigue notando en cuestión de segundos, sin
  * publicar nada; ya no es "al instante exacto", pero es un precio pequeño a cambio de que la página no se cuelgue. */
-var APS_ASESORES_CACHE_SEG = 8;
+var APS_ASESORES_CACHE_SEG = 3;
+var APS_INACT_ = {};
 function APS_asesores_() {
   var cache = CacheService.getScriptCache(), c = cache.get('APS_ASESORES');
-  if (c) { try { return JSON.parse(c); } catch (e) { /* se recalcula */ } }
-  var mapa = {}, une = function (m) { Object.keys(m).forEach(function (k) { mapa[k] = m[k]; }); };
+  if (c) { try { var o = JSON.parse(c); APS_INACT_ = o.i || {}; return o.m || {}; } catch (e) { /* se recalcula */ } }
+  var mapa = {}, inact = {}, une = function (m) { Object.keys(m).forEach(function (k) { mapa[k] = m[k]; }); };
   (APS_CONFIG.ASESORES_AUTORIZADOS || []).forEach(function (e) { var k = String(e).toLowerCase().trim(); if (APS_RE_CORREO_.test(k)) mapa[k] = { nombre: '', coordinador: false }; });
   try {
     if (APS_CONFIG.ASESORES_HOJA_ID) {
       var ss = SpreadsheetApp.openById(APS_CONFIG.ASESORES_HOJA_ID);
       var sh = APS_CONFIG.ASESORES_HOJA_NOMBRE ? ss.getSheetByName(APS_CONFIG.ASESORES_HOJA_NOMBRE) : ss.getSheets()[0];
-      if (sh && sh.getLastRow() > 0) une(APS_parseAsesores_(sh.getDataRange().getValues()));
+      if (sh && sh.getLastRow() > 0) une(APS_parseAsesores_(sh.getDataRange().getValues(), inact));
     }
   } catch (e) { Logger.log('No se pudo leer el archivo de asesores autorizados: ' + e.message); }
   try {
     var pr = PropertiesService.getScriptProperties().getProperty('APS_HOJA_ID');
-    if (pr) { var interna = SpreadsheetApp.openById(pr).getSheetByName('Asesores'); if (interna && interna.getLastRow() > 0) une(APS_parseAsesores_(interna.getDataRange().getValues())); }
+    if (pr) { var interna = SpreadsheetApp.openById(pr).getSheetByName('Asesores'); if (interna && interna.getLastRow() > 0) une(APS_parseAsesores_(interna.getDataRange().getValues(), inact)); }
   } catch (e) { Logger.log('No se pudo leer la pestaña Asesores: ' + e.message); }
-  try { cache.put('APS_ASESORES', JSON.stringify(mapa), APS_ASESORES_CACHE_SEG); } catch (e) { /* sin caché: no pasa nada, solo se vuelve a leer la próxima vez */ }
+  Object.keys(inact).forEach(function (k) { delete mapa[k]; });      // quien tenga Activo = NO en la hoja queda fuera, aunque aparezca en otra fuente
+  APS_INACT_ = inact;
+  try { cache.put('APS_ASESORES', JSON.stringify({ m: mapa, i: inact }), APS_ASESORES_CACHE_SEG); } catch (e) { /* sin caché: no pasa nada, solo se vuelve a leer la próxima vez */ }
   return mapa;
 }
+/** Cuentas dadas de baja de forma explícita (Activo = NO / FALSE) en la hoja. */
+function APS_inactivos_() { APS_asesores_(); return APS_INACT_ || {}; }
+/** Borra el caché de asesores y del panel: un cambio de acceso se nota de inmediato. */
+function APS_invalidaAsesores_() { try { var c = CacheService.getScriptCache(); c.remove('APS_ASESORES'); c.put('APS_PANEL_V', String(new Date().getTime()), 21600); } catch (e) { } }
 /** TODA la coordinación: el arreglo fijo COORDINADORES + quien tenga Rol "Coordinador" en la hoja Asesores. Úsala para correos y permisos de Drive. */
 function APS_coordinadores_() {
   var lista = {};
@@ -308,7 +316,7 @@ function APS_acceso_() {
   try { dueno = String(Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) { dueno = ''; }
   if (APS_CONFIG.BLOQUEO_ACCESO === false) return { ok: true, email: email };
   if (!email) return { ok: false, email: '', motivo: 'identidad' };
-  if (dueno && email === dueno) return { ok: true, email: email };
+  if (dueno && email === dueno && !APS_inactivos_()[email]) return { ok: true, email: email };      // el dueño siempre entra, salvo que él mismo se dé de baja en la hoja (sirve para probar el bloqueo)
   if (APS_usuario_().puedeAps) return { ok: true, email: email };
   var hayConfigurados = Object.keys(APS_asesores_()).length + (APS_CONFIG.COORDINADORES || []).length;
   if (!hayConfigurados) return { ok: true, email: email };

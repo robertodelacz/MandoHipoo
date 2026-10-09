@@ -271,3 +271,80 @@ function PLD_diagnostico() {
   Logger.log(out.join('\n'));
   return out.join('\n');
 }
+
+/* ═════════════ ACCESOS DEL EQUIPO (pestaña «Asesores», administrada desde la pantalla) ═════════════
+ * La coordinación ve a todo el equipo, agrega asesores nuevos, da de baja o reactiva, y cambia el rol, sin abrir la hoja.
+ * Todo se escribe en la pestaña «Asesores» (la misma que ya usaba el sistema), así que editar la hoja a mano o usar esta pantalla es equivalente.
+ * Baja (Activo = NO) = fuera de TODA la plataforma en su siguiente operación (la pantalla de acceso restringido). */
+
+var ASES_RE_NO_ = /^(no|n|0|false|falso|baja|inactivo|inactiva)$/i;
+/** Ubica las columnas de la pestaña por el texto del encabezado (igual que APS_parseAsesores_); crea las que falten al final. */
+function ASES_hoja_() {
+  var sh = APS_hojaAux_('Asesores', ['Correo', 'Nombre', 'Género', 'Rol', 'Activo']);
+  var ult = Math.max(1, sh.getLastColumn()), hdr = sh.getRange(1, 1, 1, ult).getValues()[0].map(function (v) { return String(v).toLowerCase().trim(); });
+  var busca = function (re) { for (var i = 0; i < hdr.length; i++) if (re.test(hdr[i])) return i + 1; return 0; };
+  var C = { correo: busca(/^(correo|e-?mail|mail|usuario)/), nombre: busca(/^nombre/), genero: busca(/^(genero|género|sexo|trato)/), rol: busca(/^(rol|tipo|perfil|coordinador)/), activo: busca(/^(activo|estatus|estado|vigente)/) };
+  if (!C.correo) throw new Error('La pestaña «Asesores» no tiene una columna «Correo» en la fila 1.');
+  [['nombre', 'Nombre'], ['genero', 'Género'], ['rol', 'Rol'], ['activo', 'Activo']].forEach(function (p) {
+    if (!C[p[0]]) { ult++; sh.getRange(1, ult).setValue(p[1]).setFontWeight('bold'); C[p[0]] = ult; }
+  });
+  return { sh: sh, C: C };
+}
+function ASES_esCoord_(v) { return /coord|admin|^(si|sí|s|x|1|true|yes)$/.test(String(v).trim().toLowerCase()); }
+/** Equipo completo para la pantalla: filas de la pestaña + cuentas que entran por otra vía (arreglo fijo de coordinadores, archivo externo). */
+function ASESORES_listar() {
+  APS_requiereAdmin_();
+  var H = ASES_hoja_(), sh = H.sh, C = H.C, n = Math.max(0, sh.getLastRow() - 1), rows = n ? sh.getRange(2, 1, n, sh.getLastColumn()).getValues() : [];
+  var dueno = ''; try { dueno = String(Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) { }
+  var vistos = {}, lista = [];
+  rows.forEach(function (r, i) {
+    var em = String(r[C.correo - 1] || '').toLowerCase().trim(); if (!APS_RE_CORREO_.test(em) || vistos[em]) return; vistos[em] = 1;
+    var act = r[C.activo - 1], g = String(r[C.genero - 1] || '').trim().toLowerCase();
+    lista.push({ correo: em, nombre: String(r[C.nombre - 1] || '').trim(), genero: /^(f|mujer|fem|sra|srita|señora)/.test(g) ? 'f' : (/^(m|h|masc|hombre|sr|señor)/.test(g) ? 'm' : ''),
+      coordinador: ASES_esCoord_(r[C.rol - 1]), activo: !(String(act).trim() !== '' && ASES_RE_NO_.test(String(act).trim())), fila: i + 2, fuente: 'hoja', dueno: em === dueno });
+  });
+  (APS_CONFIG.COORDINADORES || []).forEach(function (c) {
+    var em = String(c).toLowerCase().trim(); if (!APS_RE_CORREO_.test(em) || vistos[em]) return; vistos[em] = 1;
+    lista.push({ correo: em, nombre: '', genero: '', coordinador: true, activo: true, fila: 0, fuente: 'fijo', dueno: em === dueno });
+  });
+  var activos = {}; try { activos = APS_asesores_(); } catch (e) { }
+  Object.keys(activos).forEach(function (em) { if (vistos[em]) return; vistos[em] = 1; lista.push({ correo: em, nombre: activos[em].nombre || '', genero: activos[em].genero || '', coordinador: !!activos[em].coordinador, activo: true, fila: 0, fuente: 'externo', dueno: em === dueno }); });
+  // Último movimiento conocido de cada cuenta (para ver quién ya no usa la plataforma)
+  var ult = {};
+  try {
+    var aud = APS_hojaAux_('Auditoria', APS_AUD_COLS), na = Math.min(aud.getLastRow() - 1, 1500);
+    if (na > 0) aud.getRange(aud.getLastRow() - na + 1, 1, na, 2).getValues().forEach(function (v) { var e = String(v[1]).toLowerCase(); if (e) ult[e] = String(v[0]); });
+  } catch (e) { }
+  lista.forEach(function (x) { x.ultimo = ult[x.correo] || ''; });
+  lista.sort(function (a, b) { return (b.activo - a.activo) || (b.coordinador - a.coordinador) || String(a.nombre || a.correo).localeCompare(String(b.nombre || b.correo)); });
+  return { equipo: lista, yo: APS_correo_(), bloqueoActivo: APS_CONFIG.BLOQUEO_ACCESO !== false };
+}
+/** Alta o cambio de una cuenta. acc = { correo, nombre, genero ('m'|'f'|''), coordinador (bool), activo (bool) }. */
+function ASESORES_guardar(acc) {
+  var u = APS_requiereAdmin_();
+  acc = acc || {};
+  var correo = String(acc.correo || '').toLowerCase().trim();
+  if (!APS_RE_CORREO_.test(correo)) throw new Error('Escribe un correo válido (ej. nombre@hipoo.mx).');
+  var nombre = String(acc.nombre || '').trim().slice(0, 80), activo = acc.activo !== false, coord = !!acc.coordinador, g = acc.genero === 'f' ? 'F' : (acc.genero === 'm' ? 'M' : '');
+  var dueno = ''; try { dueno = String(Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) { }
+  if (correo === u.email && !activo) throw new Error('No puedes dar de baja tu propia cuenta desde aquí.');
+  if (correo === u.email && !coord) throw new Error('No puedes quitarte a ti mismo el rol de coordinación desde aquí.');
+  if (correo === dueno && !activo) throw new Error('Esa es la cuenta dueña del sistema: no se puede dar de baja desde la pantalla.');
+  return APS_conLock_(function () {
+    var H = ASES_hoja_(), sh = H.sh, C = H.C, n = Math.max(0, sh.getLastRow() - 1), fila = 0, nuevo = false, antes = '';
+    if (n) sh.getRange(2, C.correo, n, 1).getValues().forEach(function (v, i) { if (!fila && String(v[0]).toLowerCase().trim() === correo) fila = i + 2; });
+    // Si la columna «Activo» usa casillas (TRUE/FALSE), se respeta ese formato; si no, SI/NO.
+    var usaBool = false;
+    if (n) sh.getRange(2, C.activo, n, 1).getValues().some(function (v) { if (typeof v[0] === 'boolean') { usaBool = true; return true; } return String(v[0]).trim() !== ''; });
+    var valAct = usaBool ? activo : (activo ? 'SI' : 'NO');
+    if (!fila) { fila = Math.max(2, sh.getLastRow() + 1); nuevo = true; sh.getRange(fila, C.correo).setValue(correo); }
+    else antes = (ASES_RE_NO_.test(String(sh.getRange(fila, C.activo).getValue()).trim()) ? 'baja' : 'activo') + (ASES_esCoord_(sh.getRange(fila, C.rol).getValue()) ? '/coordinador' : '');
+    sh.getRange(fila, C.nombre).setValue(nombre || sh.getRange(fila, C.nombre).getValue());
+    if (g || nuevo || acc.genero === '') sh.getRange(fila, C.genero).setValue(g);
+    sh.getRange(fila, C.rol).setValue(coord ? 'Coordinador' : '');
+    sh.getRange(fila, C.activo).setValue(valAct);
+    SpreadsheetApp.flush(); APS_invalidaAsesores_();
+    APS_audit_('ACCESOS', nuevo ? 'ALTA_ACCESO' : (activo ? 'ACCESO_ACTIVO' : 'ACCESO_BAJA'), correo, (nuevo ? 'Alta' : 'Antes: ' + antes) + ' · ahora: ' + (activo ? 'activo' : 'baja') + (coord ? '/coordinador' : ''));
+    return { ok: true, nuevo: nuevo, correo: correo };
+  });
+}

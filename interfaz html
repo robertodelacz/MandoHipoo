@@ -1148,9 +1148,11 @@
     #fxCanvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 2000; pointer-events: none; }
     .hm-novbtn.ring .ic { animation: fxCampana .9s ease-in-out; transform-origin: 50% 0; }
     @keyframes fxCampana { 0%, 100% { transform: rotate(0); } 15% { transform: rotate(18deg); } 30% { transform: rotate(-16deg); } 45% { transform: rotate(11deg); } 60% { transform: rotate(-8deg); } 75% { transform: rotate(4deg); } }
-    #splash .sp-logo { overflow: hidden; }
+    #splash .sp-logo { overflow: hidden; animation: none; opacity: 0; }
+    #splash.sp-ok .sp-logo { opacity: 1; animation: spIn .9s cubic-bezier(.2, .9, .25, 1) both; }
     #splash .sp-logo::after { content: ""; position: absolute; top: 0; bottom: 0; left: -70%; width: 45%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .9), transparent); transform: skewX(-20deg); animation: spBrillo 1.4s .9s ease-in-out both; }
     @keyframes spBrillo { to { left: 140%; } }
+    #splash:not(.sp-ok) .sp-logo::after { animation: none; }
     .sp-msg { position: relative; font: 600 13px 'Inter', sans-serif; color: #8fb3d9; transition: opacity .18s; letter-spacing: .3px; animation: spUp .6s .8s both; }
     .sp-p { position: absolute; bottom: -12px; border-radius: 50%; background: rgba(143, 225, 234, .55); pointer-events: none; animation: spSube linear infinite; }
     @keyframes spSube { from { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } to { transform: translateY(-105vh); opacity: 0; } }
@@ -1595,6 +1597,8 @@
    (en el navegador, sin tocar el archivo) para que el logo ocupe todo el ancho que se le da. Si algo falla, se usa la imagen tal cual. */
 window.HIPOO_LOGO = <?!= JSON.stringify(APS_logoDataUri_()).replace(/</g, '\\u003c') ?>;
 window.LOGO_SRC = window.HIPOO_LOGO || '';
+window.LOGO_OK = false;
+function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { window.dispatchEvent(new Event('hipoo-logo')); } catch (e) { } }
 (function () {
   function aplicar(src) { window.LOGO_SRC = src; var a = document.querySelectorAll('img[data-logo]'); for (var i = 0; i < a.length; i++) { a[i].src = src; } }
   function recorta(src, cors) {
@@ -1614,7 +1618,9 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
         var o = document.createElement('canvas'); o.width = cw; o.height = ch; o.getContext('2d').drawImage(c, x0, y0, cw, ch, 0, 0, cw, ch);
         aplicar(o.toDataURL('image/png'));
       } catch (e) { /* imagen de otro origen o sin permiso de lectura: se queda como está */ }
+      finally { logoListo(); }
     };
+    im.onerror = function () { logoListo(); };
     im.src = src;
   }
   if (window.HIPOO_LOGO) recorta(window.HIPOO_LOGO, false); else recorta('https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000', true);
@@ -1900,7 +1906,13 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     var visto = false; try { visto = window.sessionStorage.getItem('hm_splash') === '1'; } catch (e) { visto = false; }
     if (visto || /[?&]modulo=/.test(window.location.search)) { sp.parentNode.removeChild(sp); return; }
     try { window.sessionStorage.setItem('hm_splash', '1'); } catch (e) { /* sin almacenamiento: se verá en cada carga, sin problema */ }
-    document.getElementById('spLogo').innerHTML = '<img data-logo src="' + (window.LOGO_SRC || 'https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000') + '" alt="Hipoo" onerror="respaldoLogo(this)">';
+    // UN solo logo: se espera a que el recorte del margen termine (máx. 0.8 s) y recién entonces aparece, ya con su tamaño final.
+    // Sin data-logo a propósito: nada lo cambia después de mostrarse, para que no se vea un logo grande y luego otro.
+    var puesto = false;
+    function ponLogo() { if (puesto || !document.getElementById('spLogo')) return; puesto = true; window.removeEventListener('hipoo-logo', ponLogo);
+      document.getElementById('spLogo').innerHTML = '<img src="' + (window.LOGO_SRC || 'https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000') + '" alt="Hipoo" onerror="respaldoLogo(this)">';
+      sp.classList.add('sp-ok'); }
+    if (window.LOGO_OK) ponLogo(); else { window.addEventListener('hipoo-logo', ponLogo); setTimeout(ponLogo, 800); }
     document.body.classList.add('splash-on');
     var reducido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches, cerrado = false;
     function cerrar() { if (cerrado) return; cerrado = true; sp.classList.add('out'); document.body.classList.remove('splash-on'); setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900); }
@@ -1912,8 +1924,8 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     }
   })();
   var TABLERO_URL = <?!= APS_tableroUrlJson() ?>;      // solo trae valor si el usuario es coordinador Y ya está configurado
-  var TITULOS = { pld: 'Generar documento Pre PLD', aps: 'Generar contrato APS', revpld: 'Revisión de Pre PLD', revaps: 'Revisión de contratos APS', tablero: 'Tablero Hipoo' };
-  var CONTENEDOR = { pld: 'modulo-pld', aps: 'modulo-aps', revpld: 'modulo-consola', revaps: 'modulo-consola', tablero: 'modulo-tablero' };
+  var TITULOS = { pld: 'Generar documento Pre PLD', aps: 'Generar contrato APS', revpld: 'Revisión de Pre PLD', revaps: 'Revisión de contratos APS', revacc: 'Accesos del equipo', tablero: 'Tablero Hipoo' };
+  var CONTENEDOR = { pld: 'modulo-pld', aps: 'modulo-aps', revpld: 'modulo-consola', revaps: 'modulo-consola', revacc: 'modulo-consola', tablero: 'modulo-tablero' };
   function navAltura() { var n = document.getElementById('barra-nav'); if (n && n.offsetHeight) document.documentElement.style.setProperty('--navh', n.offsetHeight + 'px'); }
   window.addEventListener('resize', navAltura);
   /* Etiqueta cada celda con el nombre de su columna: en celular las tablas se muestran como tarjetas («Folio: …», «Estado: …»). */
@@ -1952,6 +1964,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     if (s === 'aps' && window.APS_UI) { APS_UI.activar(); }
     if (s === 'revaps' && window.CON) { CON.abrir('aps'); }
     if (s === 'revpld' && window.CON) { CON.abrir('pld'); }
+    if (s === 'revacc' && window.CON) { CON.abrir('acc'); }
     if (s === 'tablero' && window.TAB) { TAB.activar(); }
   }
   // El tablero es OTRA aplicación web de Google; Google no permite mostrarla dentro de esta página (protección propia de Google contra clickjacking).
@@ -1980,6 +1993,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     aps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 11.4 12 4.8l7.8 6.6V19a1.5 1.5 0 0 1-1.5 1.5H5.7A1.5 1.5 0 0 1 4.2 19z" fill="currentColor" fill-opacity=".16"/><path d="M2.8 12.2 12 4.4l9.2 7.8"/><path d="M10 20.5v-4.6a2 2 0 0 1 4 0v4.6"/></svg>',
     revaps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h7L18.5 8.5v11a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1z" fill="currentColor" fill-opacity=".16"/><path d="M13.5 3.5v5h5"/><path d="m9.1 14.4 2 2 3.8-4"/></svg>',
     revpld: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 4.5H6.5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-14a1 1 0 0 0-1-1h-2" fill="currentColor" fill-opacity=".16"/><rect x="8.5" y="3" width="7" height="3.4" rx="1.2" fill="#fff" fill-opacity=".0"/><path d="M9 11h6M9 14.5h6M9 18h3.5"/></svg>',
+    revacc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.4" fill="currentColor" fill-opacity=".14"/><path d="M2.8 19.5c.7-3.3 3.2-5 6.2-5s5.500 1.700 6.200 5"/><path d="M16 5.200a3.200 3.200 0 0 1 0 6.200M18.500 14.800c1.600.7 2.700 2.200 3 4.700"/></svg>',
     tablero: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="3.8" height="8" rx="1" fill="currentColor" fill-opacity=".16"/><rect x="10.1" y="4.5" width="3.8" height="15.5" rx="1" fill="currentColor" fill-opacity=".16"/><rect x="16.2" y="9" width="3.8" height="11" rx="1" fill="currentColor" fill-opacity=".16"/><path d="M3 20.5h18"/></svg>',
     go: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
     ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.500"/></svg>',
@@ -2050,6 +2064,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
       h += '<h2>Coordinación</h2><div class="hm-acc dos">' +
         tarjeta('revaps', 'Revisión de contratos APS', 'Estatus de cada contrato, Google Docs, PDF, alertas y auditoría.', { coord: true, badge: pAps }) +
         tarjeta('revpld', 'Revisión de Pre PLD', 'Documentos enviados a revisión, observaciones y bitácora de modificaciones.', { coord: true, badge: pPld }) +
+        tarjeta('revacc', 'Accesos del equipo', 'Agrega asesores nuevos y activa o desactiva el acceso a toda la plataforma.', { coord: true }) +
         (hayPantalla('tablero') ? tarjeta('tablero', 'Tablero Hipoo', 'Indicadores de la actividad inmobiliaria.' + (TABLERO_URL ? ' Se abre en una pestaña nueva.' : ''), { coord: true }) : '') + '</div>';
     }
     pon(host, h);
@@ -2206,6 +2221,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
   };
   window.APS_refrescarPendientes = refrescarPanel;     // los módulos lo llaman tras guardar, enviar, aprobar o cancelar: los números cambian sin recargar
   setInterval(function () { if (!document.hidden) refrescarPanel(); }, 25000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) refrescarPanel(); });      // al volver a la pestaña se revisa de inmediato (acceso, novedades)
   setInterval(function () { if (!document.hidden && HM.panel) { pintaFeed(); } }, 30000);       // solo para que "hace 3 min" avance
   document.addEventListener('visibilitychange', function () { if (!document.hidden) refrescarPanel(); });
 
