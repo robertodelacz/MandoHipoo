@@ -1036,7 +1036,6 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
       }).join('');
     }
     if (R.ign) h += '<p class="rv-ign">' + (VER_IGN ? 'Mostrando también los ' + R.ign + ' ignorados. ' : 'Hay ' + R.ign + ' aviso' + (R.ign === 1 ? '' : 's') + ' ignorado' + (R.ign === 1 ? '' : 's') + '. ') + '<button type="button" data-rver="1">' + (VER_IGN ? 'Ocultarlos' : 'Mostrarlos') + '</button></p>';
-    h += '<div class="rv-note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span><b>Reglas fijas, sin inteligencia artificial.</b> Todo se calcula aquí con los datos que ya tienes abiertos: no se envía nada a ningún servicio externo. Los avisos «Error» son casi seguros; «Revisar» pueden estar bien. Los que ignores no vuelven a contarse en este contrato durante esta sesión.</span></div>';
     $('aps_revBody').innerHTML = h;
   }
   function revisarAuto() {
