@@ -208,6 +208,10 @@
 #con-root .cx-pc .cx-top{align-items:center}
 #con-root .cx-pc .cx-tt h3{font-size:18px}
 #con-root .cx-pc .mail{display:block;margin-top:2px;font-size:13.5px;color:var(--muted);overflow-wrap:anywhere}
+#con-root .cx-avw{position:relative;flex:none;display:block}
+#con-root .cx-crown{position:absolute;top:-17px;right:-13px;width:34px;height:26px;transform:rotate(17deg);filter:drop-shadow(0 4px 5px rgba(120,70,0,.45));animation:cxCorona 3.2s ease-in-out infinite;pointer-events:none}
+#con-root .cx-crown svg{width:100%;height:100%}
+@keyframes cxCorona{0%,100%{transform:rotate(17deg) translateY(0)}50%{transform:rotate(12deg) translateY(-3px)}}
 #con-root .cx-tags{display:flex;flex-wrap:wrap;gap:8px}
 #con-root .cx-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font:800 12px 'Inter',sans-serif;background:#eef0fb;color:var(--navy)}
 #con-root .cx-tag svg{width:14px;height:14px}
@@ -423,7 +427,7 @@
     pld: { eyebrow: 'Coordinación · Pre PLD', t1: 'Revisión de ', t2: 'Pre PLD', sub: 'Documentos que los asesores enviaron a revisión: ábrelos, márcalos como revisados u obsérvalos. Incluye la bitácora de modificaciones y la auditoría.',
       tabs: [['pld', 'Revisión', 'pld'], ['mods', 'Modificaciones', 'mods'], ['aud', 'Auditoría', 'audit']] },
     acc: { eyebrow: 'Coordinación · Accesos', t1: 'Accesos del ', t2: 'equipo', sub: 'Quién puede entrar a la plataforma. Agrega asesores nuevos y activa o desactiva el acceso con un toque: la baja aplica a todo (contratos APS, Pre PLD y revisión) en su siguiente acción.',
-      tabs: [['acc', 'Equipo', 'equipo']] }
+      tabs: [['acc', 'Equipo', 'equipo'], ['aud', 'Registro de accesos', 'audit']] }
   };
   var st = { seccion: 'aps', vista: 'aps', fa: 'revision', fp: 'revision', textoA: '', textoP: '', textoU: '', textoM: '', textoE: '', fe: 'todos', eq: [], yo: '', bloqueoActivo: true, fu: 'todo',
     aps: [], total: 0, conteos: {}, pld: [], mods: null, aud: null, res: null, admin: '', prev: {}, kpiSig: '', firma: {}, ocupado: false };
@@ -541,8 +545,7 @@
   function pintaTabs() {
     var T = SECCIONES[st.seccion].tabs, pend = st.seccion === 'aps' ? (st.conteos.EN_REVISION || 0) : 0;
     var html = T.map(function (v) { return '<button type="button" class="cx-tab' + (st.vista === v[0] ? ' on' : '') + '" data-t="' + v[0] + '">' + I[v[2]] + '<span>' + v[1] + '</span>' + (v[0] === 'alertas' && st.res && (st.res.ajustesProximos.length + st.res.vigenciasPorVencer.length) ? '<span class="n alerta">' + (st.res.ajustesProximos.length + st.res.vigenciasPorVencer.length) + '</span>' : '') + '</button>'; }).join('');
-    if (st.seccion === 'acc') html = '';
-    var tb = q('tabs'); if (tb.__h !== html) { tb.__h = html; tb.innerHTML = html; tb.style.display = html ? '' : 'none'; }
+    var tb = q('tabs'); if (tb.__h !== html) { tb.__h = html; tb.innerHTML = html; }
   }
   function cargar(anim) {
     pintaTabs(); pintaKpis();
@@ -680,7 +683,7 @@
     CREAR: ['Creó un contrato', 'lapiz', 'pri', 'edit'], EDITAR: ['Editó el contrato', 'mods', 'pri', 'edit'], ENVIAR_REVISION: ['Envió a revisión', 'send', 'warn', 'envio'], APROBAR: ['Aprobó el contrato', 'check', 'ok', 'aprob'],
     CANCELAR: ['Canceló el contrato', 'xc', 'bad', 'cancel'], ELIMINAR: ['Eliminó un borrador', 'trash', 'bad', 'cancel'], DESCARTAR_BORRADOR: ['Descartó un borrador', 'trash', 'bad', 'cancel'], DESCARGA_PDF: ['Descargó el PDF', 'dl', 'info', 'docs'],
     COPIA_DOCS: ['Generó copia en Google Docs', 'doc', 'info', 'docs'], PDF_NO_COINCIDE: ['Alerta: el PDF no coincide con los datos', 'alertas', 'bad', 'alerta'], OBSERVAR: ['Observó el documento', 'alertas', 'warn', 'cancel'],
-    REVISADO: ['Marcó como revisado', 'check', 'ok', 'aprob'], DENEGADO: ['Intento de acceso bloqueado', 'candado', 'bad', 'alerta'], REPORTE: ['Reportó un problema', 'info', 'info', 'docs']
+    REVISADO: ['Marcó como revisado', 'check', 'ok', 'aprob'], ALTA_ACCESO: ['Agregó a una persona al equipo', 'userplus', 'ok', 'alta'], ACCESO_BAJA: ['Desactivó un acceso', 'candado', 'bad', 'baja'], ACCESO_ACTIVO: ['Activó o actualizó un acceso', 'check', 'ok', 'alta'], DENEGADO: ['Intento de entrar sin acceso', 'candado', 'bad', 'alerta'], REPORTE: ['Reportó un problema', 'info', 'info', 'docs']
   };
   var FU = [['todo', 'Todo'], ['envio', 'Envíos a revisión'], ['aprob', 'Aprobaciones'], ['cancel', 'Cancelaciones y observaciones'], ['edit', 'Creación y edición'], ['docs', 'Descargas y documentos'], ['alerta', 'Alertas']];
   function humaniza(a) { a = String(a || '').toLowerCase().replace(/_/g, ' '); return a.charAt(0).toUpperCase() + a.slice(1); }
@@ -696,15 +699,15 @@
     return h + '</div>';
   }
   function vAud() {
-    var modulo = st.seccion === 'pld' ? 'PLD' : 'APS';
+    var modulo = st.seccion === 'pld' ? 'PLD' : (st.seccion === 'acc' ? 'ACC' : 'APS'), FUx = modulo === 'ACC' ? [['todo', 'Todo'], ['alerta', 'Intentos bloqueados'], ['baja', 'Bajas'], ['alta', 'Altas y reactivaciones']] : FU;
     function pinta(rows) {
       var f = rows.filter(function (r) { var a = ACC[r.accion] || []; return st.fu === 'todo' || a[3] === st.fu; });
       var evs = f.map(function (r) { var a = ACC[r.accion] || [humaniza(r.accion), 'info', '', 'docs']; return { fecha: r.fecha, icono: a[1], tono: a[2], titulo: a[0], usuario: r.usuario, ref: r.ref, detalle: r.detalle, abrir: modulo === 'APS' && /^APS-/.test(r.ref) }; });
       var cnt = {}; rows.forEach(function (r) { var c = (ACC[r.accion] || [])[3] || 'docs'; cnt[c] = (cnt[c] || 0) + 1; });
       var tl = q('lista');
       if (!q('chips')) q('vista').innerHTML = '<div class="cx-bar"><div class="cx-sbox">' + I.lupa.replace('<svg', '<svg class="lupa"') + '<input class="cx-search" data-s="u" type="search" placeholder="Buscar por usuario, acción o referencia…" value="' + esc(st.textoU) + '" autocomplete="off"><button type="button" class="cx-sx' + (st.textoU ? ' on' : '') + '" data-a="limpiaU" aria-label="Borrar búsqueda">' + I.x + '</button></div><div class="cx-chips" data-r="chips"></div></div>' +
-        '<div class="cx-nota">' + I.info + '<span>Registro de quién hizo qué. Todo se ejecuta con la cuenta dueña del sistema, así que este registro es la evidencia de quién actuó.</span></div><div data-r="lista"></div>';
-      q('chips').innerHTML = FU.map(function (x) { return '<button type="button" class="cx-chip' + (st.fu === x[0] ? ' on' : '') + '" data-fu="' + x[0] + '">' + x[1] + '<span class="n">' + (x[0] === 'todo' ? rows.length : (cnt[x[0]] || 0)) + '</span></button>'; }).join('');
+        '<div class="cx-nota">' + I.info + '<span>' + (modulo === 'ACC' ? 'Aquí quedan los <b>intentos de entrar sin acceso</b> (una cuenta desactivada o desconocida; se registra uno cada 10 min por cuenta) y cada alta, baja o reactivación que se hace desde «Equipo». Es la misma hoja «Auditoria» del archivo de registro.' : 'Registro de quién hizo qué. Todo se ejecuta con la cuenta dueña del sistema, así que este registro es la evidencia de quién actuó.') + '</span></div><div data-r="lista"></div>';
+      q('chips').innerHTML = FUx.map(function (x) { return '<button type="button" class="cx-chip' + (st.fu === x[0] ? ' on' : '') + '" data-fu="' + x[0] + '">' + x[1] + '<span class="n">' + (x[0] === 'todo' ? rows.length : (cnt[x[0]] || 0)) + '</span></button>'; }).join('');
       animar(); q('lista').innerHTML = evs.length ? lineaTiempo(evs) : vacio('audit', st.textoU ? 'Sin coincidencias' : 'Sin movimientos', st.textoU ? 'Ningún movimiento coincide con tu búsqueda.' : 'Aún no hay movimientos en esta categoría.');
     }
     var hacer = function () { srv('CONSOLA_auditoria', [st.textoU, modulo], function (rows) { st.aud = rows; if (st.vista !== 'aud') return; pinta(rows); }, null, q('chips') ? 'silencio' : 'skel'); };
@@ -727,11 +730,15 @@
   function armaAccBase() {
     q('vista').innerHTML = '<div class="cx-warnbar" data-r="aviso" style="display:none"></div><div class="cx-bar"><div class="cx-top2"><div class="cx-sbox">' + I.lupa.replace('<svg', '<svg class="lupa"') + '<input class="cx-search" data-s="e" type="search" placeholder="Buscar por nombre o correo…" value="' + esc(st.textoE) + '" autocomplete="off"><button type="button" class="cx-sx' + (st.textoE ? ' on' : '') + '" data-a="limpiaE" aria-label="Borrar búsqueda">' + I.x + '</button></div><button type="button" class="cx-btn pri cx-add" data-a="nuevoAsesor">' + I.userplus + 'Agregar asesor</button></div><div class="cx-chips" data-r="chips"></div></div><div class="cx-cnt" data-r="cnt"></div><div class="cx-grid" data-r="lista"></div>';
   }
+  var REINAS = ['lizbethserrato@hipoo.mx'];
+  var CORONA = '<svg viewBox="0 0 34 26"><defs><linearGradient id="cxOro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe27a"/><stop offset="1" stop-color="#f5a623"/></linearGradient></defs><path d="M3 22 1 7l8 6 8-11 8 11 8-6-2 15z" fill="url(#cxOro)" stroke="#b8750a" stroke-width="1.400" stroke-linejoin="round"/><rect x="3" y="22" width="28" height="3.400" rx="1.400" fill="#f5a623" stroke="#b8750a" stroke-width="1.200"/><circle cx="1.500" cy="6.500" r="2" fill="#ff6b9a"/><circle cx="17" cy="2.500" r="2.200" fill="#35B7C5"/><circle cx="32.500" cy="6.500" r="2" fill="#ff6b9a"/><circle cx="17" cy="17" r="2" fill="#fff" fill-opacity=".85"/></svg>';
   function tarjetaAcc(x) {
     var yo = x.correo === st.yo, bloqueado = yo || x.dueno;
     var tags = '<span class="cx-tag ' + (x.coordinador ? 'coord' : '') + '">' + (x.coordinador ? I.pld.replace('<svg', '<svg width="14" height="14"') + 'Coordinación' : I.user.replace('<svg', '<svg width="14" height="14"') + 'Asesor') + '</span>' +
       '<span class="cx-tag ' + (x.activo ? 'on' : 'off') + '">' + (x.activo ? 'Con acceso' : 'Sin acceso') + '</span>' + (yo ? '<span class="cx-tag you">Tu cuenta</span>' : (x.dueno ? '<span class="cx-tag you">Cuenta dueña del sistema</span>' : ''));
-    return '<article class="cx-pc' + (x.activo ? '' : ' baja') + '"><div class="cx-top"><span class="cx-av">' + esc(ini(x.nombre || x.correo)) + '</span><div class="cx-tt"><h3>' + esc(x.nombre || 'Sin nombre') + '</h3><span class="mail">' + esc(x.correo) + '</span></div></div>' +
+    var reina = REINAS.indexOf(x.correo) >= 0, av = '<span class="cx-av">' + esc(ini(x.nombre || x.correo)) + '</span>';
+    if (reina) av = '<span class="cx-avw" title="La reina de la coordinación">' + av + '<span class="cx-crown" aria-hidden="true">' + CORONA + '</span></span>';
+    return '<article class="cx-pc' + (x.activo ? '' : ' baja') + '"><div class="cx-top">' + av + '<div class="cx-tt"><h3>' + esc(x.nombre || 'Sin nombre') + '</h3><span class="mail">' + esc(x.correo) + '</span></div></div>' +
       '<div class="cx-tags">' + tags + '</div>' +
       '<div class="cx-last">' + I.reloj + '<span>' + (x.ultimo ? 'Última actividad registrada ' + esc(hace(x.ultimo)) : 'Sin actividad registrada todavía') + '</span></div>' +
       '<div class="cx-pa"><button type="button" class="cx-tg ' + (x.activo ? 'on' : 'off') + '" role="switch" aria-checked="' + (x.activo ? 'true' : 'false') + '" data-tg="' + esc(x.correo) + '"' + (bloqueado ? ' disabled title="No puedes darte de baja a ti mismo"' : '') + '><span class="trk"><i></i></span><span>' + (x.activo ? 'Acceso activo' : 'Sin acceso') + '</span></button>' +
@@ -827,7 +834,7 @@
     if (g('data-more')) { var m = ROOT.querySelector('[data-menu="' + g('data-more').replace(/"/g, '') + '"]'), abierto = m && m.classList.contains('on'); cierraMenus(); if (m && !abierto) m.classList.add('on'); return; }
     if (!b.closest('.cx-more')) cierraMenus(); else cierraMenus();
     if (g('data-t')) { st.vista = g('data-t'); st.kpiSig = ''; q('vista').innerHTML = ''; cargar(true); }
-    else if (g('data-kf')) { var k = g('data-kf'); if (st.seccion === 'acc') { st.fe = k; st.kpiSig = ''; pintaKpis(); pintaAcc(true); } else if (st.seccion === 'aps') { st.fa = k; if (st.vista !== 'aps') { st.vista = 'aps'; q('vista').innerHTML = ''; st.kpiSig = ''; cargar(true); } else { st.kpiSig = ''; pintaKpis(); pintaAps(true); } } else { st.fp = k; if (st.vista !== 'pld') { st.vista = 'pld'; q('vista').innerHTML = ''; st.kpiSig = ''; cargar(true); } else { st.kpiSig = ''; pintaKpis(); pintaPld(true); } } }
+    else if (g('data-kf')) { var k = g('data-kf'); if (st.seccion === 'acc') { st.fe = k; st.kpiSig = ''; if (st.vista !== 'acc') { st.vista = 'acc'; q('vista').innerHTML = ''; cargar(true); } else { pintaKpis(); pintaAcc(true); } } else if (st.seccion === 'aps') { st.fa = k; if (st.vista !== 'aps') { st.vista = 'aps'; q('vista').innerHTML = ''; st.kpiSig = ''; cargar(true); } else { st.kpiSig = ''; pintaKpis(); pintaAps(true); } } else { st.fp = k; if (st.vista !== 'pld') { st.vista = 'pld'; q('vista').innerHTML = ''; st.kpiSig = ''; cargar(true); } else { st.kpiSig = ''; pintaKpis(); pintaPld(true); } } }
     else if (g('data-fe')) { st.fe = g('data-fe'); st.kpiSig = ''; pintaKpis(); pintaAcc(true); }
     else if (g('data-tg')) cambiaAcceso(g('data-tg'))
     else if (g('data-edit')) formAsesor((st.eq || []).filter(function (y) { return y.correo === g('data-edit'); })[0])

@@ -18,9 +18,9 @@
     @keyframes sube { from { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } to { transform: translateY(-105vh); opacity: 0; } }
     .card { position: relative; width: min(500px, 100%); background: #fff; border-radius: 28px; padding: 30px 32px 26px; text-align: center; box-shadow: 0 40px 90px -20px rgba(0, 0, 0, .7); animation: entra .7s cubic-bezier(.2, .8, .2, 1) both; }
     @keyframes entra { from { opacity: 0; transform: translateY(22px) scale(.97); } to { opacity: 1; transform: none; } }
-    .logo { display: inline-flex; align-items: center; justify-content: center; margin: 0 auto 36px; padding: 10px 22px; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px #e3e8f5, 0 10px 24px -14px rgba(26, 34, 74, .5); }
-    .logo img { display: block; height: 38px; width: auto; max-width: 190px; }
-    .logo b { font: 900 22px 'Montserrat', sans-serif; color: #35B7C5; letter-spacing: -.5px; }
+    .logo { display: inline-flex; align-items: center; justify-content: center; margin: 0 auto 30px; padding: 16px 32px; border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px #e3e8f5, 0 10px 24px -14px rgba(26, 34, 74, .5); }
+    .logo img { display: block; height: 72px; width: auto; max-width: 280px; }
+    .logo b { font: 900 34px 'Montserrat', sans-serif; color: #35B7C5; letter-spacing: -.5px; }
     .lock { width: 96px; height: 96px; margin: 0 auto 18px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 30% 25%, #fff6e3, #ffe2ad); color: #b36200; position: relative; animation: flota 3.2s ease-in-out infinite; }
     .lock::after { content: ""; position: absolute; inset: -7px; border-radius: 50%; border: 2px solid rgba(255, 176, 59, .55); animation: onda 2.6s ease-out infinite; }
     @keyframes flota { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
@@ -38,7 +38,7 @@
     .b svg { width: 22px; height: 22px; flex: none; }
     .nota { margin: 18px 0 0; font-size: 12.5px; line-height: 1.55; color: #7a85a8; }
     .pie { margin-top: 18px; padding-top: 14px; border-top: 1px solid #e8edf6; font: 700 11px 'Montserrat', sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #98a2c2; }
-    @media (max-width: 480px) { .card { padding: 26px 20px 22px; border-radius: 24px; } h1 { font-size: 26px; } }
+    @media (max-width: 480px) { .logo img { height: 60px; max-width: 220px; } .logo { padding: 14px 24px; } .card { padding: 26px 20px 22px; border-radius: 24px; } h1 { font-size: 26px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; } .p { display: none; } }
   </style>
 </head>
@@ -75,6 +75,24 @@
     <div class="pie">Hipoo — Mesa de control</div>
   </main>
   <script>
+    /* El archivo del logo trae mucho margen blanco: se recorta en el navegador para que ocupe todo el cuadro (si algo falla, se ve tal cual). */
+    (function () {
+      var img = document.querySelector('.logo img'); if (!img) return;
+      var im = new Image();
+      im.onload = function () {
+        try {
+          var w = im.naturalWidth, h = im.naturalHeight, c = document.createElement('canvas'); c.width = w; c.height = h; var x = c.getContext('2d'); x.drawImage(im, 0, 0);
+          var d = x.getImageData(0, 0, w, h).data, x0 = w, y0 = h, x1 = -1, y1 = -1, xx, yy, k;
+          for (yy = 0; yy < h; yy++) for (xx = 0; xx < w; xx++) { k = (yy * w + xx) * 4; if (d[k + 3] > 24 && !(d[k] > 242 && d[k + 1] > 242 && d[k + 2] > 242)) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; } }
+          if (x1 <= x0 || y1 <= y0) return;
+          var m = Math.round(Math.max(x1 - x0, y1 - y0) * 0.04); x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(w - 1, x1 + m); y1 = Math.min(h - 1, y1 + m);
+          var cw = x1 - x0 + 1, ch = y1 - y0 + 1; if (cw > w * 0.92 && ch > h * 0.92) return;
+          var o = document.createElement('canvas'); o.width = cw; o.height = ch; o.getContext('2d').drawImage(c, x0, y0, cw, ch, 0, 0, cw, ch);
+          img.src = o.toDataURL('image/png');
+        } catch (e) { /* se queda como está */ }
+      };
+      im.src = img.src;
+    })();
     (function () {
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       for (var i = 0; i < 14; i++) {

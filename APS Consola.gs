@@ -250,7 +250,7 @@ function CONSOLA_auditoria(texto, modulo) {
   var filas = sh.getRange(desde, 1, ult - desde + 1, 6).getValues().map(function (v) {
     return { fecha: String(v[0]), usuario: String(v[1]), modulo: String(v[2]), accion: String(v[3]), ref: String(v[4]), detalle: String(v[5]) };
   }).reverse();
-  return filas.filter(function (x) { return (!modulo || x.modulo === modulo) && (!q || [x.usuario, x.modulo, x.accion, x.ref, x.detalle].join(' ').toLowerCase().indexOf(q) >= 0); }).slice(0, 300);
+  return filas.filter(function (x) { return (!modulo || x.modulo === modulo || (modulo === 'ACC' && (x.modulo === 'ACCESO' || x.modulo === 'ACCESOS'))) && (!q || [x.usuario, x.modulo, x.accion, x.ref, x.detalle].join(' ').toLowerCase().indexOf(q) >= 0); }).slice(0, 300);
 }
 
 
