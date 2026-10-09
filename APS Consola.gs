@@ -87,7 +87,10 @@ function PLD_item_(b, entrada, mod) {
     comentario: r ? r.comentario : '', modificadoDespues: despues };
 }
 function PLD_items_() {
-  var b = PLD_bitacora_(), R = PLD_revisiones_(), mods = PLD_ultimasMods_();
+  var b = PLD_bitacora_(), R = PLD_revisiones_(), mods = PLD_ultimasMods_(), desde = String(APS_CONFIG.PLD_DESDE || '');
+  // Corte: los Pre PLD generados ANTES de implementar este sistema no cuentan (ni en contadores ni en listas). No se borra nada de la bitácora.
+  // Excepción: si alguien ya les dio seguimiento aquí (tienen fila en PLD_Revisiones), se conservan.
+  if (desde) b = b.filter(function (x) { return x.fecha >= desde || !!R.mapa[x.id]; });
   return b.map(function (x) { return PLD_item_(x, R.mapa[x.id], mods[x.id]); });
 }
 function PLD_ordenar_(lista) { return lista.sort(function (a, b) { return a.creado < b.creado ? 1 : -1; }); }
@@ -260,7 +263,7 @@ function CONSOLA_auditoria(texto, modulo) {
 function PLD_diagnostico() {
   var items = PLD_items_(), por = {};
   items.forEach(function (x) { (por[x.estado] = por[x.estado] || []).push(x); });
-  var out = ['Bitácora: ' + PLD_ssBitacora_().getName() + ' · total de documentos: ' + items.length];
+  var out = ['Bitácora: ' + PLD_ssBitacora_().getName() + ' · documentos en la bitácora: ' + PLD_bitacora_().length + ' · contados desde el corte (' + (APS_CONFIG.PLD_DESDE || 'sin corte') + '): ' + items.length];
   Object.keys(por).forEach(function (k) {
     out.push('', k + ' (' + por[k].length + ')');
     por[k].forEach(function (x) { out.push('  · ' + x.creado + ' · ' + x.nombre + ' · creó: ' + x.creador + (x.fechaEnvio ? ' · enviado: ' + x.fechaEnvio : '')); });

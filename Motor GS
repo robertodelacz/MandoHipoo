@@ -50,6 +50,7 @@ var APS_CONFIG = {
   TABLERO_URL: 'https://script.google.com/a/macros/cualli.mx/s/AKfycbyAcu60En08nsL68IWT1sPNEXcOC-KD8B6C6mMYbuzD4yNFI7LJG1lqo8JtT0BUYn5M8Q/exec',
   // Al enviar un Pre PLD a revisión, ¿se comparte el archivo con la coordinación como "comentarista"?
   PLD_COMPARTIR_REVISOR: true,
+  PLD_DESDE: '2026-10-08 18:45',      // «Corte» del Pre PLD: solo cuentan los documentos generados desde esta fecha y hora (aaaa-mm-dd hh:mm). Vacío ('') = cuenta toda la bitácora.
   // Logo "Logo Hipo.png" en Drive (se lee desde el servidor, no depende de enlaces públicos).
   LOGO_FILE_ID: '14hryvZUI3VK_xzaOnVjIc_x8MYVjns2R',
   // (Regla fija, ya no es una bandera de configuración: el asesor SOLO puede descargar el PDF de un contrato suyo
