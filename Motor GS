@@ -65,6 +65,9 @@ var APS_CONFIG = {
   // cuenta de Gmail, se puede usar aquí para que el remitente sea ese alias en vez de tu correo. Vacío = se queda
   // como está ahora (sale de robertodelacruz@cualli.mx con el nombre "APS Hipoo").
   CORREO_REMITENTE: '',
+  // true = los avisos salen de la dirección genérica «noreply» de tu dominio (sin tu foto ni tu nombre), igual que en los recordatorios de ajustes
+  // (usa la opción noReply de Google Workspace). Los reportes del botón «?» no la usan: ahí el «Responder» debe llegar a quien reportó.
+  CORREO_NO_RESPONDER: true,
   // ¿Puede una coordinadora aprobar un contrato que ella misma creó? true = sí (como estaba). false = no: lo debe aprobar otra persona de coordinación.
   PERMITIR_AUTOAPROBACION: true,
   // A quién le llegan los reportes de fallas que los usuarios envían con el botón de ayuda («?») de la pantalla principal.
@@ -590,6 +593,7 @@ function APS_notificar_(para, asunto, mensaje, opts) {
     // remitente real; si no (CORREO_REMITENTE vacío), Apps Script manda el correo desde esa misma cuenta (la tuya),
     // que es el comportamiento de hoy.
     if (APS_CONFIG.CORREO_REMITENTE) correo.from = APS_CONFIG.CORREO_REMITENTE;
+    else if (APS_CONFIG.CORREO_NO_RESPONDER && !opts.replyTo) correo.noReply = true;
     try { correo.inlineImages = { logoHipoo: DriveApp.getFileById(APS_CONFIG.LOGO_FILE_ID).getBlob().setName('logoHipoo') }; }
     catch (eLogo) { Logger.log('No se pudo adjuntar el logo al correo: ' + eLogo.message); }   // si falla, el correo se manda sin logo, no se cae el aviso
     if (dest.length) {
@@ -614,7 +618,7 @@ function APS_notificar_(para, asunto, mensaje, opts) {
 function CORREO_diagnostico() {
   APS_requiereAdmin_();
   var coord = APS_coordinadores_(), cupo = ''; try { cupo = MailApp.getRemainingDailyQuota(); } catch (e) { cupo = 'no disponible'; }
-  var r = { coordinacion_recibe_avisos: coord, reportes_a: APS_CONFIG.REPORTES_CORREOS, notificar_activo: !!APS_CONFIG.NOTIFICAR_CORREOS, remitente: APS_CONFIG.CORREO_REMITENTE || '(la cuenta que publica el script)', cupo_diario_restante: cupo, logo_correo: '' };
+  var r = { coordinacion_recibe_avisos: coord, reportes_a: APS_CONFIG.REPORTES_CORREOS, notificar_activo: !!APS_CONFIG.NOTIFICAR_CORREOS, remitente: APS_CONFIG.CORREO_REMITENTE || (APS_CONFIG.CORREO_NO_RESPONDER ? '(noreply de tu dominio)' : '(la cuenta que publica el script)'), cupo_diario_restante: cupo, logo_correo: '' };
   try { DriveApp.getFileById(APS_CONFIG.LOGO_FILE_ID).getBlob(); r.logo_correo = 'se adjunta bien'; } catch (e) { r.logo_correo = 'NO se pudo leer: ' + e.message; }
   APS_notificar_(coord, 'Prueba de avisos a la coordinación', 'Este es un correo de prueba. Si lo recibes, los avisos de «Contrato por revisar» te llegan correctamente.', { titulo: 'Prueba de avisos', etiqueta: 'Prueba', tono: 'info', sinBoton: true });
   r.prueba_enviada_a = coord; r.nota = 'Pídele a cada persona de la lista que revise su bandeja (y Spam). En la pestaña Auditoría de la hoja queda el renglón CORREO o CORREO_FALLO con el detalle.';
