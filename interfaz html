@@ -1075,6 +1075,59 @@
     #hmToast { bottom: 92px; }
     @media (max-width: 560px) { #ayBtn { right: 14px; bottom: 14px; width: 54px; height: 54px; } #ayMenu { right: 14px; bottom: 80px; } #ayNota { right: 76px; bottom: 22px; } .ay-tipos { grid-template-columns: 1fr; } .ay-card { padding: 22px 18px 18px; } }
 
+    /* ═══ v4: recorrido y botones de cerrar ═══ */
+    #ayLuz { box-shadow: 0 0 0 9999px rgba(10, 14, 40, .78), 0 0 0 3px #fff, 0 0 0 7px rgba(53, 183, 197, .85), 0 0 40px 8px rgba(53, 183, 197, .55); animation: ayRespira 2.4s ease-in-out infinite; }
+    @keyframes ayRespira { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.18); } }
+    #ayTip { width: min(420px, calc(100vw - 24px)); box-sizing: border-box; padding: 26px 24px 18px; border-radius: 22px; box-shadow: 0 40px 80px -14px rgba(0, 0, 0, .65), 0 0 0 1px rgba(255, 255, 255, .5) inset; background: linear-gradient(180deg, #fff 0%, #f6f9ff 100%); }
+    #ayTip .ay-prog { position: absolute; left: 0; right: 0; top: 0; height: 6px; border-radius: 22px 22px 0 0; overflow: hidden; background: #e3e8fb; }
+    #ayTip .ay-prog i { display: block; height: 100%; background: linear-gradient(90deg, #35B7C5, #364494); border-radius: 0 6px 6px 0; transition: width .5s cubic-bezier(.3, .8, .3, 1); }
+    #ayTip .ay-in { animation: ayEntra .38s cubic-bezier(.2, .8, .2, 1) both; }
+    @keyframes ayEntra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    #ayTip .ay-th { gap: 14px; margin-bottom: 12px; padding-right: 44px; }
+    #ayTip .ay-ti { width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(145deg, #364494, #4a5fd0); color: #fff; box-shadow: 0 10px 20px -8px rgba(54, 68, 148, .75); }
+    #ayTip .ay-ti svg { width: 28px; height: 28px; }
+    #ayTip .ay-tc { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    #ayTip .ay-tc small { font-size: 11.5px; letter-spacing: 2px; }
+    #ayTip .ay-faltan { font: 600 12.5px 'Inter', sans-serif; color: #7a85a8; }
+    #ayTip h5 { font-size: 25px; margin: 0 0 8px; letter-spacing: -.2px; }
+    #ayTip p { font-size: 15px; line-height: 1.6; margin: 0 0 18px; color: #3d476e; }
+    #ayTip .pie { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+    #ayTip .pie .sp { flex: 1 1 0; min-width: 0; }
+    .ay-b { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 20px; white-space: nowrap; transition: background .15s, transform .12s, box-shadow .15s; }
+    .ay-b svg { width: 18px; height: 18px; flex: none; transition: transform .15s; }
+    .ay-b:active { transform: scale(.96); }
+    .ay-b:focus-visible { outline: 3px solid #ffb03b; outline-offset: 2px; }
+    .ay-b.pri { padding: 0 24px; font-size: 15px; box-shadow: 0 10px 20px -8px rgba(54, 68, 148, .7); }
+    .ay-b.pri:hover svg { transform: translateX(3px); }
+    .ay-b.ret:hover svg { transform: translateX(-3px); }
+    .ay-b.ghost { background: transparent; color: #6b7699; padding: 0 12px; font-weight: 600; }
+    .ay-b.ghost:hover { background: #eef2fb; color: #364494; }
+    #ayTip .ay-hint { margin-top: 12px; text-align: center; font-size: 11.5px; color: #98a2c2; }
+    .ay-x { position: absolute; top: 14px; right: 14px; z-index: 2; width: 40px; height: 40px; border: none; border-radius: 50%; cursor: pointer; display: grid; place-items: center; background: #eef2fb; color: #364494; transition: background .15s, transform .15s; }
+    .ay-x svg { width: 18px; height: 18px; }
+    .ay-x:hover { background: #dfe6f8; transform: rotate(90deg); }
+    .ay-x:focus-visible { outline: 3px solid #ffb03b; outline-offset: 2px; }
+    .ay-card { position: relative; }
+    .ay-card h3 { padding-right: 52px; }
+    .ay-mh { display: flex; align-items: center; justify-content: space-between; padding-right: 2px; }
+    .ay-mx { width: 36px; height: 36px; border: none; border-radius: 50%; cursor: pointer; display: grid; place-items: center; background: #eef2fb; color: #364494; } .ay-mx:hover { background: #dfe6f8; } .ay-mx svg { width: 16px; height: 16px; }
+    @media (max-width: 480px) {
+      #ayTip { padding: 24px 18px 16px; } #ayTip h5 { font-size: 22px; } #ayTip .ay-hint { display: none; }
+      #ayTip .pie .ay-b.ghost { display: none; } #ayTip .pie .sp { display: none; } #ayTip .pie .ay-b { flex: 1 1 0; padding: 0 14px; } #ayTip .pie .ay-b.ret { flex: 0 0 auto; }
+    }
+    @media (hover: none) { #ayTip .ay-hint { display: none; } }
+    /* Cerrar de Novedades: botón con texto, fácil de ubicar y de tocar */
+    .hm-sx { width: auto; height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px 0 18px; border-radius: 999px; font: 700 14px 'Inter', sans-serif; background: rgba(255, 255, 255, .16); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); transition: background .15s, transform .15s; }
+    .hm-sx svg { width: 16px; height: 16px; flex: none; } .hm-sx:hover { background: rgba(255, 255, 255, .3); } .hm-sx:active { transform: scale(.96); } .hm-sx:focus-visible { outline: 3px solid #ffb03b; outline-offset: 2px; }
+    /* Botones de la pantalla principal */
+    .hm-reg { min-height: 58px; font-size: 16.5px; font-weight: 800; letter-spacing: .1px; transition: background .15s, transform .12s, box-shadow .15s; }
+    .hm-reg svg { width: 22px; height: 22px; flex: none; } .hm-reg:hover { transform: translateY(-1px); box-shadow: 0 10px 20px -14px rgba(26, 34, 74, .6); } .hm-reg:active, .hm-cta:active { transform: scale(.985); }
+    .hm-cta { position: relative; overflow: hidden; }
+    .hm-cta::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .28), transparent); transform: skewX(-18deg); transition: left .6s; }
+    .hm-cta:hover::after { left: 130%; }
+    .hm-cta:disabled::after { display: none; }
+    @media (prefers-reduced-motion: reduce) { #ayLuz, #ayTip .ay-in, .hm-cta::after { animation: none; transition: none; } }
+
     /* v3: barra superior compacta en celular (sin nombre repetido) */
     @media (max-width: 600px) {
       .barra-nav { padding: 8px 12px; gap: 8px; }
@@ -1162,7 +1215,7 @@
   <aside class="hm-side" id="hmSide" aria-label="Novedades en vivo" aria-hidden="true">
     <div class="hm-sh">
       <div class="hm-sh-t"><span class="hm-sh-i"></span><div><b>Novedades</b><small>Historial de actividad</small></div>
-        <button type="button" class="hm-sx" id="hmSideX" aria-label="Cerrar novedades">✕</button></div>
+        <button type="button" class="hm-sx" id="hmSideX" aria-label="Cerrar novedades"><span>Cerrar</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
       <div class="hm-sh-m"><span class="hm-pill" id="hmPill"><i></i>En vivo</span><span class="hm-new" id="hmNew">0</span></div>
     </div>
     <ul class="hm-fl" id="hmFeed"></ul>
@@ -1175,7 +1228,7 @@
 <button type="button" id="ayBtn" aria-label="Ayuda y reportes" aria-haspopup="true" aria-expanded="false">?</button>
 <div id="ayNota" role="note"><b>¿Dudas?</b> Toca el «?» y te explico la pantalla, o reporta algo que no funcione.</div>
 <div id="ayMenu" role="menu" aria-label="Ayuda">
-  <h4>¿En qué te ayudamos?</h4>
+  <div class="ay-mh"><h4>¿En qué te ayudamos?</h4><button type="button" class="ay-mx" data-ay="cerrarMenu" aria-label="Cerrar ayuda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <button type="button" class="ay-op" role="menuitem" id="ayOpTour"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.500 8.500-2 5-5 2 2-5z"/></svg></i><div><b>¿Para qué sirve cada cosa?</b><span>Te voy mostrando, iluminado, qué hace cada botón y sección de esta pantalla.</span></div></button>
   <button type="button" class="ay-op rep" role="menuitem" id="ayOpRep"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.500 2.500 20h19z"/><path d="M12 10v4.500M12 17.500v.5"/></svg></i><div><b>Reportar un problema</b><span>¿Algo no funciona o se ve mal? Cuéntanos y le llega a la coordinación y a sistemas.</span></div></button>
 </div>
@@ -1859,6 +1912,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
   var PENDIENTES = { aps: 0, pld: 0 };      // por revisar (los llena el panel en vivo); 0 = ningún aviso
   var HM = { panel: null, ahoraSrv: '', t0: 0, visto: '', errores: 0, cargando: false, prev: {}, vistos: {}, primera: true, ultimoOk: 0 };
   var IC = {
+    carpeta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.500A1.500 1.500 0 0 1 5 6h4.200l2 2.200H19A1.500 1.500 0 0 1 20.500 9.700v8.300A1.500 1.500 0 0 1 19 19.500H5A1.500 1.500 0 0 1 3.500 18z"/></svg>',
     pld: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 5.9v5.5c0 4.3 2.9 7.7 7 9.4 4.1-1.7 7-5.1 7-9.4V5.9z" fill="currentColor" fill-opacity=".16"/><path d="m8.6 12.1 2.5 2.5 4.4-4.9"/></svg>',
     aps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 11.4 12 4.8l7.8 6.6V19a1.5 1.5 0 0 1-1.5 1.5H5.7A1.5 1.5 0 0 1 4.2 19z" fill="currentColor" fill-opacity=".16"/><path d="M2.8 12.2 12 4.4l9.2 7.8"/><path d="M10 20.5v-4.6a2 2 0 0 1 4 0v4.6"/></svg>',
     revaps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h7L18.5 8.5v11a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1z" fill="currentColor" fill-opacity=".16"/><path d="M13.5 3.5v5h5"/><path d="m9.1 14.4 2 2 3.8-4"/></svg>',
@@ -1904,7 +1958,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
     return '<div class="hm-bc ' + id + (permitido ? '' : ' off') + '"><div class="hm-bc-h"><span class="hm-ico">' + IC[id] + '</span><h3>' + titulo + '</h3></div><p>' + texto + '</p>' +
       (nota ? '<span class="hm-nota">' + IC.alerta.replace('<svg', '<svg width="18" height="18"') + nota + '</span>' : '') +
       '<button type="button" class="hm-cta" data-ir="' + id + '"' + (permitido ? '' : ' disabled') + '><span>' + boton + '</span>' + (permitido ? IC.go : '') + '</button>' +
-      (permitido ? '<button type="button" class="hm-reg" data-misreg="' + id + '">📂 Ver mis registros</button>' : '<span class="aviso">' + aviso + '</span>') + '</div>';
+      (permitido ? '<button type="button" class="hm-reg" data-misreg="' + id + '">' + IC.carpeta + '<span>Ver mis registros</span></button>' : '<span class="aviso">' + aviso + '</span>') + '</div>';
   }
   function pintaInicio() {
     var host = document.getElementById('inicioTarjetas');
@@ -2141,9 +2195,10 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
   }
   function ayTour() {
     ayMenu(false); AY.pasos = ayPasos().filter(function (p) { if (p.antes) return true; try { return ayVisible(p.el()); } catch (e) { return false; } }); if (!AY.pasos.length) return; AY.paso = 0;
-    document.body.classList.add('ay-tour'); ayEl('ayVel').classList.add('on'); ayEl('ayLuz').style.display = ''; ayEl('ayTip').style.display = '';
+    AY.pct = 0; document.body.classList.add('ay-tour'); ayEl('ayVel').classList.add('on'); ayEl('ayLuz').style.display = ''; ayEl('ayTip').style.display = '';
     ayPaso(0);
   }
+  var AY_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>', AY_ATRAS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
   function ayPaso(i) {
     var p = AY.pasos[i]; if (!p) return ayFin(); AY.paso = i;
     if (p.antes) p.antes();
@@ -2156,9 +2211,17 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
       window.scrollTo({ top: Math.max(0, window.scrollY + y), behavior: 'instant' });
     }
     var n = AY.pasos.length, pts = AY.pasos.map(function (_, j) { return '<i' + (j === i ? ' class="on"' : (j < i ? ' class="hecho"' : '')) + '></i>'; }).join('');
-    ayEl('ayTip').innerHTML = '<span class="ay-flecha"></span><div class="ay-th"><span class="ay-ti">' + (IC[p.ic] || IC.info) + '</span><small>Paso ' + (i + 1) + ' de ' + n + '</small></div><h5>' + hmEsc(p.t) + '</h5><p>' + hmEsc(p.x) + '</p><div class="pie"><span class="pts">' + pts + '</span>' +
-      '<button type="button" class="ay-b" data-ay="salir">Salir</button>' + (i ? '<button type="button" class="ay-b" data-ay="ant">Atrás</button>' : '') +
-      '<button type="button" class="ay-b pri" data-ay="sig">' + (i === n - 1 ? 'Terminar' : 'Siguiente') + '</button></div>';
+    var pct = Math.round((i + 1) / n * 100), ant = AY.pct || 0; AY.pct = pct;
+    ayEl('ayTip').innerHTML = '<span class="ay-flecha"></span><div class="ay-prog" role="progressbar" aria-valuemin="1" aria-valuemax="' + n + '" aria-valuenow="' + (i + 1) + '"><i style="width:' + ant + '%"></i></div>' +
+      '<button type="button" class="ay-x" data-ay="salir" aria-label="Salir del recorrido">' + AY_X + '</button>' +
+      '<div class="ay-in"><div class="ay-th"><span class="ay-ti">' + (IC[p.ic] || IC.info) + '</span><div class="ay-tc"><small>Paso ' + (i + 1) + ' de ' + n + '</small><span class="ay-faltan">' + (i === n - 1 ? 'Último paso' : 'Faltan ' + (n - 1 - i)) + '</span></div></div>' +
+      '<h5>' + hmEsc(p.t) + '</h5><p>' + hmEsc(p.x) + '</p>' +
+      '<div class="pie"><button type="button" class="ay-b ghost" data-ay="salir">Salir</button><span class="sp"></span>' +
+      (i ? '<button type="button" class="ay-b ret" data-ay="ant">' + AY_ATRAS + '<span>Atrás</span></button>' : '') +
+      '<button type="button" class="ay-b pri" data-ay="sig"><span>' + (i === n - 1 ? 'Terminar' : 'Siguiente') + '</span>' + (i === n - 1 ? IC.ok : IC.go) + '</button></div>' +
+      '<div class="ay-hint">Con el teclado: ← → para moverte · Esc para salir</div></div>';
+    requestAnimationFrame(function () { requestAnimationFrame(function () { var b = ayEl('ayTip').querySelector('.ay-prog i'); if (b) b.style.width = pct + '%'; }); });
+    var sg = ayEl('ayTip').querySelector('[data-ay="sig"]'); if (sg) sg.focus({ preventScroll: true });
     ayColoca(); requestAnimationFrame(ayColoca); clearTimeout(AY.h); AY.h = setTimeout(ayColoca, 420);      // el panel lateral tarda en deslizarse: se vuelve a colocar al terminar
   }
   function ayColoca() {
@@ -2194,12 +2257,12 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
   function ayReporte() {
     ayMenu(false);
     var pant = TITULOS[window.PANTALLA] || 'Pantalla principal';
-    ayEl('ayRepC').innerHTML = '<h3 id="ayRepT">Reportar un problema</h3><p>Cuéntanos qué pasó con tus palabras. Mientras más claro, más rápido lo resolvemos.</p>' +
+    ayEl('ayRepC').innerHTML = '<button type="button" class="ay-x" data-ay="cerrarRep" aria-label="Cerrar">' + AY_X + '</button><h3 id="ayRepT">Reportar un problema</h3><p>Cuéntanos qué pasó con tus palabras. Mientras más claro, más rápido lo resolvemos.</p>' +
       '<div class="ay-tipos" id="ayTipos">' + AY_TIPOS.map(function (t, i) { return '<button type="button" class="ay-tipo' + (i === 0 ? ' on' : '') + '" data-tipo="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>' +
       '<label for="ayMsg">¿Qué sucedió?</label><textarea id="ayMsg" maxlength="1500" placeholder="Ej.: Estaba en «' + hmEsc(pant) + '», le di clic a Ampliar y ya no pude cerrar la ventana."></textarea>' +
       '<div class="ay-meta"><span id="ayMin">Escribe al menos 10 caracteres</span><span id="ayCnt">0 / 1500</span></div>' +
       '<div class="ay-para"><b>¿Qué sucede con tu reporte?</b><ol><li>Se registra con un número de folio.</li><li>Lo reciben la Coordinación y el área de Sistemas para su atención.</li><li>Recibes un acuse de recibo en <u>' + hmEsc(USUARIO.email) + '</u>; si se requiere más información, te contactarán por ese medio.</li></ol><small>De forma automática se adjunta la pantalla en la que te encuentras y datos técnicos básicos del navegador. No se envía información de tus contratos.</small></div>' +
-      '<div class="ay-err" id="ayErr"></div><div class="ay-acc"><button type="button" class="ay-b" data-ay="cerrarRep">Cancelar</button><button type="button" class="ay-b pri" id="ayEnviar" data-ay="enviar">Enviar reporte</button></div>';
+      '<div class="ay-err" id="ayErr"></div><div class="ay-acc"><button type="button" class="ay-b ghost" data-ay="cerrarRep">Cancelar</button><button type="button" class="ay-b pri" id="ayEnviar" data-ay="enviar">Enviar reporte</button></div>';
     ayEl('ayRep').classList.add('on'); setTimeout(function () { var t = ayEl('ayMsg'); if (t) t.focus(); }, 60);
   }
   function ayEnviar() {
@@ -2227,7 +2290,7 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
       var a = ev.target.closest && ev.target.closest('[data-ay]'); if (a) {
         var k = a.getAttribute('data-ay');
         if (k === 'sig') ayPaso(AY.paso + 1); else if (k === 'ant') ayPaso(AY.paso - 1); else if (k === 'salir') ayFin();
-        else if (k === 'enviar') ayEnviar(); else if (k === 'cerrarRep') ayCerrarRep();
+        else if (k === 'enviar') ayEnviar(); else if (k === 'cerrarRep') ayCerrarRep(); else if (k === 'cerrarMenu') { ayMenu(false); ayEl('ayBtn').focus(); }
       }
       var t = ev.target.closest && ev.target.closest('.ay-tipo'); if (t) { Array.prototype.forEach.call(ayEl('ayTipos').children, function (c) { c.classList.toggle('on', c === t); }); }
       if (ev.target === ayEl('ayRep')) ayCerrarRep();
