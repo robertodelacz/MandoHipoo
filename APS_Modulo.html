@@ -222,8 +222,8 @@
 #aps-root .sheet-h h2{margin:0;font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:25px;color:#fff;letter-spacing:-.3px}
 #aps-root .sheet-h p{margin:3px 0 0;font-size:13px;color:#cfd8ff}
 #aps-root .sheet-x{flex:none;display:inline-flex;align-items:center;gap:9px;min-height:46px;padding:0 20px;border:0;border-radius:999px;background:#fff;color:var(--navy);font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 8px 18px -8px rgba(0,0,0,.5);transition:transform .15s,background .15s}
-#aps-root #aps_stepHost.in-fwd{animation:apsFwd .42s cubic-bezier(.2,.8,.2,1) both}
-#aps-root #aps_stepHost.in-back{animation:apsBack .42s cubic-bezier(.2,.8,.2,1) both}
+#aps-root #aps_stepHost.in-fwd{animation:apsFwd .42s cubic-bezier(.2,.8,.2,1) backwards}
+#aps-root #aps_stepHost.in-back{animation:apsBack .42s cubic-bezier(.2,.8,.2,1) backwards}
 @keyframes apsFwd{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
 @keyframes apsBack{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
 #aps-root .steps button,#aps-root .steps .st{transition:background .25s,color .25s,transform .2s,box-shadow .25s}
@@ -618,6 +618,7 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
     if (PASO_PREVIO !== STEP) {      // solo al cambiar de paso (no en cada tecla): el contenido entra desde el lado hacia el que avanzas
       var vv = visible(), h = $('aps_stepHost'), adelante = PASO_PREVIO == null || vv.indexOf(STEP) >= vv.indexOf(PASO_PREVIO);
       h.classList.remove('in-fwd', 'in-back'); void h.offsetWidth; h.classList.add(adelante ? 'in-fwd' : 'in-back'); PASO_PREVIO = STEP;
+      clearTimeout(window.__apsAnim); window.__apsAnim = setTimeout(function () { h.classList.remove('in-fwd', 'in-back'); }, 520);      // la animación NO debe quedarse activa: las listas desplegables nativas se descolocan dentro de un elemento animado
     }
     if (ro()) { var els = $('aps_stepHost').querySelectorAll('input,textarea,button'); for (var i = 0; i < els.length; i++) if (!els[i].hasAttribute('data-keep')) els[i].disabled = true; }
     updateHints(); paintNav();
