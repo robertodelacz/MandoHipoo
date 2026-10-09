@@ -201,8 +201,7 @@ function doGet() {
   return HtmlService.createTemplateFromFile('Interfaz').evaluate()
     .setTitle('Generador de Documentos Hipoo')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    .addMetaTag('theme-color', '#364494');      // barra del navegador del celular en el azul institucional
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
 function generarPreAvisoPLD(params) {
