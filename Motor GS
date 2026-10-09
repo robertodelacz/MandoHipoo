@@ -404,27 +404,36 @@ function APS_htmlDocumento_(datos, servidor, marca, dens) {
     N.D.css() + '</style></head><body>' + banda + N.D.render(datos, { borrador: false, servidor: !!servidor, dens: dens || 0 }) + '</body></html>';
 }
 /** El contrato es un documento para firma: NO lleva leyendas ni sellos añadidos (la huella queda guardada en el sistema, no en el papel). */
-function APS_pdfBlob_(datos, nombre, servidor) {
+function APS_pdfBlob_(datos, nombre, servidor) { return APS_pdfAjustado_(datos, nombre, servidor, 'auto').blob; }
+/**
+ * Genera el PDF y dice qué hizo con las hojas. nivel: 'auto' (compacta lo mínimo necesario SOLO si así se ahorra una hoja) o
+ * 0 normal · 1 · 2 · 3 muy compacto (fijo). Devuelve { blob, hojas, hojasNormal, nivel, nota }; hojas = 0 si no se pudo contar.
+ */
+function APS_pdfAjustado_(datos, nombre, servidor, nivel) {
   if (APS_CONFIG.PDF_METODO === 'docx') {
     var doc = APS_docDesdeDocx_(datos, nombre + ' (temporal)', '');
     var pdf = doc.getAs('application/pdf').setName(nombre + '.pdf');
     try { doc.setTrashed(true); } catch (e) { Logger.log('No se pudo borrar el Doc temporal: ' + e.message); }
-    return pdf;
+    return { blob: pdf, hojas: APS_paginasPdf_(pdf), hojasNormal: 0, nivel: 0, nota: 'método Word: sin ajuste de hojas' };
   }
   var conv = function (dens) { return Utilities.newBlob(APS_htmlDocumento_(datos, servidor, '', dens), 'text/html', nombre + '.html').getAs('application/pdf').setName(nombre + '.pdf'); };
-  var normal = conv(0);
-  if (!APS_CONFIG.AJUSTAR_HOJAS) return normal;
+  if (nivel !== 'auto' && nivel !== undefined && nivel !== null) {                       // elegido a mano
+    var fijo = conv(Number(nivel) || 0);
+    return { blob: fijo, hojas: APS_paginasPdf_(fijo), hojasNormal: 0, nivel: Number(nivel) || 0, nota: 'nivel elegido a mano' };
+  }
+  var normal = conv(0), n = APS_paginasPdf_(normal);
+  if (!APS_CONFIG.AJUSTAR_HOJAS) return { blob: normal, hojas: n, hojasNormal: n, nivel: 0, nota: 'ajuste automático apagado' };
   /* Ajuste de hojas: si compactando un poco el espaciado (misma letra) el contrato cabe en UNA HOJA MENOS, se usa la versión compacta
      con el nivel más suave que lo logre. Así la firma o unas pocas líneas no quedan solas en una hoja. */
-  var n = APS_paginasPdf_(normal);
-  if (n < 2) return normal;
+  if (n < 1) return { blob: normal, hojas: 0, hojasNormal: 0, nivel: 0, nota: 'no se pudieron contar las hojas del PDF' };
+  if (n < 2) return { blob: normal, hojas: n, hojasNormal: n, nivel: 0, nota: 'una sola hoja' };
   var maximo = conv(3), m = APS_paginasPdf_(maximo);
-  if (!(m > 0 && m < n)) return normal;
-  for (var nivel = 1; nivel < 3; nivel++) {
-    var b = conv(nivel);
-    if (APS_paginasPdf_(b) <= m) return b;
+  if (!(m > 0 && m < n)) return { blob: normal, hojas: n, hojasNormal: n, nivel: 0, nota: 'compactar no ahorra hojas' };
+  for (var nv = 1; nv < 3; nv++) {
+    var b = conv(nv), mb = APS_paginasPdf_(b);
+    if (mb > 0 && mb <= m) return { blob: b, hojas: mb, hojasNormal: n, nivel: nv, nota: 'se ahorró una hoja' };
   }
-  return maximo;
+  return { blob: maximo, hojas: m, hojasNormal: n, nivel: 3, nota: 'se ahorró una hoja' };
 }
 /** Número de hojas de un PDF (cuenta los objetos /Type /Page). 0 si no se pudo contar. */
 function APS_paginasPdf_(blob) {
@@ -914,7 +923,7 @@ function APS_aprobar(id) {
   if (snap.yaAprobado) return snap.meta;
 
   var datos = JSON.parse(snap.json), datosHash = APS_sha256_(APS_estable_(datos)), ahora = APS_ahora_();
-  var blob = APS_pdfBlob_(datos, APS_nombrePdf_(snap.reg, datos), false);
+  var pdfAj = APS_pdfAjustado_(datos, APS_nombrePdf_(snap.reg, datos), false, 'auto'), blob = pdfAj.blob;
   var pdfSha = APS_sha256_(blob.getBytes());
   var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(blob);
   var coord = APS_coordinadores_();
@@ -932,7 +941,7 @@ function APS_aprobar(id) {
     f.reg.version = snap.version + 1; f.reg.pdfSha = pdfSha; f.reg.datosHash = datosHash; f.reg.aprobadoEn = ahora;
     APS_escribir_(f.hoja, f.fila, f.reg);
     APS_snapshot_(f.reg, u, 'APROBACION');
-    APS_audit_('APS', 'APROBAR', f.reg.id, 'PDF ' + f.reg.pdfId + ' · SHA ' + pdfSha.slice(0, 16) + ' · datos ' + datosHash.slice(0, 16));
+    APS_audit_('APS', 'APROBAR', f.reg.id, 'PDF ' + f.reg.pdfId + ' · SHA ' + pdfSha.slice(0, 16) + ' · datos ' + datosHash.slice(0, 16) + ' · ' + APS_resumenHojas_(pdfAj));
     APS_notificar_([f.reg.asesor], 'Contrato aprobado — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
       'La coordinación aprobó tu contrato. Ya puedes entrar al sistema y descargar el PDF definitivo.',
       { params: { modulo: 'aps', id: f.reg.id }, firma: u.nombre ? ('Aprobado por ' + u.nombre) : 'Aprobado por la coordinación', titulo: 'Tu contrato fue aprobado', etiqueta: 'Aprobado', tono: 'ok', boton: 'Descargar el PDF',
@@ -1071,6 +1080,52 @@ function APS_obtenerPdf(id) {
   }
   APS_audit_('APS', 'DESCARGA_PDF', f.reg.id, 'SHA ' + sha.slice(0, 16));
   return { nombre: blob.getName() || (f.reg.id + '.pdf'), base64: Utilities.base64Encode(blob.getBytes()), huella: sha.slice(0, 16) };
+}
+
+/** Texto corto para Auditoría: cuántas hojas tiene el PDF y qué se hizo con el espaciado. */
+function APS_resumenHojas_(r) {
+  var niv = ['normal', 'ligero', 'compacto', 'muy compacto'][r.nivel] || 'normal';
+  return 'hojas ' + (r.hojas || '¿?') + (r.hojasNormal && r.hojasNormal !== r.hojas ? ' (normal: ' + r.hojasNormal + ')' : '') + ' · espaciado ' + niv + ' · ' + r.nota;
+}
+
+/**
+ * SOLO COORDINACIÓN: vuelve a generar el PDF de un contrato YA APROBADO con otro acomodo de hojas (para cuando una firma o unas líneas
+ * quedan solas en una hoja). Los datos y el texto no cambian: la huella de los datos y la aprobación siguen igual. El PDF anterior se
+ * conserva en Drive (renombrado) y queda en Auditoría con las dos huellas. nivel: 'auto' | 0 | 1 | 2 | 3.
+ */
+function APS_ajustarHojas(id, nivel) {
+  var u = APS_requiereAdmin_();
+  nivel = (nivel === undefined || nivel === null || nivel === '') ? 'auto' : String(nivel);
+  if (['auto', '0', '1', '2', '3'].indexOf(nivel) < 0) throw new Error('Opción de ajuste no válida.');
+  var snap = APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f) throw new Error('No se encontró el registro.');
+    if (f.reg.estado !== 'APROBADO') throw new Error('Solo se puede reajustar el PDF de un contrato aprobado.');
+    return { json: f.reg.json, version: f.reg.version || 1, reg: f.reg };
+  });
+  var datos = JSON.parse(snap.json);
+  if (snap.reg.datosHash && APS_sha256_(APS_estable_(datos)) !== snap.reg.datosHash) {
+    APS_audit_('APS', 'PDF_NO_COINCIDE', snap.reg.id, 'Reajuste de hojas rechazado: los datos ya no coinciden con la huella de la aprobación');
+    throw new Error('Los datos de este contrato ya no coinciden con lo que se aprobó. No se regenera el PDF; avisa a quien administra el sistema.');
+  }
+  var r = APS_pdfAjustado_(datos, APS_nombrePdf_(snap.reg, datos), false, nivel === 'auto' ? 'auto' : Number(nivel));
+  var pdfSha = APS_sha256_(r.blob.getBytes());
+  var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(r.blob);
+  var coord = APS_coordinadores_();
+  return APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f || f.reg.estado !== 'APROBADO' || (f.reg.version || 1) !== snap.version) {
+      try { archivo.setTrashed(true); } catch (e) {}
+      throw new Error('El contrato cambió mientras se generaba el PDF. Ábrelo de nuevo y vuelve a intentarlo.');
+    }
+    coord.forEach(function (c) { try { archivo.addViewer(c); } catch (e) { Logger.log('No se pudo compartir el PDF con ' + c + ': ' + e.message); } });
+    var anterior = { id: f.reg.pdfId, sha: f.reg.pdfSha };
+    if (anterior.id) { try { var viejo = DriveApp.getFileById(anterior.id); viejo.setName(viejo.getName().replace(/\.pdf$/i, '') + ' (anterior ' + APS_ahora_() + ').pdf'); } catch (e) { Logger.log('No se pudo renombrar el PDF anterior: ' + e.message); } }
+    f.reg.pdfUrl = archivo.getUrl(); f.reg.pdfId = archivo.getId(); f.reg.pdfSha = pdfSha; f.reg.actualizado = APS_ahora_();
+    APS_escribir_(f.hoja, f.fila, f.reg);
+    APS_audit_('APS', 'PDF_AJUSTE', f.reg.id, 'Reajustó las hojas (' + (nivel === 'auto' ? 'automático' : 'nivel ' + nivel) + ') · ' + APS_resumenHojas_(r) + ' · PDF anterior ' + (anterior.sha || '').slice(0, 16) + ' → nuevo ' + pdfSha.slice(0, 16));
+    return { meta: APS_meta_(f.reg), hojas: r.hojas, nota: r.nota, nivel: r.nivel };
+  });
 }
 
 /**

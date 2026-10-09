@@ -495,6 +495,7 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
         // (y éste ya está APROBADO, por eso basta estar dentro de "st === 'APROBADO'"; antes de eso el botón ni existe).
         b += ((coord || REG.asesor === USER.email) ? '<button type="button" class="btn-main" data-act="download" data-keep="1">⬇️ Descargar PDF aprobado</button>' : '<div class="help" style="flex:1 1 100%">✅ Aprobado por la coordinación. El contrato definitivo lo entrega la coordinación.</div>') +
              '<button type="button" class="btn-sec" data-act="clone" data-keep="1">📑 Usar como base de uno nuevo</button>' +
+             (coord ? '<button type="button" class="btn-sec" data-act="hojas" data-keep="1" title="Si una firma o unas líneas quedaron solas en una hoja">📐 Ajustar hojas del PDF</button>' : '') +
              (coord && REG.pdfUrl ? '<a class="btn-sec lnk" href="' + esc(REG.pdfUrl) + '" target="_blank" rel="noopener">👁 Ver PDF aprobado en Drive</a>' : '');
       }
     }
@@ -989,6 +990,26 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
       toast('Descarga iniciada: ' + r.nombre + ' (huella ' + r.huella + ')');
     }, 'Preparando PDF…');
   }
+  /* Solo coordinación: vuelve a acomodar las hojas del PDF aprobado (los datos y el texto no cambian). */
+  function ajustarHojas() {
+    if (!REG || REG.estado !== 'APROBADO') return;
+    var ide = REG.id;
+    confirma({
+      titulo: 'Ajustar las hojas del PDF', icono: 'doc', tono: 'info', ok: 'Regenerar PDF',
+      texto: 'Úsalo si una firma o unas líneas quedaron solas en una hoja. Los datos y el texto del contrato no cambian: solo se vuelve a acomodar el espaciado. Se genera un PDF nuevo y el anterior queda guardado en Drive.',
+      opciones: [
+        { v: 'auto', t: 'Automático (recomendado)', d: 'Hace el cambio más pequeño que logre ahorrar una hoja.' },
+        { v: '0', t: 'Normal', d: 'El espaciado original, sin compactar.' },
+        { v: '2', t: 'Compacto', d: 'Menos espacio entre líneas y bloques.' },
+        { v: '3', t: 'Muy compacto', d: 'Lo más junto posible, con la misma letra.' }
+      ], valor: 'auto'
+    }, function (v) {
+      srv('APS_ajustarHojas', [ide, v === true ? 'auto' : v], function (r) {
+        conRegistro(r.meta);
+        toast('PDF regenerado' + (r.hojas ? ': ' + r.hojas + (r.hojas === 1 ? ' hoja' : ' hojas') : '') + '. Descárgalo de nuevo para verlo.');
+      }, 'Regenerando el PDF… (puede tardar unos segundos)');
+    });
+  }
   function copiaDocs() {
     function crear(id) {
       srv('APS_docEditable', [id], function (r) { window.open(r.url, '_blank', 'noopener'); toast('Documento generado en Google Docs.'); }, 'Generando el documento en Google Docs…');
@@ -1162,6 +1183,7 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
     else if (a === 'submit') enviar();
     else if (a === 'approve') aprobar();
     else if (a === 'download') descargar();
+    else if (a === 'hojas') ajustarHojas();
     else if (a === 'clone') clonar();
     else if (a === 'docs') copiaDocs();
     else if (a === 'eliminar') eliminar();

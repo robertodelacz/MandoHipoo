@@ -1260,6 +1260,16 @@
     #hkDlg .hkd-x { margin: 0; font-size: 15.5px; line-height: 1.55; color: #55608a; white-space: pre-line; }
     #hkDlg .hkd-l { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 8px; text-align: left; }
     #hkDlg .hkd-l li { padding: 11px 14px; border-radius: 14px; background: #fff4d6; color: #6a4a00; font-size: 14px; line-height: 1.4; font-weight: 600; }
+    #hkDlg .hkd-o { margin-top: 18px; display: grid; gap: 10px; text-align: left; }
+    #hkDlg .hkd-o label { text-transform: none; letter-spacing: 0; margin: 0; position: relative; display: flex; gap: 13px; align-items: flex-start; padding: 13px 15px; border-radius: 16px; background: #f4f7fc; box-shadow: inset 0 0 0 2px #dbe2ef; cursor: pointer; transition: box-shadow .15s, background .15s; }
+    #hkDlg .hkd-o label:hover { background: #eef3fb; }
+    #hkDlg .hkd-o label:has(input:checked) { background: #e8f6f8; box-shadow: inset 0 0 0 2px #35B7C5; }
+    #hkDlg .hkd-o label:has(input:focus-visible) { outline: 3px solid #ffb03b; outline-offset: 2px; }
+    #hkDlg .hkd-o input { appearance: none; -webkit-appearance: none; flex: none; width: 22px; height: 22px; margin: 2px 0 0; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2px #9aa6d8; }
+    #hkDlg .hkd-o input:checked { box-shadow: inset 0 0 0 7px #35B7C5, inset 0 0 0 11px #fff; background: #0f8594; }
+    #hkDlg .hkd-o b, #hkDlg .hkd-o small { text-transform: none; letter-spacing: 0; }
+    #hkDlg .hkd-o b { display: block; font: 800 15px 'Inter', sans-serif; color: #1a224a; }
+    #hkDlg .hkd-o small { display: block; margin-top: 2px; font-size: 13px; line-height: 1.4; color: #55608a; }
     #hkDlg .hkd-f { margin-top: 18px; text-align: left; }
     #hkDlg .hkd-f label { display: block; margin-bottom: 7px; font: 800 11.5px 'Montserrat', sans-serif; letter-spacing: 1.2px; text-transform: uppercase; color: #55608a; }
     #hkDlg .hkd-f textarea { width: 100%; min-height: 96px; resize: vertical; padding: 13px 15px; border: 0; border-radius: 16px; background: #f4f7fc; box-shadow: inset 0 0 0 2px #dbe2ef; font: 500 15.5px/1.45 'Inter', sans-serif; color: #1a224a; }
@@ -2588,12 +2598,13 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     <h2 id="hkdT"></h2>
     <p class="hkd-x" id="hkdX"></p>
     <ul class="hkd-l" id="hkdL"></ul>
+    <div class="hkd-o" id="hkdO" role="radiogroup" aria-label="Opciones" style="display:none"></div>
     <div class="hkd-f" id="hkdF" style="display:none"><label for="hkdTa" id="hkdLb"></label><textarea id="hkdTa" maxlength="300"></textarea><span class="hkd-h" id="hkdH"></span></div>
     <div class="hkd-b"><button type="button" class="hkd-no" id="hkdNo">Cancelar</button><button type="button" class="hkd-si" id="hkdSi">Aceptar</button></div>
   </div>
 </div>
 <script>
-/* Diálogo de confirmación de la plataforma. Uso: HIPOO_confirma({ titulo, texto, lista:[], ok:'Aceptar', cancelar:'Cancelar', tono:'info|warn|danger|ok', icono:'enviar|aviso|basura|ok|doc', campo:{ etiqueta, min, ph } }, function (valor) { ... }, function () { cancelado }) */
+/* Diálogo de confirmación de la plataforma. Uso: HIPOO_confirma({ titulo, texto, lista:[], ok:'Aceptar', cancelar:'Cancelar', tono:'info|warn|danger|ok', icono:'enviar|aviso|basura|ok|doc', campo:{ etiqueta, min, ph }, opciones:[{ v, t, d }], valor:'v inicial' }, function (valor) { ... }, function () { cancelado }) */
 (function () {
   var IC = {
     enviar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5M21 3l-6.5 18-4-7.5L3 9.500z"/></svg>',
@@ -2615,7 +2626,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cierra(null, false); return; }
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && abierto.o.campo) { e.preventDefault(); if (valida()) cierra($('hkdTa').value.trim(), true); return; }
     if (e.key === 'Tab') {
-      var f = [].slice.call($('hkDlg').querySelectorAll('textarea,button:not(:disabled)')).filter(function (x) { return x.offsetParent !== null; }); if (!f.length) return;
+      var f = [].slice.call($('hkDlg').querySelectorAll('textarea,input,button:not(:disabled)')).filter(function (x) { return x.offsetParent !== null; }); if (!f.length) return;
       var i = f.indexOf(document.activeElement);
       if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && (i === f.length - 1 || i < 0)) { e.preventDefault(); f[0].focus(); }
     }
@@ -2627,13 +2638,20 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     $('hkdIc').innerHTML = IC[o.icono] || IC[tono === 'danger' ? 'basura' : tono === 'warn' ? 'aviso' : tono === 'ok' ? 'ok' : 'enviar'];
     $('hkdT').textContent = o.titulo || '¿Continuar?'; $('hkdX').textContent = o.texto || ''; $('hkdX').style.display = o.texto ? '' : 'none';
     var L = $('hkdL'); L.innerHTML = ''; (o.lista || []).forEach(function (t) { var li = document.createElement('li'); li.textContent = t; L.appendChild(li); }); L.style.display = (o.lista && o.lista.length) ? '' : 'none';
+    var O = $('hkdO'); O.innerHTML = '';
+    (o.opciones || []).forEach(function (p, i) {
+      var lb = document.createElement('label'), r = document.createElement('input'), tx = document.createElement('span'), b = document.createElement('b'), sm = document.createElement('small');
+      r.type = 'radio'; r.name = 'hkdR'; r.value = String(p.v); r.checked = o.valor !== undefined ? String(o.valor) === String(p.v) : i === 0;
+      b.textContent = p.t || ''; sm.textContent = p.d || ''; tx.appendChild(b); if (p.d) tx.appendChild(sm); lb.appendChild(r); lb.appendChild(tx); O.appendChild(lb);
+    });
+    O.style.display = (o.opciones && o.opciones.length) ? '' : 'none';
     var F = $('hkdF'), ta = $('hkdTa'); F.style.display = o.campo ? '' : 'none'; ta.value = ''; if (o.campo) { $('hkdLb').textContent = o.campo.etiqueta || 'Motivo'; ta.placeholder = o.campo.ph || ''; }
     $('hkdSi').textContent = o.ok || 'Aceptar'; $('hkdNo').textContent = o.cancelar || 'Cancelar'; $('hkdSi').disabled = false;
     abierto = { o: o, ok: ok, no: no }; d.classList.add('on'); document.addEventListener('keydown', teclas, true);
-    if (o.campo) { valida(); setTimeout(function () { ta.focus(); }, 60); } else setTimeout(function () { $('hkdSi').focus(); }, 60);
+    if (o.campo) { valida(); setTimeout(function () { ta.focus(); }, 60); } else setTimeout(function () { var r = O.querySelector('input:checked'); (r || $('hkdSi')).focus(); }, 60);
   };
   document.addEventListener('DOMContentLoaded', function () {
-    $('hkdSi').addEventListener('click', function () { if (!valida()) return; cierra(abierto && abierto.o.campo ? $('hkdTa').value.trim() : true, true); });
+    $('hkdSi').addEventListener('click', function () { if (!valida()) return; var r = abierto && abierto.o.opciones && $('hkdO').querySelector('input:checked'); cierra(abierto && abierto.o.campo ? $('hkdTa').value.trim() : (r ? r.value : true), true); });
     $('hkdNo').addEventListener('click', function () { cierra(null, false); });
     $('hkDlg').addEventListener('mousedown', function (e) { if (e.target === $('hkDlg')) cierra(null, false); });
     $('hkdTa').addEventListener('input', valida);
