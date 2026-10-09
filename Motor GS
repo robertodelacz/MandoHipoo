@@ -395,22 +395,22 @@ function APS_logoDataUri_() {
 }
 
 /** HTML completo del contrato listo para convertir a PDF. servidor=true → pie sin position:fixed. */
-function APS_htmlDocumento_(datos, servidor, marca, sello) {
+function APS_htmlDocumento_(datos, servidor, marca) {
   var N = APS_nucleo_(), logo = APS_logoDataUri_();
   if (logo) N.D.CFG.logoSrc = logo;
   var banda = marca ? '<div style="text-align:center;font:bold 9pt Arial,sans-serif;color:#333;border:1pt solid #555;padding:4pt;margin:0 0 8pt">' + N.U.esc(marca) + '</div>' : '';
   return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>APS Hipoo</title><style>html,body{margin:0;background:#fff}' +
-    N.D.css() + '</style></head><body>' + banda + N.D.render(datos, { borrador: false, servidor: !!servidor }) +
-    (sello ? '<div style="font:7pt Arial,sans-serif;color:#555;border-top:.75pt solid #999;margin:8pt 20mm 0;padding-top:4pt">' + N.U.esc(sello) + '</div>' : '') + '</body></html>';
+    N.D.css() + '</style></head><body>' + banda + N.D.render(datos, { borrador: false, servidor: !!servidor }) + '</body></html>';
 }
-function APS_pdfBlob_(datos, nombre, servidor, sello) {
+/** El contrato es un documento para firma: NO lleva leyendas ni sellos añadidos (la huella queda guardada en el sistema, no en el papel). */
+function APS_pdfBlob_(datos, nombre, servidor) {
   if (APS_CONFIG.PDF_METODO === 'docx') {
-    var doc = APS_docDesdeDocx_(datos, nombre + ' (temporal)', sello || '');
+    var doc = APS_docDesdeDocx_(datos, nombre + ' (temporal)', '');
     var pdf = doc.getAs('application/pdf').setName(nombre + '.pdf');
     try { doc.setTrashed(true); } catch (e) { Logger.log('No se pudo borrar el Doc temporal: ' + e.message); }
     return pdf;
   }
-  var html = APS_htmlDocumento_(datos, servidor, '', sello);
+  var html = APS_htmlDocumento_(datos, servidor, '');
   return Utilities.newBlob(html, 'text/html', nombre + '.html').getAs('application/pdf').setName(nombre + '.pdf');
 }
 function APS_nombrePdf_(reg, datos) {
@@ -875,11 +875,6 @@ function APS_enviarRevision(id) {
   });
 }
 
-/** Texto de sello que se imprime al final del PDF aprobado: permite comprobar después que es el mismo contrato. */
-function APS_selloTexto_(reg, u, datosHash, ahora) {
-  return 'Folio ' + reg.id + ' · versión ' + (reg.version || 1) + ' · Aprobado por la coordinación (' + (u.nombre || u.email) + ') el ' + ahora + ' · Huella de los datos (SHA-256): ' + datosHash.slice(0, 16) + '. Verificación: abrir el folio en el sistema APS.';
-}
-
 /**
  * Solo coordinador: EN_REVISION → APROBADO. Genera el PDF definitivo y lo guarda en la carpeta de Drive.
  * El PDF (lo lento) se genera FUERA del bloqueo general; al terminar se vuelve a comprobar que el contrato no cambió
@@ -901,8 +896,7 @@ function APS_aprobar(id) {
   if (snap.yaAprobado) return snap.meta;
 
   var datos = JSON.parse(snap.json), datosHash = APS_sha256_(APS_estable_(datos)), ahora = APS_ahora_();
-  var regSello = Object.assign({}, snap.reg, { version: snap.version });
-  var blob = APS_pdfBlob_(datos, APS_nombrePdf_(snap.reg, datos), false, APS_selloTexto_(regSello, u, datosHash, ahora));
+  var blob = APS_pdfBlob_(datos, APS_nombrePdf_(snap.reg, datos), false);
   var pdfSha = APS_sha256_(blob.getBytes());
   var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(blob);
   var coord = APS_coordinadores_();
