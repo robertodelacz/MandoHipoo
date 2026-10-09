@@ -545,7 +545,7 @@ function APS_correoHtml_(titulo, mensajeHtml, url, firma, extra) {
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f9;padding:24px 0">' +
       '<tr><td align="center">' +
         '<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:14px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;max-width:560px;border:1px solid ' + LINEA + '">' +
-          '<tr><td style="background:' + AZUL + ';padding:18px 32px;border-bottom:4px solid ' + CYAN + '" align="left"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#ffffff;border-radius:10px;padding:8px 16px"><img src="cid:logoHipoo" alt="Hipoo" height="30" style="display:block;border:0"></td></tr></table></td></tr>' +
+          '<tr><td style="background:' + AZUL + ';padding:18px 32px;border-bottom:4px solid ' + CYAN + '" align="left"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#ffffff;border-radius:12px;padding:8px 20px"><img src="cid:logoHipoo" alt="Hipoo" height="58" style="display:block;border:0;height:58px;width:auto"></td></tr></table></td></tr>' +
           '<tr><td style="padding:28px 32px 4px">' + chip +
             '<h2 style="margin:0 0 12px;color:' + TINTA + ';font-size:20px;line-height:1.25;font-family:Arial,Helvetica,sans-serif">' + APS_escHtml_(titulo) + '</h2>' +
             '<div style="color:#333b55;font-size:14px;line-height:1.6;font-family:Arial,Helvetica,sans-serif">' + mensajeHtml + '</div>' + tabla +
@@ -573,13 +573,17 @@ function APS_correoHtml_(titulo, mensajeHtml, url, firma, extra) {
 function APS_notificar_(para, asunto, mensaje, opts) {
   if (!APS_CONFIG.NOTIFICAR_CORREOS || !para || !para.length) return;
   opts = opts || {};
+  // Limpia la lista: minúsculas, sin espacios, sin repetidos y solo direcciones con forma de correo.
+  var vistos = {}, dest = [], malos = [];
+  para.forEach(function (c) { var k = String(c || '').toLowerCase().trim(); if (!k || vistos[k]) return; vistos[k] = 1; if (APS_RE_CORREO_.test(k)) dest.push(k); else malos.push(k); });
+  var ok = [], fallo = [];
   try {
     var url = ScriptApp.getService().getUrl();
     if (url && opts.params) {
       var qs = Object.keys(opts.params).map(function (k) { return k + '=' + encodeURIComponent(opts.params[k]); }).join('&');
       url += (url.indexOf('?') === -1 ? '?' : '&') + qs;
     }
-    var correo = { to: para.join(','), subject: '[' + (opts.sistema || 'APS Hipoo') + '] ' + asunto, name: opts.sistema || 'APS Hipoo',
+    var correo = { to: dest.join(','), subject: '[' + (opts.sistema || 'APS Hipoo') + '] ' + asunto, name: opts.sistema || 'APS Hipoo',
       htmlBody: APS_correoHtml_(opts.titulo || asunto, mensaje, opts.sinBoton ? '' : url, opts.firma, opts) };
     if (opts.replyTo) correo.replyTo = opts.replyTo;
     // Si hay un alias de "Enviar como" configurado y verificado en la cuenta que ejecuta el script, se usa como
@@ -588,8 +592,34 @@ function APS_notificar_(para, asunto, mensaje, opts) {
     if (APS_CONFIG.CORREO_REMITENTE) correo.from = APS_CONFIG.CORREO_REMITENTE;
     try { correo.inlineImages = { logoHipoo: DriveApp.getFileById(APS_CONFIG.LOGO_FILE_ID).getBlob().setName('logoHipoo') }; }
     catch (eLogo) { Logger.log('No se pudo adjuntar el logo al correo: ' + eLogo.message); }   // si falla, el correo se manda sin logo, no se cae el aviso
-    MailApp.sendEmail(correo);
-  } catch (e) { Logger.log('No se pudo enviar correo: ' + e.message); }
+    if (dest.length) {
+      try { MailApp.sendEmail(correo); ok = dest.slice(); }
+      catch (eTodos) {
+        // Un solo destinatario con problema hace fallar el envío completo: se reintenta uno por uno para que los demás sí reciban su aviso.
+        Logger.log('Envío en grupo falló (' + eTodos.message + '); se reintenta uno por uno.');
+        dest.forEach(function (d) { try { var c1 = Object.assign({}, correo, { to: d }); MailApp.sendEmail(c1); ok.push(d); } catch (e1) { fallo.push(d + ' (' + String(e1.message).slice(0, 80) + ')'); } });
+      }
+    }
+  } catch (e) { Logger.log('No se pudo enviar correo: ' + e.message); fallo.push('error general: ' + String(e.message).slice(0, 100)); }
+  malos.forEach(function (m) { fallo.push(m + ' (no parece un correo)'); });
+  // Queda constancia en la auditoría de quién recibió el aviso y a quién no le llegó (así no hay que revisar el registro de ejecuciones).
+  try { APS_audit_('APS', fallo.length ? 'CORREO_FALLO' : 'CORREO', '', String(asunto).slice(0, 70) + ' · ' + (ok.length ? 'a: ' + ok.join(', ') : '') + (fallo.length ? ' · NO llegó: ' + fallo.join('; ') : '')); } catch (e) { }
+}
+
+/**
+ * DIAGNÓSTICO DE CORREOS: ejecútala a mano (Ejecutar → CORREO_diagnostico) o desde el editor.
+ * Muestra a quién le llegan los avisos de «Contrato por revisar», cuánto cupo de envío queda en el día, y manda
+ * un correo de prueba a cada persona de la coordinación para confirmar que sí lo reciben.
+ */
+function CORREO_diagnostico() {
+  APS_requiereAdmin_();
+  var coord = APS_coordinadores_(), cupo = ''; try { cupo = MailApp.getRemainingDailyQuota(); } catch (e) { cupo = 'no disponible'; }
+  var r = { coordinacion_recibe_avisos: coord, reportes_a: APS_CONFIG.REPORTES_CORREOS, notificar_activo: !!APS_CONFIG.NOTIFICAR_CORREOS, remitente: APS_CONFIG.CORREO_REMITENTE || '(la cuenta que publica el script)', cupo_diario_restante: cupo, logo_correo: '' };
+  try { DriveApp.getFileById(APS_CONFIG.LOGO_FILE_ID).getBlob(); r.logo_correo = 'se adjunta bien'; } catch (e) { r.logo_correo = 'NO se pudo leer: ' + e.message; }
+  APS_notificar_(coord, 'Prueba de avisos a la coordinación', 'Este es un correo de prueba. Si lo recibes, los avisos de «Contrato por revisar» te llegan correctamente.', { titulo: 'Prueba de avisos', etiqueta: 'Prueba', tono: 'info', sinBoton: true });
+  r.prueba_enviada_a = coord; r.nota = 'Pídele a cada persona de la lista que revise su bandeja (y Spam). En la pestaña Auditoría de la hoja queda el renglón CORREO o CORREO_FALLO con el detalle.';
+  Logger.log(JSON.stringify(r, null, 2));
+  return r;
 }
 
 /* ═════════════ API PARA LA PANTALLA (google.script.run) ═════════════ */
