@@ -305,6 +305,20 @@
 #con-root .cx-dpb{flex:1;overflow:auto;padding:22px}
 #con-root .cx-dpb h4{margin:0 0 14px;font:800 12px 'Montserrat',sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
 #con-root .cx-dpb .cx-tl{margin-bottom:26px}
+#con-root .cx-rvs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+#con-root .cx-rvp{display:inline-flex;align-items:center;padding:5px 12px;border-radius:999px;font:700 12.5px 'Inter',sans-serif}
+#con-root .cx-rvp.error{background:var(--err-bg);color:#8f1b29}#con-root .cx-rvp.revisar{background:var(--warn-bg);color:#7a5200}#con-root .cx-rvp.estilo{background:#eaf0fb;color:#2f4a8c}
+#con-root .cx-rvi{border:1px solid var(--line);border-left-width:5px;border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fff}
+#con-root .cx-rvi.error{border-left-color:var(--err)}#con-root .cx-rvi.revisar{border-left-color:#e0a02b}#con-root .cx-rvi.estilo{border-left-color:#6f8fd6}
+#con-root .cx-rvi .h{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+#con-root .cx-rvi .h b{font:700 14px/1.35 'Inter',sans-serif;color:var(--ink)}
+#con-root .cx-rvi .sev{flex:none;font:800 10.5px 'Inter',sans-serif;letter-spacing:.6px;text-transform:uppercase;padding:2px 8px;border-radius:999px}
+#con-root .cx-rvi.error .sev{background:var(--err-bg);color:#8f1b29}#con-root .cx-rvi.revisar .sev{background:var(--warn-bg);color:#7a5200}#con-root .cx-rvi.estilo .sev{background:#eaf0fb;color:#2f4a8c}
+#con-root .cx-rvi p{margin:3px 0;font-size:13px;color:var(--ink)}
+#con-root .cx-rvi p i{display:inline-block;min-width:74px;font:800 11px 'Inter',sans-serif;font-style:normal;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+#con-root .cx-rvi .cx-btn{margin-top:8px;min-height:36px;padding:0 14px;font-size:12.5px;width:auto}
+#con-root .cx-rvn{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-size:12.5px;color:var(--muted);margin:14px 0}
+#con-root .cx-rvn svg{flex:none;width:18px;height:18px;margin-top:1px}
 
 /* ── Espera y aviso ── */
 #con-root .cx-busy{position:fixed;inset:0;background:rgba(244,247,252,.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:80;display:none;align-items:center;justify-content:center}
@@ -515,6 +529,7 @@
       (o.campo ? '<label for="cxCampo">' + esc(o.campo) + '</label><textarea id="cxCampo" maxlength="' + (o.max || 500) + '" placeholder="' + esc(o.ph || '') + '"></textarea><div class="cx-dm"><span data-r="dmMin">' + (o.min ? 'Escribe al menos ' + o.min + ' caracteres' : 'Opcional') + '</span><span data-r="dmCnt">0 / ' + (o.max || 500) + '</span></div>' : '') +
       '<div class="cx-derr" data-r="derr"></div><div class="cx-dbtn"><button type="button" class="cx-btn" data-a="dlgNo">Cancelar</button><button type="button" class="cx-btn ' + (o.btnClase || 'pri') + '" data-a="dlgSi">' + (I[o.btnIcono] || '') + esc(o.boton || 'Aceptar') + '</button></div>';
     c._o = o; q('dlg').classList.add('on');
+    if (o.valor) { var ta = c.querySelector('textarea'); if (ta) { ta.value = String(o.valor).slice(0, o.max || 500); ta.scrollTop = 0; var cn = c.querySelector('[data-r="dmCnt"]'); if (cn) cn.textContent = ta.value.length + ' / ' + (o.max || 500); } }
     setTimeout(function () { var t = c.querySelector('textarea'); (t || c.querySelector('[data-a="dlgSi"]')).focus(); }, 60);
   }
   function dlgCerrar() { q('dlg').classList.remove('on'); dlgCb = null; }
@@ -689,7 +704,7 @@
     return '<article class="cx-card e-' + r.estado + '"><div><div class="cx-top"><span class="cx-av pld">' + I.pld + '</span><div class="cx-tt"><h3>' + esc(r.operacion || r.nombre) + '</h3><div class="cx-id"><code>' + esc(corto(r.nombre, 48)) + '</code></div></div>' +
       '<span class="cx-est e-' + r.estado + '">' + I[ICEST[r.estado] || 'info'] + (ESTP[r.estado] || r.estado) + '</span></div>' +
       '<div class="cx-meta"><span class="cx-m">' + I.user + '<span>' + esc(r.asociados || 'Sin asociados') + '</span></span><span class="cx-m">' + I.user + '<span>Lo generó ' + esc(r.creador) + '</span></span><span class="cx-m" title="' + esc(r.creado) + '">' + I.reloj + '<span>' + esc(hace(r.creado)) + '</span></span></div>' + aviso + '</div>' +
-      '<div class="cx-act">' + (rev ? '<button type="button" class="cx-btn ok" data-rev="' + esc(r.id) + '">' + I.check + 'Marcar revisado</button><button type="button" class="cx-btn warn" data-obs="' + esc(r.id) + '">' + I.alertas + 'Observar</button>' : '') +
+      '<div class="cx-act">' + (rev ? '<button type="button" class="cx-btn pri" data-chk="' + esc(r.id) + '" data-nom="' + esc(r.nombre) + '" style="grid-column:1/-1" title="Revisa RFC, CURP, fechas, nombres y pagos con reglas fijas (sin IA)">' + I.lupa + 'Revisión automática</button><button type="button" class="cx-btn ok" data-rev="' + esc(r.id) + '">' + I.check + 'Marcar revisado</button><button type="button" class="cx-btn warn" data-obs="' + esc(r.id) + '">' + I.alertas + 'Observar</button>' : '') +
       '<div class="cx-row2"><a class="cx-btn' + (rev ? '' : ' pri') + '" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="' + (rev ? '' : 'grid-column:1/-1;min-height:54px') + '">' + I.doc + 'Abrir documento</a>' + '<button type="button" class="cx-btn" data-his="' + esc(r.id) + '" data-nom="' + esc(r.nombre) + '" style="' + (rev ? '' : 'grid-column:1/-1') + '">' + I.hist + 'Historial</button></div></div></article>';
   }
   function pintaPld(anim) {
@@ -715,7 +730,7 @@
   var ACC = {
     CREAR: ['Creó un contrato', 'lapiz', 'pri', 'edit'], EDITAR: ['Editó el contrato', 'mods', 'pri', 'edit'], ENVIAR_REVISION: ['Envió a revisión', 'send', 'warn', 'envio'], APROBAR: ['Aprobó el contrato', 'check', 'ok', 'aprob'],
     CANCELAR: ['Canceló el contrato', 'xc', 'bad', 'cancel'], ELIMINAR: ['Eliminó un borrador', 'trash', 'bad', 'cancel'], DESCARTAR_BORRADOR: ['Descartó un borrador', 'trash', 'bad', 'cancel'], DESCARGA_PDF: ['Descargó el PDF', 'dl', 'info', 'docs'],
-    COPIA_DOCS: ['Generó copia en Google Docs', 'doc', 'info', 'docs'], PDF_AJUSTE: ['Reajustó las hojas del PDF', 'doc', 'info', 'docs'], PDF_NO_COINCIDE: ['Alerta: el PDF no coincide con los datos', 'alertas', 'bad', 'alerta'], OBSERVAR: ['Observó el documento', 'alertas', 'warn', 'cancel'],
+    COPIA_DOCS: ['Generó copia en Google Docs', 'doc', 'info', 'docs'], PDF_AJUSTE: ['Reajustó las hojas del PDF', 'doc', 'info', 'docs'], REVISION_REGLAS: ['Corrió la revisión automática', 'lupa', 'info', 'docs'], PDF_NO_COINCIDE: ['Alerta: el PDF no coincide con los datos', 'alertas', 'bad', 'alerta'], OBSERVAR: ['Observó el documento', 'alertas', 'warn', 'cancel'],
     REVISADO: ['Marcó como revisado', 'check', 'ok', 'aprob'], ALTA_ACCESO: ['Agregó a una persona al equipo', 'userplus', 'ok', 'alta'], ACCESO_BAJA: ['Desactivó un acceso', 'candado', 'bad', 'baja'], ACCESO_ACTIVO: ['Activó o actualizó un acceso', 'check', 'ok', 'alta'], DENEGADO: ['Intento de entrar sin acceso', 'candado', 'bad', 'alerta'], REPORTE: ['Reportó un problema', 'info', 'info', 'docs'], CORREO: ['Aviso enviado por correo', 'send', 'info', 'docs'], CORREO_FALLO: ['Un aviso por correo NO llegó a alguien', 'alertas', 'bad', 'alerta']
   };
   var FU = [['todo', 'Todo'], ['envio', 'Envíos a revisión'], ['aprob', 'Aprobaciones'], ['cancel', 'Cancelaciones y observaciones'], ['edit', 'Creación y edición'], ['docs', 'Descargas y documentos'], ['alerta', 'Alertas']];
@@ -840,9 +855,34 @@
     dialogo({ titulo: 'Marcar como revisado', icono: 'check', tono: 'ok', texto: 'El asesor recibirá un aviso de que su Pre PLD está <b>listo, sin observaciones</b>.', campo: 'Nota para el asesor (opcional)', ph: 'Ej. Todo correcto', boton: 'Marcar revisado', btnIcono: 'check', btnClase: 'ok' },
       function (nota) { srv('PLD_marcarRevisado', [id, nota], function () { toast('Marcado como revisado.'); if (window.HIPOO_FX) HIPOO_FX.confeti(); vPld(false, true); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Guardando…'); });
   }
-  function observar(id) {
-    dialogo({ titulo: 'Observar documento', icono: 'alertas', tono: 'warn', texto: 'Dile al asesor <b>qué debe corregir</b>. Recibirá un aviso y podrá volver a enviarlo a revisión.', campo: '¿Qué debe corregir?', ph: 'Ej. Falta la identificación del comprador', min: 3, minMsg: 'qué debe corregir', boton: 'Enviar observación', btnIcono: 'send', btnClase: 'rev' },
+  function observar(id, valor) {
+    dialogo({ valor: valor || '', titulo: 'Observar documento', icono: 'alertas', tono: 'warn', texto: 'Dile al asesor <b>qué debe corregir</b>. Recibirá un aviso y podrá volver a enviarlo a revisión.', campo: '¿Qué debe corregir?', ph: 'Ej. Falta la identificación del comprador', min: 3, minMsg: 'qué debe corregir', boton: 'Enviar observación', btnIcono: 'send', btnClase: 'rev' },
       function (c) { srv('PLD_observar', [id, c], function () { toast('Observación enviada al asesor.'); vPld(false, true); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Guardando…'); });
+  }
+  /* Revisión automática del Pre PLD (reglas fijas: el servidor lee la hoja del asesor; nada sale de Hipoo) */
+  var RV = null;
+  function textoObservacion(r) {
+    var l = r.avisos.filter(function (a) { return a.sev !== 'estilo'; }), out = '', i;
+    for (i = 0; i < l.length; i++) { var li = '• ' + l[i].t + '\n'; if ((out + li).length > 470) break; out += li; }
+    if (i < l.length) out += '• …y ' + (l.length - i) + ' más.';
+    return out.trim();
+  }
+  function revisarCampos(id, nombre) {
+    srv('PLD_revisarReglas', [id], function (r) {
+      RV = { id: id, r: r };
+      q('drIc').innerHTML = I.lupa; q('drX').innerHTML = I.x; q('drTit').textContent = nombre;
+      var sm = q('drTit').parentNode.querySelector('small'); if (sm) sm.textContent = 'Revisión automática';
+      var c = r.resumen, nombres = { error: ['error', 'errores'], revisar: ['por revisar', 'por revisar'], estilo: ['detalle de estilo', 'detalles de estilo'] };
+      var h = '<div class="cx-rvs">' + ['error', 'revisar', 'estilo'].filter(function (k) { return c[k]; }).map(function (k) { return '<span class="cx-rvp ' + k + '">' + c[k] + ' ' + nombres[k][c[k] === 1 ? 0 : 1] + '</span>'; }).join('') + '</div>';
+      var sev = { error: 'Error', revisar: 'Revisar', estilo: 'Estilo' };
+      h += r.avisos.length ? r.avisos.map(function (a) {
+        return '<div class="cx-rvi ' + a.sev + '"><div class="h"><b>' + esc(a.t) + '</b><span class="sev">' + sev[a.sev] + '</span></div>' + (a.dice ? '<p><i>Dice</i>' + esc(a.dice) + '</p>' : '') + (a.sug ? '<p><i>Qué hacer</i>' + esc(a.sug) + '</p>' : '') +
+          (a.url ? '<a class="cx-btn" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + I.flecha + 'Abrir la celda</a>' : '') + '</div>';
+      }).join('') : vacio('checkc', 'No encontré nada raro', 'Las reglas fijas (RFC, CURP, fechas, nombres, pagos) no detectaron problemas en lo que llenó el asesor. La ortografía sigue siendo cosa de una lectura humana.');
+      if (r.avisos.some(function (a) { return a.sev !== 'estilo'; })) h += '<div class="cx-dbtn" style="margin:6px 0 4px"><button type="button" class="cx-btn warn" data-obsrv="1">' + I.alertas + 'Usar como observaciones para el asesor</button></div>';
+      h += '<div class="cx-rvn">' + I.info + '<span><b>Reglas fijas, sin inteligencia artificial.</b> El sistema leyó ' + r.camposLeidos + ' campos de la hoja del asesor y los comparó entre sí; no cambió nada en el documento ni envió datos a ningún servicio externo. «Error» es casi seguro; «Revisar» puede estar bien. Confirma siempre con el documento original.</span></div>';
+      q('drBody').innerHTML = h; q('drawer').classList.add('on');
+    }, 'Revisando los campos del documento…');
   }
   function historial(id, nombre) {
     srv('PLD_historial', [id], function (h) {
@@ -886,6 +926,8 @@
     else if (g('data-his')) historial(g('data-his'), g('data-nom'));
     else if (g('data-rev')) revisar(g('data-rev'));
     else if (g('data-obs')) observar(g('data-obs'));
+    else if (g('data-chk')) revisarCampos(g('data-chk'), g('data-nom'));
+    else if (g('data-obsrv')) { if (RV) { var tx = textoObservacion(RV.r), idr = RV.id; q('drawer').classList.remove('on'); observar(idr, tx); } }
     else if (g('data-a') === 'cerrarDr') q('drawer').classList.remove('on');
     else if (g('data-a') === 'refrescar') { st.kpiSig = ''; st.mods = null; cargar(false); }
     else if (g('data-a') === 'dlgNo') dlgCerrar();

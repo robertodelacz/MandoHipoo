@@ -153,6 +153,25 @@
 #aps-root .his-i b{font-size:13px}
 #aps-root .his-i ul{margin:6px 0 0 18px;padding:0;font-size:12.5px;color:var(--muted)}
 #aps-root .his-i li span{color:var(--ink)}
+/* ── Revisión automática (reglas fijas) ── */
+#aps-root .rv-sum{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px}
+#aps-root .rv-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:700}
+#aps-root .rv-pill.error{background:#fdecef;color:#a02339}#aps-root .rv-pill.revisar{background:#fff3dc;color:#7a4a00}#aps-root .rv-pill.estilo{background:#eaf0fb;color:#2f4a8c}
+#aps-root .rv-note{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-size:12.5px;color:var(--muted);margin:0 0 14px}
+#aps-root .rv-ok{text-align:center;padding:26px 12px}
+#aps-root .rv-ok b{display:block;font-family:'Fraunces',Georgia,serif;font-size:21px;color:var(--ink);margin:8px 0 4px}
+#aps-root .rv-ok p{margin:0 auto;max-width:480px;color:var(--muted);font-size:13px}
+#aps-root .rv-i{border:1px solid var(--line);border-left-width:5px;border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fff}
+#aps-root .rv-i.error{border-left-color:#d6455d}#aps-root .rv-i.revisar{border-left-color:#e0a02b}#aps-root .rv-i.estilo{border-left-color:#6f8fd6}
+#aps-root .rv-i h4{margin:0 0 6px;font-size:14px;line-height:1.35;color:var(--ink);display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+#aps-root .rv-i .rv-sev{flex:none;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:2px 8px;border-radius:999px}
+#aps-root .rv-i.error .rv-sev{background:#fdecef;color:#a02339}#aps-root .rv-i.revisar .rv-sev{background:#fff3dc;color:#7a4a00}#aps-root .rv-i.estilo .rv-sev{background:#eaf0fb;color:#2f4a8c}
+#aps-root .rv-i p{margin:3px 0;font-size:13px;color:var(--ink)}
+#aps-root .rv-i p span{display:inline-block;min-width:74px;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+#aps-root .rv-i .rv-bt{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+#aps-root .rv-i .rv-bt button{padding:6px 12px;font-size:12px}
+#aps-root .rv-ign{font-size:12px;color:var(--muted);margin:4px 0 0}
+#aps-root .rv-ign button{background:none;border:0;color:var(--teal);font-weight:700;cursor:pointer;padding:0;text-decoration:underline;font:inherit;font-weight:700}
 /* ── Aviso de estado del contrato ── */
 #aps-root .banner{border-radius:12px;padding:12px 14px;font-size:13.5px;margin-bottom:14px;background:#fff;color:var(--ink);border:1px solid var(--line);border-left:5px solid #b9c4de;box-shadow:var(--shadow)}
 #aps-root .banner small{display:block;margin-top:3px;color:var(--muted);font-size:12.5px;font-weight:400}
@@ -413,6 +432,12 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
     <div class="sheet-b" id="aps_hisBody"></div>
   </div>
 </div>
+<div class="modal sheetwrap" id="aps_revModal" role="dialog" aria-modal="true" aria-labelledby="aps_revTit">
+  <div class="sheet">
+    <div class="sheet-h"><div><span class="sh-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.500"/><path d="M20 20l-4.200-4.200M8.500 11l1.800 1.800L13.800 9"/></svg></span><div><h2 id="aps_revTit">Revisión automática</h2><p>Una segunda mirada para la coordinación. Tú decides qué hacer con cada aviso.</p></div></div><button type="button" class="sheet-x" id="aps_revClose" aria-label="Cerrar esta ventana"><span aria-hidden="true">✕</span> Cerrar</button></div>
+    <div class="sheet-b" id="aps_revBody"></div>
+  </div>
+</div>
 <div class="busy" id="aps_busy"><div class="busy-card"><div class="spin"></div><span id="aps_busyTxt">Procesando…</span></div></div>
 <div class="toast" id="aps_toast"></div>
 
@@ -504,7 +529,8 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
     if (IN_GAS && coord) b += '<button type="button" class="btn-sec" data-act="docs" data-keep="1" title="Descarga el contrato en Google Docs">📝 Descargar en Google Docs</button>';
     b += '<button type="button" class="btn-sec" data-act="zoom" data-keep="1">🔍 Ver contrato completo</button>';
     if (IN_GAS && REG && st === 'APROBADO') b += '<button type="button" class="btn-sec" data-act="verificar" data-keep="1" title="Comprueba folio, quién aprobó y que los datos no hayan cambiado">🔎 Verificar</button>';
-    if (IN_GAS && coord && REG && st !== 'BORRADOR') b += '<button type="button" class="btn-sec" data-act="historial" data-keep="1">🕘 Historial de cambios</button>';
+    if (coord && st !== 'APROBADO' && st !== 'CANCELADO') b += '<button type="button" class="btn-sec" data-act="revisar" data-keep="1" title="Busca errores de dedo y datos que no cuadran. Reglas fijas: ningún dato sale de Hipoo">🔎 Revisión automática</button>';
+    if (IN_GAS && coord && REG && st !== 'BORRADOR' && REG.cambiosCoord > 0) b += '<button type="button" class="btn-sec" data-act="historial" data-keep="1" title="La coordinación corrigió este contrato después de que el asesor lo envió">🕘 Historial de cambios</button>';
     if (IN_GAS && coord && REG && (st === 'EN_REVISION' || st === 'APROBADO')) b += '<button type="button" class="btn-sec danger" data-act="cancelar" data-keep="1">⛔ Cancelar contrato</button>';
     if (IN_GAS && coord && REG && st === 'BORRADOR') b += '<button type="button" class="btn-sec danger" data-act="eliminar" data-keep="1">🗑️ Eliminar borrador</button>';
     if (IN_GAS && !coord && REG && st === 'BORRADOR' && !ro()) b += '<button type="button" class="btn-sec danger" data-act="descartar">🗑️ Descartar borrador</button>';
@@ -933,6 +959,15 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
   }
   function aprobar() {
     if (ISS.length) { toast('Completa los datos pendientes antes de aprobar.', true); return; }
+    var errs = erroresPendientes();
+    if (errs.length) {
+      confirma({ titulo: 'La revisión automática encontró ' + errs.length + (errs.length === 1 ? ' error' : ' errores'), texto: 'Antes de aprobar conviene revisarlo: el contrato aprobado ya no se puede editar.', lista: errs.slice(0, 5).map(function (a) { return a.t; }).concat(errs.length > 5 ? ['… y ' + (errs.length - 5) + ' más'] : []), ok: 'Aprobar de todos modos', cancelar: 'Ver los avisos', tono: 'warn', icono: 'aviso' },
+        function () { aprobarYa(); }, function () { revisarAuto(); });
+      return;
+    }
+    aprobarYa();
+  }
+  function aprobarYa() {
     confirma({ titulo: '¿Aprobar y generar el PDF?', texto: 'Se generará el PDF definitivo. Después ya no se puede editar.', ok: 'Sí, aprobar', tono: 'ok', icono: 'ok' }, function () {
       guardar(function (meta) {
         avisoDuplicados(meta.id, 'aprobarlo', function () { srv('APS_aprobar', [meta.id], function (m) { conRegistro(m); toast('Aprobado · PDF generado'); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Generando PDF… (puede tardar hasta un minuto)', 150000); });
@@ -973,6 +1008,49 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
     else if (p[0] === 'ajustes') pre = 'Ajuste ' + (parseInt(p[1], 10) + 1) + ' \u00b7 ';
     else if (p[0] === 'contactoDir') pre = 'Domicilio de contacto \u00b7 ';
     return pre + (ETQ[k] || k);
+  }
+  /* ── Revisión automática (solo coordinación): reglas fijas de APS_REV, calculadas aquí mismo con lo que hay en pantalla ── */
+  var REVR = null, IGN = {}, VER_IGN = false;
+  function llaveAviso(a) { return (REG ? REG.id : '_nuevo') + '|' + a.id + '|' + (a.k || '') + '|' + a.t; }
+  function avisosVigentes() {
+    var r = APS_REV.aps(S), vis = r.avisos.filter(function (a) { return !IGN[llaveAviso(a)]; }), c = { error: 0, revisar: 0, estilo: 0 };
+    vis.forEach(function (a) { c[a.sev]++; });
+    return { todos: r.avisos, vis: vis, cuenta: c, ign: r.avisos.length - vis.length };
+  }
+  var SEV = { error: 'Error', revisar: 'Revisar', estilo: 'Estilo' };
+  function pintaRevision() {
+    var R = avisosVigentes(); REVR = R;
+    var h = '';
+    if (!R.todos.length || (!R.vis.length && !VER_IGN)) {
+      h += '<div class="rv-ok"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#0f9d6e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.500"/><path d="M8 12.300l2.800 2.800L16.200 9.500"/></svg><b>' + (R.todos.length ? 'Ya revisaste todos los avisos' : 'No encontré nada raro') + '</b>' +
+        '<p>' + (R.todos.length ? 'Ignoraste ' + R.ign + ' aviso' + (R.ign === 1 ? '' : 's') + '.' : 'Las reglas fijas (RFC, fechas, nombres, teléfonos, montos) no detectaron problemas.') + ' La ortografía y la redacción siguen siendo cosa de una lectura humana.</p></div>';
+    } else {
+      h += '<div class="rv-sum">' + ['error', 'revisar', 'estilo'].filter(function (k) { return R.cuenta[k]; }).map(function (k) { return '<span class="rv-pill ' + k + '">' + R.cuenta[k] + ' ' + (k === 'error' ? (R.cuenta[k] === 1 ? 'error' : 'errores') : k === 'revisar' ? 'por revisar' : (R.cuenta[k] === 1 ? 'detalle de estilo' : 'detalles de estilo')) + '</span>'; }).join('') + '</div>';
+      var lista = VER_IGN ? R.todos : R.vis;
+      h += lista.map(function (a) {
+        var ig = !!IGN[llaveAviso(a)], i = R.todos.indexOf(a);
+        return '<div class="rv-i ' + a.sev + '"' + (ig ? ' style="opacity:.55"' : '') + '><h4><span>' + esc(a.t) + '</span><span class="rv-sev">' + SEV[a.sev] + '</span></h4>' +
+          (a.dice ? '<p><span>Dice</span>' + esc(a.dice) + '</p>' : '') + (a.sug ? '<p><span>Qué hacer</span>' + esc(a.sug) + '</p>' : '') +
+          '<div class="rv-bt"><button type="button" class="btn-sec" data-rgoto="' + esc(a.step || '') + '" data-rk="' + esc(a.k || '') + '">Ir al campo</button>' +
+          '<button type="button" class="btn-sec" data-rign="' + i + '">' + (ig ? 'Volver a mostrar' : 'Ignorar este aviso') + '</button></div></div>';
+      }).join('');
+    }
+    if (R.ign) h += '<p class="rv-ign">' + (VER_IGN ? 'Mostrando también los ' + R.ign + ' ignorados. ' : 'Hay ' + R.ign + ' aviso' + (R.ign === 1 ? '' : 's') + ' ignorado' + (R.ign === 1 ? '' : 's') + '. ') + '<button type="button" data-rver="1">' + (VER_IGN ? 'Ocultarlos' : 'Mostrarlos') + '</button></p>';
+    h += '<div class="rv-note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span><b>Reglas fijas, sin inteligencia artificial.</b> Todo se calcula aquí con los datos que ya tienes abiertos: no se envía nada a ningún servicio externo. Los avisos «Error» son casi seguros; «Revisar» pueden estar bien. Los que ignores no vuelven a contarse en este contrato durante esta sesión.</span></div>';
+    $('aps_revBody').innerHTML = h;
+  }
+  function revisarAuto() {
+    if (!window.APS_REV) { toast('La revisión automática no está disponible en esta versión.', true); return; }
+    VER_IGN = false; pintaRevision(); $('aps_revModal').classList.add('open');
+    if (IN_GAS && REG && REVR) {                                              // solo deja constancia en Auditoría (cuántos avisos hubo); no envía datos del contrato
+      var c = APS_REV.aps(S).resumen;
+      try { google.script.run.withFailureHandler(function () {}).withSuccessHandler(function () {}).APS_registrarRevision(REG.id, c); } catch (e) {}
+    }
+  }
+  /* Antes de aprobar: si la revisión automática ve errores sin atender, la coordinación decide si sigue o los revisa primero. */
+  function erroresPendientes() {
+    if (USER.rol !== 'coordinador' || !window.APS_REV) return [];
+    return avisosVigentes().vis.filter(function (a) { return a.sev === 'error'; });
   }
   function historial() {
     if (!REG) return;
@@ -1190,10 +1268,14 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
     else if (a === 'cancelar') cancelar();
     else if (a === 'verificar') verificar();
     else if (a === 'historial') historial();
+    else if (a === 'revisar') revisarAuto();
     else if (a === 'descartar') descartar();
   });
   ROOT.addEventListener('click', function (e) {
     var b = e.target.closest('[data-goto]'); if (b) { goStep(b.getAttribute('data-goto'), b.getAttribute('data-focus')); return; }
+    var rg = e.target.closest('[data-rgoto]'); if (rg) { var stp = rg.getAttribute('data-rgoto'); $('aps_revModal').classList.remove('open'); if (stp) goStep(stp, rg.getAttribute('data-rk')); return; }
+    var ri = e.target.closest('[data-rign]'); if (ri && REVR) { var av = REVR.todos[+ri.getAttribute('data-rign')]; if (av) { var kk = llaveAviso(av); if (IGN[kk]) delete IGN[kk]; else IGN[kk] = 1; pintaRevision(); } return; }
+    if (e.target.closest('[data-rver]')) { VER_IGN = !VER_IGN; pintaRevision(); return; }
     var x = e.target.closest('[data-ej]'); if (x) { var id = x.getAttribute('data-ej'); cargar(id === 'reset' ? null : id); }
   });
   ROOT.addEventListener('click', function (e) {
@@ -1206,9 +1288,10 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
   $('aps_btnNuevo').addEventListener('click', nuevo);
   $('aps_regClose').addEventListener('click', cerrarRegistros);
   $('aps_regVolver').addEventListener('click', cerrarRegistros); $('aps_regQ').addEventListener('input', pintaRegistros);
-  ['aps_regModal', 'aps_hisModal', 'aps_modal'].forEach(function (id) {       // tocar fuera de la ventana también la cierra
+  ['aps_regModal', 'aps_hisModal', 'aps_revModal', 'aps_modal'].forEach(function (id) {       // tocar fuera de la ventana también la cierra
     $(id).addEventListener('mousedown', function (e) { if (e.target === this) this.classList.remove('open'); });
   }); $('aps_hisClose').addEventListener('click', function () { $('aps_hisModal').classList.remove('open'); });
+  $('aps_revClose').addEventListener('click', function () { $('aps_revModal').classList.remove('open'); });
   $('aps_btnNext').addEventListener('click', next); $('aps_btnPrev').addEventListener('click', prev);
   $('aps_btnZoom').addEventListener('click', openModal); $('aps_btnPrint').addEventListener('click', imprimir); $('aps_fab').addEventListener('click', openModal);
   $('aps_modalClose').addEventListener('click', closeModal); $('aps_modalPrint').addEventListener('click', function () { closeModal(); imprimir(); });
@@ -1221,7 +1304,7 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
     if (!activado) { activado = true; iniciarServidor(); }
     refresh(true); fitPreview();
   }
-  function cerrarModales() { closeModal(); cerrarRegistros(); $('aps_hisModal').classList.remove('open'); }
+  function cerrarModales() { closeModal(); cerrarRegistros(); $('aps_hisModal').classList.remove('open'); $('aps_revModal').classList.remove('open'); }
   window.APS_UI = { activar: activar, cerrarModales: cerrarModales, abrir: abrirRegistro, misRegistros: abrirRegistros, cargar: cargar, estado: function () { return S; }, pendientes: function () { return ISS.slice(); }, ir: goStep, step: function () { return STEP; } };
   if (IN_GAS) { $('aps_btnPrint').style.display = 'none'; $('aps_modalPrint').style.display = 'none'; $('aps_sinPdf').style.display = ''; }      // el PDF solo lo ve la coordinación (se muestran al identificar)
   if (IN_GAS) ROOT.querySelector('.ejs').style.display = 'none';       // datos de ejemplo: solo coordinador (se muestran al identificar)

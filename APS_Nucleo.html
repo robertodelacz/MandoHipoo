@@ -808,4 +808,480 @@ var APS_DOC = (function (U, T) {
 })(APS_U,
    APS_TEXTO);
 
+/* ═══ APS_REV · REVISIÓN POR REGLAS FIJAS (sin IA, sin enviar datos a ningún lado) ═══════════════════════════════
+   Corre igual en el navegador (contratos APS) y en el servidor (Pre PLD). Solo hace cuentas y comparaciones sobre
+   los mismos datos que ya tiene la pantalla o el script: ningún dato sale de Hipoo.
+   Cada aviso: { id, sev: 'error'|'revisar'|'estilo', src: 'Regla fija', t: título, dice: lo que se lee, sug: qué hacer, k, step, celda }
+   · error   = casi seguro está mal (no cumple un formato o un dato se contradice con otro)
+   · revisar = puede estar bien, conviene confirmarlo con el documento original
+   · estilo  = detalle de redacción / captura
+   Lo que NO hace: ortografía y frases sin sentido (eso requiere un diccionario o un modelo; queda para la capa de IA). */
+var APS_REV = (function (U) {
+  var RFC_TABLA = '0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ';
+  var CURP_TABLA = '0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ';
+  var CURP_ESTADOS = 'AS BC BS CC CL CM CS CH DF DG GT GR HG JC MC MN MS NT NL OC PL QT QR SP SL SR TC TS TL VZ YN ZS NE'.split(' ');
+  var INCONVENIENTES = ('BUEI BUEY CACA CACO CAGA CAGO CAKA CAKO COGE COGI COJA COJE COJI COJO COLA CULO FALO FETO GETA GUEI GUEY JETA JOTO KACA KACO KAGA KAGO KAKA KAKO KOGE KOGI KOJA KOJE KOJI KOJO KOLA KULO LILO LOCA LOCO LOKA LOKO MAME MAMO MEAR MEAS MEON MIAR MION MOCO MOKO MULA MULO NACA NACO PEDA PEDO PENE PIPI PITO POPO PUTA PUTO QULO RATA ROBA ROBE ROBO RUIN SENO TETA VACA VAGA VAGO VAKA VUEI VUEY WUEI WUEY').split(' ');
+  var PARTICULAS = { DA: 1, DAS: 1, DE: 1, DEL: 1, DER: 1, DI: 1, DIE: 1, DD: 1, EL: 1, LA: 1, LOS: 1, LAS: 1, LE: 1, LES: 1, MAC: 1, MC: 1, VAN: 1, VON: 1, Y: 1 };
+  var DOMINIOS = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'yahoo.com.mx', 'icloud.com', 'live.com', 'live.com.mx', 'hotmail.es', 'outlook.es', 'prodigy.net.mx', 'me.com', 'msn.com', 'protonmail.com'];
+  var SUFIJOS_PM = /(\bS\.?\s?A\.?(\s?P\.?\s?I\.?)?(\s?B\.?)?(\s?DE\s?C\.?\s?V\.?)?|\bS\.?\s?DE\s?R\.?\s?L\.?(\s?DE\s?C\.?\s?V\.?)?|\bS\.?\s?C\.?|\bA\.?\s?C\.?|\bS\.?\s?A\.?\s?S\.?|\bS\.?\s?DE\s?S\.?\s?S\.?|SOCIEDAD|ASOCIACI[OÓ]N|FIDEICOMISO|COOPERATIVA|\bC\.?\s?V\.?)\s*$/i;
+
+  function de(e) { return /^el /.test(e) ? 'del ' + e.slice(3) : 'de ' + e; }
+  function s(v) { return String(v === null || v === undefined ? '' : v).trim(); }
+  function p2(n) { return (n < 10 ? '0' : '') + n; }
+  function mayus(t) { return s(t).toUpperCase(); }
+  function limpiaClave(t) { return mayus(t).replace(/[\s\-]/g, ''); }
+  function hoyLocal() { var d = new Date(); return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); }
+  function diasEnMes(y, m) { return new Date(y, m, 0).getDate(); }
+  function dinero(n) { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmtFecha(iso) { return iso && U && U.fechaLarga && U.fechaLarga(iso) ? U.fechaLarga(iso) : (iso || ''); }
+
+  /* Fecha → 'aaaa-mm-dd' válida, o '' si no es una fecha real. Acepta 'aaaa-mm-dd', 'dd/mm/aaaa' y objetos Date. */
+  function iso(v) {
+    if (v instanceof Date) { return isNaN(v.getTime()) ? '' : v.getFullYear() + '-' + p2(v.getMonth() + 1) + '-' + p2(v.getDate()); }
+    var t = s(v), m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(t), y, mo, d;
+    if (m) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+    else if ((m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/.exec(t))) { d = +m[1]; mo = +m[2]; y = +m[3]; }
+    else return '';
+    if (mo < 1 || mo > 12 || d < 1 || d > diasEnMes(y, mo)) return '';
+    return y + '-' + p2(mo) + '-' + p2(d);
+  }
+  function edadEn(nac, ref) {
+    var a = nac.split('-').map(Number), b = ref.split('-').map(Number), e = b[0] - a[0];
+    if (b[1] < a[1] || (b[1] === a[1] && b[2] < a[2])) e--;
+    return e;
+  }
+  function numero(v) { if (typeof v === 'number') return v; var t = s(v).replace(/[$,\s]/g, ''); return t === '' || isNaN(Number(t)) ? NaN : Number(t); }
+
+  /* ── RFC ── */
+  function rfcDigito(rfc) {
+    var b = mayus(rfc).slice(0, -1);
+    if (b.length === 11) b = ' ' + b;
+    if (b.length !== 12) return null;
+    var sum = 0;
+    for (var i = 0; i < 12; i++) { var v = RFC_TABLA.indexOf(b.charAt(i)); if (v < 0) return null; sum += v * (13 - i); }
+    var d = 11 - (sum % 11);
+    return d === 11 ? '0' : d === 10 ? 'A' : String(d);
+  }
+  function parseRfc(x) {
+    var r = limpiaClave(x), m = /^([A-ZÑ&]{3,4})(\d{2})(\d{2})(\d{2})([A-Z0-9]{2})([A-Z0-9])$/.exec(r);
+    if (!m) return { ok: false, rfc: r };
+    return { ok: true, rfc: r, tipo: m[1].length === 4 ? 'PF' : 'PM', letras: m[1], aa: m[2], mm: +m[3], dd: +m[4], homo: m[5], dig: m[6],
+      generico: r === 'XAXX010101000' || r === 'XEXX010101000' };
+  }
+  /* ── CURP ── */
+  function curpDigito(curp) {
+    var c = mayus(curp), sum = 0;
+    for (var i = 0; i < 17; i++) { var v = CURP_TABLA.indexOf(c.charAt(i)); if (v < 0) return null; sum += v * (18 - i); }
+    var d = 10 - (sum % 10);
+    return d === 10 ? '0' : String(d);
+  }
+  function parseCurp(x) {
+    var c = limpiaClave(x), m = /^([A-ZÑ]{4})(\d{2})(\d{2})(\d{2})([HMX])([A-Z]{2})([A-ZÑ]{3})([A-Z0-9])(\d)$/.exec(c);
+    if (!m) return { ok: false, curp: c };
+    return { ok: true, curp: c, letras: m[1], aa: m[2], mm: +m[3], dd: +m[4], sexo: m[5], estado: m[6], diferenciador: m[8], dig: m[9] };
+  }
+  /* Año completo a partir del RFC/CURP y de la fecha de nacimiento conocida: coincide si los 2 últimos dígitos son iguales. */
+  function fechaCuadra(aa, mm, dd, isoRef) {
+    var a = isoRef.split('-');
+    return a[0].slice(2) === aa && +a[1] === mm && +a[2] === dd;
+  }
+
+  /* ── Letras iniciales del RFC/CURP a partir del nombre ── */
+  function sinAcento(t) { return mayus(t).replace(/Ñ/g, '\u0001').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\u0001/g, 'Ñ'); }
+  function palabras(t) { return sinAcento(t).replace(/[^A-ZÑ&\s]/g, ' ').split(/\s+/).filter(Boolean); }
+  function sinParticulas(ws) { var o = ws.filter(function (w) { return !PARTICULAS[w]; }); return o.length ? o : ws; }
+  function nombrePila(ws) {                          // si el nombre empieza con JOSE / MARIA (o J. / MA.) y hay otro, se usa el otro
+    ws = sinParticulas(ws);
+    if (ws.length > 1 && /^(JOSE|MARIA|MA|J)$/.test(ws[0])) return ws[1];
+    return ws[0] || '';
+  }
+  function letraBase(c) { return c === 'Ñ' || c === '&' ? 'X' : c; }
+  /* → { rfc: 'XXXX', curp: 'XXXX' } esperado, o null si no se puede calcular con seguridad */
+  function codigosNombre(nombres, pat, mat) {
+    var P = sinParticulas(palabras(pat)).join(''), M = sinParticulas(palabras(mat)).join(''), N = nombrePila(palabras(nombres));
+    if (!P || !N || P.length < 3) return null;      // apellido de 1-2 letras o sin apellido: la regla cambia, no se compara
+    var vocal = 'X', i;
+    for (i = 1; i < P.length; i++) { if ('AEIOU'.indexOf(P.charAt(i)) >= 0) { vocal = P.charAt(i); break; } }
+    var c1 = letraBase(P.charAt(0)), c3 = M ? letraBase(M.charAt(0)) : 'X', c4 = letraBase(N.charAt(0));
+    return { c1: c1, c2: vocal, c3: c3, c4: c4, base: c1 + vocal + c3 + c4 };
+  }
+  function ajustaInconveniente(cod, donde) {
+    if (INCONVENIENTES.indexOf(cod) < 0) return cod;
+    return donde === 'curp' ? cod.charAt(0) + 'X' + cod.slice(2) : cod.slice(0, 3) + 'X';
+  }
+  function coincideLetras(real, esp, donde) {
+    var e = esp.base; real = mayus(real).replace(/Ñ/g, 'X');
+    return real === e || real === ajustaInconveniente(e, donde);
+  }
+
+  /* ═══ Constructor de avisos ═══ */
+  function nuevo(limite) {
+    var lista = [], vistos = {};
+    return {
+      add: function (sev, id, t, dice, sug, extra) {
+        var llave = id + '|' + (extra && (extra.k || extra.celda) || '') + '|' + t;
+        if (vistos[llave] || lista.length >= (limite || 80)) return;
+        vistos[llave] = 1;
+        var o = { id: id, sev: sev, src: 'Regla fija', t: t, dice: dice || '', sug: sug || '' };
+        if (extra) for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) o[k] = extra[k];
+        lista.push(o);
+      },
+      fin: function () {
+        var orden = { error: 0, revisar: 1, estilo: 2 };
+        lista = lista.map(function (x, i) { x._i = i; return x; }).sort(function (a, b) { return (orden[a.sev] - orden[b.sev]) || (a._i - b._i); });
+        lista.forEach(function (x, i) { x.n = i + 1; delete x._i; });
+        var r = { error: 0, revisar: 0, estilo: 0 };
+        lista.forEach(function (x) { r[x.sev]++; });
+        return { avisos: lista, resumen: r };
+      }
+    };
+  }
+
+  /* ═══ Revisión de una clave de contribuyente / CURP (compartida por APS y Pre PLD) ═══
+     p: { etq, rfc, curp, fechaNac (iso), nombres, pat, mat, nombreCompleto, esperaTipo: 'PF'|'PM' }, ref: función (campo) → extras del aviso */
+  function revisaRfc(A, p, ref) {
+    var rfcTxt = s(p.rfc);
+    if (!rfcTxt) return;
+    var r = parseRfc(rfcTxt), x = ref('rfc');
+    if (!r.ok) {
+      A.add('error', 'RFC_FORMATO', 'El RFC ' + de(p.etq) + ' no tiene el formato correcto', 'Se lee «' + rfcTxt + '» (' + limpiaClave(rfcTxt).length + ' caracteres).',
+        'Debe tener 12 caracteres (empresa) o 13 (persona física): letras, 6 dígitos de fecha y 3 de homoclave. Compáralo con la Constancia de Situación Fiscal.', x);
+      return;
+    }
+    if (r.generico) { A.add('revisar', 'RFC_GENERICO', 'El RFC ' + de(p.etq) + ' es genérico', 'Se lee «' + r.rfc + '».', 'Ese RFC es para público en general o extranjeros sin RFC. Confirma que de verdad no tiene uno propio.', x); return; }
+    if (p.esperaTipo && r.tipo !== p.esperaTipo) {
+      A.add('error', 'RFC_TIPO', 'El RFC ' + de(p.etq) + ' es de ' + (r.tipo === 'PF' ? 'persona física' : 'persona moral') + ' pero se capturó como ' + (p.esperaTipo === 'PF' ? 'persona física' : 'persona moral'),
+        'RFC «' + r.rfc + '» tiene ' + r.rfc.length + ' caracteres.', p.esperaTipo === 'PF' ? 'Una persona física lleva 13 caracteres.' : 'Una empresa lleva 12 caracteres.', x);
+    }
+    var mesOk = r.mm >= 1 && r.mm <= 12 && r.dd >= 1 && r.dd <= 31 && (r.mm !== 2 || r.dd <= 29) && ([4, 6, 9, 11].indexOf(r.mm) < 0 || r.dd <= 30);
+    if (!mesOk) {
+      A.add('error', 'RFC_FECHA', 'La fecha dentro del RFC ' + de(p.etq) + ' no existe', 'Se lee «' + r.rfc + '»: mes ' + p2(r.mm) + ', día ' + p2(r.dd) + '.', 'Revisa los dígitos 5 al 10 del RFC (aammdd).', x);
+    } else if (p.fechaNac && !fechaCuadra(r.aa, r.mm, r.dd, p.fechaNac)) {
+      A.add('error', 'RFC_FECHA_NO_CUADRA', 'La fecha dentro del RFC ' + de(p.etq) + ' no coincide con ' + (p.etqFecha || 'su fecha de nacimiento'),
+        'El RFC «' + r.rfc + '» trae ' + p2(r.dd) + '/' + p2(r.mm) + '/' + r.aa + ' y la fecha capturada es ' + fmtFecha(p.fechaNac) + '.', 'Confirma cuál de las dos está bien con la identificación o la constancia fiscal.', x);
+    }
+    var dg = rfcDigito(r.rfc);
+    if (dg !== null && dg !== r.dig) {
+      A.add('revisar', 'RFC_DIGITO', 'El RFC ' + de(p.etq) + ' no pasa el dígito verificador', 'Se lee «' + r.rfc + '»; el último carácter debería ser «' + dg + '».',
+        'Suele ser un error de dedo en alguna letra o número. Compáralo con la constancia fiscal.', x);
+    }
+    if (r.tipo === 'PF' && p.pat && (p.nombres || p.nombreCompleto)) {
+      var cand = candidatos(p), ok = false, primero = null;
+      cand.forEach(function (c) { if (!c) return; if (!primero) primero = c; if (coincideLetras(r.letras, c, 'rfc')) ok = true; });
+      if (!ok && primero) A.add('revisar', 'RFC_NOMBRE', 'Las letras del RFC ' + de(p.etq) + ' no parecen salir de su nombre', 'RFC «' + r.rfc + '»; por el nombre se esperaría «' + ajustaInconveniente(primero.base, 'rfc') + '…».',
+        'Puede ser un error de dedo en el nombre o en el RFC (o un caso especial de apellidos). Confírmalo con la constancia fiscal.', x);
+    } else if (r.tipo === 'PF' && !p.pat && p.nombreCompleto) {
+      var cand2 = candidatos(p), ok2 = false, prim2 = null;
+      cand2.forEach(function (c) { if (!c) return; if (!prim2) prim2 = c; if (coincideLetras(r.letras, c, 'rfc')) ok2 = true; });
+      if (!ok2 && prim2) A.add('revisar', 'RFC_NOMBRE', 'Las letras del RFC ' + de(p.etq) + ' no parecen salir de su nombre', 'RFC «' + r.rfc + '»; por el nombre se esperaría «' + ajustaInconveniente(prim2.base, 'rfc') + '…».',
+        'Puede ser un error de dedo en el nombre o en el RFC (o un caso especial de apellidos). Confírmalo con la constancia fiscal.', x);
+    }
+  }
+  /* Posibles lecturas del nombre → códigos esperados (en APS el nombre viene en una sola línea) */
+  function candidatos(p) {
+    if (p.pat || p.nombres) return [codigosNombre(p.nombres, p.pat, p.mat)];
+    var unidades = [], ws = s(p.nombreCompleto).split(/\s+/).filter(Boolean), cur = [];
+    ws.forEach(function (w) { cur.push(w); if (!PARTICULAS[sinAcento(w).replace(/[^A-ZÑ]/g, '')]) { unidades.push(cur.join(' ')); cur = []; } });
+    if (cur.length) unidades.push(cur.join(' '));
+    var n = unidades.length, out = [];
+    if (n < 2) return out;
+    if (n === 2) out.push(codigosNombre(unidades[0], unidades[1], ''));
+    else {
+      out.push(codigosNombre(unidades.slice(0, n - 2).join(' '), unidades[n - 2], unidades[n - 1]));
+      out.push(codigosNombre(unidades.slice(0, n - 1).join(' '), unidades[n - 1], ''));
+    }
+    return out;
+  }
+  function revisaCurp(A, p, ref) {
+    var txt = s(p.curp);
+    if (!txt) return;
+    var c = parseCurp(txt), x = ref('curp');
+    if (!c.ok) {
+      A.add('error', 'CURP_FORMATO', 'La CURP ' + de(p.etq) + ' no tiene el formato correcto', 'Se lee «' + txt + '» (' + limpiaClave(txt).length + ' caracteres).',
+        'Debe tener 18 caracteres: 4 letras, 6 dígitos de fecha, H/M, 2 letras del estado, 3 consonantes y 2 de control.', x);
+      return;
+    }
+    if (CURP_ESTADOS.indexOf(c.estado) < 0) A.add('error', 'CURP_ESTADO', 'La clave de estado de la CURP ' + de(p.etq) + ' no existe', 'Se lee «' + c.estado + '» en las posiciones 12 y 13 de «' + c.curp + '».', 'Revisa esas dos letras (por ejemplo JC = Jalisco, DF = Ciudad de México, NE = nacido en el extranjero).', x);
+    var mesOk = c.mm >= 1 && c.mm <= 12 && c.dd >= 1 && c.dd <= 31 && (c.mm !== 2 || c.dd <= 29) && ([4, 6, 9, 11].indexOf(c.mm) < 0 || c.dd <= 30);
+    if (!mesOk) A.add('error', 'CURP_FECHA', 'La fecha dentro de la CURP ' + de(p.etq) + ' no existe', 'Se lee «' + c.curp + '».', 'Revisa los dígitos 5 al 10 (aammdd).', x);
+    else if (p.fechaNac) {
+      if (!fechaCuadra(c.aa, c.mm, c.dd, p.fechaNac)) A.add('error', 'CURP_FECHA_NO_CUADRA', 'La fecha dentro de la CURP ' + de(p.etq) + ' no coincide con su fecha de nacimiento',
+        'La CURP «' + c.curp + '» trae ' + p2(c.dd) + '/' + p2(c.mm) + '/' + c.aa + ' y la fecha capturada es ' + fmtFecha(p.fechaNac) + '.', 'Confirma cuál de las dos está bien con el acta o la identificación.', x);
+      else {
+        var anio = +p.fechaNac.slice(0, 4), esLetra = /[A-Z]/.test(c.diferenciador);
+        if ((anio >= 2000) !== esLetra) A.add('revisar', 'CURP_SIGLO', 'El carácter 17 de la CURP ' + de(p.etq) + ' no corresponde al siglo de nacimiento',
+          'Nació en ' + anio + ' y el carácter 17 es «' + c.diferenciador + '» (' + (esLetra ? 'letra: nacidos desde 2000' : 'número: nacidos antes de 2000') + ').', 'Revisa la CURP o la fecha de nacimiento.', x);
+      }
+    }
+    var dg = curpDigito(c.curp);
+    if (dg !== null && dg !== c.dig) A.add('error', 'CURP_DIGITO', 'La CURP ' + de(p.etq) + ' no pasa el dígito verificador', 'Se lee «' + c.curp + '»; el último dígito debería ser «' + dg + '».',
+      'Es casi seguro un error de dedo en alguna letra o número. Verifícala en la consulta oficial de CURP (gob.mx/curp) con el acta o la identificación.', x);
+    var cand = candidatos(p), ok = false, primero = null;
+    cand.forEach(function (e) { if (!e) return; if (!primero) primero = e; if (coincideLetras(c.letras, e, 'curp')) ok = true; });
+    if (!ok && primero) A.add('revisar', 'CURP_NOMBRE', 'Las letras de la CURP ' + de(p.etq) + ' no parecen salir de su nombre', 'CURP «' + c.curp + '»; por el nombre se esperaría «' + ajustaInconveniente(primero.base, 'curp') + '…».',
+      'Puede ser un error de dedo en el nombre o en la CURP (o un caso especial de apellidos). Confírmalo con la identificación.', x);
+    if (txt && s(p.rfc)) {
+      var r = parseRfc(p.rfc);
+      if (r.ok && r.tipo === 'PF' && !r.generico && r.rfc.slice(0, 10) !== c.curp.slice(0, 10)) A.add('error', 'RFC_CURP_DISTINTOS', 'El RFC y la CURP ' + de(p.etq) + ' no parecen ser de la misma persona',
+        'RFC «' + r.rfc.slice(0, 10) + '…» y CURP «' + c.curp.slice(0, 10) + '…» deberían empezar igual (10 primeros caracteres).', 'Revisa cuál de los dos tiene el error de dedo.', x);
+    }
+  }
+
+  /* ═══ Texto libre (nombres, domicilios, etc.) ═══ */
+  function revisaTexto(A, valor, etq, extra, opts) {
+    var t = String(valor === null || valor === undefined ? '' : valor);
+    if (!s(t)) return;
+    opts = opts || {};
+    function aviso(sev, id, titulo, dice, sug) { A.add(sev, id, titulo + ' (' + etq + ')', dice, sug, extra); }
+    if (/ {2,}/.test(t)) aviso('estilo', 'TXT_ESPACIOS', 'Hay espacios dobles', 'Se lee «' + t.replace(/ {2,}/g, function (m) { return m.replace(/ /g, '·'); }).slice(0, 80) + '» (cada · es un espacio).', 'Dejar un solo espacio.');
+    if (/\s[,;.:](?!\d)/.test(t) && !/\d\s\.\s?\d/.test(t)) aviso('estilo', 'TXT_ESPACIO_ANTES', 'Hay un espacio antes de un signo de puntuación', 'Se lee «' + t.slice(0, 80) + '».', 'Quitar el espacio antes de la coma, el punto o los dos puntos.');
+    if (/[,;:][^\s\d\)\]»"”']/.test(t)) aviso('estilo', 'TXT_FALTA_ESPACIO', 'Falta un espacio después de una coma', 'Se lee «' + t.slice(0, 80) + '».', 'Agregar un espacio después de la coma.');
+    var rep = /(?:^|[^\p{L}])(\p{L}{2,})\s+\1(?![\p{L}])/iu.exec(t);
+    if (rep) aviso('revisar', 'TXT_REPETIDA', 'Hay una palabra repetida', 'Se lee «' + rep[1] + ' ' + rep[1] + '».', 'Quitar una de las dos si fue un error al escribir.');
+    var letras = /([A-Za-zÁÉÍÓÚÜÑáéíóúüñ])\1{2,}/.exec(t);
+    if (letras && !/^[IVXLCDM]+$/i.test(letras[0])) aviso('revisar', 'TXT_LETRAS', 'Hay una letra repetida tres veces o más', 'Se lee «' + letras[0] + '».', 'Revisar si es un error de dedo.');
+    var abre = (t.match(/\(/g) || []).length, cierra = (t.match(/\)/g) || []).length;
+    if (abre !== cierra) aviso('revisar', 'TXT_PARENTESIS', 'Hay un paréntesis sin pareja', 'Se lee «' + t.slice(0, 80) + '».', 'Cerrar o quitar el paréntesis.');
+    var comillas = (t.match(/["“”«»]/g) || []).length;
+    if (comillas % 2 === 1) aviso('revisar', 'TXT_COMILLAS', 'Hay unas comillas sin pareja', 'Se lee «' + t.slice(0, 80) + '».', 'Cerrar o quitar las comillas.');
+    if (/[<>@#%^*_=+{}\[\]|\\~`]/.test(t) && !opts.permiteSimbolos) aviso('revisar', 'TXT_SIMBOLOS', 'Tiene símbolos poco comunes', 'Se lee «' + t.slice(0, 80) + '».', 'Revisar si se coló algún carácter por error.');
+    if (opts.nombre) {
+      if (/\d/.test(t)) aviso('error', 'NOMBRE_NUMEROS', 'El nombre tiene números', 'Se lee «' + t.slice(0, 80) + '».', 'Revisar si se tecleó un número por error.');
+      if (/^[a-záéíóúüñ]/.test(t.trim()) && !PARTICULAS[sinAcento(t.trim().split(/\s+/)[0])]) aviso('estilo', 'NOMBRE_MINUSCULA', 'El nombre empieza con minúscula', 'Se lee «' + t.slice(0, 80) + '».', 'Empezar con mayúscula.');
+      if (opts.completo && t.trim().split(/\s+/).length < 2) aviso('revisar', 'NOMBRE_UNA_PALABRA', 'El nombre tiene una sola palabra', 'Se lee «' + t.slice(0, 80) + '».', 'Debería traer nombre y apellidos completos, como en la identificación.');
+    }
+    if (/\.\./.test(t) && !/\.\.\./.test(t)) aviso('estilo', 'TXT_PUNTOS', 'Hay dos puntos seguidos', 'Se lee «' + t.slice(0, 80) + '».', 'Dejar un solo punto.');
+  }
+
+  function distancia(a, b) {
+    var m = a.length, n = b.length, d = [], i, j;
+    for (i = 0; i <= m; i++) { d[i] = [i]; }
+    for (j = 1; j <= n; j++) d[0][j] = j;
+    for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+    return d[m][n];
+  }
+  function revisaCorreo(A, correo, etq, extra) {
+    var c = s(correo).toLowerCase();
+    if (!c || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c)) return;
+    var dom = c.split('@')[1];
+    if (/\.(con|cmo|coom|ocm|vom)$/.test(dom) || /,/.test(dom)) A.add('revisar', 'CORREO_TERMINACION', 'El correo ' + etq + ' termina raro', 'Se lee «' + c + '».', 'Revisar la terminación (.com, .com.mx, .mx…).', extra);
+    else if (DOMINIOS.indexOf(dom) < 0) {
+      var cerca = null;
+      DOMINIOS.forEach(function (d) { if (!cerca && distancia(dom, d) <= 2 && dom.length > 5) cerca = d; });
+      if (cerca) A.add('revisar', 'CORREO_DOMINIO', 'El correo ' + etq + ' podría tener mal el dominio', 'Se lee «' + c + '».', '¿Será «' + c.split('@')[0] + '@' + cerca + '»? Confírmalo con la persona.', extra);
+    }
+  }
+  function revisaTelefono(A, tel, etq, extra) {
+    var d = s(tel).replace(/\D/g, '');
+    if (!d) return;
+    if (d.length === 10 && (/^(\d)\1{9}$/.test(d) || d === '1234567890' || d === '0123456789')) A.add('error', 'TEL_FALSO', 'El teléfono ' + etq + ' parece inventado', 'Se lee «' + s(tel) + '».', 'Pedir el número real.', extra);
+    else if (d.length === 12 && d.slice(0, 2) === '52') return;
+    else if (d.length !== 10) A.add('error', 'TEL_LARGO', 'El teléfono ' + etq + ' no tiene 10 dígitos', 'Se lee «' + s(tel) + '» (' + d.length + ' dígitos).', 'Revisar si falta o sobra un número (lada + 8 dígitos).', extra);
+  }
+  function esCDMX(est) { var t = sinAcento(est).replace(/[^A-Z ]/g, '').trim(); return t === 'CIUDAD DE MEXICO' || t === 'CDMX' || t === 'DISTRITO FEDERAL'; }
+  function revisaCp(A, cp, estado, etq, extra) {
+    var c = s(cp);
+    if (!c) return;
+    if (!/^\d{5}$/.test(c)) { A.add('error', 'CP_FORMATO', 'El código postal ' + etq + ' no tiene 5 dígitos', 'Se lee «' + c + '».', 'Revisar el código postal.', extra); return; }
+    var n = +c, enCdmx = n >= 1000 && n <= 16999;
+    if (s(estado) && esCDMX(estado) !== enCdmx && sinAcento(estado).length > 2) {
+      A.add('revisar', 'CP_ESTADO', 'El código postal ' + etq + ' no parece ser del estado indicado', 'C.P. ' + c + ' y estado «' + s(estado) + '».',
+        enCdmx ? 'Los C.P. 01000 al 16999 son de la Ciudad de México.' : 'Los C.P. de la Ciudad de México van de 01000 a 16999 y este no está en ese rango.', extra);
+    }
+  }
+
+  /* ═══════════════ CONTRATO APS ═══════════════ */
+  var STEP_DE = function (k) {
+    if (/^(propietarios|contactoDir|telMovil|telFijo|correo)/.test(k)) return 'cliente';
+    if (/^(inmDomicilio|escritura|notari|folioReal|instalaciones)/.test(k)) return 'inmueble';
+    if (/^(precio|ajustes|honorarios|vigenciaVenta|ivaVenta|modalidadVenta)/.test(k)) return 'venta';
+    if (/^(renta|mantenimiento|vigenciaRenta|duracion|garantias|deposito|rentasAdelantadas|destino|menores|mascotas|modalidadRenta|ivaRenta)/.test(k)) return 'renta';
+    return 'firma';
+  };
+  function aps(d, opciones) {
+    opciones = opciones || {};
+    var A = nuevo(opciones.limite), hoy = opciones.hoy || hoyLocal(), P = (d && d.propietarios) || [], multi = P.length > 1;
+    function ref(k) { return { k: k, step: STEP_DE(k) }; }
+    var vistosNombre = {}, vistosRfc = {};
+    P.forEach(function (o, i) {
+      var pre = 'propietarios.' + i + '.', pm = o.naturaleza === 'PM', etq = multi ? 'el propietario ' + (i + 1) : 'el propietario';
+      var nom = s(o.nombre);
+      revisaTexto(A, nom, pm ? 'razón social' + (multi ? ' ' + (i + 1) : '') : 'nombre' + (multi ? ' del propietario ' + (i + 1) : ' del propietario'), ref(pre + 'nombre'), { nombre: !pm, completo: !pm, permiteSimbolos: pm });
+      if (nom) {
+        if (!pm && SUFIJOS_PM.test(nom) && /\b(S\.?A\.?|S\.?C\.?|A\.?C\.?|DE C\.?V\.?|S\.? DE R\.?L\.?|SAPI|S\.?A\.?S\.?)\b/i.test(nom)) A.add('error', 'NAT_NOMBRE', 'Está como persona física pero el nombre parece de una empresa', 'Se lee «' + nom + '».', 'Cambiar a persona moral, o revisar el nombre.', ref(pre + 'naturaleza'));
+        if (pm && !SUFIJOS_PM.test(nom)) A.add('revisar', 'PM_SIN_REGIMEN', 'Está como persona moral pero el nombre no trae el tipo de sociedad', 'Se lee «' + nom + '».', 'Normalmente termina en S.A. de C.V., S. de R.L., S.C., A.C., etc. Revisar que esté completo.', ref(pre + 'nombre'));
+        var kn = sinAcento(nom).replace(/[^A-ZÑ0-9]/g, '');
+        if (vistosNombre[kn]) A.add('error', 'PROP_REPETIDO', 'Hay dos propietarios con el mismo nombre', 'Se lee «' + nom + '» en los propietarios ' + vistosNombre[kn] + ' y ' + (i + 1) + '.', 'Quitar el repetido o corregir el nombre.', ref(pre + 'nombre'));
+        else vistosNombre[kn] = i + 1;
+      }
+      (o.representantes || []).forEach(function (r, j) {
+        revisaTexto(A, r.nombre, 'representante ' + (j + 1) + (multi ? ' del propietario ' + (i + 1) : ''), ref(pre + 'representantes.' + j + '.nombre'), { nombre: true, completo: true });
+      });
+      var modoRfc = !o.rfcModo || o.rfcModo === 'normal';
+      if (modoRfc && s(o.rfc)) {
+        var rr = parseRfc(o.rfc);
+        if (rr.ok && vistosRfc[rr.rfc]) A.add('error', 'RFC_REPETIDO', 'Dos propietarios tienen el mismo RFC', 'RFC «' + rr.rfc + '» en los propietarios ' + vistosRfc[rr.rfc] + ' y ' + (i + 1) + '.', 'Revisar cuál es el correcto.', ref(pre + 'rfc'));
+        else if (rr.ok) vistosRfc[rr.rfc] = i + 1;
+        revisaRfc(A, { etq: etq, rfc: o.rfc, esperaTipo: pm ? 'PM' : 'PF', nombreCompleto: pm ? '' : nom }, function () { return ref(pre + 'rfc'); });
+      }
+      if (pm && s(o.rfcRep)) {
+        var rp = (o.representantes || [])[0];
+        revisaRfc(A, { etq: 'el representante' + (multi ? ' del propietario ' + (i + 1) : ''), rfc: o.rfcRep, esperaTipo: 'PF', nombreCompleto: rp ? s(rp.nombre) : '' }, function () { return ref(pre + 'rfcRep'); });
+      }
+      if (pm && s(o.poderFecha)) {
+        var pf = iso(o.poderFecha);
+        if (pf && pf > hoy) A.add('error', 'PODER_FUTURO', 'La fecha del poder es futura', 'Se lee ' + fmtFecha(pf) + '.', 'Revisar el año o el día.', ref(pre + 'poderFecha'));
+        if (pf && d.fecha && iso(d.fecha) && pf > iso(d.fecha)) A.add('error', 'PODER_POSTERIOR', 'El poder es posterior a la firma del contrato', 'Poder: ' + fmtFecha(pf) + '. Firma: ' + fmtFecha(iso(d.fecha)) + '.', 'Revisar las fechas.', ref(pre + 'poderFecha'));
+      }
+      ['idAutoridad', 'poderNotario'].forEach(function (c) { revisaTexto(A, o[c], c === 'idAutoridad' ? 'autoridad de la identificación' : 'notario del poder', ref(pre + c), {}); });
+    });
+    var cd = d.contactoDir || {};
+    revisaTexto(A, cd.calle, 'calle del domicilio de notificaciones', ref('contactoDir.calle'), {});
+    revisaTexto(A, cd.colonia, 'colonia del domicilio de notificaciones', ref('contactoDir.colonia'), {});
+    revisaTexto(A, cd.alcaldia, 'alcaldía o municipio de notificaciones', ref('contactoDir.alcaldia'), {});
+    revisaCp(A, cd.cp, cd.estado, 'del domicilio de notificaciones', ref('contactoDir.cp'));
+    revisaTelefono(A, d.telMovil, 'móvil', ref('telMovil'));
+    revisaTelefono(A, d.telFijo, 'fijo', ref('telFijo'));
+    revisaCorreo(A, d.correo, 'del cliente', ref('correo'));
+    revisaTexto(A, d.inmDomicilio, 'domicilio del inmueble', ref('inmDomicilio'), { permiteSimbolos: false });
+    if (s(d.inmDomicilio) && !/\d{5}/.test(d.inmDomicilio)) A.add('estilo', 'DOM_SIN_CP', 'El domicilio del inmueble no trae código postal', 'Se lee «' + s(d.inmDomicilio).slice(0, 90) + '».', 'Si en la escritura aparece, conviene agregarlo.', ref('inmDomicilio'));
+    if (s(d.inmDomicilio) && !/\d/.test(d.inmDomicilio)) A.add('revisar', 'DOM_SIN_NUMERO', 'El domicilio del inmueble no tiene ningún número', 'Se lee «' + s(d.inmDomicilio).slice(0, 90) + '».', 'Normalmente lleva número exterior; confirmar con la escritura.', ref('inmDomicilio'));
+    revisaTexto(A, d.notarioNombre, 'notario', ref('notarioNombre'), { nombre: true });
+    revisaTexto(A, d.notariaNumDe, 'notaría', ref('notariaNumDe'), {});
+    revisaTexto(A, d.lugar, 'lugar de firma', ref('lugar'), {});
+    revisaTexto(A, d.instalaciones, 'instalaciones', ref('instalaciones'), {});
+
+    var firma = iso(d.fecha), esc = iso(d.escrituraFecha);
+    if (firma && firma < U_restaDias(hoy, 30)) A.add('revisar', 'FIRMA_PASADA', 'La fecha de firma es de hace más de 30 días', 'Se lee ' + fmtFecha(firma) + '.', 'Si es un contrato nuevo, normalmente lleva la fecha de hoy.', ref('fecha'));
+    if (esc) {
+      if (firma && esc > firma) A.add('error', 'ESCRITURA_POSTERIOR', 'La escritura del inmueble es posterior a la firma del contrato', 'Escritura: ' + fmtFecha(esc) + '. Firma: ' + fmtFecha(firma) + '.', 'Revisar el año de la escritura o la fecha de firma.', ref('escrituraFecha'));
+      if (esc.slice(0, 4) < '1900') A.add('revisar', 'ESCRITURA_ANTIGUA', 'La fecha de la escritura es muy antigua', 'Se lee ' + fmtFecha(esc) + '.', 'Revisar el año.', ref('escrituraFecha'));
+    }
+    var pct = numero(d.honorariosPct);
+    if (!isNaN(pct) && pct > 0 && pct < 1) A.add('revisar', 'HONORARIOS_FRACCION', 'Los honorarios son menores a 1 %', 'Se lee ' + s(d.honorariosPct) + ' %.', '¿Quiso decir ' + (pct * 100).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' %?', ref('honorariosPct'));
+    var precio = numero(d.precio), rentaM = numero(d.rentaMonto);
+    if (!isNaN(precio) && precio > 0 && precio % 1000 !== 0 && precio < 1000000) A.add('estilo', 'PRECIO_REDONDO', 'El precio de venta no es un monto redondo', 'Se lee ' + dinero(precio) + '.', 'Confirmar que no falte un cero o sobre un dígito.', ref('precio'));
+    if (!isNaN(precio) && precio > 0 && !isNaN(rentaM) && rentaM > 0 && rentaM * 12 > precio) A.add('revisar', 'RENTA_VS_PRECIO', 'La renta de un año supera el precio de venta', 'Renta mensual ' + dinero(rentaM) + ' · precio ' + dinero(precio) + '.', 'Revisar que no se hayan cruzado los montos.', ref('rentaMonto'));
+    return A.fin();
+  }
+  function U_restaDias(isoFecha, n) {
+    var a = isoFecha.split('-').map(Number), t = new Date(a[0], a[1] - 1, a[2] - n);
+    return t.getFullYear() + '-' + p2(t.getMonth() + 1) + '-' + p2(t.getDate());
+  }
+
+  /* ═══════════════ PRE PLD ═══════════════
+     c: { nombreMarca: valor }  (fechas ya en 'aaaa-mm-dd' o tal cual se capturaron) · celdas: { nombreMarca: 'C12' }
+     extra: { cps: [{valor, estado, celda}], correos: [{valor, celda}], telefonos: [{valor, celda}], vacios: [{bloque, etiqueta, celda}], monedaPesos: 'Peso mexicano' } */
+  function pld(c, celdas, extra, opciones) {
+    opciones = opciones || {}; celdas = celdas || {}; extra = extra || {};
+    var A = nuevo(opciones.limite || 120), hoy = opciones.hoy || hoyLocal();
+    function g(n) { return c[n] === undefined || c[n] === null ? '' : c[n]; }
+    function ref(n) { return { k: n, celda: celdas[n] || '' }; }
+    var ids = {};
+    function fechaCampo(n, etq, o) {
+      var v = g(n);
+      if (!s(v)) return '';
+      var f = iso(v);
+      if (!f) { A.add('error', 'FECHA_INVALIDA', 'La fecha ' + etq + ' no es una fecha válida', 'Se lee «' + s(v) + '».', 'Escribirla como dd/mm/aaaa.', ref(n)); return ''; }
+      var anio = +f.slice(0, 4);
+      if (anio < (o && o.minAnio || 1900) || anio > 2100) { A.add('error', 'FECHA_ANIO', 'El año de la fecha ' + etq + ' es poco creíble', 'Se lee ' + fmtFecha(f) + '.', 'Revisar el año.', ref(n)); return ''; }
+      return f;
+    }
+    function personaFisica(pref, etq, rep) {
+      var q = pref + (rep ? '_Rep' : ''), nombres = s(g(q + '_Nombres')), pat = s(g(q + '_ApPaterno')), mat = s(g(q + '_ApMaterno'));
+      if (!(nombres || pat || mat || s(g(q + '_RFC')) || s(g(q + '_CURP')) || s(g(q + '_FechaNac')))) return;
+      revisaTexto(A, nombres, 'nombres ' + de(etq), ref(q + '_Nombres'), { nombre: true });
+      revisaTexto(A, pat, 'apellido paterno ' + de(etq), ref(q + '_ApPaterno'), { nombre: true });
+      revisaTexto(A, mat, 'apellido materno ' + de(etq), ref(q + '_ApMaterno'), { nombre: true });
+      if (nombres && pat && sinAcento(nombres) === sinAcento(pat)) A.add('revisar', 'NOMBRE_IGUAL_APELLIDO', 'El nombre y el apellido paterno ' + de(etq) + ' son iguales', 'Se lee «' + nombres + '» en ambos.', 'Confirmar que no se haya copiado el mismo dato.', ref(q + '_ApPaterno'));
+      var fn = fechaCampo(q + '_FechaNac', 'de nacimiento ' + de(etq), { minAnio: 1900 });
+      if (fn) {
+        if (fn > hoy) A.add('error', 'NAC_FUTURA', 'La fecha de nacimiento ' + de(etq) + ' es futura', 'Se lee ' + fmtFecha(fn) + '.', 'Revisar el año.', ref(q + '_FechaNac'));
+        else {
+          var ed = edadEn(fn, hoy);
+          if (ed < 18) A.add('error', 'MENOR_EDAD', etq.charAt(0).toUpperCase() + etq.slice(1) + ' sería menor de edad', 'Nació el ' + fmtFecha(fn) + ' (' + ed + ' años).', 'Revisar el año de nacimiento.', ref(q + '_FechaNac'));
+          else if (ed > 100) A.add('revisar', 'EDAD_MAYOR', 'La edad ' + de(etq) + ' sale de más de 100 años', 'Nació el ' + fmtFecha(fn) + ' (' + ed + ' años).', 'Revisar el año de nacimiento.', ref(q + '_FechaNac'));
+        }
+      }
+      var p = { etq: etq, rfc: g(q + '_RFC'), curp: g(q + '_CURP'), fechaNac: fn, nombres: nombres, pat: pat, mat: mat, esperaTipo: 'PF' };
+      revisaRfc(A, p, function () { return ref(q + '_RFC'); });
+      revisaCurp(A, p, function () { return ref(q + '_CURP'); });
+      [['RFC', parseRfc(g(q + '_RFC'))], ['CURP', parseCurp(g(q + '_CURP'))]].forEach(function (par) {
+        var o = par[1], clave = o.ok ? (par[0] === 'RFC' ? o.rfc : o.curp) : '';
+        if (!clave || (o.generico)) return;
+        if (ids[clave] && ids[clave] !== etq) A.add('revisar', 'CLAVE_REPETIDA', 'El ' + par[0] + ' ' + de(etq) + ' es igual al de otra parte de la operación (' + ids[clave].replace(/^el /, '') + ')', 'Se lee «' + clave + '».', 'Si son personas distintas, uno de los dos está mal. Si es la misma persona en dos lados de la operación, confirmarlo.', ref(q + '_' + par[0]));
+        else ids[clave] = etq;
+      });
+    }
+    function personaMoral(pref, etq) {
+      var den = s(g(pref + '_Denominacion'));
+      if (!(den || s(g(pref + '_RFC_Moral')) || s(g(pref + '_FechaConst')))) return;
+      revisaTexto(A, den, 'razón social ' + de(etq), ref(pref + '_Denominacion'), { permiteSimbolos: true });
+      if (den && !SUFIJOS_PM.test(den)) A.add('revisar', 'PM_SIN_REGIMEN', 'La razón social ' + de(etq) + ' no trae el tipo de sociedad', 'Se lee «' + den + '».', 'Normalmente termina en S.A. de C.V., S. de R.L., S.C., A.C., etc.', ref(pref + '_Denominacion'));
+      var fc = fechaCampo(pref + '_FechaConst', 'de constitución ' + de(etq), { minAnio: 1850 });
+      if (fc && fc > hoy) A.add('error', 'CONST_FUTURA', 'La fecha de constitución ' + de(etq) + ' es futura', 'Se lee ' + fmtFecha(fc) + '.', 'Revisar el año.', ref(pref + '_FechaConst'));
+      var p = { etq: etq, rfc: g(pref + '_RFC_Moral'), fechaNac: fc, etqFecha: 'su fecha de constitución', esperaTipo: 'PM' };
+      revisaRfc(A, p, function () { return ref(pref + '_RFC_Moral'); });
+      var o = parseRfc(g(pref + '_RFC_Moral'));
+      if (o.ok && !o.generico) { if (ids[o.rfc] && ids[o.rfc] !== etq) A.add('revisar', 'CLAVE_REPETIDA', 'El RFC ' + de(etq) + ' es igual al de otra parte de la operación (' + ids[o.rfc].replace(/^el /, '') + ')', 'Se lee «' + o.rfc + '».', 'Revisar cuál es el correcto.', ref(pref + '_RFC_Moral')); else ids[o.rfc] = etq; }
+      personaFisica(pref, 'el representante ' + de(etq), true);
+    }
+    // Partes: se descubren por los nombres de campo (Vendedor_1_..., Comprador_2_...)
+    var partes = {};
+    Object.keys(c).forEach(function (n) { var m = /^(Vendedor|Comprador)_(\d+)_/.exec(n); if (m) partes[m[1] + '_' + m[2]] = { rol: m[1], num: +m[2] }; });
+    Object.keys(partes).sort(function (a, b) { return a.charAt(0) === b.charAt(0) ? partes[a].num - partes[b].num : (a.charAt(0) === 'V' ? -1 : 1); }).forEach(function (pref) {
+      var t = partes[pref], etq = (t.rol === 'Vendedor' ? 'el vendedor ' : 'el comprador ') + t.num;
+      if (c[pref + '_Denominacion'] !== undefined) personaMoral(pref, etq); else personaFisica(pref, etq, false);
+    });
+    // Operación y escrituración
+    var fo = fechaCampo('Operacion_Fecha', 'de la operación'), fe = fechaCampo('Escritura_Fecha', 'del instrumento');
+    if (fe && fe > hoy) A.add('error', 'ESCRITURA_FUTURA', 'La fecha del instrumento es futura', 'Se lee ' + fmtFecha(fe) + '.', 'El Pre PLD se entrega después de la firma. Revisar el año.', ref('Escritura_Fecha'));
+    if (fo && fo > hoy) A.add('revisar', 'OPERACION_FUTURA', 'La fecha de la operación es futura', 'Se lee ' + fmtFecha(fo) + '.', 'Revisar el año.', ref('Operacion_Fecha'));
+    if (fo && fe && fo !== fe) A.add('revisar', 'FECHAS_DISTINTAS', 'La fecha de la operación y la del instrumento son distintas', 'Operación: ' + fmtFecha(fo) + '. Instrumento: ' + fmtFecha(fe) + '.', 'Normalmente son el mismo día. Confirmar cuál es la correcta.', ref('Operacion_Fecha'));
+    revisaTexto(A, g('Escritura_Notario'), 'número de notario', ref('Escritura_Notario'), {});
+    var folio = s(g('Inmueble_FolioReal'));
+    if (folio && /[^\w\s\-\/.,:*]/.test(folio)) A.add('revisar', 'FOLIO_RARO', 'El folio real tiene caracteres poco comunes', 'Se lee «' + folio.slice(0, 60) + '».', 'Compararlo con la escritura.', ref('Inmueble_FolioReal'));
+    var escNum = s(g('Escritura_Num'));
+    if (escNum && /[^\w\s\-\/.,]/.test(escNum)) A.add('revisar', 'ESCRITURA_NUM_RARO', 'El número de instrumento tiene caracteres poco comunes', 'Se lee «' + escNum.slice(0, 60) + '».', 'Compararlo con la escritura.', ref('Escritura_Num'));
+    // Montos y pagos
+    var valor = numero(g('Inmueble_ValorPactado'));
+    if (s(g('Inmueble_ValorPactado')) && (isNaN(valor) || valor <= 0)) A.add('error', 'VALOR_INVALIDO', 'El valor pactado no es un monto válido', 'Se lee «' + s(g('Inmueble_ValorPactado')) + '».', 'Escribir solo el número.', ref('Inmueble_ValorPactado'));
+    else if (!isNaN(valor) && (valor < 100000 || valor > 500000000)) A.add('revisar', 'VALOR_RARO', 'El valor pactado parece fuera de lo normal', 'Se lee ' + dinero(valor) + '.', 'Revisar que no falte o sobre un cero.', ref('Inmueble_ValorPactado'));
+    var pagos = {}, suma = 0, hayOtraMoneda = false, algunPago = false, sinMonto = false;
+    Object.keys(c).forEach(function (n) { var m = /^Pago_(\d+)_/.exec(n); if (m) pagos[m[1]] = true; });
+    var cuantos = Object.keys(pagos).length;
+    Object.keys(pagos).sort(function (a, b) { return a - b; }).forEach(function (k) {
+      var pre = 'Pago_' + k, etq = cuantos > 1 ? 'del pago ' + k : 'del pago';
+      var fp = fechaCampo(pre + '_Fecha', etq, {}), mt = numero(g(pre + '_Monto')), mon = s(g(pre + '_Moneda')), forma = s(g(pre + '_Forma')), inst = s(g(pre + '_Instrumento'));
+      if (!(fp || s(g(pre + '_Monto')) || mon || forma || inst)) return;
+      algunPago = true;
+      if (fp && fp > hoy) A.add('revisar', 'PAGO_FUTURO', 'La fecha ' + etq + ' es futura', 'Se lee ' + fmtFecha(fp) + '.', 'Revisar el año.', ref(pre + '_Fecha'));
+      if (fp && fe && fp > fe && (new Date(fp) - new Date(fe)) / 86400000 > 90) A.add('revisar', 'PAGO_MUY_POSTERIOR', 'La fecha ' + etq + ' es más de 3 meses posterior al instrumento', 'Pago: ' + fmtFecha(fp) + '. Instrumento: ' + fmtFecha(fe) + '.', 'Revisar el año o el mes.', ref(pre + '_Fecha'));
+      if (s(g(pre + '_Monto')) && (isNaN(mt) || mt <= 0)) A.add('error', 'MONTO_INVALIDO', 'El monto ' + etq + ' no es válido', 'Se lee «' + s(g(pre + '_Monto')) + '».', 'Escribir solo el número, mayor a cero.', ref(pre + '_Monto'));
+      else if (isNaN(mt)) sinMonto = true;
+      else { if (/peso/i.test(mon) || !mon) suma += mt; else hayOtraMoneda = true; if (!isNaN(valor) && valor > 0 && mt > valor * 1.05 && (/peso/i.test(mon) || !mon)) A.add('error', 'PAGO_MAYOR_VALOR', 'El monto ' + etq + ' es mayor que el valor pactado', 'Pago ' + dinero(mt) + ' · valor pactado ' + dinero(valor) + '.', 'Revisar el monto o el valor.', ref(pre + '_Monto')); }
+      if (/efectivo/i.test(inst)) A.add('revisar', 'PAGO_EFECTIVO', 'Hay un pago en efectivo ' + etq, 'Instrumento: «' + inst + '».', 'En compraventas de inmuebles el efectivo tiene restricciones por la ley antilavado; confirmar con Legal que el monto esté dentro de lo permitido.', ref(pre + '_Instrumento'));
+    });
+    if (algunPago && !isNaN(valor) && valor > 0 && !hayOtraMoneda && !sinMonto && Math.abs(suma - valor) > 1) {
+      A.add('revisar', 'PAGOS_NO_SUMAN', 'Los pagos no suman el valor pactado', 'Pagos: ' + dinero(suma) + ' · valor pactado: ' + dinero(valor) + ' · diferencia: ' + dinero(Math.abs(suma - valor)) + '.',
+        suma < valor ? 'Falta capturar algún pago o hay un monto mal escrito.' : 'Algún pago está de más o con un monto mal escrito.', ref('Inmueble_ValorPactado'));
+    } else if (algunPago && hayOtraMoneda) A.add('estilo', 'PAGOS_OTRA_MONEDA', 'Hay pagos en otra moneda; no se pudo comparar la suma con el valor pactado', '', 'Revisar la suma a mano con el tipo de cambio de la operación.', ref('Inmueble_ValorPactado'));
+    // Datos sin nombre de campo (se leen por su etiqueta)
+    (extra.cps || []).forEach(function (x) { revisaCp(A, x.valor, x.estado, x.donde || '', { celda: x.celda, k: 'CP' }); });
+    (extra.correos || []).forEach(function (x) { revisaCorreo(A, x.valor, x.donde || '', { celda: x.celda, k: 'Correo' }); });
+    (extra.telefonos || []).forEach(function (x) { revisaTelefono(A, x.valor, x.donde || '', { celda: x.celda, k: 'Teléfono' }); });
+    // Campos vacíos: un solo aviso por bloque
+    var porBloque = {}, orden = [];
+    (extra.vacios || []).forEach(function (v) { if (!porBloque[v.bloque]) { porBloque[v.bloque] = []; orden.push(v.bloque); } porBloque[v.bloque].push(v); });
+    orden.forEach(function (b) {
+      var l = porBloque[b], nombres = l.slice(0, 6).map(function (v) { return v.etiqueta.replace(/[:$]+\s*$/, '').replace(/\s*\(.*?\)\s*$/, '').trim(); });
+      A.add('revisar', 'VACIOS', b + ': faltan ' + l.length + ' dato' + (l.length === 1 ? '' : 's'), nombres.join(', ') + (l.length > 6 ? ' y ' + (l.length - 6) + ' más' : '') + '.',
+        'Llenarlos o confirmar que no aplican.', { k: 'Vacíos', celda: l[0].celda || '' });
+    });
+    return A.fin();
+  }
+
+  return { aps: aps, pld: pld, iso: iso, rfcDigito: rfcDigito, curpDigito: curpDigito, parseRfc: parseRfc, parseCurp: parseCurp, codigosNombre: codigosNombre };
+})(APS_U);
+
 </script>

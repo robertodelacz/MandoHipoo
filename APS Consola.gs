@@ -348,3 +348,86 @@ function ASESORES_guardar(acc) {
     return { ok: true, nuevo: nuevo, correo: correo };
   });
 }
+
+
+/* ═════════════ REVISIÓN POR REGLAS FIJAS (sin IA: ningún dato sale de este script) ═════════════
+   Las reglas viven en APS_Nucleo.html (APS_REV) y son las mismas en la pantalla y aquí.
+   Contratos APS: la pantalla revisa lo que tiene abierto y solo avisa aquí cuántos avisos hubo (para Auditoría).
+   Pre PLD: el servidor abre la hoja del asesor, lee sus campos y los revisa. */
+
+/** Deja constancia en Auditoría de que la coordinación corrió la revisión de un contrato APS. */
+function APS_registrarRevision(id, resumen) {
+  APS_requiereAdmin_();
+  var f = APS_buscar_(id);
+  if (!f) throw new Error('No se encontró el contrato.');
+  var r = resumen || {}, n = function (x) { x = Number(x); return isFinite(x) && x >= 0 ? Math.min(Math.floor(x), 999) : 0; };
+  APS_audit_('APS', 'REVISION_REGLAS', f.reg.id, 'Revisión por reglas: ' + n(r.error) + ' error(es), ' + n(r.revisar) + ' por revisar, ' + n(r.estilo) + ' de estilo');
+  return { ok: true };
+}
+
+/** Etiquetas que pueden quedar vacías sin que sea un error. Se comparan sin acentos y en minúsculas. */
+var PLD_OPCIONALES_ = /^(ap\.? ?materno|num\.? ?int|m2 |comprobante|valor (avaluo|catastral)|asociados)/;
+function PLD_sinAcentos_(t) { return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
+function PLD_nombreBloque_(t) {
+  var x = PLD_sinAcentos_(t), m = /^(vendedor|comprador)\s+(\d+)/.exec(x);
+  if (m) return (m[1] === 'vendedor' ? 'Vendedor ' : 'Comprador ') + m[2];
+  if (/detalles/.test(x)) return 'Detalles de la operación';
+  if (/inmueble/.test(x)) return 'Inmueble';
+  if (/escritur/.test(x)) return 'Escrituración';
+  if (/liquid/.test(x)) return 'Liquidación';
+  return String(t || '').trim();
+}
+
+/** Lee la hoja de un Pre PLD: valores de los campos marcados por el sistema + datos sueltos (C.P., correo, teléfono) + campos vacíos por bloque. */
+function PLD_leerHoja_(id) {
+  var ss;
+  try { ss = SpreadsheetApp.openById(String(id)); } catch (e) { throw new Error('No se pudo abrir el documento (¿fue eliminado o movido?). ' + e.message); }
+  var tz = ss.getSpreadsheetTimeZone() || APS_CONFIG.ZONA, sh = ss.getSheetByName('Pre Aviso PLD') || ss.getSheets()[0], campos = {}, celdas = {};
+  function val(v) { return Object.prototype.toString.call(v) === '[object Date]' ? Utilities.formatDate(v, tz, 'yyyy-MM-dd') : v; }
+  ss.getNamedRanges().forEach(function (nr) {
+    var n = nr.getName();
+    if (!/^((Vendedor|Comprador)_\d+_|Pago_\d+_|Operacion_Fecha$|Inmueble_|Escritura_)/.test(n)) return;
+    var rg = nr.getRange();
+    if (rg.getSheet().getSheetId() !== sh.getSheetId()) return;
+    var c = rg.getCell(1, 1);
+    campos[n] = val(c.getValue()); celdas[n] = c.getA1Notation();
+  });
+  if (!Object.keys(campos).length) throw new Error('Este documento no trae los campos marcados por el sistema (¿se generó con una versión anterior?). No se puede revisar automáticamente.');
+  var data = sh.getDataRange().getValues(), extra = { cps: [], correos: [], telefonos: [], vacios: [] }, bloque = 'Encabezado', seccion = '', ultEstado = '', ultEstadoFila = -9;
+  function a1(r, c) { return sh.getRange(r + 1, c + 1).getA1Notation(); }
+  for (var r = 0; r < data.length; r++) {
+    var row = data[r], A = String(row[0] === null ? '' : row[0]).trim(), B = String(row[1] === null ? '' : row[1]).trim();
+    if (/^LADO\s*\d/i.test(A)) { bloque = PLD_nombreBloque_(B); seccion = ''; continue; }
+    var otros = false; for (var k = 2; k < row.length; k++) if (String(row[k]).trim() !== '') otros = true;
+    if (!A && B && !/[:$]\s*$/.test(B) && !otros) {
+      var mp = /^PAGO\s+(\d+)/i.exec(B);
+      if (mp) { bloque = 'Pago ' + mp[1]; seccion = ''; } else seccion = B;
+      continue;
+    }
+    [0, 1, 3, 5].forEach(function (c) {
+      var lab = String(row[c] === null ? '' : row[c]).trim();
+      if (!lab || !/[:$]\s*$/.test(lab) || lab.length > 60) return;
+      var vc = c === 0 ? 2 : c + 1, v = row[vc], vacio = v === null || v === undefined || String(v).trim() === '', l = PLD_sinAcentos_(lab), celda = a1(r, vc);
+      if (/^entidad federativa:/.test(l)) { ultEstado = vacio ? '' : String(v).trim(); ultEstadoFila = r; }
+      var donde = bloque === 'Inmueble' ? 'del inmueble' : 'de ' + bloque.charAt(0).toLowerCase() + bloque.slice(1);
+      if (!vacio) {
+        if (/^c\.?p\.?:/.test(l)) extra.cps.push({ valor: val(v), estado: (r - ultEstadoFila <= 4) ? ultEstado : '', donde: donde, celda: celda });
+        else if (/^correo/.test(l)) extra.correos.push({ valor: String(v), donde: donde, celda: celda });
+        else if (/^tel\.?/.test(l)) extra.telefonos.push({ valor: String(v), donde: donde, celda: celda });
+      } else if (!PLD_OPCIONALES_.test(l)) {
+        extra.vacios.push({ bloque: bloque + (seccion && !/^pago/i.test(bloque) ? ' · ' + seccion : ''), etiqueta: lab, celda: celda });
+      }
+    });
+  }
+  return { campos: campos, celdas: celdas, extra: extra, gid: sh.getSheetId() };
+}
+
+/** Coordinación: revisa por reglas fijas el Pre PLD que llenó el asesor (RFC, CURP, fechas, nombres, pagos, vacíos…). No cambia nada en la hoja. */
+function PLD_revisarReglas(id) {
+  var u = APS_requiereAdmin_(), b = PLD_bitacora_().filter(function (x) { return x.id === String(id); })[0];
+  if (!b) throw new Error('No se encontró ese documento en la bitácora.');
+  var L = PLD_leerHoja_(b.id), res = APS_nucleo_().R.pld(L.campos, L.celdas, L.extra, { hoy: APS_hoy_() });
+  res.avisos.forEach(function (a) { if (a.celda) a.url = b.url + (b.url.indexOf('#') < 0 ? '#' : '&') + 'gid=' + L.gid + '&range=' + encodeURIComponent(a.celda); });
+  APS_audit_('PLD', 'REVISION_REGLAS', b.id, 'Revisión por reglas: ' + res.resumen.error + ' error(es), ' + res.resumen.revisar + ' por revisar, ' + res.resumen.estilo + ' de estilo');
+  return { id: b.id, nombre: b.nombre, operacion: b.operacion, url: b.url, avisos: res.avisos, resumen: res.resumen, camposLeidos: Object.keys(L.campos).length, revisado: APS_ahora_(), por: u.email };
+}

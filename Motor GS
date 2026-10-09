@@ -376,7 +376,7 @@ var APS_N_ = null;
 function APS_nucleo_() {
   if (APS_N_) return APS_N_;
   var cod = function (n) { return HtmlService.createHtmlOutputFromFile(n).getContent().replace(/<\/?script[^>]*>/gi, '').replace(/<!--[\s\S]*?-->/g, ''); };
-  APS_N_ = (new Function(cod('APS_Nucleo') + '\n' + cod('APS_Docx') + '\n;return { U: APS_U, T: APS_TEXTO, D: APS_DOC, M: APS_MODELO, X: APS_DOCX };'))();
+  APS_N_ = (new Function(cod('APS_Nucleo') + '\n' + cod('APS_Docx') + '\n;return { U: APS_U, T: APS_TEXTO, D: APS_DOC, M: APS_MODELO, X: APS_DOCX, R: APS_REV };'))();
   return APS_N_;
 }
 
@@ -477,9 +477,21 @@ function APS_estadoUI_(r) {
 /** Datos del registro para la pantalla. El asesor nunca recibe los enlaces del PDF ni del documento de Google Docs. */
 function APS_meta_(r, admDado) {
   var adm = (admDado === undefined) ? APS_usuario_().rol === 'coordinador' : admDado;
-  return { id: r.id, creado: r.creado, actualizado: r.actualizado, asesor: r.asesor, estado: r.estado, estadoUI: APS_estadoUI_(r), tipo: r.tipo,
+  var m = { id: r.id, creado: r.creado, actualizado: r.actualizado, asesor: r.asesor, estado: r.estado, estadoUI: APS_estadoUI_(r), tipo: r.tipo,
     propietarios: r.propietarios, inmueble: r.inmueble, pendientes: r.pendientes, pdfUrl: adm ? r.pdfUrl : '', docUrl: adm ? r.docUrl : '', docFecha: adm ? r.docFecha : '',
     comentario: r.comentario, revisadoPor: r.revisadoPor, version: r.version || 1, aprobadoEn: r.aprobadoEn || '', huella: String(r.datosHash || '').slice(0, 16) };
+  // Solo en consultas de UN contrato (no en las listas): cuántas veces corrigió la coordinación después de que el asesor lo envió. La pantalla muestra «Historial de cambios» solo si hay algo que ver.
+  if (admDado === undefined && adm && r.estado !== 'BORRADOR') m.cambiosCoord = APS_cambiosCoord_(r.id);
+  return m;
+}
+/** Veces que la coordinación editó un contrato ya enviado (cada una deja una versión EDICION_COORDINACION). */
+function APS_cambiosCoord_(id) {
+  try {
+    var sh = APS_hojaAux_('Versiones', APS_VER_COLS), n = sh.getLastRow() - 1, c = 0;
+    if (n < 1) return 0;
+    sh.getRange(2, 2, n, 5).getValues().forEach(function (v) { if (String(v[0]) === String(id) && String(v[4]) === 'EDICION_COORDINACION') c++; });
+    return c;
+  } catch (e) { return 0; }
 }
 function APS_todos_() {
   var sh = APS_hoja_(), n = sh.getLastRow() - 1;
