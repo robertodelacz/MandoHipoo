@@ -147,8 +147,8 @@
         toast('Enviado a revisión.'); if (btn) { btn.textContent = '✅ Enviado a revisión'; btn.disabled = true; } cargar();
       }, 'Enviando…');
     };
-    if (window.HIPOO_confirma) window.HIPOO_confirma({ titulo: '¿Enviar a revisión?', texto: 'Este Pre PLD se enviará a la coordinación para su revisión.', ok: 'Sí, enviar', tono: 'info', icono: 'enviar' }, hazlo);
-    else if (window.confirm('¿Enviar este Pre PLD a revisión de la coordinación?')) hazlo();
+    if (window.HIPOO_confirma) window.HIPOO_confirma({ titulo: '¿Ya terminaste de llenarlo?', texto: 'Al enviarlo, la coordinación recibirá un aviso para revisar este Pre PLD. Hazlo solo cuando ya esté completo.', ok: 'Sí, enviar', tono: 'info', icono: 'enviar' }, hazlo);
+    else if (window.confirm('¿Ya terminaste de llenar este Pre PLD? Se enviará a la coordinación para su revisión.')) hazlo();
   }
   ROOT.addEventListener('input', function (e) { if (e.target.getAttribute('data-r') === 'q') { BUSCA = e.target.value; var pos = e.target.selectionStart; pinta(); var n = q('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) { } } } });
   ROOT.addEventListener('click', function (e) {

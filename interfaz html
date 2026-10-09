@@ -1901,7 +1901,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
             showStatus('success', 
               (res.bitacora === false ? '⚠️ Documento generado, pero NO se pudo inscribir en la bitácora: no aparecerá en «Mis Pre PLD» ni podrá enviarse a revisión. Avisa a sistemas con el botón «?».<br>' : '✅ ¡LISTO! Documento generado e inscrito en Bitácora.<br>') + 
               '<a href="'+res.url+'" target="_blank">ABRIR PRE-AVISO PLD</a>' + 
-              (res.bitacora === false ? '' : '<button type="button" class="btn-reset" data-pldid="' + String(res.id).replace(/[^A-Za-z0-9_-]/g, '') + '" onclick="PLDREV.enviar(this.getAttribute(\'data-pldid\'), this)">📤 ENVIAR A REVISIÓN</button>') + 
+              (res.bitacora === false ? '' : '<div style="margin:10px 0 2px;font-size:13px;line-height:1.5">Llénalo y, <b>cuando termines</b>, envíalo a revisión desde <b>«Mis Pre PLD y revisión»</b>. La coordinación recibirá el aviso en ese momento.</div><button type="button" class="btn-reset" onclick="setMode(\'revision\', document.getElementById(\'btnModoRev\'))">📋 IR A MIS PRE PLD</button>') + 
               '<button onclick="resetForm()" class="btn-reset">NUEVA OPERACIÓN</button>'
             );
           } else {
