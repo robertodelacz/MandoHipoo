@@ -190,7 +190,7 @@
 #aps-root .card h2,#aps-root .reg-box h2{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.2px}
 #aps-root .btn-main{border-bottom:3px solid var(--primary)}
 #aps-root .hdr::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px;-webkit-mask-image:linear-gradient(100deg,#000,transparent 70%);mask-image:linear-gradient(100deg,#000,transparent 70%)}
-#aps-root .hdr{position:relative;overflow:hidden}#aps-root .hdr>*{position:relative;z-index:1}
+#aps-root .hdr{position:relative;overflow:hidden}#aps-root .hdr>*{position:relative;z-index:1}#aps-root .hdr>.hk-m{position:absolute;z-index:0}#aps-root .hdr{background:radial-gradient(70% 160% at 100% 0%,#3d4fb0 0%,transparent 60%),linear-gradient(100deg,#364494 0%,#232d61 100%)}#aps-root .hdr .header-logo{width:210px}
 
 /* ═════ Refinamiento visual: superficies con sombra suave; el estado se comunica con fondo tenue, sin tiras ni bordes de color ═════ */
 #aps-root .card{border:0;border-radius:22px;box-shadow:0 1px 2px rgba(26,34,74,.05),0 18px 40px -18px rgba(26,34,74,.28)}
@@ -731,9 +731,9 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
   }
   /* Marca de agua BORRADOR: mientras el contrato no esté aprobado (o falten datos) NUNCA sale como definitivo */
   function marcaBorrador() { return ISS.length > 0 || (IN_GAS && !(REG && REG.estado === 'APROBADO')); }
-  function docHtml() { return D.render(S, { borrador: marcaBorrador() }); }
+  function docHtml(pantalla) { return D.render(S, { borrador: pantalla ? false : marcaBorrador() }); }      // en pantalla la vista previa se ve completa y limpia; la marca BORRADOR queda en lo que se imprime
   function renderPreview() {
-    var h = docHtml();
+    var h = docHtml(true);
     $('aps_pvPaper').innerHTML = h; 
     var b = $('aps_estado'); b.className = 'badge ' + (ISS.length ? 'warn' : 'ok'); b.textContent = ISS.length ? 'Borrador · ' + ISS.length + ' pendiente' + (ISS.length === 1 ? '' : 's') : (IN_GAS && !(REG && REG.estado === 'APROBADO') ? 'Datos completos · sin aprobar' : 'Completo');
     if ($('aps_modal').classList.contains('open')) { $('aps_modalPaper').innerHTML = h; fitModal(); }
@@ -821,7 +821,7 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
       else { imgs.forEach(function (i) { i.addEventListener('load', listo); i.addEventListener('error', listo); }); setTimeout(ir, 5000); }   // espera el logo (máx. 5 s)
     } catch (e) { limpia(); toast('No se pudo abrir la impresión desde aquí. Usa el PDF aprobado.', true); }
   }
-  function openModal() { $('aps_modal').classList.add('open'); $('aps_modalPaper').innerHTML = docHtml(); fitModal(); }
+  function openModal() { $('aps_modal').classList.add('open'); $('aps_modalPaper').innerHTML = docHtml(true); fitModal(); }
   function closeModal() { $('aps_modal').classList.remove('open'); }
 
   var EJ = M.ejemplos;
