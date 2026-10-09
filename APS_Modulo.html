@@ -240,6 +240,52 @@
 #aps-root .hdr .logo-container{padding:8px 22px;border-radius:14px}
 #aps-root .hdr .header-logo{width:250px;height:auto;max-width:42vw;max-height:none;object-fit:contain}
 #aps-root .fab{right:92px}
+
+/* ═══ v3: logo de un solo color, pantalla más ancha, panel de registros centrado, móvil con aire y barra de acciones fija ═══ */
+#aps-root .hdr .logo-container{background:#fff;border:0}
+#aps-root{max-width:1560px;font-size:15px}
+#aps-root .app{max-width:1520px;padding:30px 38px 70px}
+#aps-root .card{padding:28px 30px}
+#aps-root label{font-size:14px}
+#aps-root .input-text{font-size:15.5px;padding:12px 14px}
+@media(min-width:1050px){#aps-root .layout{grid-template-columns:minmax(0,1fr) 520px;gap:34px}}
+@media(min-width:1500px){#aps-root .layout{grid-template-columns:minmax(0,1fr) 600px}}
+#aps-root .modal.sheetwrap.open{display:flex;align-items:center;justify-content:center}
+#aps-root .sheet{width:100%;max-height:calc(100vh - 56px);margin:0;display:flex;flex-direction:column}
+#aps-root .sheet-h,#aps-root .sheet-t,#aps-root .sheet-f{flex:none}
+#aps-root .sheet-b{flex:1 1 auto;min-height:0;overflow:auto}
+body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,body:has(.cx-modal.open) #ayBtn,body:has(.cx-modal.open) #ayNota{display:none!important}
+@media(max-width:600px){
+  #aps-root .app{padding:18px 16px 96px}
+  #aps-root .card{padding:22px 18px;margin-bottom:20px}
+  #aps-root .field-group,#aps-root .grid2>.field-group{margin-bottom:22px}
+  #aps-root .input-text,#aps-root .money input{font-size:16px;min-height:50px}
+  #aps-root .hdr{padding:14px 16px;gap:12px}
+  #aps-root .hdr-l{width:100%;gap:12px}
+  #aps-root .hdr .logo-container{padding:6px 12px;border-radius:12px;flex:none}
+  #aps-root .hdr .header-logo{width:112px;max-width:none}
+  #aps-root .hdr h1{font-size:21px}
+  #aps-root .hdr p{font-size:11.5px;line-height:1.35}
+  #aps-root .userbar{width:100%;gap:8px}
+  #aps-root .userbar .user-chip{flex:1 1 100%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #aps-root .userbar .btn-sec{flex:1;min-height:46px;font-size:14px}
+  #aps-root .actions{position:sticky;bottom:0;z-index:15;margin:16px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(244,247,252,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 -12px 26px -16px rgba(26,34,74,.4)}
+  #aps-root .actions .btn-main,#aps-root .actions .btn-sec{flex:1;min-height:52px;font-size:16px}
+  #aps-root .fab{bottom:92px;right:76px}
+  body[data-pantalla="aps"] #ayBtn{bottom:96px}
+  #aps-root .modal.sheetwrap.open{align-items:flex-end}
+  #aps-root .sheet{border-radius:24px 24px 0 0;max-height:92vh;min-height:0}
+  #aps-root .sheet-b{padding:8px 14px 14px}
+  #aps-root .sheet-q{max-width:none;min-width:100%}
+  #aps-root .reg-wrap{overflow:visible}
+  #aps-root table.reg thead{display:none}
+  #aps-root table.reg,#aps-root table.reg tbody,#aps-root table.reg tr,#aps-root table.reg td{display:block;width:100%}
+  #aps-root table.reg tr{background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(26,34,74,.08),0 0 0 1px #e6ebf5;padding:12px 14px;margin:0 0 12px}
+  #aps-root table.reg td{display:flex;justify-content:space-between;gap:14px;border:0;padding:5px 0;text-align:right;font-size:14px}
+  #aps-root table.reg td::before{content:attr(data-l);flex:none;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;text-align:left;padding-top:3px}
+  #aps-root table.reg td[data-l=""]::before{display:none}
+  #aps-root .sheet-b table.reg td{border-bottom:0}#aps-root table.reg td:last-child{padding-top:10px}#aps-root table.reg td:last-child .btn-mini{width:100%;min-height:46px;font-size:15px}
+}
 </style>
 <style id="aps_docCss"></style>
 <div id="aps-root">
@@ -863,7 +909,7 @@
       return !q || [r.id, r.propietarios, r.inmueble, r.asesor, r.tipo].join(' ').toLowerCase().indexOf(q) >= 0;
     });
     $('aps_regList').innerHTML = rows.length ? '<div class="reg-wrap"><table class="reg"><thead><tr><th>Folio</th><th>Estado</th><th>Propietarios</th><th>Tipo</th><th>Actualizado</th>' + (coord ? '<th>Asesor</th>' : '') + '<th></th></tr></thead><tbody>' +
-      rows.map(function (r) { return '<tr><td>' + esc(r.id) + '</td><td><span class="est e-' + (r.estadoUI || r.estado) + '">' + (ESTADOS_UI[r.estadoUI] || ESTADOS[r.estado]) + '</span></td><td>' + esc(r.propietarios) + '</td><td>' + esc(r.tipo) + '</td><td>' + esc(r.actualizado) + '</td>' +
+      rows.map(function (r) { return '<tr><td>' + esc(r.id) + '</td><td><span class="est e-' + (r.estadoUI || r.estado) + '">' + (ESTADOS_UI[r.estadoUI] || ESTADOS[r.estado]) + '</span></td><td>' + (esc(r.propietarios) || '<span style="color:#8590b0">Sin nombre aún</span>') + '</td><td>' + esc(r.tipo) + '</td><td>' + esc(r.actualizado) + '</td>' +
         (coord ? '<td>' + esc(r.asesor) + '</td>' : '') + '<td><button type="button" class="btn-mini" data-open="' + esc(r.id) + '">Abrir</button></td></tr>'; }).join('') + '</tbody></table></div>'
       : '<div class="help" style="padding:26px 4px;font-size:14px">' + (regFilas.length ? 'Ningún contrato coincide con tu búsqueda o filtro.' : 'Todavía no hay contratos en esta vista.') + '</div>';
     $('aps_regSub').textContent = (rows.length === regFilas.length ? regFilas.length : rows.length + ' de ' + regFilas.length) + (regFilas.length === 1 ? ' contrato' : ' contratos');

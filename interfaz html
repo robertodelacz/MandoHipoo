@@ -1074,6 +1074,17 @@
     @media (max-width: 560px) { #ayTip .pie { flex-wrap: wrap; } #ayTip .pts { flex: 1 0 100%; margin: 0 0 10px; } #ayTip .ay-b { padding: 10px 15px; } #ayTip .ay-b.pri { margin-left: auto; } }
     #hmToast { bottom: 92px; }
     @media (max-width: 560px) { #ayBtn { right: 14px; bottom: 14px; width: 54px; height: 54px; } #ayMenu { right: 14px; bottom: 80px; } #ayNota { right: 76px; bottom: 22px; } .ay-tipos { grid-template-columns: 1fr; } .ay-card { padding: 22px 18px 18px; } }
+
+    /* v3: barra superior compacta en celular (sin nombre repetido) */
+    @media (max-width: 600px) {
+      .barra-nav { padding: 8px 12px; gap: 8px; }
+      #navUsuario { display: none; }
+      .barra-nav .nav-titulo { flex: 1 1 0; min-width: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      #navNov { display: none !important; }
+      .nav-volver { min-height: 44px; } #navPend { min-height: 40px; display: inline-flex; align-items: center; }
+      input, select, textarea { font-size: 16px !important; }      /* menos de 16 px hace que el iPhone acerque la pantalla solo al tocar un campo */
+      #aps-root .chip, #con-root .cx-btn, #rv-root .cx-btn, #aps-root .btn-mini { min-height: 44px; }
+    }
     /* Pantallas claras (contratos APS y revisión): superficie propia, por encima del video y su capa oscura de fondo */
     #modulo-aps, #modulo-consola, #modulo-tablero { position: relative; min-height: calc(100vh - 62px); background: linear-gradient(180deg, #dfe6f4 0, #f4f7fc 340px); padding: 22px 14px 48px; }
     @media (max-width: 560px) { #modulo-aps, #modulo-consola, #modulo-tablero { padding: 10px 0 36px; } }
@@ -1788,10 +1799,26 @@ window.LOGO_SRC = window.HIPOO_LOGO || '';
   var TABLERO_URL = <?!= APS_tableroUrlJson() ?>;      // solo trae valor si el usuario es coordinador Y ya está configurado
   var TITULOS = { pld: 'Generar documento Pre PLD', aps: 'Generar contrato APS', revpld: 'Revisión de Pre PLD', revaps: 'Revisión de contratos APS', tablero: 'Tablero Hipoo' };
   var CONTENEDOR = { pld: 'modulo-pld', aps: 'modulo-aps', revpld: 'modulo-consola', revaps: 'modulo-consola', tablero: 'modulo-tablero' };
+  function navAltura() { var n = document.getElementById('barra-nav'); if (n && n.offsetHeight) document.documentElement.style.setProperty('--navh', n.offsetHeight + 'px'); }
+  window.addEventListener('resize', navAltura);
+  /* Etiqueta cada celda con el nombre de su columna: en celular las tablas se muestran como tarjetas («Folio: …», «Estado: …»). */
+  (function etiquetaTablas() {
+    function tag() {
+      var t = document.querySelectorAll('table.reg, table.cx-tb');
+      for (var i = 0; i < t.length; i++) {
+        var tb = t[i], hs = tb.querySelectorAll('thead th'); if (!hs.length) continue;
+        var rows = tb.querySelectorAll('tbody tr');
+        for (var r = 0; r < rows.length; r++) { if (rows[r].getAttribute('data-t')) continue; rows[r].setAttribute('data-t', '1'); var c = rows[r].children; for (var k = 0; k < c.length; k++) c[k].setAttribute('data-l', hs[k] ? hs[k].textContent.trim() : ''); }
+      }
+    }
+    var h; new MutationObserver(function () { clearTimeout(h); h = setTimeout(tag, 40); }).observe(document.body, { childList: true, subtree: true }); tag();
+  })();
   function hayPantalla(s) { return !!document.getElementById(CONTENEDOR[s]); }
   function irA(s) {
     if (s === 'consola') s = 'revaps';
     window.PANTALLA = s;
+    document.body.setAttribute('data-pantalla', s);
+    setTimeout(navAltura, 30);
     setTimeout(function () { if (typeof novSync === 'function') novSync(); }, 0);
     if (typeof ayFin === 'function') { ayFin(); ayMenu(false); ayCerrarRep(); }
     if (window.APS_UI && APS_UI.cerrarModales) APS_UI.cerrarModales();      // una ventana ampliada no debe quedarse abierta al cambiar de pantalla
