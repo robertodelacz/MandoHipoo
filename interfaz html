@@ -1190,6 +1190,45 @@
     /* Pantallas claras (contratos APS y revisión): superficie propia, por encima del video y su capa oscura de fondo */
     #modulo-aps, #modulo-consola, #modulo-tablero { position: relative; min-height: calc(100vh - 62px); background: linear-gradient(180deg, #dfe6f4 0, #f4f7fc 340px); padding: 22px 14px 48px; }
     @media (max-width: 560px) { #modulo-aps, #modulo-consola, #modulo-tablero { padding: 10px 0 36px; } }
+
+    /* v8: barra superior renovada — botón Inicio grande, ruta clara, cambio directo entre secciones y usuario con iniciales */
+    .barra-nav { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 24px; border-bottom: 0; color: #fff;
+      background: radial-gradient(60% 220% at 100% 0%, rgba(61, 79, 176, .85) 0%, transparent 60%), linear-gradient(100deg, #2b377a 0%, #1a224a 100%);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 14px 34px -14px rgba(13, 18, 43, .6); }
+    .barra-nav::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, #35B7C5, #8fe1ea 40%, #35B7C5 70%, transparent); opacity: .9; }
+    .nav-volver { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px 0 15px; border: 0; border-radius: 15px; background: #fff; color: #2b377a; cursor: pointer; font: 800 15px 'Montserrat', sans-serif; letter-spacing: 0; box-shadow: 0 10px 22px -10px rgba(0, 0, 0, .6); transition: transform .15s, box-shadow .15s; }
+    .nav-volver svg { width: 21px; height: 21px; transition: transform .2s; }
+    .nav-volver:hover { transform: translateY(-2px); box-shadow: 0 14px 26px -10px rgba(0, 0, 0, .65); } .nav-volver:hover svg { transform: translateX(-2px) scale(1.06); }
+    .nav-volver:active { transform: scale(.97); } .nav-volver:focus-visible { outline: 3px solid #ffb03b; outline-offset: 3px; }
+    .nv-ttl { display: flex; flex-direction: column; min-width: 0; flex: 0 1 auto; padding-left: 4px; line-height: 1.1; }
+    .nv-ttl small { font: 800 10.5px 'Montserrat', sans-serif; letter-spacing: 2.5px; text-transform: uppercase; color: #8fe1ea; margin-bottom: 4px; }
+    .barra-nav .nav-titulo { flex: none; font: 600 clamp(18px, 1.8vw, 23px)/1.1 'Fraunces', Georgia, serif; letter-spacing: -.2px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .nv-sw { display: flex; align-items: center; gap: 4px; padding: 4px; margin-left: auto; border-radius: 17px; background: rgba(255, 255, 255, .08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .13); }
+    .nv-sw button { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 15px 0 12px; border: 0; border-radius: 13px; background: transparent; color: #cfdcf5; cursor: pointer; white-space: nowrap; font: 700 13.5px 'Inter', sans-serif; transition: background .18s, color .18s, transform .12s; }
+    .nv-sw button svg { width: 20px; height: 20px; flex: none; }
+    .nv-sw button:hover { background: rgba(255, 255, 255, .13); color: #fff; } .nv-sw button:active { transform: scale(.97); }
+    .nv-sw button.on { background: #fff; color: #2b377a; box-shadow: 0 8px 16px -8px rgba(0, 0, 0, .55); cursor: default; }
+    .nv-sw button:focus-visible { outline: 3px solid #ffb03b; outline-offset: 2px; }
+    .nv-sw .b { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center; background: #ffb03b; color: #2b1700; font: 800 11px 'Inter', sans-serif; }
+    .nv-der { display: flex; align-items: center; gap: 10px; flex: none; }
+    .barra-nav .nav-pend { display: none !important; }      /* los pendientes ya salen como globo naranja en «Revisión APS / Pre PLD» del selector */
+    .barra-nav .nav-nov { min-height: 42px; padding: 0 16px; font-size: 12.5px; }
+    .nav-usuario { display: inline-flex; align-items: center; gap: 10px; min-height: 46px; padding: 4px 16px 4px 5px; border-radius: 999px; background: rgba(255, 255, 255, .1); border: 0; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2); font: 700 13.5px 'Inter', sans-serif; color: #fff; max-width: 230px; }
+    .nav-usuario i { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(145deg, #35B7C5, #0f8594); color: #fff; font: 800 13px 'Montserrat', sans-serif; font-style: normal; }
+    .nav-usuario span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (max-width: 1500px) { .nav-usuario span { display: none; } .nav-usuario { padding: 4px; } }
+    @media (max-width: 1180px) { .nv-sw button span.t { display: none; } .nv-sw button { padding: 0 12px; } .nv-sw button.on span.t { display: inline; } }
+    @media (max-width: 900px) { .nav-usuario span { display: none; } .nav-usuario { padding: 4px; } }
+    @media (max-width: 720px) {
+      .barra-nav { padding: 8px 12px 10px; gap: 8px 10px; }
+      .nav-volver { min-height: 48px; padding: 0 16px 0 12px; }
+      .nv-ttl { flex: 1 1 0; } .nv-ttl small { display: none; }
+      .barra-nav .nav-titulo { font-size: 18px; }
+      .nv-der { margin-left: auto; } .nav-usuario { display: none; } .barra-nav .nav-nov { display: none !important; }
+      .nv-sw { order: 5; flex: 1 1 100%; margin: 0; overflow-x: auto; scrollbar-width: none; border-radius: 16px; }
+      .nv-sw::-webkit-scrollbar { display: none; }
+      .nv-sw button { flex: 1 0 auto; min-height: 44px; } .nv-sw button span.t { display: inline; }
+    }
     @media print { #splash, .hm, .barra-nav { display: none !important; } }
     /* Legibilidad del Pre PLD: solo el color de los textos grises (los bordes no cambian) */
     .card-header .subtitle, .stat-tile span { color: #D6DAEE; }
@@ -1225,11 +1264,14 @@
 
 <!-- ══════════════════ BARRA DE NAVEGACIÓN (aparece al elegir una opción; regresa a la bienvenida) ══════════════════ -->
 <div class="barra-nav" id="barra-nav" style="display:none;">
-  <button type="button" class="nav-volver" onclick="irA('inicio')">← Inicio</button>
-  <span class="nav-titulo" id="navTitulo"></span>
-  <button type="button" class="nav-nov" id="navNov" style="display:none;"></button>
-  <button type="button" class="nav-pend" id="navPend" style="display:none;"></button>
-  <span class="nav-usuario" id="navUsuario"></span>
+  <button type="button" class="nav-volver" onclick="irA('inicio')" aria-label="Volver al inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.200 11.400 12 4.800l7.800 6.600V19a1.500 1.500 0 0 1-1.500 1.500H5.700A1.500 1.500 0 0 1 4.200 19z"/><path d="M9.500 20.500v-5h5v5"/></svg><span>Inicio</span></button>
+  <div class="nv-ttl"><small id="navEye"></small><span class="nav-titulo" id="navTitulo"></span></div>
+  <nav class="nv-sw" id="navSw" aria-label="Ir a otra sección"></nav>
+  <div class="nv-der">
+    <button type="button" class="nav-nov" id="navNov" style="display:none;"></button>
+    <button type="button" class="nav-pend" id="navPend" style="display:none;"></button>
+    <span class="nav-usuario" id="navUsuario"></span>
+  </div>
 </div>
 
 <!-- ══════════════════ PANTALLA PRINCIPAL ══════════════════ -->
@@ -1956,7 +1998,10 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     });
     document.getElementById('barra-nav').style.display = (s === 'inicio') ? 'none' : '';
     document.getElementById('navTitulo').textContent = TITULOS[s] || '';
-    document.getElementById('navUsuario').textContent = USUARIO.nombre || USUARIO.email;
+    (function () { var n = USUARIO.nombre || USUARIO.email || '', w = String(n).split('@')[0].split(/[\s._-]+/).filter(Boolean), u = document.getElementById('navUsuario');
+      u.innerHTML = '<i>' + hmEsc(((w[0] || '?').charAt(0) + (w[1] ? w[1].charAt(0) : '')).toUpperCase()) + '</i><span>' + hmEsc(USUARIO.nombre || USUARIO.email) + '</span>'; u.title = USUARIO.email || ''; })();
+    document.getElementById('navEye').textContent = (s === 'revaps' || s === 'revpld' || s === 'revacc' || s === 'tablero') ? 'Coordinación' : 'Hipoo';
+    pintaNavSw();
     actualizaNavPend();
     window.scrollTo(0, 0);
     (function () { var d = document.getElementById(destino); d.classList.remove('scr-in'); void d.offsetWidth; d.classList.add('scr-in'); setTimeout(function () { d.classList.remove('scr-in'); }, 650); })();
@@ -1977,7 +2022,19 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   // Insignia "🔔 N pendientes" en la barra de arriba: a diferencia del aviso de la bienvenida, esta SIGUE al
   // coordinador a cualquier pantalla (revisando un contrato, generando un Pre PLD, etc.) — no hay que volver al
   // inicio para acordarse de que algo espera revisión.
+  var NAV_SW = [['aps', 'Contrato APS', 'aps'], ['pld', 'Pre PLD', 'pld'], ['revaps', 'Revisión APS', 'revaps'], ['revpld', 'Revisión Pre PLD', 'revpld'], ['revacc', 'Accesos', 'revacc']];
+  function pintaNavSw() {
+    var nav = document.getElementById('navSw'); if (!nav) return;
+    var act = window.PANTALLA, h = NAV_SW.filter(function (x) { return hayPantalla(x[0]); }).map(function (x) {
+      var b = x[0] === 'revaps' ? PENDIENTES.aps : (x[0] === 'revpld' ? PENDIENTES.pld : 0);
+      return '<button type="button" data-sw="' + x[0] + '"' + (act === x[0] ? ' class="on" aria-current="page"' : '') + '>' + IC[x[2]] + '<span class="t">' + x[1] + '</span>' + (b ? '<span class="b">' + b + '</span>' : '') + '</button>'; }).join('');
+    if (nav.__h !== h) { nav.__h = h; nav.innerHTML = h; }
+    nav.style.display = nav.children.length > 1 ? '' : 'none';
+    var on = nav.querySelector('.on'); if (on && nav.scrollWidth > nav.clientWidth) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+  }
+  document.getElementById('navSw').addEventListener('click', function (e) { var b = e.target.closest('button[data-sw]'); if (b && !b.classList.contains('on')) irA(b.getAttribute('data-sw')); });
   function actualizaNavPend() {
+    pintaNavSw();
     var el = document.getElementById('navPend'); if (!el) return;
     var pTot = (PENDIENTES.aps || 0) + (PENDIENTES.pld || 0);
     if (USUARIO.rol === 'coordinador' && pTot > 0) {

@@ -335,7 +335,7 @@ function APS_paginaBloqueo_(a) {
     if (!cache.get(k)) { cache.put(k, '1', 600); APS_audit_('ACCESO', 'DENEGADO', a.email || '', a.motivo === 'identidad' ? 'Sin identificar' : 'Cuenta sin acceso activo'); }
   } catch (e) { Logger.log('No se pudo registrar el intento de acceso: ' + e.message); }
   var t = HtmlService.createTemplateFromFile('Bloqueo');
-  t.email = a.email || ''; t.motivo = a.motivo || 'desactivado'; t.logo = ''; t.contacto = (APS_CONFIG.REPORTES_CORREOS || []).join(',');
+  t.email = a.email || ''; t.motivo = a.motivo || 'desactivado'; t.url = ''; try { t.url = ScriptApp.getService().getUrl() || ''; } catch (e) { t.url = ''; } t.logo = ''; t.contacto = (APS_CONFIG.REPORTES_CORREOS || []).join(',');
   try { t.logo = APS_logoDataUri_(); } catch (e) { t.logo = ''; }
   return t.evaluate().setTitle('Acceso no disponible').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL).addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }

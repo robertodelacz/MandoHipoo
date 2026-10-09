@@ -69,7 +69,7 @@
       Solicitar acceso por correo
     </a>
     <? } ?>
-    <a class="b sec" href="#" onclick="window.top.location.reload(); return false;">Ya me lo activaron: reintentar</a>
+    <? if (url) { ?><a class="b sec" href="<?= url ?>" target="_top" rel="noopener">Ya me lo activaron: reintentar</a><? } else { ?><p class="nota" style="margin:10px 0 0">Si ya te activaron, cierra esta pestaña y vuelve a abrir tu enlace de la plataforma.</p><? } ?>
 
     <p class="nota">Cada intento de entrar queda registrado para seguridad de la plataforma.</p>
     <div class="pie">Hipoo — Mesa de control</div>
