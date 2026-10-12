@@ -1269,8 +1269,8 @@
       #aps-root .chip, #con-root .cx-btn, #rv-root .cx-btn, #aps-root .btn-mini { min-height: 44px; }
     }
     /* Pantallas claras (contratos APS y revisión): superficie propia, por encima del video y su capa oscura de fondo */
-    #modulo-aps, #modulo-consola, #modulo-tablero { position: relative; min-height: calc(100vh - 62px); background: linear-gradient(180deg, #dfe6f4 0, #f4f7fc 340px); padding: 22px 14px 48px; }
-    @media (max-width: 560px) { #modulo-aps, #modulo-consola, #modulo-tablero { padding: 10px 0 36px; } }
+    #modulo-pld, #modulo-aps, #modulo-consola, #modulo-tablero { position: relative; min-height: calc(100vh - 62px); background: linear-gradient(180deg, #dfe6f4 0, #f4f7fc 340px); padding: 22px 14px 48px; }
+    @media (max-width: 560px) { #modulo-pld, #modulo-aps, #modulo-consola, #modulo-tablero { padding: 10px 0 36px; } }
 
     /* v8: barra superior renovada — botón Inicio grande, ruta clara, cambio directo entre secciones y usuario con iniciales */
     .barra-nav { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 24px; border-bottom: 0; color: #fff;
@@ -1404,16 +1404,128 @@
       .bg-video { display: none !important; }
       body { background: radial-gradient(circle at 50% -5%, #2c3878 0%, var(--bg-dark) 55%, var(--border-dark) 100%); background-attachment: fixed; }
     }
+
+    /* ═════ PRE PLD · aspecto claro, en sintonía con «Contrato APS» (solo estilo: los campos, botones y funciones son los mismos) ═════ */
+    #modulo-pld { --primary: #35B7C5; --teal: #0f8594; --navy: #364494; --ink: #1a224a; --muted: #5a6488; --line: #dbe2ef; --soft: #f4f7fc; --tint: #e8f6f8;
+      --ok: #0f9d6e; --ok-bg: #e3f6ee; --err: #d92d3f; --err-bg: #fdecee; --warn: #9a6700; --warn-bg: #fff4d6;
+      --bg-card: #fff; --bg-input: #fff; --bg-dark: #f4f7fc; --text-dim: #5a6488; --text-main: #1a224a; --border-dark: #1a224a; --border-width: 1px; font-size: 15px; line-height: 1.45; color: var(--ink); }
+    #modulo-pld .app-container { max-width: 1560px; margin: 0 auto; padding: 0; background: var(--soft); border-radius: 18px; overflow: clip; box-shadow: 0 10px 40px rgba(26, 34, 74, .18); }
+    #modulo-pld .app { padding: 30px 38px 60px; position: relative; z-index: 1; }
+    /* Encabezado: banner azul con el logo, igual que Contrato APS */
+    #modulo-pld .hdr { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; text-align: left; margin: 0; padding: 14px 22px; border-bottom: 4px solid var(--primary);
+      background: radial-gradient(70% 160% at 100% 0%, #3d4fb0 0%, transparent 60%), linear-gradient(100deg, #364494 0%, #232d61 100%); }
+    #modulo-pld .hdr::after { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px); background-size: 40px 40px; -webkit-mask-image: linear-gradient(100deg, #000, transparent 70%); mask-image: linear-gradient(100deg, #000, transparent 70%); }
+    #modulo-pld .hdr > * { position: relative; z-index: 1; } #modulo-pld .hdr > .hk-m { position: absolute; z-index: 0; }
+    #modulo-pld .hdr-l { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    #modulo-pld .hdr .logo-container { margin: 0; padding: 8px 22px; border-radius: 14px; background: #fff; border: 0; box-shadow: 0 6px 16px rgba(0, 0, 0, .2); }
+    #modulo-pld .hdr .header-logo { width: 250px; height: auto; max-width: 42vw; object-fit: contain; }
+    #modulo-pld .hdr h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 24px; line-height: 1.1; color: #fff; letter-spacing: .2px; text-shadow: none; margin: 0; }
+    #modulo-pld .hdr p { color: #cfe9ee; font-size: 12px; font-weight: 500; background: none; border: 0; padding: 0; margin: 3px 0 0; display: block; border-radius: 0; }
+    /* Selector de modo: píldoras como los pasos de APS */
+    #modulo-pld .mode-switch { display: flex; gap: 8px; flex-wrap: wrap; max-width: none; margin: 0 0 24px; }
+    #modulo-pld .mode-btn { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: #fff; border: 0; border-radius: 999px; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 700; letter-spacing: 0; transform: none;
+      box-shadow: 0 1px 2px rgba(26, 34, 74, .08), 0 0 0 1px rgba(26, 34, 74, .06); transition: box-shadow .15s, color .15s, background .15s; }
+    #modulo-pld .mode-btn svg { width: 17px; height: 17px; flex: none; }
+    #modulo-pld .mode-btn:hover { color: var(--ink); box-shadow: 0 4px 12px -4px rgba(26, 34, 74, .25), 0 0 0 1px rgba(53, 183, 197, .7); }
+    #modulo-pld .mode-btn.active { background: var(--navy); color: #fff; transform: none; box-shadow: 0 8px 18px -8px rgba(54, 68, 148, .7); }
+    /* Distribución */
+    #modulo-pld .main-layout { gap: 34px; }
+    @media (min-width: 900px) { #modulo-pld .main-layout { grid-template-columns: minmax(0, 1fr) 440px; } #modulo-pld .sidebar-column { top: calc(var(--navh, 62px) + 14px); } }
+    @media (min-width: 1500px) { #modulo-pld .main-layout { grid-template-columns: minmax(0, 1fr) 520px; } }
+    #modulo-pld .layout-pago { max-width: 760px; }
+    /* Tarjetas */
+    #modulo-pld .card { background: #fff; border: 0; border-radius: 22px; padding: 28px 30px; margin-bottom: 20px; color: var(--ink); transition: none;
+      box-shadow: 0 1px 2px rgba(26, 34, 74, .05), 0 18px 40px -18px rgba(26, 34, 74, .28); }
+    #modulo-pld .card:hover { transform: none; box-shadow: 0 1px 2px rgba(26, 34, 74, .05), 0 18px 40px -18px rgba(26, 34, 74, .28); }
+    #modulo-pld .card-header { gap: 14px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+    #modulo-pld .icon-box { width: 40px; height: 40px; background: var(--tint); border: 1px solid #bfe6ec; border-radius: 10px; box-shadow: none; color: var(--teal); }
+    #modulo-pld .icon-box svg { width: 22px; height: 22px; }
+    #modulo-pld .card-header h2 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 19px; letter-spacing: -.2px; color: var(--ink); text-shadow: none; }
+    #modulo-pld .card-header .subtitle { font-size: 12.5px; font-weight: 400; color: var(--muted); margin-top: 3px; }
+    #modulo-pld .field-group { margin-bottom: 18px; }
+    #modulo-pld .field-group:last-child { margin-bottom: 0; }
+    #modulo-pld label { font-size: 14px; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--ink); margin-bottom: 6px; }
+    #modulo-pld .input-text { background: #fff; border: 1px solid #c4cde0; border-radius: 10px; padding: 12px 14px; color: var(--ink); font-size: 15.5px; font-weight: 500; transform: none; box-shadow: none; transition: border-color .12s, box-shadow .12s; }
+    #modulo-pld .input-text::placeholder { color: #9aa4c0; font-weight: 400; }
+    #modulo-pld .input-text:hover { border-color: #9fb0d3; }
+    #modulo-pld .input-text:focus { outline: none; background: #fff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(53, 183, 197, .22); transform: none; }
+    #modulo-pld .regime-toggle { gap: 8px; flex-wrap: wrap; }
+    #modulo-pld .regime-btn { flex: 1 1 140px; border: 1px solid #c4cde0; background: #fff; padding: 11px 14px; border-radius: 10px; color: var(--ink); font-size: 14px; font-weight: 600; box-shadow: none; transform: none; transition: all .12s; }
+    #modulo-pld .regime-btn:hover { border-color: var(--primary); background: var(--tint); color: var(--ink); }
+    #modulo-pld .regime-btn.active { background: var(--tint); border-color: var(--primary); color: var(--ink); transform: none; box-shadow: inset 0 0 0 1px var(--primary), 0 0 0 3px rgba(53, 183, 197, .18); }
+    #modulo-pld .regime-btn.active::before { content: '●  '; color: var(--primary); font-size: 10px; vertical-align: 1px; }
+    #modulo-pld .stepper { background: #fff; border: 1px solid #c4cde0; border-radius: 10px; }
+    #modulo-pld .stepper-btn { color: var(--navy); width: 46px; height: 42px; }
+    #modulo-pld .stepper-btn:hover { background: var(--tint); color: var(--ink); }
+    #modulo-pld .stepper-value { border-left: 1px solid var(--line); border-right: 1px solid var(--line); color: var(--teal); font-size: 19px; }
+    #modulo-pld .btn-clear-count { height: 44px; background: #fff; border: 1px solid #c4cde0; border-radius: 10px; color: var(--muted); font-weight: 600; }
+    #modulo-pld .btn-clear-count:hover { border-color: #f0b4bb; color: var(--err); background: var(--err-bg); box-shadow: none; transform: none; }
+    #modulo-pld .btn-clear-count:active { transform: none; box-shadow: none; }
+    #modulo-pld .email-chip { background: var(--tint); border: 1px solid #bfe6ec; color: #16465a; }
+    #modulo-pld .email-chip .dot { box-shadow: none; }
+    #modulo-pld .info-note { gap: 10px; background: var(--tint); border: 1px solid #bfe6ec; border-left: 1px solid #bfe6ec; border-radius: 12px; padding: 13px 15px; font-size: 13px; font-weight: 400; color: #16465a; line-height: 1.5; margin-top: 16px; }
+    #modulo-pld .info-note .icon { display: inline-flex; color: var(--teal); }
+    #modulo-pld .info-note .icon svg { width: 18px; height: 18px; }
+    /* Resumen: tarjeta clara que acompaña al formulario */
+    #modulo-pld .summary-card { background: #fff; border: 0; border-radius: 22px; padding: 22px 24px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(26, 34, 74, .05), 0 18px 40px -18px rgba(26, 34, 74, .28); }
+    #modulo-pld .summary-head { margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+    #modulo-pld .summary-head h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 18px; letter-spacing: -.2px; color: var(--ink); text-shadow: none; }
+    #modulo-pld .summary-head span { font-size: 11px; font-weight: 800; color: #0a6b4a; background: var(--ok-bg); padding: 4px 10px; border-radius: 999px; }
+    #modulo-pld .summary-head span::before { background: var(--ok); box-shadow: none; }
+    #modulo-pld .stat-tile { background: var(--soft); border: 1px solid var(--line); border-radius: 12px; }
+    #modulo-pld .stat-tile:hover { border-color: var(--primary); transform: none; box-shadow: none; }
+    #modulo-pld .stat-tile span { color: var(--muted); font-weight: 700; }
+    #modulo-pld .stat-tile strong { color: var(--navy); }
+    #modulo-pld .stat-text-summary { background: var(--tint); border: 1px solid #bfe6ec; border-radius: 12px; color: #16465a; }
+    #modulo-pld .stat-text-summary strong { color: var(--teal); }
+    @keyframes bumpBoxL { 0% { transform: scale(1); } 50% { transform: scale(1.015); } 100% { transform: scale(1); } }
+    #modulo-pld .bumpBox { animation: bumpBoxL .4s ease-out; }
+    /* Ayuda */
+    #modulo-pld .help-panel { background: linear-gradient(135deg, #eaf7f9, #f4f7fc); border: 0; border-radius: 18px; box-shadow: none; padding: 22px 24px; }
+    #modulo-pld .help-panel h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 18px; color: var(--navy); letter-spacing: -.2px; }
+    #modulo-pld .help-panel h3::before { content: ""; flex: none; width: 32px; height: 32px; border-radius: 10px; background: var(--tint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f8594' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z'/%3E%3C/svg%3E") center / 19px no-repeat; border: 1px solid #bfe6ec; font-size: 0; }
+    #modulo-pld .help-panel-content { font-size: 14px; color: var(--muted); }
+    #modulo-pld .help-panel-content strong { color: var(--ink); }
+    #modulo-pld .btn-guide { background: #fff; border: 1px dashed var(--primary); border-radius: 10px; color: var(--teal); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; padding: 12px 16px; }
+    #modulo-pld .btn-guide svg { width: 18px; height: 18px; flex: none; }
+    #modulo-pld .btn-guide:hover { background: var(--tint); color: var(--teal); border-style: dashed; transform: none; box-shadow: none; }
+    /* Botón principal y mensajes de resultado */
+    #modulo-pld .btn-main { width: 100%; background: var(--navy); color: #fff; border: 1px solid var(--navy); border-bottom: 3px solid var(--primary); border-radius: 12px; padding: 16px 22px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: .5px; box-shadow: 0 2px 6px rgba(54, 68, 148, .28); margin-bottom: 0; transition: all .12s; }
+    #modulo-pld .btn-main:hover { background: #2c3a82; border-color: #2c3a82; border-bottom-color: var(--primary); transform: none; box-shadow: 0 4px 12px rgba(54, 68, 148, .35); }
+    #modulo-pld .btn-main:active { transform: none; box-shadow: 0 2px 6px rgba(54, 68, 148, .28); }
+    #modulo-pld .btn-main:disabled, #modulo-pld .btn-main:disabled:hover { opacity: .45; background: var(--navy); border-color: var(--navy); border-bottom-color: var(--primary); color: #fff; box-shadow: none; cursor: not-allowed; }
+    #modulo-pld .status { margin: 16px 0 0; padding: 16px 18px; border: 0; border-radius: 14px; box-shadow: none; text-align: left; font-weight: 600; font-size: 14px; line-height: 1.5; }
+    #modulo-pld .status.loading { background: var(--tint); color: #16465a; }
+    #modulo-pld .status.success { background: var(--ok-bg); color: #0a6b4a; }
+    #modulo-pld .status.error { background: var(--err-bg); color: #8f1b29; }
+    #modulo-pld .status a { background: var(--navy); color: #fff; border: 0; border-radius: 10px; padding: 10px 18px; margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 13.5px; }
+    #modulo-pld .status a:hover { background: #2c3a82; color: #fff; border: 0; }
+    #modulo-pld .btn-reset { background: #fff; color: var(--navy); border: 1px solid #b9c4de; border-radius: 10px; padding: 11px 16px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13.5px; margin-top: 10px; }
+    #modulo-pld .btn-reset:hover { background: var(--tint); color: var(--navy); border-color: var(--primary); }
+    #modulo-pld .clock-spinner { border-color: var(--teal); }
+    #modulo-pld .clock-spinner::before, #modulo-pld .clock-spinner::after { background-color: var(--teal); }
+    @media (max-width: 600px) {
+      #modulo-pld .app-container { border-radius: 0; box-shadow: none; }
+      #modulo-pld .app { padding: 18px 16px 48px; }
+      #modulo-pld .card { padding: 22px 18px; margin-bottom: 20px; }
+      #modulo-pld .field-group { margin-bottom: 22px; }
+      #modulo-pld .input-text { font-size: 16px; min-height: 50px; }
+      #modulo-pld .hdr { padding: 14px 16px; gap: 12px; }
+      #modulo-pld .hdr-l { width: 100%; gap: 12px; }
+      #modulo-pld .hdr .logo-container { padding: 6px 12px; border-radius: 12px; flex: none; }
+      #modulo-pld .hdr .header-logo { width: 112px; max-width: none; }
+      #modulo-pld .hdr h1 { font-size: 21px; } #modulo-pld .hdr p { font-size: 11.5px; line-height: 1.35; }
+      #modulo-pld .mode-switch { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px 20px; padding: 2px 16px 6px; scrollbar-width: none; }
+      #modulo-pld .mode-switch::-webkit-scrollbar { display: none; }
+      #modulo-pld .regime-btn { flex: 1 1 100%; }
+      #modulo-pld .summary-card { padding: 20px 18px; }
+    }
+    @media print { #modulo-pld { display: none !important; } }
   </style>
 </head>
 <body>
 
-<div class="bg-video">
-  <video autoplay loop muted playsinline webkit-playsinline loop poster="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000">
-    <source src="https://videos.pexels.com/video-files/31737798/13522392_2560_1440_30fps.mp4" type="video/mp4">
-  </video>
-</div>
-<div class="bg-overlay"></div>
+
 
 <? var ADM = APS_esAdmin(); var AUT = APS_puedeGenerarAps(); ?>
 <!-- ══════════════════ SPLASH DE BIENVENIDA (una vez por sesión) ══════════════════ -->
@@ -1531,18 +1643,23 @@
 <div id="modulo-pld" style="display:none;">
 <div class="app-container">
   
-  <header class="header">
-    <div class="logo-container">
-      <img data-logo src="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000" alt="Hipoo" class="header-logo" onerror="window.respaldoLogo&&respaldoLogo(this)">
+  <header class="header hdr">
+    <div class="hdr-l">
+      <div class="logo-container">
+        <img data-logo src="https://drive.google.com/thumbnail?id=1jS_6nXoN7oBQCJqHN6Os9vtxnV82s9_f&sz=w1000" alt="Hipoo" class="header-logo" onerror="window.respaldoLogo&&respaldoLogo(this)">
+      </div>
+      <div>
+        <h1>Generador Pre-Aviso PLD</h1>
+        <p>Operativa Institucional y Cumplimiento</p>
+      </div>
     </div>
-    <h1>Generador Pre-Aviso PLD</h1>
-    <p>Operativa Institucional y Cumplimiento</p>
   </header>
+  <div class="app">
 
   <div class="mode-switch">
-    <button class="mode-btn active" id="btnModoNueva" onclick="setMode('nueva', this)">🆕 Nueva Operación</button>
-    <button class="mode-btn" id="btnModoPago" onclick="setMode('pago', this)">➕ Agregar Pago a Operación Existente</button>
-    <button class="mode-btn" id="btnModoRev" onclick="setMode('revision', this)">📋 Mis Pre PLD y revisión</button>
+    <button class="mode-btn active" id="btnModoNueva" onclick="setMode('nueva', this)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11.5v5M9.5 14h5"/></svg>Nueva Operación</button>
+    <button class="mode-btn" id="btnModoPago" onclick="setMode('pago', this)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Agregar Pago a Operación Existente</button>
+    <button class="mode-btn" id="btnModoRev" onclick="setMode('revision', this)"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg>Mis Pre PLD y revisión</button>
   </div>
 
   <!-- ══════════════════ MODO: NUEVA OPERACIÓN ══════════════════ -->
@@ -1555,7 +1672,7 @@
       <div class="card">
         <div class="card-header">
           <div class="icon-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/6014/6014206.png" alt="Operación" class="icon-img">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6.5A1.5 1.5 0 0 0 5 7.5v11A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-11A1.5 1.5 0 0 0 17.5 6H16"/><path d="M9 11h6M9 15h4"/></svg>
           </div>
           <div>
             <h2>Datos de la Operación</h2>
@@ -1580,7 +1697,7 @@
       <div class="card">
         <div class="card-header">
           <div class="icon-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/4757/4757347.png" alt="Venta" class="icon-img">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg>
           </div>
           <div>
             <h2>Vendedor (Lado 1)</h2>
@@ -1614,7 +1731,7 @@
       <div class="card">
         <div class="card-header">
           <div class="icon-box">
-             <img src="https://cdn-icons-png.magnific.com/512/5764/5764035.png?ga=GA1.1.1372457637.1778013504" alt="Compra" class="icon-img">
+             <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>
           </div>
           <div>
             <h2>Comprador (Lado 2)</h2>
@@ -1648,7 +1765,7 @@
       <div class="card">
         <div class="card-header">
           <div class="icon-box">
-             <img src="https://cdn-icons-png.magnific.com/512/4523/4523470.png?ga=GA1.1.1372457637.1778013504" alt="Pagos" class="icon-img">
+             <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6.5 9.5h.01M17.5 14.5h.01"/></svg>
           </div>
           <div>
             <h2>Pagos / Liquidación</h2>
@@ -1675,7 +1792,7 @@
       <div class="card">
         <div class="card-header">
           <div class="icon-box">
-             <img src="https://cdn-icons-png.magnific.com/512/1069/1069900.png?ga=GA1.1.1372457637.1778013504" alt="Acceso" class="icon-img">
+             <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 5 6v5.5c0 4.2 2.9 7.3 7 9 4.1-1.7 7-4.8 7-9V6z"/><path d="m9 12 2.2 2.2L15.2 10"/></svg>
           </div>
           <div>
             <h2>Acceso y Protección</h2>
@@ -1686,7 +1803,7 @@
           <div class="email-chip"><span class="dot"></span> oficialdecumplimiento@cualli.mx</div>
         </div>
         <div class="info-note">
-          <span class="icon">ℹ️</span>
+          <span class="icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></svg></span>
           <span>El archivo se generará con protecciones: los títulos, secciones y menús no podrán ser modificados. Solo las celdas de captura estarán habilitadas para edición.</span>
         </div>
       </div>
@@ -1736,12 +1853,12 @@
           <ul>
             <li><strong>Nombre de la Operación:</strong> En este campo deberás colocar la direccion de la propiedad o el nombre para identificar la operacion (ej. Venta Lote 14) y nombra a los asesores responsables tanto del Comprador como del Vendedor. Estos campos son estrictamente obligatorios.</li>
             <li><strong>Bloques Vendedor y Comprador (Lado 1 y 2):</strong> Define el Régimen Fiscal y la cantidad exacta de Vendedores y Compradores. El sistema generará por cada seleccion el bloque correspondiente (ejemplo: 2 Vendedores Persona Física, 1 Comprador Persona Moral) de datos y requerimientos por cada uno.</li>
-            <li><strong>Liquidación:</strong> Selecciona en cuántos pagos o exhibiciones se formalizará la operación para generar las secciones y listar los pagos correspondientes. Si más adelante surge un pago adicional no contemplado, no generes un documento nuevo: usa "➕ Agregar Pago a Operación Existente" arriba.</li>
+            <li><strong>Liquidación:</strong> Selecciona en cuántos pagos o exhibiciones se formalizará la operación para generar las secciones y listar los pagos correspondientes. Si más adelante surge un pago adicional no contemplado, no generes un documento nuevo: usa «Agregar Pago a Operación Existente» arriba.</li>
             <li><strong>Generar:</strong> Se creará un documento de Google Sheets. Tendras que capturar los campos en rojo; la estructura, reglas y fórmulas estarán bloqueadas por el área de PLD.</li>
           </ul>
           
           <a href="https://drive.google.com/file/d/18NbXuOl5Ft9kONYxwybro_7U9borwZvt/view?usp=drive_link" target="_blank" class="btn-guide">
-            📖 ABRIR GUÍA OPERATIVA DE CONSULTA
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg> ABRIR GUÍA OPERATIVA DE CONSULTA
           </a>
         </div>
       </div>
@@ -1759,7 +1876,7 @@
     <div class="card">
       <div class="card-header">
         <div class="icon-box">
-          <span class="icon-emoji">➕</span>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
         </div>
         <div>
           <h2>Agregar Pago a Operación Existente</h2>
@@ -1788,7 +1905,7 @@
       </div>
 
       <div class="info-note">
-        <span class="icon">ℹ️</span>
+        <span class="icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></svg></span>
         <span>El sistema verifica que el documento sea un Pre-Aviso PLD válido, genera un respaldo automático (uno solo, sin importar cuántos pagos agregues de una vez) e inserta los bloques siguientes sin tocar la información ya capturada. Solo funciona en documentos generados con esta versión del sistema.</span>
       </div>
     </div>
@@ -1808,7 +1925,7 @@
   </div>
   <!-- ══════════════════ FIN MODO: MIS PRE PLD Y REVISIÓN ══════════════════ -->
 
-
+  </div>
 </div>
 </div>
 <!-- ══════════════════ FIN MÓDULO PRE PLD ══════════════════ -->
@@ -2521,7 +2638,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     if (nuevos.length) { var e0 = nuevos[0]; hmToast(nuevos.length > 1 ? nuevos.length + ' novedades nuevas' : e0.titulo, nuevos.length > 1 ? e0.titulo + ' · ' + e0.texto : e0.texto, true); }
     /* Sello de marca de agua: se inserta (detrás del contenido) en cada encabezado oscuro de la plataforma. */
   (function marcaDeAgua() {
-    var L = [['.hm-hero', 'k-hero'], ['#con-root .cx-hero', 'k-cx'], ['#aps-root .hdr', 'k-aps'], ['#splash', 'k-splash c'], ['#bloqueoVivo', 'k-bloq c']];
+    var L = [['.hm-hero', 'k-hero'], ['#con-root .cx-hero', 'k-cx'], ['#aps-root .hdr', 'k-aps'], ['#modulo-pld .hdr', 'k-aps'], ['#splash', 'k-splash c'], ['#bloqueoVivo', 'k-bloq c']];
     L.forEach(function (c) {
       var els = document.querySelectorAll(c[0]);
       for (var i = 0; i < els.length; i++) {
