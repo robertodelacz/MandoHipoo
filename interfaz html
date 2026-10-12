@@ -820,6 +820,7 @@
     .hm-cielo .cn { background: linear-gradient(180deg, rgba(18, 26, 78, 0) 0%, rgba(22, 30, 86, .74) 42%, #121846 100%); }
     .hm[data-fase="ata"] .hm-cielo .ca, .hm[data-fase="noche"] .hm-cielo .cn { opacity: 1; }
     .hm::after { transition: opacity .35s; } .hm.cambia::after { opacity: 0; }
+    .hm-ext::before, .hm-ext::after { display: none; }      /* el panel de novedades comparte la clase .hm: sin esto la ilustración se colaba al fondo de las demás pantallas */
     .hm[data-fase="noche"] .hm-pie { color: #b8c3f0; }
     .hm[data-fase="ata"] .hn svg { fill: #fff0e0; fill-opacity: .85; stroke: #c9786a; stroke-opacity: .3; }
     .hm[data-fase="noche"] .hn svg { fill: #2b3778; fill-opacity: .6; stroke: #9fb0ff; stroke-opacity: .28; }
