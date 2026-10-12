@@ -1276,17 +1276,18 @@
     .hk-m { position: absolute; top: 50%; z-index: -1; pointer-events: none; width: var(--s, 200px); height: var(--s, 200px); transform: translateY(-50%); opacity: var(--o, 1); background: var(--marca) center / contain no-repeat;
       filter: drop-shadow(0 0 20px rgba(123, 224, 234, .34)) drop-shadow(0 12px 30px rgba(8, 12, 40, .5)); animation: hkIn 1.4s cubic-bezier(.2, .8, .2, 1) both; }
     .hk-m.k-hero { left: 62%; top: 47%; --s: 205px; }
-    .hk-m.k-cx { left: 56%; top: 48%; --s: 160px; }
-    .hk-m.k-aps { left: 56%; top: 50%; --s: 120px; }
+    .hk-m.k-cx { left: 700px; top: 48%; --s: 160px; }
+    .hk-m.k-aps { left: 700px; top: 50%; --s: 120px; }
     .hk-m.c { left: 50%; margin-left: calc(var(--s) / -2); }
     .hk-m.k-splash { --s: 680px; } .hk-m.k-bloq { --s: 700px; }
     @keyframes hkIn { from { opacity: 0; transform: translateY(-50%) scale(.86) rotate(-6deg); } to { opacity: var(--o, 1); transform: translateY(-50%) scale(1) rotate(0); } }
+    /* Solo aparece donde sobra espacio: en pantallas medianas se encimaría con los textos, así que ahí se oculta. */
+    @media (max-width: 1399px) { .hk-m.k-cx, .hk-m.k-aps { display: none; } }
     @media (max-width: 900px) {
-      .hk-m.k-hero, .hk-m.k-cx, .hk-m.k-aps { left: auto; right: 6px; --o: .55; -webkit-mask-image: linear-gradient(to left, #000 45%, transparent 100%); mask-image: linear-gradient(to left, #000 45%, transparent 100%); }
-      .hk-m.k-hero { --s: 150px; top: 52%; } .hk-m.k-cx { --s: 130px; } .hk-m.k-aps { --s: 90px; }
+      .hk-m.k-hero { left: auto; right: 22px; top: 40%; --s: 150px; }
       .hk-m.k-splash { --s: 480px; } .hk-m.k-bloq { --s: 480px; }
     }
-    @media (max-width: 600px) { .hk-m.k-hero, .hk-m.k-cx { display: none; } }      /* en celular los encabezados van llenos: el logo ya aparece arriba */
+    @media (max-width: 600px) { .hk-m.k-hero { display: none; } }      /* en celular el encabezado va lleno: el logo ya aparece arriba */
     @media print { .hk-m { display: none !important; } }
     /* ═══ Diálogo de confirmación de la plataforma (reemplaza los avisos del navegador) ═══ */
     #hkDlg { position: fixed; inset: 0; z-index: 2500; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(13, 18, 43, .62); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
