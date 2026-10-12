@@ -895,7 +895,8 @@ function registrarEnBitacora_(idArchivo, urlArchivo, nombreArchivo, operacion, a
     
     // ── REGISTRO DE LOS DATOS ──
     var fechaCreacion = new Date();
-    var usuarioCreador = Session.getActiveUser().getEmail() || Session.getEffectiveUser().getEmail() || 'Usuario WebApp';
+    // Si no se puede identificar a la persona se deja constancia «(sin identificar)»; antes se atribuía a la cuenta dueña del sistema.
+    var usuarioCreador = APS_correo_() || '(sin identificar)';
     
     // Se insertan las variables validadas (si vienen vacías pone un texto en blanco)
     hojaBitacora.appendRow([
