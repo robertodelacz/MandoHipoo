@@ -27,6 +27,17 @@ var APS_CONFIG = {
   // coordinador SIN publicar nada, usa la columna "Rol" de la pestaña "Asesores" en su lugar — se detecta en vivo,
   // en la siguiente carga de la página. Trata este arreglo como algo que casi no se toca una vez configurado.
   COORDINADORES: ['lizbethserrato@hipoo.mx'],
+  // ADMINISTRADORES TÉCNICOS: cuentas que siempre entran a la plataforma y pueden correr las funciones de mantenimiento
+  // y diagnóstico (APS_setup, ACCESO_diagnostico, PLD_diagnostico, IA_diagnostico…), aunque no estén en la hoja «Asesores».
+  // Antes esto se decidía con «quien es el dueño del despliegue» (Session.getEffectiveUser), y ese dato cambia por completo si
+  // algún día se publica como «ejecutar como el usuario que accede» (todos serían «el dueño»). Con una lista escrita aquí
+  // el candado se queda igual de firme en cualquier modo. Mantenla corta (máx. 2 o 3 cuentas) y, si cambia la cuenta dueña
+  // del proyecto, agrégala aquí. Igual que COORDINADORES: un cambio exige publicar una versión nueva.
+  ADMINISTRADORES_TECNICOS: ['robertodelacruz@cualli.mx'],
+  // Buzón de Cumplimiento que recibe, por cada contrato APROBADO, un correo con las huellas (SHA-256) de los datos y del PDF.
+  // Sirve de evidencia FUERA de la hoja: si alguien alterara el Registro, este correo conserva lo que se aprobó. [] = no se envía.
+  // Para activarlo: ['oficialdecumplimiento@cualli.mx'] (confírmalo antes con la persona que lo va a recibir).
+  EVIDENCIA_CORREOS: [],
   // Método para generar el PDF GUARDADO en Drive al aprobar: 'html' (conversión directa del HTML) o 'docx' (arma un Word
   // nativo, con márgenes y número de página reales, lo convierte a Google Doc y lo exporta a PDF; requiere el servicio
   // avanzado "Drive API"). Compáralos con APS_probarPDF y elige el mejor.
@@ -138,7 +149,7 @@ var APS_AUD_COLS = ['Fecha', 'Usuario', 'Módulo', 'Acción', 'Referencia', 'Det
 var APS_REP_COLS = ['Folio', 'Fecha', 'Usuario', 'Nombre', 'Rol', 'Tipo', 'Pantalla', 'Mensaje', 'Datos técnicos', 'Estado'];
 /** Hoja auxiliar dentro del mismo archivo de registro (se crea sola si no existe). */
 function APS_hojaAux_(nombre, cols) {
-  var ss = SpreadsheetApp.openById(APS_ids_().hoja), sh = ss.getSheetByName(nombre);
+  var ss = APS_ss_(), sh = ss.getSheetByName(nombre);
   if (!sh) {
     sh = ss.insertSheet(nombre);
     sh.getRange(1, 1, 1, cols.length).setValues([cols]).setFontWeight('bold');
@@ -309,21 +320,24 @@ function APS_requiereUsuario_() {
   APS_requiereAcceso_();      // candado único: aplica a TODAS las funciones del servidor que pasan por aquí (APS, Pre PLD, consola)
   return u;
 }
+/** ¿Es una cuenta de administración técnica (lista ADMINISTRADORES_TECNICOS)? No depende de quién publicó la aplicación. */
+function APS_esAdminTecnico_(email) {
+  var e = String(email || '').toLowerCase().trim();
+  return !!e && (APS_CONFIG.ADMINISTRADORES_TECNICOS || []).some(function (x) { return String(x).toLowerCase().trim() === e; });
+}
 /**
  * ¿Esta cuenta tiene acceso ACTIVO a la plataforma? La pestaña «Asesores» (más COORDINADORES y las otras fuentes de
  * APS_asesores_) es la única fuente: quien no aparezca, o aparezca con Activo = NO, queda fuera de TODO (no solo de APS).
- * Siempre pasa quien publicó la aplicación (para no dejar fuera al administrador). Si todavía no hay NADIE configurado
- * (sistema recién instalado, o la hoja no se pudo leer), no se bloquea a nadie.
+ * Siempre pasan las cuentas de ADMINISTRADORES_TECNICOS (para no dejar fuera al administrador), salvo que ellas mismas
+ * se den de baja en la hoja (sirve para probar el bloqueo). Ya NO existe la salida «si no hay nadie configurado, entra
+ * todo el mundo»: si la hoja no se puede leer, el sistema se cierra (solo entran administración técnica y coordinación fija).
  */
 function APS_acceso_() {
-  var email = APS_correo_(), dueno = '';
-  try { dueno = String(Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) { dueno = ''; }
+  var email = APS_correo_();
   if (APS_CONFIG.BLOQUEO_ACCESO === false) return { ok: true, email: email };
   if (!email) return { ok: false, email: '', motivo: 'identidad' };
-  if (dueno && email === dueno && !APS_inactivos_()[email]) return { ok: true, email: email };      // el dueño siempre entra, salvo que él mismo se dé de baja en la hoja (sirve para probar el bloqueo)
+  if (APS_esAdminTecnico_(email) && !APS_inactivos_()[email]) return { ok: true, email: email };
   if (APS_usuario_().puedeAps) return { ok: true, email: email };
-  var hayConfigurados = Object.keys(APS_asesores_()).length + (APS_CONFIG.COORDINADORES || []).length;
-  if (!hayConfigurados) return { ok: true, email: email };
   return { ok: false, email: email, motivo: 'desactivado' };
 }
 /** Lanza error (con la marca ACCESO_DENEGADO, que la pantalla reconoce) si la cuenta no tiene acceso. */
@@ -453,8 +467,14 @@ function APS_ids_() {
   if (!h || !c) throw new Error('Falta la configuración inicial. Ejecuta APS_setup() una vez desde el editor de Apps Script.');
   return { hoja: h, carpeta: c };
 }
+/** Abre el archivo de registro UNA sola vez por ejecución (cada openById cuesta cientos de milisegundos y antes se repetía varias veces por operación). Las variables globales viven solo durante una ejecución. */
+var APS_SS_MEMO_ = null;
+function APS_ss_() {
+  if (!APS_SS_MEMO_) APS_SS_MEMO_ = SpreadsheetApp.openById(APS_ids_().hoja);
+  return APS_SS_MEMO_;
+}
 function APS_hoja_() {
-  var sh = SpreadsheetApp.openById(APS_ids_().hoja).getSheetByName('Registros');
+  var sh = APS_ss_().getSheetByName('Registros');
   if (!sh) throw new Error('No se encontró la hoja "Registros". Vuelve a ejecutar APS_setup().');
   return sh;
 }
@@ -544,11 +564,10 @@ function APS_nuevoId_(tomados) {
 function APS_escHtml_(t) {
   return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
-/** Para las funciones de prueba/instalación: solo la cuenta que publicó la aplicación o la coordinación (no cualquier usuario del dominio). */
+/** Para las funciones de prueba/instalación/diagnóstico: solo administración técnica (ADMINISTRADORES_TECNICOS) o coordinación (no cualquier usuario del dominio). */
 function APS_soloMantenimiento_() {
-  var activo = '', dueno = '';
-  try { activo = String(Session.getActiveUser().getEmail() || '').toLowerCase(); dueno = String(Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) {}
-  if (activo && dueno && activo === dueno) return;       // quien la corre desde el editor de Apps Script
+  var activo = APS_correo_();
+  if (activo && APS_esAdminTecnico_(activo)) return;       // quien la corre desde el editor de Apps Script
   if (APS_usuario_().rol === 'coordinador') return;
   throw new Error('Sin permiso.');
 }
@@ -954,6 +973,12 @@ function APS_aprobar(id) {
     APS_escribir_(f.hoja, f.fila, f.reg);
     APS_snapshot_(f.reg, u, 'APROBACION');
     APS_audit_('APS', 'APROBAR', f.reg.id, 'PDF ' + f.reg.pdfId + ' · SHA ' + pdfSha.slice(0, 16) + ' · datos ' + datosHash.slice(0, 16) + ' · ' + APS_resumenHojas_(pdfAj));
+    // Evidencia fuera de la hoja: huellas completas por correo al buzón de Cumplimiento (solo si EVIDENCIA_CORREOS tiene direcciones). Sin datos personales.
+    if ((APS_CONFIG.EVIDENCIA_CORREOS || []).length) {
+      APS_notificar_(APS_CONFIG.EVIDENCIA_CORREOS, 'Evidencia de aprobación — ' + f.reg.id, 'Constancia automática de una aprobación. Conserva este correo: las huellas permiten comprobar después que el contrato y su PDF no cambiaron.',
+        { sistema: 'APS Hipoo · Evidencia', titulo: 'Constancia de aprobación', etiqueta: 'Evidencia', tono: 'info', sinBoton: true, firma: 'Aprobado por ' + (u.nombre || u.email),
+          datos: [['Folio', f.reg.id], ['Versión', String(f.reg.version)], ['Aprobado', ahora], ['Aprobó', u.email], ['Huella de los datos (SHA-256)', datosHash], ['Huella del PDF (SHA-256)', pdfSha], ['ID del PDF en Drive', f.reg.pdfId]] });
+    }
     APS_notificar_([f.reg.asesor], 'Contrato aprobado — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
       'La coordinación aprobó tu contrato. Ya puedes entrar al sistema y descargar el PDF definitivo.',
       { params: { modulo: 'aps', id: f.reg.id }, firma: u.nombre ? ('Aprobado por ' + u.nombre) : 'Aprobado por la coordinación', titulo: 'Tu contrato fue aprobado', etiqueta: 'Aprobado', tono: 'ok', boton: 'Descargar el PDF',

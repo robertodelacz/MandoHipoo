@@ -209,6 +209,7 @@ function doGet() {
 function generarPreAvisoPLD(params) {
   APS_requiereAcceso_();      // sin acceso activo no se genera nada (ni llamando a la función directo)
   try {
+    params = PLD_limpiaParams_(params);      // el servidor no confía en lo que manda la pantalla: tipos, rangos y texto sin fórmulas
     var fechaHoy = Utilities.formatDate(new Date(), 'America/Mexico_City', 'dd-MM-yyyy');
     var nombreArchivo = 'Pre_PLD_' + params.operacion.substring(0, 30) + '_' + fechaHoy;
     
@@ -225,6 +226,8 @@ function generarPreAvisoPLD(params) {
       var userEmail = Session.getActiveUser().getEmail();
       if (userEmail) archivo.addEditor(userEmail);
     } catch (e) { Logger.log('No se pudo obtener el correo: ' + e.message); }
+    // Quienes editan el documento no pueden agregar a otras personas ni cambiar permisos: solo el dueño del sistema.
+    try { archivo.setShareableByEditors(false); } catch (e) { Logger.log('No se pudo restringir el re-compartir: ' + e.message); }
 
     try {
       var carpeta = DriveApp.getFolderById(CONFIG.CARPETA_DESTINO_ID);
@@ -341,7 +344,7 @@ function generarPreAvisoPLD(params) {
       // que entrar al registro de ejecuciones de Apps Script. Envuelto en su
       // propio try/catch para que ni esto pueda interrumpir la generación.
       try {
-        registrarModificacionEnBitacora(ss.getId(), params.operacion, userEmail, 'ADVERTENCIA: no se pudo agregar el ancla de "Agregar Pago" al crear el documento — ' + e.message);
+        registrarModificacionEnBitacora_(ss.getId(), params.operacion, userEmail, 'ADVERTENCIA: no se pudo agregar el ancla de "Agregar Pago" al crear el documento — ' + e.message);
       } catch (e2) { Logger.log('Tampoco se pudo registrar la advertencia del ancla: ' + e2.message); }
     }
 
@@ -349,7 +352,7 @@ function generarPreAvisoPLD(params) {
     sheet.setFrozenRows(2);
     var enBitacora = false;
     try {
-      enBitacora = registrarEnBitacora(
+      enBitacora = registrarEnBitacora_(
         ss.getId(), 
         ss.getUrl(), 
         nombreArchivo, 
@@ -370,6 +373,33 @@ function generarPreAvisoPLD(params) {
   }
 }
 
+
+/**
+ * Valida y limpia lo que llega de la pantalla al generar un Pre PLD. Solo se usan estos 8 campos; cualquier otro se descarta.
+ * Mismos topes que la pantalla: hasta 20 vendedores y 20 compradores, y hasta CONFIG.PAGOS_MAX pagos.
+ * El texto sale sin caracteres de control y sin «= + - @» al inicio (Sheets lo leería como fórmula).
+ */
+function PLD_limpiaParams_(p) {
+  if (!p || typeof p !== 'object') throw new Error('Datos inválidos.');
+  var entero = function (v, min, max, nombre) {
+    var n = Number(v);
+    if (!Number.isInteger(n) || n < min || n > max) throw new Error(nombre + ' debe ser un número entre ' + min + ' y ' + max + '.');
+    return n;
+  };
+  var reg = function (v) { if (v !== 'PF' && v !== 'PM') throw new Error('Régimen no válido.'); return v; };
+  var operacion = PLD_textoSeguro_(p.operacion, 120);
+  if (!operacion) throw new Error('Escribe el nombre de la operación.');
+  return {
+    operacion: operacion, asociadoLado1: PLD_textoSeguro_(p.asociadoLado1, 120), asociadoLado2: PLD_textoSeguro_(p.asociadoLado2, 120),
+    vendedorCount: entero(p.vendedorCount, 1, 20, 'Vendedores'), compradorCount: entero(p.compradorCount, 1, 20, 'Compradores'),
+    pagosCount: entero(p.pagosCount, 1, CONFIG.PAGOS_MAX, 'Pagos'),
+    vendedorRegimen: reg(p.vendedorRegimen), compradorRegimen: reg(p.compradorRegimen)
+  };
+}
+/** Texto para celdas y bitácoras: sin caracteres de control y sin «= + - @» al inicio (no se interpreta como fórmula). */
+function PLD_textoSeguro_(v, max) {
+  return String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/^[=+\-@\s]+/, '').trim().slice(0, max || 200);
+}
 
 // ══════════════════════════════════════════════════════════════
 //  HOJA OCULTA DE CATÁLOGOS + DROPDOWN DE ACTIVIDADES
@@ -816,7 +846,7 @@ function compartirArchivo(archivo) {
 /**
  * Registra los metadatos del archivo generado incluyendo datos de la operación y asociados.
  */
-function registrarEnBitacora(idArchivo, urlArchivo, nombreArchivo, operacion, asociadoLado1, asociadoLado2) {
+function registrarEnBitacora_(idArchivo, urlArchivo, nombreArchivo, operacion, asociadoLado1, asociadoLado2) {
   var idBitacora = CONFIG.BITACORA_SPREADSHEET_ID;
   if (!idBitacora || idBitacora === 'AQUÍ_COLOCA_EL_ID_DE_TU_SPREADSHEET_DE_SEGUIMIENTO') {
     Logger.log('Registro omitido: ID de bitácora no configurado.');
@@ -870,10 +900,10 @@ function registrarEnBitacora(idArchivo, urlArchivo, nombreArchivo, operacion, as
     // Se insertan las variables validadas (si vienen vacías pone un texto en blanco)
     hojaBitacora.appendRow([
       fechaCreacion, 
-      nombreArchivo, 
-      operacion || '',
-      asociadoLado1 || '',
-      asociadoLado2 || '',
+      PLD_textoSeguro_(nombreArchivo, 200),
+      PLD_textoSeguro_(operacion, 120),
+      PLD_textoSeguro_(asociadoLado1, 120),
+      PLD_textoSeguro_(asociadoLado2, 120),
       idArchivo, 
       urlArchivo, 
       usuarioCreador
@@ -919,6 +949,16 @@ function agregarPagoAOperacion(inputIdOUrl, cantidadPagos) {
     var idArchivo = extraerIdDeSpreadsheet(inputIdOUrl);
     if (!idArchivo) {
       return { success: false, message: 'No se reconoce el link o ID proporcionado.' };
+    }
+
+    // 0. Dueño del documento: solo quien lo generó (según la bitácora) o la coordinación puede ampliarlo. El script corre con los
+    //    permisos del dueño del sistema, así que sin esta comprobación cualquiera podría modificar cualquier hoja que el dueño pueda abrir.
+    var uPago = APS_usuario_();
+    if (uPago.rol !== 'coordinador') {
+      var regPago = PLD_bitacora_().filter(function (x) { return x.id === idArchivo; })[0];
+      if (!regPago || regPago.creador !== uPago.email) {
+        return { success: false, message: 'Solo quien generó este documento (o la coordinación) puede agregarle pagos.' };
+      }
     }
 
     var ss, sheet;
@@ -1048,7 +1088,7 @@ function agregarPagoAOperacion(inputIdOUrl, cantidadPagos) {
       var detalle = cantidadPagos === 1
         ? 'Se agregó el Pago ' + primerNumeroPago + ' (antes: ' + conteoPorNombre + ' pago(s), ahora: ' + ultimoNumeroPago + ')'
         : 'Se agregaron los Pagos ' + primerNumeroPago + ' a ' + ultimoNumeroPago + ' (antes: ' + conteoPorNombre + ' pago(s), ahora: ' + ultimoNumeroPago + ')';
-      registrarModificacionEnBitacora(idArchivo, rangoOperacion.getValue(), correoActivo, detalle);
+      registrarModificacionEnBitacora_(idArchivo, rangoOperacion.getValue(), correoActivo, detalle);
     } catch (e) {
       Logger.log('No se pudo registrar en bitácora: ' + e.message);
     }
@@ -1136,7 +1176,7 @@ function actualizarSelloModificacion(ss, correoActivo) {
 
 // Bitácora inmutable de modificaciones: siempre se anexa una fila nueva,
 // nunca se edita una fila existente, para no arriesgar el registro original.
-function registrarModificacionEnBitacora(idArchivo, operacion, usuario, detalle) {
+function registrarModificacionEnBitacora_(idArchivo, operacion, usuario, detalle) {
   var idBitacora = CONFIG.BITACORA_SPREADSHEET_ID;
   if (!idBitacora) return;
   var ssBitacora = SpreadsheetApp.openById(idBitacora);
@@ -1149,7 +1189,7 @@ function registrarModificacionEnBitacora(idArchivo, operacion, usuario, detalle)
     hoja.getRange('A1:E1').setFontWeight('bold').setBackground('#364494').setFontColor('#ffffff').setHorizontalAlignment('center');
     hoja.setColumnWidth(1, 150); hoja.setColumnWidth(2, 220); hoja.setColumnWidth(3, 220); hoja.setColumnWidth(4, 200); hoja.setColumnWidth(5, 380);
   }
-  hoja.appendRow([new Date(), idArchivo, operacion || '', usuario || 'Usuario WebApp', detalle]);
+  hoja.appendRow([new Date(), idArchivo, PLD_textoSeguro_(operacion, 120), PLD_textoSeguro_(usuario, 120) || 'Usuario WebApp', PLD_textoSeguro_(detalle, 500)]);
   var ultimaFila = hoja.getLastRow();
   hoja.getRange(ultimaFila, 1).setNumberFormat('dd/mm/yyyy hh:mm:ss');
 }
@@ -1170,7 +1210,7 @@ function registrarModificacionEnBitacora(idArchivo, operacion, usuario, detalle)
  * esos documentos antiguos.
  */
 function retrofitearAncla(inputIdOUrl) {
-  APS_requiereAcceso_();
+  APS_soloMantenimiento_();      // utilidad de editor: antes cualquier usuario podía llamarla desde el navegador con cualquier archivo
   var idArchivo = extraerIdDeSpreadsheet(inputIdOUrl);
   if (!idArchivo) { Logger.log('No se reconoce el link o ID.'); return; }
 

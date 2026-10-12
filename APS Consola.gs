@@ -26,13 +26,24 @@ function APS_sumaDias_(iso, n) {
 
 /* ═════════════ LECTURA DE LAS BITÁCORAS DEL PRE PLD ═════════════ */
 
+/** Texto seguro para escribir en una celda: sin caracteres de control y sin «= + - @» al inicio (Sheets lo leería como fórmula). */
+function APS_textoCelda_(v, max) {
+  return String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/^[=+\-@\s]+/, '').trim().slice(0, max || 200);
+}
+/** Enlace seguro: solo https hacia Google Docs/Drive (los Pre PLD son hojas de Google). Cualquier otra cosa (javascript:, otros sitios) se descarta. */
+function PLD_urlSegura_(u) {
+  u = String(u || '').trim();
+  return /^https:\/\/(docs|drive)\.google\.com\/[A-Za-z0-9\-_\/.?=&%#:+]*$/.test(u) ? u : '';
+}
 function PLD_fecha_(v) {
   if (v instanceof Date) return Utilities.formatDate(v, APS_CONFIG.ZONA, 'yyyy-MM-dd HH:mm');
   return String(v || '');
 }
+var PLD_SS_MEMO_ = null;      // se abre una sola vez por ejecución
 function PLD_ssBitacora_() {
   if (typeof CONFIG === 'undefined' || !CONFIG.BITACORA_SPREADSHEET_ID) throw new Error('No se encontró la bitácora del Pre PLD (CONFIG.BITACORA_SPREADSHEET_ID).');
-  return SpreadsheetApp.openById(CONFIG.BITACORA_SPREADSHEET_ID);
+  if (!PLD_SS_MEMO_) PLD_SS_MEMO_ = SpreadsheetApp.openById(CONFIG.BITACORA_SPREADSHEET_ID);
+  return PLD_SS_MEMO_;
 }
 /** TODOS los Pre PLD generados (hoja "Seguimiento de Entregables"). Antes solo leía los últimos 1000: un documento en revisión más antiguo desaparecía de la lista. */
 function PLD_bitacora_() {
@@ -40,7 +51,7 @@ function PLD_bitacora_() {
   if (!sh || sh.getLastRow() < 2) return [];
   var ult = sh.getLastRow(), desde = 2;
   return sh.getRange(desde, 1, ult - desde + 1, 8).getValues().map(function (v) {
-    return { fecha: PLD_fecha_(v[0]), nombre: String(v[1]), operacion: String(v[2]), lado1: String(v[3]), lado2: String(v[4]), id: String(v[5]), url: String(v[6]), creador: String(v[7]).toLowerCase() };
+    return { fecha: PLD_fecha_(v[0]), nombre: String(v[1]), operacion: String(v[2]), lado1: String(v[3]), lado2: String(v[4]), id: String(v[5]), url: PLD_urlSegura_(v[6]), creador: String(v[7]).toLowerCase() };
   }).filter(function (r) { return r.id; });
 }
 /** Últimas modificaciones estructurales por archivo (hoja "Historial_Modificaciones"): id → fecha más reciente. */
@@ -82,7 +93,7 @@ function PLD_escribirRev_(R, entrada, reg) {
 function PLD_item_(b, entrada, mod) {
   var r = entrada ? entrada.reg : null, estado = r ? r.estado : 'SIN_ENVIAR';
   var despues = !!(mod && ((estado === 'REVISADO' && r.fechaRevision && mod > r.fechaRevision) || (estado === 'EN_REVISION' && r.fechaEnvio && mod > r.fechaEnvio)));
-  return { id: b.id, nombre: b.nombre, operacion: b.operacion, asociados: [b.lado1, b.lado2].filter(Boolean).join(' / '), url: b.url, creador: b.creador, creado: b.fecha,
+  return { id: b.id, nombre: b.nombre, operacion: b.operacion, asociados: [b.lado1, b.lado2].filter(Boolean).join(' / '), url: PLD_urlSegura_(b.url), creador: b.creador, creado: b.fecha,
     estado: estado, enviadoPor: r ? r.enviadoPor : '', fechaEnvio: r ? r.fechaEnvio : '', revisadoPor: r ? r.revisadoPor : '', fechaRevision: r ? r.fechaRevision : '',
     comentario: r ? r.comentario : '', modificadoDespues: despues };
 }
@@ -261,6 +272,7 @@ function CONSOLA_auditoria(texto, modulo) {
  * Un documento SIN fila en PLD_Revisiones cuenta como "SIN_ENVIAR" (nunca se ha enviado a revisión).
  */
 function PLD_diagnostico() {
+  APS_soloMantenimiento_();      // solo administración técnica o coordinación: antes cualquier usuario podía llamarla desde el navegador y recibía el listado de documentos
   var items = PLD_items_(), por = {};
   items.forEach(function (x) { (por[x.estado] = por[x.estado] || []).push(x); });
   var out = ['Bitácora: ' + PLD_ssBitacora_().getName() + ' · documentos en la bitácora: ' + PLD_bitacora_().length + ' · contados desde el corte (' + (APS_CONFIG.PLD_DESDE || 'sin corte') + '): ' + items.length];
@@ -295,20 +307,19 @@ function ASES_esCoord_(v) { return /coord|admin|^(si|sí|s|x|1|true|yes)$/.test(
 function ASESORES_listar() {
   APS_requiereAdmin_();
   var H = ASES_hoja_(), sh = H.sh, C = H.C, n = Math.max(0, sh.getLastRow() - 1), rows = n ? sh.getRange(2, 1, n, sh.getLastColumn()).getValues() : [];
-  var dueno = ''; try { dueno = String(Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) { }
   var vistos = {}, lista = [];
   rows.forEach(function (r, i) {
     var em = String(r[C.correo - 1] || '').toLowerCase().trim(); if (!APS_RE_CORREO_.test(em) || vistos[em]) return; vistos[em] = 1;
     var act = r[C.activo - 1], g = String(r[C.genero - 1] || '').trim().toLowerCase();
     lista.push({ correo: em, nombre: String(r[C.nombre - 1] || '').trim(), genero: /^(f|mujer|fem|sra|srita|señora)/.test(g) ? 'f' : (/^(m|h|masc|hombre|sr|señor)/.test(g) ? 'm' : ''),
-      coordinador: ASES_esCoord_(r[C.rol - 1]), activo: !(String(act).trim() !== '' && ASES_RE_NO_.test(String(act).trim())), fila: i + 2, fuente: 'hoja', dueno: em === dueno });
+      coordinador: ASES_esCoord_(r[C.rol - 1]), activo: !(String(act).trim() !== '' && ASES_RE_NO_.test(String(act).trim())), fila: i + 2, fuente: 'hoja', dueno: APS_esAdminTecnico_(em) });
   });
   (APS_CONFIG.COORDINADORES || []).forEach(function (c) {
     var em = String(c).toLowerCase().trim(); if (!APS_RE_CORREO_.test(em) || vistos[em]) return; vistos[em] = 1;
-    lista.push({ correo: em, nombre: '', genero: '', coordinador: true, activo: true, fila: 0, fuente: 'fijo', dueno: em === dueno });
+    lista.push({ correo: em, nombre: '', genero: '', coordinador: true, activo: true, fila: 0, fuente: 'fijo', dueno: APS_esAdminTecnico_(em) });
   });
   var activos = {}; try { activos = APS_asesores_(); } catch (e) { }
-  Object.keys(activos).forEach(function (em) { if (vistos[em]) return; vistos[em] = 1; lista.push({ correo: em, nombre: activos[em].nombre || '', genero: activos[em].genero || '', coordinador: !!activos[em].coordinador, activo: true, fila: 0, fuente: 'externo', dueno: em === dueno }); });
+  Object.keys(activos).forEach(function (em) { if (vistos[em]) return; vistos[em] = 1; lista.push({ correo: em, nombre: activos[em].nombre || '', genero: activos[em].genero || '', coordinador: !!activos[em].coordinador, activo: true, fila: 0, fuente: 'externo', dueno: APS_esAdminTecnico_(em) }); });
   // Último movimiento conocido de cada cuenta (para ver quién ya no usa la plataforma)
   var ult = {};
   try {
@@ -325,11 +336,10 @@ function ASESORES_guardar(acc) {
   acc = acc || {};
   var correo = String(acc.correo || '').toLowerCase().trim();
   if (!APS_RE_CORREO_.test(correo)) throw new Error('Escribe un correo válido (ej. nombre@hipoo.mx).');
-  var nombre = String(acc.nombre || '').trim().slice(0, 80), activo = acc.activo !== false, coord = !!acc.coordinador, g = acc.genero === 'f' ? 'F' : (acc.genero === 'm' ? 'M' : '');
-  var dueno = ''; try { dueno = String(Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) { }
+  var nombre = APS_textoCelda_(acc.nombre, 80), activo = acc.activo !== false, coord = !!acc.coordinador, g = acc.genero === 'f' ? 'F' : (acc.genero === 'm' ? 'M' : '');
   if (correo === u.email && !activo) throw new Error('No puedes dar de baja tu propia cuenta desde aquí.');
   if (correo === u.email && !coord) throw new Error('No puedes quitarte a ti mismo el rol de coordinación desde aquí.');
-  if (correo === dueno && !activo) throw new Error('Esa es la cuenta dueña del sistema: no se puede dar de baja desde la pantalla.');
+  if (APS_esAdminTecnico_(correo) && !activo) throw new Error('Esa es una cuenta de administración técnica del sistema: no se puede dar de baja desde la pantalla.');
   return APS_conLock_(function () {
     var H = ASES_hoja_(), sh = H.sh, C = H.C, n = Math.max(0, sh.getLastRow() - 1), fila = 0, nuevo = false, antes = '';
     if (n) sh.getRange(2, C.correo, n, 1).getValues().forEach(function (v, i) { if (!fila && String(v[0]).toLowerCase().trim() === correo) fila = i + 2; });
@@ -694,6 +704,7 @@ function PLD_revisarIA(id) {
 
 /** Para correr UNA vez desde el editor tras poner la llave: comprueba llave, modelo y respuesta con un texto de prueba. No muestra la llave. */
 function IA_diagnostico() {
+  APS_soloMantenimiento_();      // gasta crédito de la IA: solo administración técnica o coordinación
   Logger.log('Llave puesta: ' + (IA_prop_('ANTHROPIC_API_KEY') ? 'SÍ' : 'NO') + ' · Interruptor IA_ACTIVA: ' + (IA_prop_('IA_ACTIVA') || '(vacío)') + ' · Modelo: ' + IA_modelo_());
   if (!IA_prop_('ANTHROPIC_API_KEY')) { Logger.log('Falta ANTHROPIC_API_KEY en Configuración del proyecto > Propiedades del script.'); return; }
   var t0 = new Date().getTime();
@@ -708,6 +719,7 @@ function IA_diagnostico() {
 
 /** Resumen de consumo del mes (desde Auditoría): revisiones, tokens y costo aproximado. Correr desde el editor cuando quieras. */
 function IA_consumo() {
+  APS_soloMantenimiento_();
   var sh = APS_hojaAux_('Auditoria', APS_AUD_COLS), n = Math.max(0, sh.getLastRow() - 1), mes = APS_hoy_().slice(0, 7), pe = Number(IA_prop_('IA_PRECIO_ENTRADA')) || 0.10, ps = Number(IA_prop_('IA_PRECIO_SALIDA')) || 0.50;
   var llamadas = 0, repetidas = 0, tin = 0, tout = 0, pensando = 0, porUsuario = {};
   if (n) sh.getRange(2, 1, n, 6).getValues().forEach(function (f) {
