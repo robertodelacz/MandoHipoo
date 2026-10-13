@@ -36,7 +36,7 @@ var APS_CONFIG = {
   ADMINISTRADORES_TECNICOS: ['robertodelacruz@cualli.mx'],
   // ROL «BACKUP» (respaldo de la coordinación): se da en la pestaña «Asesores», columna «Rol» = Backup (o desde «Accesos del equipo»).
   // Puede todo lo que hace la coordinación (revisar, aprobar, observar, cancelar, tablero, auditoría…) EXCEPTO ver o cambiar los accesos del equipo (altas y bajas).
-  // true = también recibe los correos de «Contrato / Pre PLD por revisar». false = no los recibe (de todos modos ve los pendientes en su pantalla principal). Un cambio exige publicar versión nueva.
+  // true = recibe los correos de «Contrato / Pre PLD por revisar» y se le comparten los PDF y documentos en Drive. false = NO recibe ningún correo ni se le comparte nada en Drive (Google también avisa por correo al compartir); ve y gestiona todo desde la plataforma. Un cambio exige publicar versión nueva.
   BACKUP_RECIBE_AVISOS: false,
   // Buzón de Cumplimiento que recibe, por cada contrato APROBADO, un correo con las huellas (SHA-256) de los datos y del PDF.
   // Sirve de evidencia FUERA de la hoja: si alguien alterara el Registro, este correo conserva lo que se aprobó. [] = no se envía.
@@ -308,11 +308,11 @@ function APS_inactivos_() { APS_asesores_(); return APS_INACT_ || {}; }
 /** Borra el caché de asesores y del panel: un cambio de acceso se nota de inmediato. */
 function APS_invalidaAsesores_() { try { var c = CacheService.getScriptCache(); c.remove('APS_ASESORES'); c.put('APS_PANEL_V', String(new Date().getTime()), 21600); } catch (e) { } }
 /** TODA la coordinación: el arreglo fijo COORDINADORES + quien tenga Rol "Coordinador" en la hoja Asesores. Úsala para correos y permisos de Drive. */
-function APS_coordinadores_(paraAvisos) {
+function APS_coordinadores_(incluirBackup) {
   var lista = {};
   (APS_CONFIG.COORDINADORES || []).forEach(function (c) { var k = String(c).toLowerCase().trim(); if (k) lista[k] = 1; });
   var mapa = {}; try { mapa = APS_asesores_(); } catch (e) { mapa = {}; }
-  Object.keys(mapa).forEach(function (k) { if (mapa[k] && mapa[k].coordinador && !(paraAvisos && mapa[k].backup && APS_CONFIG.BACKUP_RECIBE_AVISOS === false)) lista[k] = 1; });      // el Backup también recibe los avisos de «por revisar» (se apaga con BACKUP_RECIBE_AVISOS: false); los permisos de Drive siempre los lleva
+  Object.keys(mapa).forEach(function (k) { if (mapa[k] && mapa[k].coordinador && !(!incluirBackup && mapa[k].backup && APS_CONFIG.BACKUP_RECIBE_AVISOS === false)) lista[k] = 1; });      // con BACKUP_RECIBE_AVISOS: false el Backup queda fuera de esta lista (correos de «por revisar» Y compartir archivos de Drive, que también genera un correo de Google); incluirBackup = true devuelve a todos (solo para revisar quién tiene acceso)
   return Object.keys(lista);
 }
 /** Usuario identificado Y autorizado para generar contratos APS. */
@@ -374,7 +374,7 @@ function ACCESO_diagnostico() {
   var vistos = {};
   try { APS_todos_().forEach(function (r) { var e = String(r.asesor || '').toLowerCase(); if (e) vistos[e] = (vistos[e] || []).concat('contratos APS'); }); } catch (e) { }
   try { PLD_bitacora_().forEach(function (r) { var e = String(r.creador || '').toLowerCase(); if (e) vistos[e] = (vistos[e] || []).concat('Pre PLD'); }); } catch (e) { }
-  var activos = APS_asesores_(), coords = APS_coordinadores_(), bloqueados = [], ok = [];
+  var activos = APS_asesores_(), coords = APS_coordinadores_(true), bloqueados = [], ok = [];
   Object.keys(vistos).sort().forEach(function (e) {
     var tiene = !!activos[e] || coords.indexOf(e) >= 0, fuentes = vistos[e].filter(function (x, i, a) { return a.indexOf(x) === i; }).join(' + ');
     (tiene ? ok : bloqueados).push('  · ' + e + '  (ha usado: ' + fuentes + ')');
@@ -683,7 +683,7 @@ function APS_notificar_(para, asunto, mensaje, opts) {
  */
 function CORREO_diagnostico() {
   APS_requiereAdmin_();
-  var coord = APS_coordinadores_(true), cupo = ''; try { cupo = MailApp.getRemainingDailyQuota(); } catch (e) { cupo = 'no disponible'; }
+  var coord = APS_coordinadores_(), cupo = ''; try { cupo = MailApp.getRemainingDailyQuota(); } catch (e) { cupo = 'no disponible'; }
   var r = { coordinacion_recibe_avisos: coord, reportes_a: APS_CONFIG.REPORTES_CORREOS, notificar_activo: !!APS_CONFIG.NOTIFICAR_CORREOS, remitente: APS_CONFIG.CORREO_REMITENTE || (APS_CONFIG.CORREO_NO_RESPONDER ? '(noreply de tu dominio)' : '(la cuenta que publica el script)'), cupo_diario_restante: cupo, logo_correo: '' };
   try { DriveApp.getFileById(APS_CONFIG.LOGO_FILE_ID).getBlob(); r.logo_correo = 'se adjunta bien'; } catch (e) { r.logo_correo = 'NO se pudo leer: ' + e.message; }
   APS_notificar_(coord, 'Prueba de avisos a la coordinación', 'Este es un correo de prueba. Si lo recibes, los avisos de «Contrato por revisar» te llegan correctamente.', { titulo: 'Prueba de avisos', etiqueta: 'Prueba', tono: 'info', sinBoton: true });
@@ -929,7 +929,7 @@ function APS_enviarRevision(id) {
     APS_escribir_(f.hoja, f.fila, f.reg);
     APS_snapshot_(f.reg, u, 'ENVIO');                                   // lo que el asesor mandó, tal cual
     APS_audit_('APS', 'ENVIAR_REVISION', f.reg.id, f.reg.propietarios);
-    APS_notificar_(APS_coordinadores_(true), 'Contrato por revisar — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
+    APS_notificar_(APS_coordinadores_(), 'Contrato por revisar — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
       '<b>' + APS_escHtml_(APS_nombreDe_(f.reg.asesor)) + '</b> envió a revisión un contrato. Ábrelo con el botón: podrás revisarlo, corregir lo que haga falta y aprobarlo.',
       { params: { modulo: 'aps', id: f.reg.id }, titulo: 'Hay un contrato esperando tu revisión', etiqueta: 'Por revisar', tono: 'warn', boton: 'Revisar el contrato',
         datos: APS_datosCorreo_(f.reg, [['Asesor', APS_nombreDe_(f.reg.asesor) + ' · ' + f.reg.asesor], ['Enviado', f.reg.actualizado]]) });

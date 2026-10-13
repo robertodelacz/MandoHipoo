@@ -137,7 +137,7 @@ function PLD_enviarRevision(id) {
       APS_coordinadores_().forEach(function (c) { try { DriveApp.getFileById(b.id).addCommenter(c); } catch (err) { Logger.log('No se pudo compartir con ' + c + ': ' + err.message); } });
     }
     APS_audit_('PLD', 'ENVIAR_REVISION', b.id, b.operacion);
-    APS_notificar_(APS_coordinadores_(true), 'Pre PLD por revisar — ' + b.nombre, '<b>' + APS_escHtml_(APS_nombreDe_(u.email)) + '</b> envió a revisión un Pre PLD. Ábrelo desde el sistema para revisarlo.',
+    APS_notificar_(APS_coordinadores_(), 'Pre PLD por revisar — ' + b.nombre, '<b>' + APS_escHtml_(APS_nombreDe_(u.email)) + '</b> envió a revisión un Pre PLD. Ábrelo desde el sistema para revisarlo.',
       { params: { modulo: 'revpld' }, sistema: 'Pre PLD', titulo: 'Hay un Pre PLD esperando tu revisión', etiqueta: 'Por revisar', tono: 'warn', boton: 'Ir a la revisión de Pre PLD',
         datos: [['Documento', b.nombre], ['Operación', b.operacion], ['Asociados', it.asociados], ['Enviado por', APS_nombreDe_(u.email) + ' · ' + u.email], ['Enviado', reg.fechaEnvio]] });
     return PLD_item_(b, R.mapa[b.id], null);
