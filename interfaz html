@@ -1527,6 +1527,185 @@
       #modulo-pld .summary-card { padding: 20px 18px; }
     }
     @media print { #modulo-pld { display: none !important; } }
+
+    /* ═══ v7: Inicio rediseñado — tarjetas blancas con ilustración, botones con sombra, pendientes, números y Coordinación (el encabezado y la ciudad NO se tocan) ═══ */
+    @keyframes hmGlowA { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 185, 56, .55); } 50% { box-shadow: 0 0 0 12px rgba(255, 185, 56, 0); } }
+
+    /* Tarjetas principales */
+    .hm-big { gap: 24px; margin-bottom: 24px; }
+    .hm-bc { container-type: inline-size; container-name: hmbc; display: flex; flex-direction: column; min-height: 450px; padding: 40px; border-radius: 30px; border: 1px solid #dce3f5; background: linear-gradient(160deg, #fff 0%, #f2f5ff 100%); box-shadow: 0 2px 4px rgba(26, 34, 74, .04), 0 30px 50px -32px rgba(26, 34, 74, .4); }
+    .hm-bc.pld { border-color: #cbe7ec; background: linear-gradient(160deg, #fff 0%, #edf8fa 100%); box-shadow: 0 2px 4px rgba(26, 34, 74, .04), 0 30px 50px -32px rgba(10, 63, 85, .4); }
+    .hm-bc::before, .hm-bc.pld::before { display: block; content: ""; position: absolute; left: auto; right: -60px; top: -70px; bottom: auto; width: 340px; height: 340px; border-radius: 50%; background: radial-gradient(closest-side, #e4e9ff 0%, rgba(228, 233, 255, 0) 100%); pointer-events: none; }
+    .hm-bc.pld::before { background: radial-gradient(closest-side, #d3f0f4 0%, rgba(211, 240, 244, 0) 100%); }
+    .hm-bc > * { position: relative; }
+    .hm-bc .hm-ilu { position: absolute; right: 20px; top: 24px; width: 250px; pointer-events: none; transition: transform .35s cubic-bezier(.3, 1.4, .5, 1); }
+    .hm-bc:hover .hm-ilu { transform: translateY(-4px) rotate(-1.5deg); }
+    .hm-ilu svg { display: block; width: 100%; height: auto; }
+    .hm-tag { display: flex; align-items: center; gap: 9px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 2.8px; color: #5b67a0; }
+    .hm-tag i { width: 8px; height: 8px; border-radius: 50%; background: #364494; }
+    .hm-bc.pld .hm-tag { color: #2f7f8b; } .hm-bc.pld .hm-tag i { background: #0f8594; }
+    .hm-bc h3 { margin: 20px 0 0; font-size: 36px; line-height: 1.1; letter-spacing: -.9px; max-width: 300px; }
+    .hm-bc p { margin: 18px 0 0; font-size: 15.5px; line-height: 1.6; color: #4a5578; max-width: 310px; }
+    .hm-bc .hm-nota { margin: 16px 0 0; align-self: flex-start; }
+    .hm-bc-btns { margin-top: auto; padding-top: 34px; display: flex; flex-direction: column; gap: 20px; }
+    .hm-bc .hm-cta { height: 60px; min-height: 60px; padding: 0 11px 0 30px; border: none; border-radius: 30px; justify-content: space-between; font-size: 16px; letter-spacing: 0; background: linear-gradient(180deg, #4152bc, #364494); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 6px 0 #232d61, 0 18px 24px -10px rgba(35, 45, 97, .55); transition: transform .15s, box-shadow .15s, filter .15s; }
+    .hm-bc .hm-cta svg { width: 40px; height: 40px; padding: 10px; box-sizing: border-box; border-radius: 50%; background: rgba(255, 255, 255, .2); }
+    .hm-bc .hm-cta:hover { background: linear-gradient(180deg, #4152bc, #364494); filter: brightness(1.06); transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 8px 0 #232d61, 0 22px 28px -10px rgba(35, 45, 97, .55); }
+    .hm-bc .hm-cta:active { transform: translateY(4px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 2px 0 #232d61, 0 8px 14px -8px rgba(35, 45, 97, .5); }
+    .hm-bc.pld .hm-cta { background: linear-gradient(180deg, #12909f, #0b7280); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 6px 0 #065564, 0 18px 24px -10px rgba(6, 85, 100, .55); }
+    .hm-bc.pld .hm-cta:hover { background: linear-gradient(180deg, #12909f, #0b7280); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 8px 0 #065564, 0 22px 28px -10px rgba(6, 85, 100, .55); }
+    .hm-bc.pld .hm-cta:active { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 2px 0 #065564, 0 8px 14px -8px rgba(6, 85, 100, .5); }
+    .hm-bc .hm-reg { height: 54px; min-height: 54px; margin-top: 0; border: none; border-radius: 27px; background: #e9edfc; color: #364494; font-size: 15px; box-shadow: inset 0 0 0 1px #d2daf6, 0 5px 0 #bac5ee; transition: transform .15s, filter .15s; }
+    .hm-bc .hm-reg svg { width: 19px; height: 19px; }
+    .hm-bc .hm-reg:hover { background: #e9edfc; filter: brightness(.98); transform: translateY(-2px); box-shadow: inset 0 0 0 1px #d2daf6, 0 5px 0 #bac5ee; }
+    .hm-bc .hm-reg:active { transform: translateY(3px); box-shadow: inset 0 0 0 1px #d2daf6, 0 2px 0 #bac5ee; }
+    .hm-bc.pld .hm-reg { background: #ddf3f6; color: #0b6f7c; box-shadow: inset 0 0 0 1px #bfe3e9, 0 5px 0 #a3d3dc; }
+    .hm-bc.pld .hm-reg:hover { background: #ddf3f6; box-shadow: inset 0 0 0 1px #bfe3e9, 0 5px 0 #a3d3dc; }
+    .hm-bc.pld .hm-reg:active { box-shadow: inset 0 0 0 1px #bfe3e9, 0 2px 0 #a3d3dc; }
+    .hm-bc.off { background: #f1f4fa; border-color: #e0e6f2; }
+    .hm-bc.off::before { display: none; }
+    .hm-bc.off .hm-ilu { opacity: .35; filter: grayscale(1); }
+    .hm-bc.off .hm-cta { background: #c4cce2; color: #5a6488; box-shadow: 0 6px 0 #aab4d1; }
+    .hm-bc.off .hm-cta:hover, .hm-bc.off .hm-cta:active { filter: none; transform: none; background: #c4cce2; box-shadow: 0 6px 0 #aab4d1; }
+
+    /* Pendientes por revisar */
+    .hm-pend { display: flex; align-items: stretch; min-height: 120px; margin-bottom: 24px; background: #fff; border: 1px solid #f1dda8; border-radius: 28px; overflow: hidden; box-shadow: 0 22px 40px -30px rgba(180, 120, 0, .55); animation: hmRise .6s both; }
+    .hm-pend-h { display: flex; align-items: center; gap: 18px; min-width: 400px; padding: 0 34px; background: radial-gradient(120% 140% at 0% 50%, #ffe9b0 0%, transparent 70%), linear-gradient(90deg, #fff4d6, #fffbee); }
+    .hm-pend-ic { flex: none; width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; color: #3a2200; background: linear-gradient(145deg, #ffc25a, #ff9f1c); animation: hmGlowA 2s infinite; }
+    .hm-pend-ic svg { width: 28px; height: 28px; }
+    .hm-pend-h b { display: block; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: -.2px; color: #3a2600; }
+    .hm-pend-n { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; color: #c77d00; }
+    .hm-pend-n em { font-family: 'Fraunces', Georgia, serif; font-style: normal; font-weight: 700; font-size: 38px; line-height: 1; }
+    .hm-pend-n strong { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; }
+    .hm-pend-r { flex: 1; display: flex; align-items: center; gap: 14px; padding: 0 30px; border: none; border-left: 1px solid #f1e3bc; background: none; color: #1a224a; font: inherit; text-align: left; cursor: pointer; transition: background .2s; }
+    .hm-pend-r:hover { background: #fffbee; }
+    .hm-pend-c { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; color: #fff; background: linear-gradient(145deg, #5367d6, #364494); }
+    .hm-pend-r.pld .hm-pend-c { background: linear-gradient(145deg, #35b7c5, #0f8594); }
+    .hm-pend-c svg { width: 22px; height: 22px; }
+    .hm-pend-t b { display: block; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; }
+    .hm-pend-t small { display: block; margin-top: 2px; font-size: 12.5px; color: #5a6488; }
+    .hm-pend-go { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #364494; transition: transform .2s; }
+    .hm-pend-r.pld .hm-pend-go { color: #0b6f7c; }
+    .hm-pend-go i { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: #e4e8fa; }
+    .hm-pend-r.pld .hm-pend-go i { background: #ddf3f6; }
+    .hm-pend-go svg { width: 14px; height: 14px; }
+    .hm-pend-r:hover .hm-pend-go { transform: translateX(3px); }
+    .hm-pend-r:focus-visible { outline: 3px solid #ffb03b; outline-offset: -3px; }
+
+    /* Números: tarjetas claras con cifras concretas */
+    .hm-kpis { gap: 24px; margin-bottom: 8px; align-items: start; }
+    .hm-kpi { padding: 28px 30px; border-radius: 28px; border: 1px solid #dce3f5; background: linear-gradient(160deg, #fff 0%, #f2f5ff 100%); box-shadow: 0 2px 4px rgba(26, 34, 74, .04), 0 26px 44px -32px rgba(26, 34, 74, .4); }
+    .hm-kpi.pld { border-color: #cbe7ec; background: linear-gradient(160deg, #fff 0%, #edf8fa 100%); box-shadow: 0 2px 4px rgba(26, 34, 74, .04), 0 26px 44px -32px rgba(10, 63, 85, .4); }
+    .hm-kpi .hm-kh { margin-bottom: 20px; }
+    .hm-kpi .hm-kh b { font-size: 18px; letter-spacing: -.2px; }
+    .hm-kpi .hm-ico { color: #fff; background: linear-gradient(145deg, #5367d6, #364494); box-shadow: 0 10px 18px -8px rgba(54, 68, 148, .8); }
+    .hm-kpi.pld .hm-ico { background: linear-gradient(145deg, #35b7c5, #0f8594); box-shadow: 0 10px 18px -8px rgba(15, 133, 148, .8); }
+    .hm-kpi .hm-cells { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .hm-kpi.pld .hm-cells { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .hm-kpi .hm-cell { height: 100px; min-height: 100px; display: flex; flex-direction: column; justify-content: space-between; padding: 14px 18px; border: 1px solid #e3e8f4; border-radius: 20px; background: #f4f7fc; box-shadow: none; }
+    .hm-kpi.pld .hm-cell { padding: 14px; border-color: #d6eaee; background: #f4fafb; }
+    .hm-kpi .hm-cell:hover { transform: translateY(-3px); box-shadow: 0 14px 24px -16px rgba(26, 34, 74, .45); }
+    .hm-kpi .hm-cell .n { margin: 0; font-size: 46px; line-height: 1; letter-spacing: -1px; color: #1a224a; }
+    .hm-kpi .hm-cell:hover .n { transform: none; }
+    .hm-kpi .hm-cell .l { font-size: 12.5px; font-weight: 700; line-height: 1.2; color: #5a6488; }
+    .hm-kpi .hm-cell .l br { display: none; }
+    .hm-kpi .hm-cell.cero .n { color: #8b94b3; }
+    .hm-kpi .hm-cell.hm-sk .n { color: transparent; }
+    .hm-kpi .hm-cell.t-warn:not(.cero) { border: 1.5px solid #ffb938; background: linear-gradient(160deg, #fff1cc, #fffbef); box-shadow: 0 14px 24px -16px rgba(180, 120, 0, .7); }
+    .hm-kpi .hm-cell.t-warn:not(.cero) .n { color: #b36b00; } .hm-kpi .hm-cell.t-warn:not(.cero) .l { color: #7a5200; }
+    .hm-kpi .hm-cell.t-ok:not(.cero) { border: 1.5px solid #5cc8a5; background: linear-gradient(160deg, #e3f6ee, #f4fbf8); box-shadow: 0 14px 24px -16px rgba(15, 157, 110, .6); }
+    .hm-kpi .hm-cell.t-ok:not(.cero) .n, .hm-kpi .hm-cell.t-ok:not(.cero) .l { color: #0b7c57; }
+    .hm-kpi .hm-cell.t-bad:not(.cero) { border: 1.5px solid #f08a96; background: linear-gradient(160deg, #fde8ea, #fff6f7); box-shadow: 0 14px 24px -16px rgba(217, 45, 63, .55); }
+    .hm-kpi .hm-cell.t-bad:not(.cero) .n, .hm-kpi .hm-cell.t-bad:not(.cero) .l { color: #a3192a; }
+
+    /* Coordinación */
+    #inicioTarjetas h2 { display: flex; align-items: center; gap: 16px; margin: 36px 0 16px; font-size: 12px; letter-spacing: 3.2px; }
+    #inicioTarjetas h2::after { content: ""; flex: 1; height: 1px; background: #dbe2ef; }
+    .hm-acc.dos { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+    .hm-card.coord { border-radius: 26px; border: 1px solid #f0dfb0; background: linear-gradient(160deg, #fff6dd 0%, #fff 62%); box-shadow: 0 2px 4px rgba(26, 34, 74, .03), 0 22px 36px -28px rgba(26, 34, 74, .35); }
+    .hm-card.coord.k-revacc { border-color: #d5dcf3; background: linear-gradient(160deg, #e7ebfc 0%, #fff 62%); }
+    .hm-card.coord.k-tablero { border-color: #c5e6ec; background: linear-gradient(160deg, #ddf3f6 0%, #fff 62%); }
+    .hm-card.coord .hm-card-main { flex-direction: column; align-items: stretch; gap: 0; min-height: 200px; height: 100%; padding: 22px; position: relative; }
+    .hm-card.coord .hm-card-main > * { position: relative; }
+    .hm-card.coord .hm-card-main > .hm-wm { position: absolute; right: -18px; top: -14px; width: 130px; height: 130px; opacity: .14; color: #9a6700; pointer-events: none; }
+    .hm-card.coord.k-revacc .hm-card-main > .hm-wm { color: #364494; opacity: .12; } .hm-card.coord.k-tablero .hm-card-main > .hm-wm { color: #0f8594; opacity: .12; }
+    .hm-wm svg { width: 100%; height: 100%; display: block; }
+    .hm-card.coord .hm-ico { width: 48px; height: 48px; border-radius: 15px; color: #3a2200; background: linear-gradient(145deg, #ffc25a, #ff9f1c); box-shadow: 0 10px 18px -8px rgba(255, 159, 28, .8); }
+    .hm-card.coord.k-revacc .hm-ico { color: #fff; background: linear-gradient(145deg, #5367d6, #364494); box-shadow: 0 10px 18px -8px rgba(54, 68, 148, .8); }
+    .hm-card.coord.k-tablero .hm-ico { color: #fff; background: linear-gradient(145deg, #35b7c5, #0f8594); box-shadow: 0 10px 18px -8px rgba(15, 133, 148, .8); }
+    .hm-card.coord .hm-card-t { flex: 1; margin-top: 16px; }
+    .hm-card.coord .hm-card-t b { font-size: 17px; line-height: 1.15; margin-bottom: 0; }
+    .hm-card.coord .hm-card-t > span:not(.aviso) { margin-top: 5px; font-size: 12.5px; color: #5a6488; }
+    .hm-dk-f { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 14px; min-height: 36px; }
+    .hm-dk-f .hm-go { margin-left: auto; width: 36px; height: 36px; background: #edf1fa; }
+    .hm-dk-f .hm-go svg { width: 16px; height: 16px; }
+    .hm-dk-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 11px; border-radius: 13px; background: #ffb938; color: #3a2200; font-size: 12px; font-weight: 700; }
+    .hm-dk-chip i { width: 7px; height: 7px; border-radius: 50%; background: #3a2200; }
+    .hm-dk-nota { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #0f7482; }
+
+    /* Cuando el panel de novedades está abierto (o la pantalla es mediana) las tarjetas se angostan: ilustración y título se achican para no encimarse */
+    @container hmbc (max-width: 460px) { .hm-ilu { width: 200px; right: 12px; top: 22px; } .hm-bc h3 { font-size: 31px; max-width: 240px; } .hm-bc p { max-width: 280px; } }
+    @container hmbc (max-width: 340px) { .hm-ilu { width: 160px; right: -6px; top: 14px; } .hm-bc h3 { font-size: 29px; max-width: 200px; } .hm-bc p { max-width: 320px; font-size: 14.5px; } }
+    @media (max-width: 1000px) { .hm-bc { padding: 30px 24px 24px; border-radius: 28px; } .hm-bc-btns { padding-top: 30px; } }
+    .hm-kpi { container-type: inline-size; container-name: hmkpi; }
+    @container hmkpi (max-width: 340px) {
+      .hm-kpi.pld .hm-cells { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .hm-kpi .hm-cells { gap: 8px; }
+      .hm-kpi .hm-cell { padding: 12px; } .hm-kpi.pld .hm-cell { padding: 12px 14px; }
+      .hm-kpi .hm-cell .n { font-size: 38px; } .hm-kpi .hm-cell .l { font-size: 11.5px; line-height: 1.15; }
+    }
+    @media (max-width: 1000px) { .hm-acc.dos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    #hmAviso { container-type: inline-size; container-name: hmav; }
+    @container hmav (max-width: 1040px) {
+      .hm-pend { flex-wrap: wrap; }
+      .hm-pend-h { flex: 1 1 100%; min-width: 0; padding: 20px 28px; }
+      .hm-pend-r { flex: 1 1 50%; min-width: 0; min-height: 80px; padding: 0 22px; border-left: none; border-top: 1px solid #f1e3bc; }
+      .hm-pend-r + .hm-pend-r { border-left: 1px solid #f1e3bc; }
+    }
+    @container hmav (max-width: 600px) {
+      .hm-pend-h { padding: 20px; }
+      .hm-pend-r { flex-basis: 100%; min-height: 76px; padding: 0 16px; }
+      .hm-pend-r + .hm-pend-r { border-left: none; }
+    }
+    @media (max-width: 560px) {
+      .hm-big { gap: 16px; margin-bottom: 16px; }
+      .hm-bc { min-height: 450px; padding: 30px 24px 24px; border-radius: 28px; }
+      .hm-bc .hm-ilu { right: -6px; top: 14px; width: 160px; }
+      .hm-bc h3 { font-size: 29px; max-width: 180px; }
+      .hm-bc p { font-size: 14.5px; max-width: 300px; }
+      .hm-bc-btns { padding-top: 30px; }
+      .hm-bc .hm-cta { height: 60px; min-height: 60px; padding: 0 10px 0 26px; font-size: 16px; }
+      .hm-bc .hm-reg { height: 52px; min-height: 52px; font-size: 14.5px; }
+      .hm-pend { margin-bottom: 16px; border-radius: 26px; }
+      .hm-pend-h { gap: 14px; }
+      .hm-pend-ic { width: 50px; height: 50px; }
+      .hm-pend-h b { font-size: 16.5px; line-height: 1.15; }
+      .hm-pend-n em { font-size: 34px; } .hm-pend-n strong { font-size: 18px; }
+      .hm-pend-c { width: 44px; height: 44px; } .hm-pend-t b { font-size: 15px; } .hm-pend-t small { font-size: 12px; }
+      .hm-pend-go { gap: 7px; } .hm-pend-go i { width: 30px; height: 30px; }
+      .hm-kpis { gap: 16px; }
+      .hm-kpi { padding: 22px 18px 18px; border-radius: 26px; }
+      .hm-kpi .hm-kh { margin-bottom: 16px; }
+      .hm-kpi .hm-kh b { font-size: 17px; }
+      .hm-kpi .hm-cells { gap: 8px; }
+      .hm-kpi.pld .hm-cells { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .hm-kpi .hm-cell { height: 96px; min-height: 96px; padding: 12px; border-radius: 18px; }
+      .hm-kpi.pld .hm-cell { height: 88px; min-height: 88px; padding: 12px 14px; }
+      .hm-kpi .hm-cell .n { font-size: 38px; } .hm-kpi.pld .hm-cell .n { font-size: 36px; }
+      .hm-kpi .hm-cell .l { font-size: 11.5px; line-height: 1.15; }
+      #inicioTarjetas h2 { margin: 28px 0 14px; font-size: 11.5px; letter-spacing: 3px; }
+      .hm-acc.dos { gap: 12px; }
+      .hm-card.coord { border-radius: 22px; }
+      .hm-card.coord .hm-card-main { min-height: 178px; padding: 16px; }
+      .hm-card.coord .hm-ico { width: 42px; height: 42px; border-radius: 13px; }
+      .hm-card.coord .hm-card-t { margin-top: 12px; }
+      .hm-card.coord .hm-card-t b { font-size: 15px; }
+      .hm-card.coord .hm-card-t > span:not(.aviso) { display: none; }
+      .hm-card.coord .hm-card-main > .hm-wm { width: 100px; height: 100px; right: -16px; top: -12px; }
+      .hm-dk-f { margin-top: 10px; } .hm-dk-f .hm-go { width: 32px; height: 32px; }
+      .hm-dk-chip { height: 24px; padding: 0 10px; font-size: 11.5px; } .hm-dk-chip i { display: none; }
+      .hm-dk-nota { font-size: 10.5px; letter-spacing: .6px; }
+    }
   </style>
 </head>
 <body>
@@ -1579,8 +1758,8 @@
   </header>
   <main class="hm-main">
     <section class="hm-big" id="hmPrincipal" aria-label="Acciones principales"></section>
-    <section class="hm-kpis" id="hmKpis" aria-label="Resumen"></section>
     <div id="hmAviso"></div>
+    <section class="hm-kpis" id="hmKpis" aria-label="Resumen"></section>
     <div class="hm-cols">
       <section>
         <div id="inicioTarjetas"></div>
@@ -2455,12 +2634,17 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   function logoHtml(grande) { return '<img data-logo src="' + (window.LOGO_SRC || LOGO_URL) + '" alt="Hipoo" onerror="window.respaldoLogo&&respaldoLogo(this)">'; }
   function tarjeta(id, titulo, texto, o) {
     o = o || {};
-    var badge = o.badge ? '<span class="hm-badge">' + (o.badge > 99 ? '99+' : o.badge) + '</span>' : '';
-    var main = '<button type="button" class="hm-card-main" data-ir="' + id + '"' + (o.off ? ' disabled' : '') + '><span class="hm-ico">' + IC[id] + '</span><span class="hm-card-t"><b>' + titulo + '</b><span>' + texto + '</span>' +
-      (o.aviso ? '<span class="aviso">' + o.aviso + '</span>' : '') + '</span>' + (o.off ? '' : '<span class="hm-go">' + IC.go + '</span>') + '</button>';
+    var chip = o.badge ? '<span class="hm-dk-chip"><i></i>' + (o.badge > 99 ? '99+' : o.badge) + ' por revisar</span>' : (o.nota ? '<span class="hm-dk-nota">' + o.nota + '</span>' : '');
+    var flecha = o.externo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>' : IC.go;
+    var main = '<button type="button" class="hm-card-main" data-ir="' + id + '"' + (o.off ? ' disabled' : '') + '><span class="hm-wm" aria-hidden="true">' + IC[id] + '</span><span class="hm-ico">' + IC[id] + '</span><span class="hm-card-t"><b>' + titulo + '</b><span>' + texto + '</span>' +
+      (o.aviso ? '<span class="aviso">' + o.aviso + '</span>' : '') + '</span><span class="hm-dk-f">' + chip + (o.off ? '' : '<span class="hm-go">' + flecha + '</span>') + '</span></button>';
     var sub = o.misRegistros ? '<button type="button" class="hm-card-sub" data-misreg="' + id + '"><span>Ver mis registros</span><span>→</span></button>' : '';
-    return '<div class="hm-card' + (o.coord ? ' coord' : '') + (o.off ? ' off' : '') + '">' + badge + main + sub + '</div>';
+    return '<div class="hm-card k-' + id + (o.coord ? ' coord' : '') + (o.off ? ' off' : '') + '">' + main + sub + '</div>';
   }
+  var ILU = {
+    aps: '<svg viewBox="0 0 300 250" fill="none" aria-hidden="true"><g transform="rotate(8 190 120)"><rect x="110" y="40" width="130" height="170" rx="14" fill="#E4E9FF" stroke="#B7C2F0" stroke-width="1.5"/></g><g transform="rotate(-4 190 120)"><rect x="118" y="34" width="130" height="170" rx="14" fill="#fff" stroke="#364494" stroke-width="2"/><path d="M142 70h82M142 88h82M142 106h52" stroke="#C5CEF2" stroke-width="3.5" stroke-linecap="round"/><path d="M142 150l24-20 24 20v26h-48z" stroke="#0F8594" stroke-width="2.6" stroke-linejoin="round"/><path d="M158 176v-14h16v14" stroke="#0F8594" stroke-width="2.6"/></g><circle cx="236" cy="190" r="30" fill="#FFB938"/><circle cx="236" cy="190" r="23" stroke="#3A2200" stroke-width="1.8" stroke-dasharray="3 3"/><path d="M225 190l8 8 14-16" stroke="#3A2200" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    pld: '<svg viewBox="0 0 300 260" fill="none" aria-hidden="true"><circle cx="190" cy="120" r="108" stroke="#BFE3E9" stroke-width="1.5"/><circle cx="190" cy="120" r="78" stroke="#A9D9E1" stroke-width="1.5"/><path d="M190 52l62 22v44c0 40-26 64-62 74-36-10-62-34-62-74V74z" fill="#fff" stroke="#0F8594" stroke-width="2.4"/><path d="M190 52l62 22v44c0 40-26 64-62 74z" fill="#E1F3F6"/><path d="M162 122l19 19 36-40" stroke="#0F8594" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="262" cy="196" r="7" fill="#FFB938"/><circle cx="116" cy="60" r="4.500" fill="#35B7C5"/></svg>'
+  };
   function grande(id, titulo, texto, boton, permitido, aviso) {
     var nota = '';
     var P = HM.panel;
@@ -2468,10 +2652,10 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
       if (id === 'aps' && P.aps.borradores > 0) nota = P.aps.borradores + (P.aps.borradores === 1 ? ' borrador sin terminar' : ' borradores sin terminar');
       if (id === 'pld' && P.pld && P.pld.observados > 0) nota = P.pld.observados + (P.pld.observados === 1 ? ' documento por corregir' : ' documentos por corregir');
     }
-    return '<div class="hm-bc ' + id + (permitido ? '' : ' off') + '"><div class="hm-bc-h"><span class="hm-ico">' + IC[id] + '</span><h3>' + titulo + '</h3></div><p>' + texto + '</p>' +
+    return '<div class="hm-bc ' + id + (permitido ? '' : ' off') + '"><span class="hm-ilu" aria-hidden="true">' + ILU[id] + '</span><span class="hm-tag"><i></i>' + (id === 'aps' ? 'CONTRATO · APS' : 'CUMPLIMIENTO · PLD') + '</span><h3>' + titulo + '</h3><p>' + texto + '</p>' +
       (nota ? '<span class="hm-nota">' + IC.alerta.replace('<svg', '<svg width="18" height="18"') + nota + '</span>' : '') +
-      '<button type="button" class="hm-cta" data-ir="' + id + '"' + (permitido ? '' : ' disabled') + '><span>' + boton + '</span>' + (permitido ? IC.go : '') + '</button>' +
-      (permitido ? '<button type="button" class="hm-reg" data-misreg="' + id + '">' + IC.carpeta + '<span>Ver mis registros</span></button>' : '<span class="aviso">' + aviso + '</span>') + '</div>';
+      '<div class="hm-bc-btns"><button type="button" class="hm-cta" data-ir="' + id + '"' + (permitido ? '' : ' disabled') + '><span>' + boton + '</span>' + (permitido ? IC.go : '') + '</button>' +
+      (permitido ? '<button type="button" class="hm-reg" data-misreg="' + id + '">' + IC.carpeta + '<span>Ver mis registros</span></button>' : '<span class="aviso">' + aviso + '</span>') + '</div></div>';
   }
   /* Solo se vuelve a dibujar un bloque cuando su contenido CAMBIÓ: antes, cada refresco del panel (cada 25 s y tras cada acción) reconstruía los botones y repetía su animación de entrada = parpadeo. */
   function pon(el, html) { if (!el || el.__h === html) return false; el.__h = html; el.innerHTML = html; return true; }
@@ -2498,10 +2682,10 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     var h = '';
     if (coord && hayPantalla('revaps')) {
       h += '<h2>Coordinación</h2><div class="hm-acc dos">' +
-        tarjeta('revaps', 'Revisión de contratos APS', 'Estatus de cada contrato, Google Docs, PDF, alertas y auditoría.', { coord: true, badge: pAps }) +
-        tarjeta('revpld', 'Revisión de Pre PLD', 'Documentos enviados a revisión, observaciones y bitácora de modificaciones.', { coord: true, badge: pPld }) +
-        tarjeta('revacc', 'Accesos del equipo', 'Agrega asesores nuevos y activa o desactiva el acceso a toda la plataforma.', { coord: true }) +
-        (hayPantalla('tablero') ? tarjeta('tablero', 'Tablero Hipoo', 'Indicadores de la actividad inmobiliaria.' + (TABLERO_URL ? ' Se abre en una pestaña nueva.' : ''), { coord: true }) : '') + '</div>';
+        tarjeta('revaps', 'Revisión de contratos APS', 'Estatus, PDF, alertas y auditoría.', { coord: true, badge: pAps }) +
+        tarjeta('revpld', 'Revisión de Pre PLD', 'Observaciones y bitácora de modificaciones.', { coord: true, badge: pPld }) +
+        tarjeta('revacc', 'Accesos del equipo', 'Altas y bajas de asesores en toda la plataforma.', { coord: true }) +
+        (hayPantalla('tablero') ? tarjeta('tablero', 'Tablero Hipoo', 'Indicadores de la actividad inmobiliaria.', { coord: true, externo: !!TABLERO_URL, nota: TABLERO_URL ? 'Otra pestaña' : '' }) : '') + '</div>';
     }
     pon(host, h);
     pintaKpis(); pintaAviso(); pintaFeed(); pintaLive();
@@ -2513,19 +2697,19 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     p_x: 'Pre PLD que la coordinación regresó con observaciones por corregir.', p_o: 'Pre PLD que la coordinación ya revisó.' };
   function celda(clave, num, etiqueta, tono, destino, caliente) {
     var cargando = (num == null);
-    return '<button type="button" class="hm-cell t-' + tono + (caliente && num > 0 ? ' hot' : '') + (cargando ? ' hm-sk' : '') + '" title="' + hmEsc(DEF[clave] || '') + '" data-kir="' + destino + '" data-k="' + clave + '"><span class="n" data-n="' + (cargando ? '' : num) + '">' + (cargando ? '0' : num) + '</span><span class="l">' + etiqueta + '</span></button>';
+    return '<button type="button" class="hm-cell t-' + tono + (caliente && num > 0 ? ' hot' : '') + ((cargando || num === 0) ? ' cero' : '') + (cargando ? ' hm-sk' : '') + '" title="' + hmEsc(DEF[clave] || '') + '" data-kir="' + destino + '" data-k="' + clave + '"><span class="n" data-n="' + (cargando ? '' : num) + '">' + (cargando ? '0' : num) + '</span><span class="l">' + etiqueta + '</span></button>';
   }
-  function tarjetaKpi(icono, titulo, sub, celdas) {
-    return '<div class="hm-kpi"><div class="hm-kh"><span class="hm-ico">' + icono + '</span><div><b>' + titulo + '</b><small>' + sub + '</small></div></div><div class="hm-cells">' + celdas + '</div></div>';
+  function tarjetaKpi(icono, titulo, sub, celdas, cls) {
+    return '<div class="hm-kpi ' + (cls || '') + '"><div class="hm-kh"><span class="hm-ico">' + icono + '</span><div><b>' + titulo + '</b><small>' + sub + '</small></div></div><div class="hm-cells">' + celdas + '</div></div>';
   }
   function pintaKpis() {
     var host = document.getElementById('hmKpis'); if (!USUARIO.email) { host.innerHTML = ''; host.__h = ''; return; }
     var P = HM.panel, coord = USUARIO.rol === 'coordinador', a = P ? P.aps : null, d = P ? P.pld : null, sub = coord ? 'Todo el equipo' : 'Tus registros', h = '';
     var v = function (o, k) { return o ? o[k] : null; };
     if (USUARIO.puedeAps) h += tarjetaKpi(IC.aps, 'Contratos APS', sub,
-      celda('a_b', v(a, 'borradores'), 'Borradores<br>sin enviar', 'mute', 'aps') + celda('a_r', v(a, 'enRevision'), coord ? 'Por revisar' : 'En revisión', 'warn', 'aps', coord) + celda('a_o', v(a, 'aprobados'), 'Aprobados', 'ok', 'aps'));
+      celda('a_b', v(a, 'borradores'), 'Borradores sin enviar', 'mute', 'aps') + celda('a_r', v(a, 'enRevision'), coord ? 'Por revisar' : 'En revisión', 'warn', 'aps', coord) + celda('a_o', v(a, 'aprobados'), 'Aprobados', 'ok', 'aps'), 'aps');
     if (!P || d) h += tarjetaKpi(IC.pld, 'Pre PLD', sub,
-      celda('p_s', v(d, 'sinEnviar'), 'Sin enviar', 'mute', 'pld') + celda('p_r', v(d, 'enRevision'), coord ? 'Por revisar' : 'En revisión', 'warn', 'pld', coord) + celda('p_x', v(d, 'observados'), coord ? 'Observados' : 'Por corregir', 'bad', 'pld', !coord) + celda('p_o', v(d, 'revisados'), 'Revisados', 'ok', 'pld'));
+      celda('p_s', v(d, 'sinEnviar'), 'Sin enviar', 'mute', 'pld') + celda('p_r', v(d, 'enRevision'), coord ? 'Por revisar' : 'En revisión', 'warn', 'pld', coord) + celda('p_x', v(d, 'observados'), coord ? 'Observados' : 'Por corregir', 'bad', 'pld', !coord) + celda('p_o', v(d, 'revisados'), 'Revisados', 'ok', 'pld'), 'pld');
     if (!pon(host, h)) return;      // mismos números: nada que redibujar
     host.querySelectorAll('.n[data-n]').forEach(function (el) {
       var k = el.parentNode.getAttribute('data-k'), fin = el.getAttribute('data-n'); if (fin === '') return; fin = +fin;
@@ -2538,12 +2722,22 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   function pintaAviso() {
     var host = document.getElementById('hmAviso'), coord = USUARIO.rol === 'coordinador', P = HM.panel, h = '';
     if (!P) { pon(host, ''); return; }
+    var flecha = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    var fila = function (cls, ico, titulo, sub, attr, accion) {
+      return '<button type="button" class="hm-pend-r ' + cls + '" ' + attr + '><span class="hm-pend-c">' + ico + '</span><span class="hm-pend-t"><b>' + titulo + '</b><small>' + sub + '</small></span><span class="hm-pend-go">' + accion + '<i>' + flecha + '</i></span></button>';
+    };
+    var cab = function (titulo, n, palabra) {
+      return '<div class="hm-pend-h"><span class="hm-pend-ic">' + IC.alerta + '</span><div><b>' + titulo + '</b><div class="hm-pend-n"><em>' + n + '</em><strong>' + palabra + '</strong></div></div></div>';
+    };
     if (coord && hayPantalla('revaps') && (PENDIENTES.aps + PENDIENTES.pld) > 0) {
-      h = '<div class="hm-aviso">' + IC.alerta + '<b>Tienes pendientes por revisar</b><div class="hm-av-b">' +
-        (PENDIENTES.aps ? '<button type="button" data-ir="revaps"><b>' + PENDIENTES.aps + '</b>contrato' + (PENDIENTES.aps === 1 ? '' : 's') + ' APS</button>' : '') +
-        (PENDIENTES.pld ? '<button type="button" data-ir="revpld"><b>' + PENDIENTES.pld + '</b>Pre PLD</button>' : '') + '</div></div>';
+      var tot = PENDIENTES.aps + PENDIENTES.pld;
+      h = '<div class="hm-pend">' + cab('Tienes pendientes por revisar', tot, tot === 1 ? 'documento' : 'documentos') +
+        (PENDIENTES.aps ? fila('aps', IC.aps, PENDIENTES.aps + ' contrato' + (PENDIENTES.aps === 1 ? '' : 's') + ' APS', 'Esperando tu revisión', 'data-ir="revaps"', 'Revisar') : '') +
+        (PENDIENTES.pld ? fila('pld', IC.pld, PENDIENTES.pld + ' Pre PLD', 'Esperando tu revisión', 'data-ir="revpld"', 'Revisar') : '') + '</div>';
     } else if (!coord && P.pld && P.pld.observados > 0) {
-      h = '<div class="hm-aviso">' + IC.alerta + '<b>Tienes ' + P.pld.observados + ' Pre PLD con observaciones por corregir</b><div class="hm-av-b"><button type="button" data-misreg="pld">Ver mis Pre PLD</button></div></div>';
+      var ob = P.pld.observados;
+      h = '<div class="hm-pend">' + cab('Tienes documentos por corregir', ob, ob === 1 ? 'documento' : 'documentos') +
+        fila('pld', IC.pld, ob + ' Pre PLD', 'Con observaciones por corregir', 'data-misreg="pld"', 'Ver mis Pre PLD') + '</div>';
     }
     pon(host, h);
   }
@@ -2750,7 +2944,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     P.push({ el: function () { return q('.hm-kpi'); }, ic: 'lista', t: 'Tus números de un vistazo', x: 'Cuántos contratos tienes en borrador, en revisión y aprobados' + (coord ? ' (de todo el equipo)' : '') + '. Toca cualquier cuadro para ir directo a esa lista.' });
     P.push({ el: function () { return document.querySelectorAll('#pantalla-inicio .hm-kpi')[1]; }, ic: 'pld', t: 'Pre PLD: su avance', x: 'Lo mismo para Pre PLD. En rojo aparece lo que ' + (coord ? 'ya observaste y espera corrección' : 'la coordinación te regresó con observaciones y debes corregir') + '.' });
     if (coord) {
-      P.push({ el: function () { var b = q('.hm-card [data-ir="revaps"]'); return b && b.parentNode; }, ic: 'revaps', t: 'Revisión de contratos APS', x: 'Tu bandeja: revisas cada contrato, corriges lo necesario y lo apruebas. El globo naranja indica cuántos esperan revisión.' });
+      P.push({ el: function () { var b = q('.hm-card [data-ir="revaps"]'); return b && b.parentNode; }, ic: 'revaps', t: 'Revisión de contratos APS', x: 'Tu bandeja: revisas cada contrato, corriges lo necesario y lo apruebas. La etiqueta naranja indica cuántos esperan revisión.' });
       P.push({ el: function () { var b = q('.hm-card [data-ir="revpld"]'); return b && b.parentNode; }, ic: 'revpld', t: 'Revisión de Pre PLD', x: 'Aquí ves los documentos enviados, puedes marcarlos como revisados o regresarlos con observaciones.' });
       P.push({ el: function () { var b = q('.hm-card [data-ir="tablero"]'); return b && b.parentNode; }, ic: 'tablero', t: 'Tablero Hipoo', x: 'Indicadores de la actividad inmobiliaria.' });
     }
