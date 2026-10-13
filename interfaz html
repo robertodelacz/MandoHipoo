@@ -1086,22 +1086,27 @@
     @media (min-width: 1200px) {
       .hm { transition: padding-right .38s cubic-bezier(.3, .8, .25, 1); }
       .hm.nov-on { padding-right: 390px; }
-      body.nov-open #ayBtn { right: 410px; } body.nov-open #hmToast { right: 410px; } body.nov-open #ayNota { right: 478px; }
+      body.nov-open #hmToast { right: 410px; }
     }
     @media (max-width: 1199px) {
       body.nov-open .hm-scrim { opacity: 1; pointer-events: auto; }
-      body.nov-open #ayBtn, body.nov-open #ayNota { display: none !important; }
+      body.nov-open #ayNota { display: none !important; }
     }
     /* ═══ Ayuda («?»): botón flotante, menú, recorrido y reporte ═══ */
-    #ayBtn { position: fixed; right: 20px; bottom: 20px; z-index: 880; width: 58px; height: 58px; border-radius: 50%; border: none; cursor: pointer; background: linear-gradient(145deg, #4256c4, #2b377a); color: #fff; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 30px; line-height: 1; display: grid; place-items: center; box-shadow: 0 14px 30px -8px rgba(26, 34, 74, .6), 0 0 0 4px rgba(255, 255, 255, .9); transition: transform .18s, box-shadow .18s; }
-    #ayBtn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 20px 36px -10px rgba(26, 34, 74, .65), 0 0 0 4px #fff; }
-    #ayBtn:focus-visible { outline: 4px solid #ffb03b; outline-offset: 3px; }
-    #ayBtn.pulso::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 3px solid #35B7C5; animation: ayPulso 1.8s infinite; }
-    @keyframes ayPulso { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(1.7); opacity: 0; } }
-    body.splash-on #ayBtn, body.ay-tour #ayBtn, body.splash-on #ayNota, body.ay-tour #ayNota { display: none !important; }
-    #ayNota { position: fixed; right: 88px; bottom: 28px; z-index: 880; max-width: 250px; background: #1a224a; color: #fff; border-radius: 14px 14px 4px 14px; padding: 12px 14px; font: 600 13px/1.4 'Inter', sans-serif; box-shadow: 0 16px 34px -10px rgba(13, 18, 43, .55); cursor: pointer; animation: hmRise .5s both; display: none; }
+    /* El «?» vive en la barra superior (y en el encabezado de Inicio): ya no flota sobre el contenido. ayUbica() lo cambia de lugar según la pantalla. */
+    #ayBtn { position: relative; flex: none; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 0; cursor: pointer; background: rgba(255, 255, 255, .14); color: #fff; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 25px; line-height: 1; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .45); transition: background .15s, color .15s, transform .15s; -webkit-tap-highlight-color: transparent; }
+    #ayBtn:hover { background: rgba(255, 255, 255, .26); transform: translateY(-1px); }
+    #ayBtn:active { transform: scale(.95); }
+    #ayBtn[aria-expanded="true"] { background: #fff; color: #2b377a; box-shadow: none; }
+    #ayBtn:focus-visible { outline: 3px solid #ffb03b; outline-offset: 3px; }
+    #ayBtn.pulso::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 3px solid #35B7C5; animation: ayPulso 1.8s infinite; pointer-events: none; }
+    @keyframes ayPulso { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(1.55); opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { #ayBtn.pulso::after { animation: none; opacity: .8; } }
+    body.splash-on #ayNota, body.ay-tour #ayNota { display: none !important; }
+    #ayNota { position: fixed; top: 74px; right: 14px; z-index: 880; max-width: 250px; background: #1a224a; color: #fff; border-radius: 14px 4px 14px 14px; padding: 12px 14px; font: 600 13px/1.4 'Inter', sans-serif; box-shadow: 0 16px 34px -10px rgba(13, 18, 43, .55); cursor: pointer; animation: hmRise .5s both; display: none; }
     #ayNota.on { display: block; } #ayNota b { color: #7be0ea; }
-    #ayMenu { position: fixed; right: 20px; bottom: 90px; z-index: 881; width: min(340px, calc(100vw - 28px)); background: #fff; border-radius: 18px; padding: 8px; box-shadow: 0 30px 60px -14px rgba(13, 18, 43, .5), 0 0 0 1px rgba(26, 34, 74, .06); font-family: 'Inter', sans-serif; transform-origin: 100% 100%; transform: scale(.92) translateY(10px); opacity: 0; pointer-events: none; transition: transform .2s, opacity .2s; }
+    #ayNota::before { content: ""; position: absolute; top: -6px; right: var(--ax, 19px); width: 13px; height: 13px; background: #1a224a; transform: rotate(45deg); border-radius: 3px; }
+    #ayMenu { position: fixed; top: 74px; right: 14px; z-index: 881; width: min(340px, calc(100vw - 28px)); background: #fff; border-radius: 18px; padding: 8px; box-shadow: 0 30px 60px -14px rgba(13, 18, 43, .5), 0 0 0 1px rgba(26, 34, 74, .06); font-family: 'Inter', sans-serif; transform-origin: 100% 0; transform: scale(.92) translateY(-10px); opacity: 0; pointer-events: none; transition: transform .2s, opacity .2s; }
     #ayMenu.on { transform: none; opacity: 1; pointer-events: auto; }
     #ayMenu h4 { margin: 8px 12px 6px; font: 800 11px 'Montserrat', sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #5a6488; }
     .ay-op { display: flex; align-items: center; gap: 13px; width: 100%; text-align: left; background: none; border: none; border-radius: 13px; padding: 12px; cursor: pointer; color: #1a224a; transition: background .15s; font-family: inherit; }
@@ -1151,8 +1156,9 @@
     .ay-para ol { margin: 6px 0 8px; padding-left: 20px; } .ay-para li { margin: 3px 0; } .ay-para small { display: block; color: #4f747a; font-size: 11.5px; line-height: 1.45; }
     .ay-para b:first-child { display: block; font: 800 12px 'Montserrat', sans-serif; letter-spacing: .5px; color: #1a224a; }
     @media (max-width: 560px) { #ayTip .pie { flex-wrap: wrap; } #ayTip .pts { flex: 1 0 100%; margin: 0 0 10px; } #ayTip .ay-b { padding: 10px 15px; } #ayTip .ay-b.pri { margin-left: auto; } }
-    #hmToast { bottom: 92px; }
-    @media (max-width: 560px) { #ayBtn { right: 14px; bottom: 14px; width: 54px; height: 54px; } #ayMenu { right: 14px; bottom: 80px; } #ayNota { right: 76px; bottom: 22px; } .ay-tipos { grid-template-columns: 1fr; } .ay-card { padding: 22px 18px 18px; } }
+    @media (max-width: 560px) { #hmToast { bottom: 92px; } }
+    @media (max-width: 560px) { .ay-tipos { grid-template-columns: 1fr; } .ay-card { padding: 22px 18px 18px; }
+      .barra-nav .nav-volver { padding: 0; min-width: 48px; justify-content: center; } .barra-nav .nav-volver span { display: none; } }      /* en celular «Inicio» queda solo con la casita para dejar lugar al título y al «?» */
 
     /* ═══ v4: recorrido y botones de cerrar ═══ */
     #ayLuz { box-shadow: 0 0 0 9999px rgba(10, 14, 40, .78), 0 0 0 3px #fff, 0 0 0 7px rgba(53, 183, 197, .85), 0 0 40px 8px rgba(53, 183, 197, .55); animation: ayRespira 2.4s ease-in-out infinite; }
@@ -1629,8 +1635,8 @@
 <div id="hmToast" role="status" aria-live="polite"></div>
 
 <!-- ══════════════════ AYUDA («?») ══════════════════ -->
-<button type="button" id="ayBtn" aria-label="Ayuda y reportes" aria-haspopup="true" aria-expanded="false">?</button>
-<div id="ayNota" role="note"><b>¿Dudas?</b> Toca el «?» y te explico la pantalla, o reporta algo que no funcione.</div>
+<button type="button" id="ayBtn" aria-label="Ayuda y reportes" title="Ayuda y reportes" aria-haspopup="true" aria-expanded="false">?</button>
+<div id="ayNota" role="note"><b>¿Dudas?</b> Toca el «?» de arriba y te explico la pantalla, o reporta algo que no funcione.</div>
 <div id="ayMenu" role="menu" aria-label="Ayuda">
   <div class="ay-mh"><h4>¿En qué te ayudamos?</h4><button type="button" class="ay-mx" data-ay="cerrarMenu" aria-label="Cerrar ayuda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <button type="button" class="ay-op" role="menuitem" id="ayOpTour"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.500 8.500-2 5-5 2 2-5z"/></svg></i><div><b>¿Para qué sirve cada cosa?</b><span>Te voy mostrando, iluminado, qué hace cada botón y sección de esta pantalla.</span></div></button>
@@ -2358,6 +2364,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   function irA(s) {
     if (s === 'consola') s = 'revaps';
     window.PANTALLA = s; window.NOV_OTRA = false;
+    if (typeof ayUbica === 'function') ayUbica();
     document.body.setAttribute('data-pantalla', s);
     setTimeout(navAltura, 30);
     setTimeout(function () { if (typeof novSync === 'function') novSync(); }, 0);
@@ -2710,8 +2717,25 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   window.addEventListener('error', function (e) { try { AY.errores.push(String(e.message || 'error').slice(0, 120)); AY.errores = AY.errores.slice(-5); } catch (x) { } });
   window.addEventListener('unhandledrejection', function (e) { try { AY.errores.push(String((e.reason && e.reason.message) || e.reason || 'promesa rechazada').slice(0, 120)); AY.errores = AY.errores.slice(-5); } catch (x) { } });
   function ayEl(id) { return document.getElementById(id); }
+  /* El botón «?» se cambia de lugar según la pantalla: junto a «Novedades» en Inicio, y en la barra superior en las demás. */
+  function ayUbica() {
+    var b = ayEl('ayBtn'); if (!b) return;
+    var inicio = (window.PANTALLA || 'inicio') === 'inicio', dest = document.querySelector(inicio ? '#pantalla-inicio .hm-tr' : '#barra-nav .nv-der');
+    if (!dest || b.parentNode === dest) return;
+    var antes = inicio ? ayEl('hmLive') : ayEl('navUsuario');
+    dest.insertBefore(b, antes && antes.parentNode === dest ? antes : null);
+  }
+  /* Coloca el menú / la nota justo debajo del botón, alineados a su derecha, con la flecha apuntándole. */
+  function ayAncla(el) {
+    var b = ayEl('ayBtn'), r = b.getBoundingClientRect(), W = window.innerWidth, der = Math.max(12, W - r.right - 4);
+    var ancho = el.offsetWidth || Math.min(340, W - 28);
+    der = Math.max(12, Math.min(der, W - ancho - 12)); /* que nunca se salga por la izquierda en pantallas angostas */
+    el.style.top = Math.max(8, r.bottom + 12) + 'px'; el.style.right = der + 'px';
+    el.style.setProperty('--ax', Math.max(10, (W - r.right + r.width / 2) - der - 7) + 'px');
+  }
   function ayMenu(abrir) {
     var m = ayEl('ayMenu'), b = ayEl('ayBtn'); if (abrir == null) abrir = !m.classList.contains('on');
+    if (abrir) ayAncla(m);
     m.classList.toggle('on', abrir); b.setAttribute('aria-expanded', abrir ? 'true' : 'false'); b.classList.remove('pulso'); ayEl('ayNota').classList.remove('on');
     ayEl('ayOpTour').style.display = (window.PANTALLA || 'inicio') === 'inicio' ? '' : 'none';
     if (abrir) { almacen('set', 'ay_visto', '1'); var p = m.querySelector('.ay-op:not([style*="none"])'); if (p) p.focus(); }
@@ -2732,7 +2756,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     }
     P.push({ el: function () { return ayEl('hmSide'); }, fijo: true, antes: function () { if (!novAbierto()) novAbre(true, false); }, ic: 'campana', t: 'Novedades en vivo', x: 'Cada vez que un contrato se envía, se aprueba, se cancela o recibe observaciones, aparece aquí al instante, con su historial por día. Las nuevas traen la etiqueta NUEVO. Con el botón de novedades de arriba (se ilumina en naranja cuando hay algo nuevo) lo abres o lo cierras.' });
     P.push({ el: function () { return ayEl('hmLeer'); }, fijo: true, ic: 'ok', t: 'Marcar como leídas', x: 'Cuando ya las viste, presiona este botón y la lista se limpia de etiquetas NUEVO.' });
-    P.push({ el: function () { return ayEl('ayBtn'); }, fijo: true, ic: 'ayuda', t: 'Este botón «?»', x: 'Siempre está a la mano: te repite este recorrido o te deja reportar cualquier problema en un minuto.' });
+    P.push({ el: function () { return ayEl('ayBtn'); }, fijo: true, ic: 'ayuda', t: 'Este botón «?»', x: 'Lo encuentras arriba, junto a Novedades, en todas las pantallas: te repite este recorrido o te deja reportar cualquier problema en un minuto.' });
     return P;
   }
   function ayTour() {
@@ -2778,7 +2802,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     };
     var orden = (r.width > W * .55 || el.id === 'hmSide') ? ['abajo', 'arriba', 'izquierda', 'derecha'] : ['derecha', 'izquierda', 'abajo', 'arriba'];
     if (el.id === 'hmSide' || el.id === 'hmLeer') orden = ['izquierda'];
-    if (el.id === 'ayBtn') orden = ['arriba', 'izquierda'];
+    if (el.id === 'ayBtn') orden = ['abajo', 'izquierda'];
     for (var k = 0; k < orden.length; k++) { if (cabe[orden[k]]) { lado = orden[k]; break; } }
     var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     if (lado === 'derecha') { x = r.right + m + G; y = cy - th / 2; }
@@ -2824,6 +2848,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   }
   function ayCerrarRep() { ayEl('ayRep').classList.remove('on'); }
   (function ayInit() {
+    ayUbica();
     ayEl('ayBtn').addEventListener('click', function () { ayMenu(); });
     ayEl('ayOpTour').addEventListener('click', ayTour); ayEl('ayOpRep').addEventListener('click', ayReporte);
     ayEl('ayNota').addEventListener('click', function () { ayMenu(true); });
@@ -2846,8 +2871,8 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
       if (AY.pasos.length) { if (ev.key === 'Escape') ayFin(); else if (ev.key === 'ArrowRight' || ev.key === 'Enter') { ev.preventDefault(); ayPaso(AY.paso + 1); } else if (ev.key === 'ArrowLeft') ayPaso(AY.paso - 1); return; }
       if (ev.key === 'Escape') { if (ayEl('ayRep').classList.contains('on')) ayCerrarRep(); else if (ayEl('ayMenu').classList.contains('on')) { ayMenu(false); ayEl('ayBtn').focus(); } }
     });
-    window.addEventListener('resize', function () { if (AY.pasos.length) ayColoca(); });
-    window.addEventListener('scroll', function () { if (AY.pasos.length) ayColoca(); }, { passive: true });
+    window.addEventListener('resize', function () { ayUbica(); if (AY.pasos.length) ayColoca(); else if (ayEl('ayMenu').classList.contains('on')) ayAncla(ayEl('ayMenu')); });
+    window.addEventListener('scroll', function () { if (AY.pasos.length) ayColoca(); else if (ayEl('ayMenu').classList.contains('on')) ayAncla(ayEl('ayMenu')); }, { passive: true });
   })();
 
   /* ═══ Efectos: confeti de celebración, ondas al tocar, brillo en tarjetas, parallax y campana ═══ */
@@ -2882,7 +2907,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   })();
   (function () {
     // Primera vez: el botón late y aparece una nota (una sola vez por navegador, después del splash)
-    if (!almacen('get', 'ay_visto')) setTimeout(function () { var b = ayEl('ayBtn'); if (!b) return; b.classList.add('pulso'); ayEl('ayNota').classList.add('on'); setTimeout(function () { ayEl('ayNota').classList.remove('on'); }, 12000); }, 3200);
+    if (!almacen('get', 'ay_visto')) setTimeout(function () { var b = ayEl('ayBtn'); if (!b) return; b.classList.add('pulso'); ayAncla(ayEl('ayNota')); ayEl('ayNota').classList.add('on'); setTimeout(function () { ayEl('ayNota').classList.remove('on'); }, 12000); }, 3200);
   })();
 </script>
 <div id="hkDlg" role="dialog" aria-modal="true" aria-labelledby="hkdT" aria-describedby="hkdX">

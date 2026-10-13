@@ -271,7 +271,6 @@
 /* Logo del encabezado: grande, como siempre */
 #aps-root .hdr .logo-container{padding:8px 22px;border-radius:14px}
 #aps-root .hdr .header-logo{width:250px;height:auto;max-width:42vw;max-height:none;object-fit:contain}
-#aps-root .fab{right:92px}
 
 /* ═══ v3: logo de un solo color, pantalla más ancha, panel de registros centrado, móvil con aire y barra de acciones fija ═══ */
 #aps-root .hdr .logo-container{background:#fff;border:0}
@@ -286,7 +285,7 @@
 #aps-root div.sheet{width:100%;max-height:calc(100vh - 56px);margin:0;display:flex;flex-direction:column}
 #aps-root .sheet-h,#aps-root .sheet-t,#aps-root .sheet-f{flex:none}
 #aps-root .sheet-b{flex:1 1 auto;min-height:0;overflow:auto}
-body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,body:has(.cx-modal.open) #ayBtn,body:has(.cx-modal.open) #ayNota{display:none!important}
+body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,body:has(.cx-modal.open) #ayMenu,body:has(.cx-modal.open) #ayNota{display:none!important}
 @media(max-width:600px){
   #aps-root .app{padding:18px 16px 96px}
   #aps-root .card{padding:22px 18px;margin-bottom:20px}
@@ -303,8 +302,7 @@ body:has(#aps-root .modal.open) #ayBtn,body:has(#aps-root .modal.open) #ayNota,b
   #aps-root .userbar .btn-sec{flex:1;min-height:46px;font-size:14px}
   #aps-root .actions{position:sticky;bottom:0;z-index:15;margin:16px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(244,247,252,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 -12px 26px -16px rgba(26,34,74,.4)}
   #aps-root .actions .btn-main,#aps-root .actions .btn-sec{flex:1;min-height:52px;font-size:16px}
-  #aps-root .fab{bottom:92px;right:76px}
-  body[data-pantalla="aps"] #ayBtn{bottom:96px}
+  #aps-root .fab{bottom:92px;right:14px}
   #aps-root .modal.sheetwrap.open{align-items:flex-end}
   #aps-root div.sheet{border-radius:24px 24px 0 0;max-height:92vh;min-height:0}
   #aps-root .sheet-b{padding:8px 14px 14px}
