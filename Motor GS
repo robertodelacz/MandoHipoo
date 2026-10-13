@@ -37,7 +37,7 @@ var APS_CONFIG = {
   // ROL «BACKUP» (respaldo de la coordinación): se da en la pestaña «Asesores», columna «Rol» = Backup (o desde «Accesos del equipo»).
   // Puede todo lo que hace la coordinación (revisar, aprobar, observar, cancelar, tablero, auditoría…) EXCEPTO ver o cambiar los accesos del equipo (altas y bajas).
   // true = también recibe los correos de «Contrato / Pre PLD por revisar». false = no los recibe (de todos modos ve los pendientes en su pantalla principal). Un cambio exige publicar versión nueva.
-  BACKUP_RECIBE_AVISOS: true,
+  BACKUP_RECIBE_AVISOS: false,
   // Buzón de Cumplimiento que recibe, por cada contrato APROBADO, un correo con las huellas (SHA-256) de los datos y del PDF.
   // Sirve de evidencia FUERA de la hoja: si alguien alterara el Registro, este correo conserva lo que se aprobó. [] = no se envía.
   // Para activarlo: ['oficialdecumplimiento@cualli.mx'] (confírmalo antes con la persona que lo va a recibir).
