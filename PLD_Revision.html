@@ -151,7 +151,7 @@
     if (b.getAttribute('data-f')) { FILTRO = b.getAttribute('data-f'); pinta(); return; }
     if (b.getAttribute('data-env')) enviar(b.getAttribute('data-env'), b); else if (b.getAttribute('data-a') === 'refrescar') cargar();
   });
-  window.PLDREV = { cargar: cargar, enviar: enviar, refrescar: refrescar };
+  window.PLDREV = { cargar: cargar, enviar: enviar, refrescar: refrescar, filtro: function (f) { FILTRO = f || 'todos'; } };
 })();
 
 </script>

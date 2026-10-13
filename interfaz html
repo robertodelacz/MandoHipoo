@@ -2540,7 +2540,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     var h; new MutationObserver(function () { clearTimeout(h); h = setTimeout(tag, 40); }).observe(document.body, { childList: true, subtree: true }); tag();
   })();
   function hayPantalla(s) { return !!document.getElementById(CONTENEDOR[s]); }
-  function irA(s) {
+  function irA(s, filtro) {          /* filtro (opcional): qué lista abrir dentro de la revisión de coordinación */
     if (s === 'consola') s = 'revaps';
     window.PANTALLA = s; window.NOV_OTRA = false;
     if (typeof ayUbica === 'function') ayUbica();
@@ -2565,8 +2565,8 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     (function () { var d = document.getElementById(destino); d.classList.remove('scr-in'); void d.offsetWidth; d.classList.add('scr-in'); setTimeout(function () { d.classList.remove('scr-in'); }, 650); })();
     if (s === 'inicio' && window.refrescarPanel) refrescarPanel();
     if (s === 'aps' && window.APS_UI) { APS_UI.activar(); }
-    if (s === 'revaps' && window.CON) { CON.abrir('aps'); }
-    if (s === 'revpld' && window.CON) { CON.abrir('pld'); }
+    if (s === 'revaps' && window.CON) { CON.abrir('aps', filtro); }
+    if (s === 'revpld' && window.CON) { CON.abrir('pld', filtro); }
     if (s === 'revacc' && window.CON) { CON.abrir('acc'); }
     if (s === 'tablero' && window.TAB) { TAB.activar(); }
   }
@@ -2875,7 +2875,8 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
 
   function clicInicio(e) {
     var k = e.target.closest('[data-kir]');
-    if (k) { var d = k.getAttribute('data-kir'); if (USUARIO.rol === 'coordinador' && hayPantalla('rev' + d)) irA('rev' + d); else irMisRegistros(d); return; }
+    if (k) { var d = k.getAttribute('data-kir'), kf = KIR[k.getAttribute('data-k')];      // cada número abre SU lista (Aprobados → aprobados, Observados → observados…)
+      if (USUARIO.rol === 'coordinador' && hayPantalla('rev' + d)) irA('rev' + d, kf && kf[0]); else irMisRegistros(d, kf && kf[1]); return; }
     var m = e.target.closest('[data-misreg]'); if (m) { irMisRegistros(m.getAttribute('data-misreg')); return; }
     var ev = e.target.closest('[data-ev]'); if (ev) { abreEvento(ev.getAttribute('data-ev')); return; }
     if (e.target.id === 'hmLeer') { marcaLeidas(); return; }
@@ -2885,10 +2886,12 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   document.getElementById('hmExt').addEventListener('click', clicInicio);
   // Desde la tarjeta de inicio: entra al módulo y, de una vez, abre la pestaña/lista de "mis registros" en vez de
   // dejar a la persona en el formulario en blanco de "nuevo registro".
-  function irMisRegistros(id) {
+  /* Clave del número → [filtro de la revisión de coordinación, estado en «mis registros» del asesor] */
+  var KIR = { a_b: ['sin_terminar', 'BORRADOR'], a_r: ['revision', 'EN_REVISION'], a_o: ['aprobados', 'APROBADO'], p_s: ['sin_enviar', 'SIN_ENVIAR'], p_r: ['revision', 'EN_REVISION'], p_x: ['observados', 'OBSERVADO'], p_o: ['revisados', 'REVISADO'] };
+  function irMisRegistros(id, estado) {
     irA(id);
-    if (id === 'aps' && window.APS_UI && APS_UI.misRegistros) APS_UI.misRegistros();
-    else if (id === 'pld') { var btn = document.getElementById('btnModoRev'); if (btn) setMode('revision', btn); }
+    if (id === 'aps' && window.APS_UI && APS_UI.misRegistros) APS_UI.misRegistros(null, estado);
+    else if (id === 'pld') { if (estado && window.PLDREV && PLDREV.filtro) PLDREV.filtro(estado); var btn = document.getElementById('btnModoRev'); if (btn) setMode('revision', btn); }
   }
   pintaInicio();
   refrescarPanel();

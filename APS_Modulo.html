@@ -1195,11 +1195,11 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     $('aps_regSub').textContent = (rows.length === regFilas.length ? regFilas.length : rows.length + ' de ' + regFilas.length) + (regFilas.length === 1 ? ' contrato' : ' contratos');
     $('aps_regPie').textContent = regTotal > regFilas.length ? 'Se muestran los ' + regFilas.length + ' más recientes de ' + regTotal + '.' : '';
   }
-  function abrirRegistros(f) {
+  function abrirRegistros(f, est) {      /* est (opcional, asesor): estado que se muestra de entrada, p. ej. 'APROBADO' */
     regFiltro = f || (USER.rol === 'coordinador' ? 'revision' : 'mios');
     var coord = USER.rol === 'coordinador';
     $('aps_regTit').textContent = coord ? 'Contratos APS' : 'Mis contratos';
-    $('aps_regModal').classList.add('open'); $('aps_regQ').value = ''; regEstado = 'todos';
+    $('aps_regModal').classList.add('open'); $('aps_regQ').value = ''; regEstado = (est && typeof est === 'string' && REG_CHIPS.some(function (t) { return t[0] === est; })) ? est : 'todos';
     if (coord) $('aps_regTabs').innerHTML = [['revision', 'Por revisar'], ['todos', 'Todos'], ['mios', 'Míos']].map(function (t) { return '<button type="button" class="chip' + (t[0] === regFiltro ? ' active' : '') + '" data-regtab="' + t[0] + '"><span>' + t[1] + '</span></button>'; }).join('');
     $('aps_regList').innerHTML = '<div class="help" style="padding:26px 4px">Cargando…</div>';
     try { $('aps_regClose').focus(); } catch (e) {}
