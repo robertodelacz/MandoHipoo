@@ -1765,6 +1765,12 @@
       @container hmbc (max-width: 340px) { .hm-bc .hm-ilu { width: 105px; right: 8px; top: 16px; } .hm-bc h3 { font-size: 25px; max-width: calc(100% - 118px); } .hm-bc p { font-size: 14px; } }
     }
     @media (min-width: 561px) and (max-width: 1000px) { .hm-bc { padding: 26px 22px 22px; min-height: 360px; } .hm-bc-btns { padding-top: 24px; } }
+
+    /* ═══ v10: encabezado de Inicio menos cargado — arriba solo «Novedades» y «?»; el chip «En vivo» baja a la línea del usuario ═══ */
+    .hm-tr { gap: 14px; }
+    .hm-quien-r { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; }
+    .hm-quien-r .hm-live { padding: 6px 13px; font-size: 11.5px; background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .16); }
+    @media (max-width: 560px) { .hm-quien-r { flex-direction: column; align-items: flex-start; } }
   </style>
 </head>
 <body>
@@ -1807,12 +1813,14 @@
     <div class="hm-in">
       <div class="hm-top">
         <div class="hm-brand"><span class="hm-logo" id="hmLogo"></span><span class="hm-sep"></span><span class="hm-sys">Mesa de control inmobiliaria</span></div>
-        <div class="hm-tr"><button type="button" class="hm-novbtn" id="hmNovBtn" aria-controls="hmSide" aria-expanded="false"><span class="ic"></span><span id="hmNovL">Novedades</span><b id="hmNovN">0</b></button>
-          <div class="hm-live" id="hmLive" title="La información se actualiza sola"><i></i><b>En vivo</b><span id="hmLiveT">conectando…</span></div></div>
+        <div class="hm-tr"><button type="button" class="hm-novbtn" id="hmNovBtn" aria-controls="hmSide" aria-expanded="false"><span class="ic"></span><span id="hmNovL">Novedades</span><b id="hmNovN">0</b></button></div>
       </div>
       <p class="hm-fecha" id="hmFecha"></p>
       <h1 id="inicioSaludo">¡Bienvenido!</h1>
-      <div class="hm-quien"><span class="hm-rol" id="hmRol"></span><span id="inicioQuien"></span></div>
+      <div class="hm-quien-r">
+        <div class="hm-quien"><span class="hm-rol" id="hmRol"></span><span id="inicioQuien"></span></div>
+        <div class="hm-live" id="hmLive" title="La información se actualiza sola"><i></i><b>En vivo</b><span id="hmLiveT">conectando…</span></div>
+      </div>
     </div>
   </header>
   <main class="hm-main">
