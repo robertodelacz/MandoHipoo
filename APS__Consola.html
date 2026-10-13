@@ -381,6 +381,70 @@
   #con-root .cx-add{width:100%}
 }
 @media(prefers-reduced-motion:reduce){#con-root *,#con-root *::before,#con-root *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ── Tarjetas de revisión: cuerpo + barra de acciones (v8) ── */
+#con-root .cx-card{display:block;padding:0}
+#con-root .cx-card>.cx-bd{padding:22px 24px 20px 30px;min-width:0}
+#con-root .cx-foot{display:flex;align-items:center;flex-wrap:wrap;gap:12px 16px;padding:16px 24px 16px 30px;border-top:1px solid #e4e9f4;border-radius:0 0 24px 24px;background:linear-gradient(90deg,#f3f5fa,#fafbfd)}
+#con-root .cx-card.e-EN_REVISION .cx-foot{background:linear-gradient(90deg,#fff6dc,#fffbf0);border-top-color:#f5e3b0}
+#con-root .cx-card.e-APROBADO .cx-foot,#con-root .cx-card.e-REVISADO .cx-foot{background:linear-gradient(90deg,#eaf8f2,#f6fcf9);border-top-color:#cbebdd}
+#con-root .cx-card.e-COMPLETO .cx-foot{background:linear-gradient(90deg,#eef5ff,#f8faff);border-top-color:#d3e3f7}
+#con-root .cx-card.e-CANCELADO .cx-foot,#con-root .cx-card.e-OBSERVADO .cx-foot{background:linear-gradient(90deg,#fdf0f2,#fff9fa);border-top-color:#f6d3d8}
+#con-root .cf-pri{display:inline-flex;align-items:center;gap:14px;height:50px;padding:0 8px 0 24px;border:0;border-radius:25px;color:#fff;font:800 15px 'Montserrat',sans-serif;cursor:pointer;white-space:nowrap;text-decoration:none;transition:transform .15s,filter .15s}
+#con-root .cf-pri.indigo{background:linear-gradient(180deg,#4152bc,#364494);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 5px 0 #232d61,0 14px 20px -10px rgba(35,45,97,.55)}
+#con-root .cf-pri.amber{background:linear-gradient(180deg,#ffc25a,#ff9f1c);color:#3a2200;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 5px 0 #c97a0a,0 14px 20px -10px rgba(201,122,10,.65)}
+#con-root .cf-pri.green{background:linear-gradient(180deg,#22c08a,#0f9d6e);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 5px 0 #0a6e4d,0 14px 20px -10px rgba(10,110,77,.55)}
+#con-root .cf-pri.warn{background:#fff1cc;color:#7a5200;padding:0 22px 0 14px;gap:10px;box-shadow:inset 0 0 0 1px #f6d98b,0 5px 0 #e8c36b}
+#con-root .cf-pri:hover{transform:translateY(-2px);filter:brightness(1.05)}
+#con-root .cf-pri:active{transform:translateY(3px)}
+#con-root .cf-pri:disabled{opacity:.5;cursor:not-allowed}
+#con-root .cf-pri svg{width:19px;height:19px}
+#con-root .cf-go{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center}
+#con-root .cf-pri.amber .cf-go{background:rgba(58,34,0,.14)}
+#con-root .cf-go svg{width:17px;height:17px}
+#con-root .cf-ia{display:inline-flex;align-items:center;gap:10px;height:50px;padding:0 20px 0 10px;border:0;border-radius:25px;background:linear-gradient(180deg,#f1eeff,#e6e1ff);color:#4b3fb5;font:800 14.5px 'Montserrat',sans-serif;cursor:pointer;white-space:nowrap;box-shadow:inset 0 0 0 1px #cfc8fa,0 5px 0 #b9b0f0;transition:transform .15s}
+#con-root .cf-ia:hover{transform:translateY(-2px)}#con-root .cf-ia:active{transform:translateY(3px)}
+#con-root .cf-ia .cf-ico{width:32px;height:32px;border-radius:50%;background:#fff;color:#6a5ae0;display:flex;align-items:center;justify-content:center}
+#con-root .cf-ia svg{width:18px;height:18px}
+#con-root .cf-sep{width:1px;height:32px;background:rgba(26,34,74,.12)}
+#con-root .cf-seg{display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding:4px;background:#fff;border:1px solid #dce3f2;border-radius:18px;box-shadow:0 1px 2px rgba(26,34,74,.04)}
+#con-root .cf-seg.fin{margin-left:auto}
+#con-root .cf-it{display:inline-flex;align-items:center;gap:9px;min-height:40px;padding:0 14px 0 6px;border:0;border-radius:14px;background:transparent;color:#2a3566;font:700 13px 'Inter',sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .15s}
+#con-root .cf-it:hover{background:#eef2fc}
+#con-root .cf-it.off{cursor:default;color:#8b94b3}#con-root .cf-it.off:hover{background:transparent}
+#con-root .cf-ci{flex:none;width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:#e9edfc;color:#364494}
+#con-root .cf-ci svg{width:16px;height:16px}
+#con-root .cf-ci.blue{background:#e3ecff;color:#2f63d8}
+#con-root .cf-ci.pdf{background:#fde8ea;color:#c0263a;font:800 8.5px 'Inter',sans-serif;letter-spacing:.2px}
+#con-root .cf-it.off .cf-ci.pdf{opacity:.55}
+#con-root .cf-mw{position:relative;margin-left:auto}
+#con-root .cf-seg.fin+.cf-mw{margin-left:0}
+#con-root .cf-more{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 16px;border:1px solid #cfd8ec;border-radius:23px;background:#fff;color:#364494;font:700 13.5px 'Inter',sans-serif;cursor:pointer;box-shadow:0 1px 2px rgba(26,34,74,.05);transition:background .15s}
+#con-root .cf-more:hover{background:#eef2fc}
+#con-root .cf-more svg{width:20px;height:20px}
+#con-root .cf-mw .cx-more{right:0;left:auto;bottom:calc(100% + 8px)}
+#con-root .cf-pri:focus-visible,#con-root .cf-ia:focus-visible,#con-root .cf-it:focus-visible,#con-root .cf-more:focus-visible{outline:3px solid #ffb03b;outline-offset:2px}
+@media(max-width:960px){
+  #con-root .cx-card>.cx-bd{padding:20px 20px 18px 26px}
+  #con-root .cx-foot{padding:14px 20px 16px 26px}
+}
+@media(max-width:700px){
+  #con-root .cx-card>.cx-bd{padding:18px 16px 16px 22px}
+  #con-root .cx-foot{flex-direction:column;align-items:stretch;padding:14px 14px 16px 20px;border-radius:0 0 22px 22px}
+  #con-root .cf-sep{display:none}
+  #con-root .cf-pri,#con-root .cf-ia{width:100%;justify-content:space-between;height:54px}
+  #con-root .cf-ia{justify-content:flex-start}
+  #con-root .cf-seg,#con-root .cf-seg.fin{margin:0;display:flex;flex-wrap:wrap;align-items:stretch}
+  #con-root .cf-it{flex:1 1 86px}
+  #con-root .cf-it{flex-direction:column;justify-content:flex-start;gap:6px;min-height:76px;padding:10px 6px 8px;text-align:center;white-space:normal;line-height:1.2;font-size:12.5px}
+  #con-root .cf-mw{margin:0;width:100%}
+  #con-root .cf-more{width:100%;justify-content:center;height:50px}
+  #con-root .cf-mw .cx-more{left:0;right:0;min-width:0}
+  #con-root .foot-pld .cf-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  #con-root .foot-pld .cf-pri{padding:0 8px 0 16px;font-size:14px;gap:8px}
+  #con-root .foot-pld .cf-pri.warn{padding:0 12px;justify-content:center}
+}
+@media(min-width:701px){#con-root .cf-pair{display:contents}}
 </style>
 
 <div id="con-root">
@@ -456,6 +520,9 @@
     vacio: svg('<path d="M3.500 13.500 6 5.500h12l2.500 8v5a1.500 1.500 0 0 1-1.500 1.500H5a1.500 1.500 0 0 1-1.500-1.500z"/><path d="M3.500 13.500H8l1.200 2.500h5.600l1.200-2.500h4.500"/>', 1.6),
     info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.500M12 7.800v.2"/>'),
     candado: svg('<rect x="4.500" y="10.500" width="15" height="10" rx="2.500"/><path d="M8 10.500V8a4 4 0 0 1 8 0v2.500"/>'),
+    spark: svg('<path d="M12 3l1.900 5.100L19 10l-5.100 1.900L12 17l-1.900-5.100L5 10l5.100-1.900z"/><path d="M18.500 16l.7 1.800 1.800.7-1.800.7-.7 1.800-.7-1.800-1.800-.7 1.800-.7z"/>'),
+    plus: svg('<path d="M12 5v14M5 12h14"/>', 2.2),
+    ext: svg('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/>'),
     flecha: svg('<path d="M5 12h14M13 6l6 6-6 6"/>', 2.3),
     casa: svg('<path d="M4.200 11.400 12 4.800l7.800 6.600V19a1.500 1.500 0 0 1-1.500 1.500H5.700A1.500 1.500 0 0 1 4.200 19z"/><path d="M9.500 20.500v-5h5v5"/>'),
     userplus: svg('<circle cx="9.500" cy="8.500" r="3.800"/><path d="M2.800 20c.8-3.600 3.400-5.500 6.700-5.500 1.600 0 3 .4 4.200 1.200M18 9v6M15 12h6"/>'),
@@ -641,21 +708,21 @@
     else if (r.estado === 'CANCELADO' && r.comentario) aviso = '<div class="cx-aviso bad">' + I.xc + '<span>Motivo: <q>' + esc(corto(r.comentario, 160)) + '</q></span></div>';
     else if (r.estado === 'APROBADO') aviso = '<div class="cx-aviso ok">' + I.checkc + '<span>Aprobado' + (r.revisadoPor ? ' por <b>' + esc(r.revisadoPor) + '</b>' : '') + (r.aprobadoEn ? ' · ' + esc(r.aprobadoEn) : '') + '</span></div>';
     var docs = r.docUrl ? '<a class="cx-pill" href="' + esc(r.docUrl) + '" target="_blank" rel="noopener" title="Generado ' + esc(r.docFecha) + '">' + I.doc.replace('<svg', '<svg width="14" height="14"') + ' Google Docs</a>' : '';
-    var sec = '';
-    if (r.estado === 'APROBADO') sec = '<div class="cx-row2">' + (r.pdfUrl ? '<a class="cx-btn" href="' + esc(r.pdfUrl) + '" target="_blank" rel="noopener">' + I.ojo + 'Ver PDF</a>' : '<span></span>') + '<button type="button" class="cx-btn" data-pdf="' + esc(r.id) + '">' + I.dl + 'Descargar</button></div>';
-    else sec = '<div class="cx-row2">' + (r.docUrl ? '<a class="cx-btn" href="' + esc(r.docUrl) + '" target="_blank" rel="noopener">' + I.doc + 'Docs</a>' : '<button type="button" class="cx-btn" data-docs="' + esc(r.id) + '">' + I.doc + 'Crear Docs</button>') + '<button type="button" class="cx-btn" data-more="' + esc(r.id) + '" aria-haspopup="true" aria-label="Más acciones">' + I.mas + 'Más</button></div>';
-    var menu = '<div class="cx-more" data-menu="' + esc(r.id) + '" role="menu">' +
-      (r.estado === 'APROBADO' ? (r.docUrl ? '<a href="' + esc(r.docUrl) + '" target="_blank" rel="noopener">' + I.doc + 'Abrir en Google Docs</a>' : '<button type="button" data-docs="' + esc(r.id) + '">' + I.doc + 'Crear en Google Docs</button>') : '') +
-      (r.docUrl ? '<button type="button" data-docs="' + esc(r.id) + '" data-regen="1">' + I.ref + 'Regenerar Google Docs</button>' : '') +
-      (r.estado === 'BORRADOR' ? '<button type="button" class="dg" data-del="' + esc(r.id) + '">' + I.trash + 'Eliminar borrador</button>' : '') +
-      ((r.estado === 'EN_REVISION' || r.estado === 'APROBADO') ? '<button type="button" class="dg" data-cancel="' + esc(r.id) + '">' + I.xc + 'Cancelar contrato</button>' : '') + '</div>';
-    if (r.estado === 'APROBADO') sec = sec.replace('</div>', '</div>') + '<button type="button" class="cx-btn" data-more="' + esc(r.id) + '">' + I.mas + 'Más acciones</button>';
-    return '<article class="cx-card e-' + r.estadoUI + (r.estado === 'EN_REVISION' ? ' e-EN_REVISION' : '') + '"><div><div class="cx-top"><span class="cx-av">' + esc(ini(r.propietarios)) + '</span><div class="cx-tt"><h3>' + esc(r.propietarios || 'Sin nombre aún') + '</h3>' +
+    var rev = r.estado === 'EN_REVISION', apr = r.estado === 'APROBADO', id = esc(r.id);
+    var prim = '<button type="button" class="cf-pri ' + (rev ? 'amber' : 'indigo') + '" data-open="' + id + '">' + (rev ? 'Revisar contrato' : 'Abrir contrato') + '<span class="cf-go">' + (rev ? I.ojo : I.flecha) + '</span></button>';
+    var gdocs = r.docUrl ? '<a class="cf-it" href="' + esc(r.docUrl) + '" target="_blank" rel="noopener" title="Abrir en Google Docs"><span class="cf-ci blue">' + I.doc + '</span>Google Docs</a>' : '<button type="button" class="cf-it" data-docs="' + id + '" title="Crear el contrato en Google Docs"><span class="cf-ci blue">' + I.plus + '</span>Crear Google Docs</button>';
+    var pdfs = apr ? (r.pdfUrl ? '<a class="cf-it" href="' + esc(r.pdfUrl) + '" target="_blank" rel="noopener" title="Ver el PDF aprobado en Drive"><span class="cf-ci pdf">PDF</span>Ver PDF</a>' : '') + '<button type="button" class="cf-it" data-pdf="' + id + '"><span class="cf-ci">' + I.dl + '</span>Descargar</button>' : '<span class="cf-it off" title="El PDF definitivo se genera cuando se aprueba el contrato"><span class="cf-ci pdf">PDF</span>Se genera al aprobar</span>';
+    var mi = (r.docUrl ? '<button type="button" data-docs="' + id + '" data-regen="1">' + I.ref + 'Regenerar Google Docs</button>' : '') +
+      (r.estado === 'BORRADOR' ? '<button type="button" class="dg" data-del="' + id + '">' + I.trash + 'Eliminar borrador</button>' : '') +
+      ((rev || apr) ? '<button type="button" class="dg" data-cancel="' + id + '">' + I.xc + 'Cancelar contrato</button>' : '');
+    var mas = mi ? '<div class="cf-mw"><button type="button" class="cf-more" data-more="' + id + '" aria-haspopup="true" aria-label="Más acciones">' + I.mas + '<span>Más</span></button><div class="cx-more" data-menu="' + id + '" role="menu">' + mi + '</div></div>' : '';
+    var pie = '<div class="cx-foot">' + prim + '<span class="cf-sep"></span><div class="cf-seg">' + gdocs + pdfs + '</div>' + mas + '</div>';
+    return '<article class="cx-card e-' + r.estadoUI + (r.estado === 'EN_REVISION' ? ' e-EN_REVISION' : '') + '"><div class="cx-bd"><div class="cx-top"><span class="cx-av">' + esc(ini(r.propietarios)) + '</span><div class="cx-tt"><h3>' + esc(r.propietarios || 'Sin nombre aún') + '</h3>' +
       '<div class="cx-id"><code>' + esc(r.id) + '</code>' + (r.version > 1 ? '<span class="cx-pill v">v' + r.version + '</span>' : '') + docs + '</div></div>' +
       '<span class="cx-est e-' + r.estadoUI + '">' + I[ICEST[r.estadoUI] || 'info'] + (ESTA[r.estadoUI] || r.estadoUI) + '</span></div>' +
       '<div class="cx-meta">' + (tipo ? '<span class="cx-m"><span class="cx-pill v">' + esc(tipo) + '</span></span>' : '') + '<span class="cx-m">' + I.pin + '<span title="' + esc(r.inmueble) + '">' + esc(corto(r.inmueble || 'Inmueble sin capturar', 80)) + '</span></span>' +
       '<span class="cx-m">' + I.user + '<span>' + esc(r.asesor) + '</span></span><span class="cx-m" title="' + esc(r.actualizado) + '">' + I.reloj + '<span>' + esc(hace(r.actualizado)) + '</span></span></div>' + aviso + '</div>' +
-      '<div class="cx-act"><button type="button" class="cx-btn ' + (r.estado === 'EN_REVISION' ? 'rev' : 'pri') + '" data-open="' + esc(r.id) + '">' + (r.estado === 'EN_REVISION' ? I.ojo + 'Revisar contrato' : I.flecha + 'Abrir contrato') + '</button>' + sec + menu + '</div></article>';
+      pie + '</article>';
   }
   function pintaAps(anim) {
     if (!q('lista')) armaApsBase();
@@ -708,12 +775,17 @@
     if (w) aviso += '<div class="cx-aviso ' + (w.nivel === 'info' ? 'warn' : w.nivel) + '">' + I.reloj + '<span>Esperando tu revisión desde hace <b>' + w.txt + '</b> · enviado ' + esc(r.fechaEnvio) + '</span></div>';
     if (r.estado === 'OBSERVADO') aviso += '<div class="cx-aviso bad">' + I.alertas + '<span><b>Qué debe corregir el asesor:</b> <q>' + esc(corto(r.comentario, 220)) + '</q></span></div>';
     if (r.estado === 'REVISADO') aviso += '<div class="cx-aviso ok">' + I.checkc + '<span>Revisado por <b>' + esc(r.revisadoPor) + '</b> · ' + esc(r.fechaRevision) + (r.comentario ? ' · <q>' + esc(corto(r.comentario, 140)) + '</q>' : '') + '</span></div>';
-    var rev = r.estado === 'EN_REVISION';
-    return '<article class="cx-card e-' + r.estado + '"><div><div class="cx-top"><span class="cx-av pld">' + I.pld + '</span><div class="cx-tt"><h3>' + esc(r.operacion || r.nombre) + '</h3><div class="cx-id"><code>' + esc(corto(r.nombre, 48)) + '</code></div></div>' +
+    var rev = r.estado === 'EN_REVISION', id = esc(r.id), nom = esc(r.nombre);
+    var abrir = '<a class="cf-it" href="' + esc(r.url) + '" target="_blank" rel="noopener"><span class="cf-ci blue">' + I.doc + '</span>Abrir documento</a>';
+    var hist = '<button type="button" class="cf-it" data-his="' + id + '" data-nom="' + nom + '"><span class="cf-ci">' + I.hist + '</span>Historial</button>';
+    var pie;
+    if (rev) pie = '<div class="cx-foot foot-pld"><button type="button" class="cf-ia" data-chk="' + id + '" data-nom="' + nom + '" title="Revisa RFC, CURP, fechas, nombres y pagos"><span class="cf-ico">' + I.spark + '</span>Revisión automática</button><span class="cf-sep"></span>' +
+      '<div class="cf-pair"><button type="button" class="cf-pri green" data-rev="' + id + '">Marcar revisado<span class="cf-go">' + I.check + '</span></button><button type="button" class="cf-pri warn" data-obs="' + id + '">' + I.alertas + 'Observar</button></div>' +
+      '<div class="cf-seg fin">' + abrir + hist + '</div></div>';
+    else pie = '<div class="cx-foot foot-pld"><a class="cf-pri indigo" href="' + esc(r.url) + '" target="_blank" rel="noopener">Abrir documento<span class="cf-go">' + I.doc + '</span></a><span class="cf-sep"></span><div class="cf-seg">' + hist + '</div></div>';
+    return '<article class="cx-card e-' + r.estado + '"><div class="cx-bd"><div class="cx-top"><span class="cx-av pld">' + I.pld + '</span><div class="cx-tt"><h3>' + esc(r.operacion || r.nombre) + '</h3><div class="cx-id"><code>' + esc(corto(r.nombre, 48)) + '</code></div></div>' +
       '<span class="cx-est e-' + r.estado + '">' + I[ICEST[r.estado] || 'info'] + (ESTP[r.estado] || r.estado) + '</span></div>' +
-      '<div class="cx-meta"><span class="cx-m">' + I.user + '<span>' + esc(r.asociados || 'Sin asociados') + '</span></span><span class="cx-m">' + I.user + '<span>Lo generó ' + esc(r.creador) + '</span></span><span class="cx-m" title="' + esc(r.creado) + '">' + I.reloj + '<span>' + esc(hace(r.creado)) + '</span></span></div>' + aviso + '</div>' +
-      '<div class="cx-act">' + (rev ? '<button type="button" class="cx-btn pri" data-chk="' + esc(r.id) + '" data-nom="' + esc(r.nombre) + '" style="grid-column:1/-1" title="Revisa RFC, CURP, fechas, nombres y pagos">' + I.lupa + 'Revisión automática</button><button type="button" class="cx-btn ok" data-rev="' + esc(r.id) + '">' + I.check + 'Marcar revisado</button><button type="button" class="cx-btn warn" data-obs="' + esc(r.id) + '">' + I.alertas + 'Observar</button>' : '') +
-      '<div class="cx-row2"><a class="cx-btn' + (rev ? '' : ' pri') + '" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="' + (rev ? '' : 'grid-column:1/-1;min-height:54px') + '">' + I.doc + 'Abrir documento</a>' + '<button type="button" class="cx-btn" data-his="' + esc(r.id) + '" data-nom="' + esc(r.nombre) + '" style="' + (rev ? '' : 'grid-column:1/-1') + '">' + I.hist + 'Historial</button></div></div></article>';
+      '<div class="cx-meta"><span class="cx-m">' + I.user + '<span>' + esc(r.asociados || 'Sin asociados') + '</span></span><span class="cx-m">' + I.user + '<span>Lo generó ' + esc(r.creador) + '</span></span><span class="cx-m" title="' + esc(r.creado) + '">' + I.reloj + '<span>' + esc(hace(r.creado)) + '</span></span></div>' + aviso + '</div>' + pie + '</article>';
   }
   function pintaPld(anim) {
     if (!q('lista')) armaPldBase();

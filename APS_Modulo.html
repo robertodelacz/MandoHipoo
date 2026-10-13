@@ -106,6 +106,71 @@
 #aps-root .msg-step{background:var(--err-bg);border:1px solid #f3b6bd;color:#8f1b29;border-radius:10px;padding:12px 14px;font-size:13.5px;font-weight:600;margin-bottom:16px}
 #aps-root .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 #aps-root .acciones .nota{flex:1 1 100%;font-size:12.5px;color:var(--muted)}
+/* ── barra de acciones del contrato (ac2) ── */
+#aps-root .ac2{width:100%;border-radius:20px;background:#fff;border:1px solid #dbe2ef;box-shadow:0 2px 4px rgba(26,34,74,.04),0 22px 38px -30px rgba(26,34,74,.4);overflow:hidden}
+#aps-root .ac2 *{box-sizing:border-box}
+#aps-root .ac2-main{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid #e4e9f4;background:linear-gradient(90deg,#eef3ff,#f8faff)}
+#aps-root .ac2.st-EN_REVISION .ac2-main{background:linear-gradient(90deg,#fff6dc,#fffbf0);border-bottom-color:#f5e3b0}
+#aps-root .ac2.st-APROBADO .ac2-main{background:linear-gradient(90deg,#eaf8f2,#f6fcf9);border-bottom-color:#cbebdd}
+#aps-root .ac2.st-CANCELADO .ac2-main,#aps-root .ac2.st-BORRADOR .ac2-main{background:linear-gradient(90deg,#f3f5fa,#fafbfd);border-bottom-color:#e1e5f0}
+#aps-root .ac2-l,#aps-root .ac2-r{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#aps-root .ac2-r{margin-left:auto}
+#aps-root .ac-pri{display:inline-flex;align-items:center;gap:14px;height:50px;padding:0 8px 0 24px;border:0;border-radius:25px;color:#fff;font:800 15px 'Montserrat',sans-serif;letter-spacing:.1px;cursor:pointer;white-space:nowrap;transition:transform .15s,filter .15s}
+#aps-root .ac-pri.indigo{background:linear-gradient(180deg,#4152bc,#364494);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 5px 0 #232d61,0 14px 20px -10px rgba(35,45,97,.55)}
+#aps-root .ac-pri.green{background:linear-gradient(180deg,#22c08a,#0f9d6e);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 5px 0 #0a6e4d,0 14px 20px -10px rgba(10,110,77,.55)}
+#aps-root .ac-pri:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.05)}
+#aps-root .ac-pri:active:not(:disabled){transform:translateY(3px)}
+#aps-root .ac-pri:disabled{opacity:.5;cursor:not-allowed;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 rgba(26,34,74,.25)}
+#aps-root .ac-go{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center}
+#aps-root .ac-ghost{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 18px 0 10px;border-radius:23px;background:#fff;border:1px solid #cfd8ec;color:#2a3566;font:700 13.5px 'Inter',sans-serif;cursor:pointer;box-shadow:0 1px 2px rgba(26,34,74,.05);transition:background .15s,transform .15s}
+#aps-root .ac-ghost:hover{background:#eef2fc;transform:translateY(-1px)}
+#aps-root .ac-ci{flex:none;width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:#e9edfc;color:#364494}
+#aps-root .ac2-tools{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;padding:16px 20px 18px}
+#aps-root .ac2-g{display:flex;flex-direction:column;gap:7px;min-width:0}
+#aps-root .ac2-g.end{margin-left:auto}
+#aps-root .ac2-t{font:800 10.5px 'Montserrat',sans-serif;letter-spacing:2.2px;text-transform:uppercase;color:#7b86a8}
+#aps-root .ac2-seg{display:flex;flex-wrap:wrap;gap:3px;background:#f6f8fd;border:1px solid #dce3f2;border-radius:18px;padding:4px}
+#aps-root .ac-it{display:inline-flex;align-items:center;gap:9px;min-height:40px;padding:0 14px 0 6px;border:0;border-radius:14px;background:transparent;color:#2a3566;font:700 13px 'Inter',sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .15s}
+#aps-root .ac-it:hover{background:#fff;box-shadow:0 1px 3px rgba(26,34,74,.12)}
+#aps-root .ac-it.blue .ac-ci{background:#e3ecff;color:#2f63d8}
+#aps-root .ac-it.slate .ac-ci{background:#e9edf5;color:#4a5578}
+#aps-root .ac-it.gdocs .ac-ci{background:#dfeafd;color:#1a73e8}
+#aps-root .ac-it.pdf .ac-ci{background:#fde8ea;color:#c0263a}
+#aps-root .ac-it.teal .ac-ci{background:#dcf3f6;color:#0f8594}
+#aps-root .ac-it.green .ac-ci{background:#ddf5eb;color:#0b7c57}
+#aps-root .ac-it.ia .ac-ci{background:#ece8ff;color:#6a5ae0}
+#aps-root .ac2-ex{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#aps-root .ac-more{position:relative}
+#aps-root .ac-more>summary{list-style:none}
+#aps-root .ac-more>summary::-webkit-details-marker{display:none}
+#aps-root .ac-moreb{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 16px;border-radius:23px;background:#fff;border:1px solid #cfd8ec;color:#364494;font:700 13.5px 'Inter',sans-serif;cursor:pointer;box-shadow:0 1px 2px rgba(26,34,74,.05)}
+#aps-root .ac-moreb:hover,#aps-root .ac-more[open]>.ac-moreb{background:#eef2fc}
+#aps-root .ac-menu{position:absolute;right:0;bottom:calc(100% + 8px);z-index:30;min-width:230px;background:#fff;border:1px solid #dce3f2;border-radius:16px;padding:6px;box-shadow:0 18px 40px -12px rgba(26,34,74,.35)}
+#aps-root .ac-mi{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0 12px 0 6px;border:0;border-radius:11px;background:transparent;color:#2a3566;font:700 13.5px 'Inter',sans-serif;cursor:pointer;text-align:left}
+#aps-root .ac-mi:hover{background:#eef2fc}
+#aps-root .ac-mi.danger{color:#b4233a}
+#aps-root .ac-mi.danger .ac-ci{background:#fde8ea;color:#c0263a}
+#aps-root .ac-mi.danger:hover{background:#fdeff1}
+#aps-root .ac-nota{display:flex;align-items:center;gap:10px;margin:0 20px 18px;padding:11px 14px;border-radius:14px;background:#f0f2f8;color:#4a5578;font:500 13px/1.4 'Inter',sans-serif}
+#aps-root .ac-nota.ok{background:#e3f6ee;color:#0b7c57}
+#aps-root .ac-nota svg{flex:none}
+#aps-root .ac-pri:focus-visible,#aps-root .ac-ghost:focus-visible,#aps-root .ac-it:focus-visible,#aps-root .ac-moreb:focus-visible,#aps-root .ac-mi:focus-visible{outline:3px solid #ffb03b;outline-offset:2px}
+@media(max-width:700px){
+  #aps-root .ac2-main{flex-direction:column-reverse;align-items:stretch;padding:14px}
+  #aps-root .ac2-l,#aps-root .ac2-r{width:100%;margin:0}
+  #aps-root .ac2-r .ac-pri{flex:1;justify-content:space-between;height:54px;font-size:16px}
+  #aps-root .ac2-l .ac-ghost{flex:1;justify-content:center;height:50px}
+  #aps-root .ac2-tools{padding:14px 14px 16px;gap:14px}
+  #aps-root .ac2-g,#aps-root .ac2-g.end{width:100%;margin:0}
+  #aps-root .ac2-seg{display:grid;grid-template-columns:1fr 1fr}
+  #aps-root .ac-it{min-height:48px;white-space:normal;line-height:1.2;font-size:13.5px}
+  #aps-root .ac2-ex{width:100%}
+  #aps-root .ac2-ex>.ac-ghost{flex:1 1 100%;justify-content:center;height:50px}
+  #aps-root .ac-more{flex:1 1 100%}
+  #aps-root .ac-moreb{width:100%;justify-content:center;height:50px}
+  #aps-root .ac-menu{left:0;right:0}
+}
+@media(max-width:460px){#aps-root .ac2-seg{grid-template-columns:1fr}#aps-root .ac-it{min-height:50px}}
 /* ── Vista previa ── */
 #aps-root .prev-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
 #aps-root .prev-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
@@ -513,34 +578,78 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     return '<div id="aps_estadoBanner" class="' + claseBanner() + '">' + textoBanner() + '</div>';
   }
   function pintaBanner() { var bx = $('aps_bannerBox'); if (bx) bx.innerHTML = banner(); }
+  /* ── barra de acciones del contrato (asesor y coordinación) ──
+     Mismas acciones y mismas reglas de siempre; solo cambia cómo se ordenan: lo principal arriba,
+     herramientas agrupadas abajo y lo delicado (cancelar / eliminar / descartar) dentro de «Más». */
+  var AC_I = {
+    save: '<path d="M5 4h11l3 3v12a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" fill="currentColor" fill-opacity=".14"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>',
+    send: '<path d="M21 3L10.500 13.500M21 3l-6.500 18-4-7.500L3 9.500z" fill="currentColor" fill-opacity=".14"/>',
+    check: '<path d="M5 12.500l4.500 4.500L19 7.500"/>',
+    dl: '<path d="M12 4v10M7.500 10l4.500 4.500 4.500-4.500"/><path d="M4.500 15v3a2 2 0 002 2h11a2 2 0 002-2v-3"/>',
+    eye: '<path d="M2 12s3.500-7 10-7 10 7 10 7-3.500 7-10 7S2 12 2 12z" fill="currentColor" fill-opacity=".14"/><circle cx="12" cy="12" r="3"/>',
+    print: '<path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="8" rx="2" fill="currentColor" fill-opacity=".14"/><path d="M7 14h10v6H7z" fill="#fff"/><path d="M7 14h10v6H7z"/>',
+    doc: '<path d="M6.500 3h7L19 8.500V20a1 1 0 01-1 1H6.500a1 1 0 01-1-1V4a1 1 0 011-1z" fill="currentColor" fill-opacity=".16"/><path d="M13.500 3v5.500H19M8.500 13h7M8.500 16.500h5"/>',
+    drive: '<path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h4" fill="currentColor" fill-opacity=".12"/>',
+    pages: '<rect x="5" y="3" width="14" height="18" rx="2" fill="currentColor" fill-opacity=".14"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+    shield: '<path d="M12 3l8 3v6c0 5-3.500 8-8 9-4.500-1-8-4-8-9V6z" fill="currentColor" fill-opacity=".14"/><path d="M8.500 12l2.500 2.500 4.500-5"/>',
+    spark: '<path d="M12 3l1.900 5.100L19 10l-5.100 1.900L12 17l-1.900-5.100L5 10l5.100-1.900z" fill="currentColor" fill-opacity=".18"/><path d="M18.500 16l.7 1.800 1.800.7-1.800.7-.7 1.800-.7-1.800-1.800-.7 1.800-.7z"/>',
+    hist: '<path d="M3.500 12a8.500 8.500 0 102.600-6.100L3.500 8.500"/><path d="M3.500 4v4.500H8M12 7.500V12l3 2"/>',
+    copy: '<rect x="8" y="8" width="12" height="12" rx="2" fill="currentColor" fill-opacity=".14"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
+    more: '<circle cx="5.500" cy="12" r="1.600" fill="currentColor"/><circle cx="12" cy="12" r="1.600" fill="currentColor"/><circle cx="18.500" cy="12" r="1.600" fill="currentColor"/>',
+    stop: '<circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".12"/><path d="M5.600 5.600l12.800 12.800"/>',
+    trash: '<path d="M4 7h16M10 3.500h4M6.500 7l.8 12a1.500 1.500 0 001.500 1.400h6.400a1.500 1.500 0 001.500-1.400l.8-12M10 11v6M14 11v6"/>',
+    lock: '<rect x="5" y="11" width="14" height="9" rx="2" fill="currentColor" fill-opacity=".14"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
+  };
+  function acIc(k, sz, sw) { return '<svg width="' + (sz || 18) + '" height="' + (sz || 18) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 1.9) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + AC_I[k] + '</svg>'; }
+  function acItem(k, tone, label, attrs, titulo) {      // botón dentro de un grupo
+    return '<button type="button" class="ac-it ' + tone + '" ' + attrs + (titulo ? ' title="' + titulo + '"' : '') + '><span class="ac-ci">' + acIc(k, 15, 2) + '</span><span class="ac-tx">' + label + '</span></button>';
+  }
+  function acLink(k, tone, label, href, titulo) {
+    return '<a class="ac-it ' + tone + '" href="' + href + '" target="_blank" rel="noopener"' + (titulo ? ' title="' + titulo + '"' : '') + '><span class="ac-ci">' + acIc(k, 15, 2) + '</span><span class="ac-tx">' + label + '</span></a>';
+  }
   function accionesHtml() {
-    var b = '', st = REG ? REG.estado : null, coord = USER.rol === 'coordinador', hay = ISS.length > 0;
+    var st = REG ? REG.estado : null, coord = USER.rol === 'coordinador', hay = ISS.length > 0;
+    var pri = '', izq = '', doc = [], rev = [], extra = '', menu = '', nota = '';
     if (IN_GAS) {
-      if (!ro()) b += '<button type="button" class="btn-sec" data-act="save">💾 Guardar borrador</button>';
+      if (!ro()) izq += '<button type="button" class="ac-ghost" data-act="save"><span class="ac-ci">' + acIc('save', 17, 2) + '</span>Guardar borrador</button>';
       if (!ro() && (!st || st === 'BORRADOR'))
-        b += '<button type="button" class="btn-main" data-act="submit"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>📤 Enviar a revisión</button>';
+        pri += '<button type="button" class="ac-pri indigo" data-act="submit"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>Enviar a revisión<span class="ac-go">' + acIc('send', 17, 2.1) + '</span></button>';
       if (coord && st === 'EN_REVISION')
-        b += '<button type="button" class="btn-main ok" data-act="approve"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>✅ Aprobar y generar PDF</button>';
+        pri += '<button type="button" class="ac-pri green" data-act="approve"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>Aprobar y generar PDF<span class="ac-go">' + acIc('check', 17, 2.6) + '</span></button>';
       if (st === 'APROBADO') {
         // Regla: el coordinador siempre puede descargar. El asesor SOLO si es dueño de este contrato en particular
         // (y éste ya está APROBADO, por eso basta estar dentro de "st === 'APROBADO'"; antes de eso el botón ni existe).
-        b += ((coord || REG.asesor === USER.email) ? '<button type="button" class="btn-main" data-act="download" data-keep="1">⬇️ Descargar PDF aprobado</button>' : '<div class="help" style="flex:1 1 100%">✅ Aprobado por la coordinación. El contrato definitivo lo entrega la coordinación.</div>') +
-             '<button type="button" class="btn-sec" data-act="clone" data-keep="1">📑 Usar como base de uno nuevo</button>' +
-             (coord ? '<button type="button" class="btn-sec" data-act="hojas" data-keep="1" title="Si una firma o unas líneas quedaron solas en una hoja">📐 Ajustar hojas del PDF</button>' : '') +
-             (coord && REG.pdfUrl ? '<a class="btn-sec lnk" href="' + esc(REG.pdfUrl) + '" target="_blank" rel="noopener">👁 Ver PDF aprobado en Drive</a>' : '');
+        if (coord || REG.asesor === USER.email) pri += '<button type="button" class="ac-pri indigo" data-act="download" data-keep="1">Descargar PDF aprobado<span class="ac-go">' + acIc('dl', 17, 2.1) + '</span></button>';
+        else nota += '<div class="ac-nota ok">' + acIc('check', 16, 2.2) + '<span>Aprobado por la coordinación. El contrato definitivo lo entrega la coordinación.</span></div>';
+        izq += '<button type="button" class="ac-ghost" data-act="clone" data-keep="1"><span class="ac-ci">' + acIc('copy', 17, 2) + '</span>Usar como base de uno nuevo</button>';
       }
     }
-    if (puedeImprimir()) b += '<button type="button" class="btn-sec" data-act="print" data-keep="1" title="Solo para revisión: el contrato definitivo es el PDF aprobado">' + (IN_GAS ? '🖨️ Imprimir (revisión)' : '🖨️ Imprimir / Guardar PDF') + '</button>';
-    else if (IN_GAS && st !== 'APROBADO') b += '<div class="nota">🔒 El PDF definitivo se habilita cuando la coordinación apruebe el contrato.</div>';
-    if (IN_GAS && coord) b += '<button type="button" class="btn-sec" data-act="docs" data-keep="1" title="Descarga el contrato en Google Docs">📝 Descargar en Google Docs</button>';
-    b += '<button type="button" class="btn-sec" data-act="zoom" data-keep="1">🔍 Ver contrato completo</button>';
-    if (IN_GAS && REG && st === 'APROBADO') b += '<button type="button" class="btn-sec" data-act="verificar" data-keep="1" title="Comprueba folio, quién aprobó y que los datos no hayan cambiado">🔎 Verificar</button>';
-    if (coord && st !== 'APROBADO' && st !== 'CANCELADO') b += '<button type="button" class="btn-sec" data-act="revisar" data-keep="1" title="Busca errores de dedo y datos que no cuadran">🔎 Revisión automática</button>';
-    if (IN_GAS && coord && REG && st !== 'BORRADOR' && REG.cambiosCoord > 0) b += '<button type="button" class="btn-sec" data-act="historial" data-keep="1" title="La coordinación corrigió este contrato después de que el asesor lo envió">🕘 Historial de cambios</button>';
-    if (IN_GAS && coord && REG && (st === 'EN_REVISION' || st === 'APROBADO')) b += '<button type="button" class="btn-sec danger" data-act="cancelar" data-keep="1">⛔ Cancelar contrato</button>';
-    if (IN_GAS && coord && REG && st === 'BORRADOR') b += '<button type="button" class="btn-sec danger" data-act="eliminar" data-keep="1">🗑️ Eliminar borrador</button>';
-    if (IN_GAS && !coord && REG && st === 'BORRADOR' && !ro()) b += '<button type="button" class="btn-sec danger" data-act="descartar">🗑️ Descartar borrador</button>';
-    return b;
+    // Documento: ver, imprimir, Docs, PDF
+    doc.push(acItem('eye', 'blue', 'Ver contrato completo', 'data-act="zoom" data-keep="1"'));
+    if (puedeImprimir()) doc.push(acItem('print', 'slate', IN_GAS ? 'Imprimir (revisión)' : 'Imprimir / Guardar PDF', 'data-act="print" data-keep="1"', 'Solo para revisión: el contrato definitivo es el PDF aprobado'));
+    else if (IN_GAS && st !== 'APROBADO') nota += '<div class="ac-nota">' + acIc('lock', 16, 2) + '<span>El PDF definitivo se habilita cuando la coordinación apruebe el contrato.</span></div>';
+    if (IN_GAS && coord) doc.push(acItem('doc', 'gdocs', 'Descargar en Google Docs', 'data-act="docs" data-keep="1"', 'Descarga el contrato en Google Docs'));
+    if (IN_GAS && st === 'APROBADO' && coord && REG.pdfUrl) doc.push(acLink('drive', 'pdf', 'Ver PDF aprobado en Drive', esc(REG.pdfUrl)));
+    if (IN_GAS && st === 'APROBADO' && coord) doc.push(acItem('pages', 'teal', 'Ajustar hojas del PDF', 'data-act="hojas" data-keep="1"', 'Si una firma o unas líneas quedaron solas en una hoja'));
+    if (IN_GAS && REG && st === 'APROBADO') doc.push(acItem('shield', 'green', 'Verificar', 'data-act="verificar" data-keep="1"', 'Comprueba folio, quién aprobó y que los datos no hayan cambiado'));
+    // Revisión: IA e historial
+    if (coord && st !== 'APROBADO' && st !== 'CANCELADO') rev.push(acItem('spark', 'ia', 'Revisión automática', 'data-act="revisar" data-keep="1"', 'Busca errores de dedo y datos que no cuadran'));
+    if (IN_GAS && coord && REG && st !== 'BORRADOR' && REG.cambiosCoord > 0) rev.push(acItem('hist', 'blue', 'Historial de cambios', 'data-act="historial" data-keep="1"', 'La coordinación corrigió este contrato después de que el asesor lo envió'));
+    // Lo delicado va dentro de «Más»
+    if (IN_GAS && coord && REG && (st === 'EN_REVISION' || st === 'APROBADO')) menu += '<button type="button" class="ac-mi danger" data-act="cancelar" data-keep="1"><span class="ac-ci">' + acIc('stop', 16, 2) + '</span>Cancelar contrato</button>';
+    if (IN_GAS && coord && REG && st === 'BORRADOR') menu += '<button type="button" class="ac-mi danger" data-act="eliminar" data-keep="1"><span class="ac-ci">' + acIc('trash', 16, 2) + '</span>Eliminar borrador</button>';
+    if (IN_GAS && !coord && REG && st === 'BORRADOR' && !ro()) menu += '<button type="button" class="ac-mi danger" data-act="descartar"><span class="ac-ci">' + acIc('trash', 16, 2) + '</span>Descartar borrador</button>';
+    var tono = !st ? 'nuevo' : st;
+    var h = '<div class="ac2 st-' + tono + '">';
+    if (pri || izq) h += '<div class="ac2-main"><div class="ac2-l">' + izq + '</div><div class="ac2-r">' + pri + '</div></div>';
+    h += '<div class="ac2-tools">' +
+         '<div class="ac2-g"><span class="ac2-t">Documento</span><div class="ac2-seg">' + doc.join('') + '</div></div>' +
+         (rev.length ? '<div class="ac2-g"><span class="ac2-t">Revisión</span><div class="ac2-seg">' + rev.join('') + '</div></div>' : '') +
+         ((extra || menu) ? '<div class="ac2-g end"><div class="ac2-ex">' + extra +
+           (menu ? '<details class="ac-more"><summary class="ac-moreb" title="Más acciones" aria-label="Más acciones">' + acIc('more', 20, 2) + '<span>Más</span></summary><div class="ac-menu">' + menu + '</div></details>' : '') + '</div></div>' : '') +
+         '</div>' + nota + '</div>';
+    return h;
   }
   function visible() { var a = ['operacion', 'cliente', 'inmueble']; if (D.tieneVenta(S)) a.push('venta'); if (D.tieneRenta(S)) a.push('renta'); a.push('firma'); return a; }
 
@@ -1273,6 +1382,10 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     }
     if (t.getAttribute && t.getAttribute('data-fmt') === 'money') {
       var n = U.parseNum(t.value); if (!isNaN(n)) { t.value = U.formatoNum(n); setP(t.getAttribute('data-k'), t.value); toca(); refresh(false); } }
+  });
+  document.addEventListener('click', function (e) {      // cierra el menú «Más» al tocar fuera o al elegir una opción
+    var ds = ROOT.querySelectorAll('details.ac-more[open]');
+    for (var q = 0; q < ds.length; q++) if (!ds[q].contains(e.target) || e.target.closest('.ac-menu button')) ds[q].removeAttribute('open');
   });
   host.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
