@@ -2606,9 +2606,10 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     }
     var h; new MutationObserver(function () { clearTimeout(h); h = setTimeout(tag, 40); }).observe(document.body, { childList: true, subtree: true }); tag();
   })();
-  function hayPantalla(s) { return !!document.getElementById(CONTENEDOR[s]); }
+  function hayPantalla(s) { if (s === 'revacc' && USUARIO.backup) return false; return !!document.getElementById(CONTENEDOR[s]); }      /* el rol Backup no ve «Accesos del equipo» (el servidor además lo rechaza) */
   function irA(s, filtro) {          /* filtro (opcional): qué lista abrir dentro de la revisión de coordinación */
     if (s === 'consola') s = 'revaps';
+    if (s === 'revacc' && USUARIO.backup) s = 'revaps';
     window.PANTALLA = s; window.NOV_OTRA = false;
     if (typeof ayUbica === 'function') ayUbica();
     document.body.setAttribute('data-pantalla', s);
@@ -2738,7 +2739,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     var saludo = USUARIO.genero === 'f' ? 'Bienvenida' : (USUARIO.genero === 'm' ? 'Bienvenido' : 'Bienvenido/a');    // 'm'/'f' vienen del servidor (columna "Género" o, si no está, una adivinanza por el nombre)
     var nom = USUARIO.nombre ? USUARIO.nombre.split(' ')[0] : '';
     document.getElementById('inicioSaludo').innerHTML = hmEsc(saludo) + (nom ? ',<br><em>' + hmEsc(nom) + '</em>' : '');
-    var rol = document.getElementById('hmRol'); rol.textContent = coord ? 'Coordinación' : 'Asesor'; rol.className = 'hm-rol' + (coord ? ' coord' : '');
+    var rol = document.getElementById('hmRol'); rol.textContent = USUARIO.backup ? 'Backup' : (coord ? 'Coordinación' : 'Asesor'); rol.className = 'hm-rol' + (coord ? ' coord' : '');
     document.getElementById('inicioQuien').textContent = USUARIO.email;
     var f = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
     var hr = new Date().getHours(); document.getElementById('hmFecha').textContent = (hr < 12 ? 'Buenos días' : (hr < 19 ? 'Buenas tardes' : 'Buenas noches')) + ' · ' + f;
@@ -2748,8 +2749,8 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
       grande('pld', 'Generar documento Pre PLD', 'Crea el Pre-Aviso PLD de una operación, agrega pagos a una operación existente o consulta tus documentos.', 'Generar Pre PLD', true));
     var h = '';
     if (coord && hayPantalla('revaps')) {
-      h += '<h2>Coordinación</h2><div class="hm-acc dos">' +
-        tarjeta('revacc', 'Accesos del equipo', 'Altas y bajas de asesores en toda la plataforma.', { coord: true }) +
+      var tAcc = hayPantalla('revacc') ? tarjeta('revacc', 'Accesos del equipo', 'Altas y bajas de asesores en toda la plataforma.', { coord: true }) : '';
+      h += '<h2>Coordinación</h2><div class="hm-acc ' + (tAcc ? 'dos' : 'uno') + '">' + tAcc +
         (hayPantalla('tablero') ? tarjeta('tablero', 'Tablero Hipoo', 'Indicadores de la actividad inmobiliaria.', { coord: true, externo: !!TABLERO_URL, nota: TABLERO_URL ? 'Otra pestaña' : '' }) : '') + '</div>';
     }
     pon(host, h);
@@ -3007,14 +3008,14 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   function ayVisible(e) { return !!(e && e.getClientRects().length); }
   function ayPasos() {
     var q = function (sel) { return document.querySelector('#pantalla-inicio ' + sel); }, P = [], coord = USUARIO.rol === 'coordinador';
-    P.push({ el: function () { return q('.hm-hero .hm-in'); }, ic: 'guia', t: 'Tu pantalla principal', x: 'Desde aquí llegas a todo. Arriba ves quién eres y tu rol (' + (coord ? 'Coordinación' : 'Asesor') + '), que define lo que puedes hacer.' });
+    P.push({ el: function () { return q('.hm-hero .hm-in'); }, ic: 'guia', t: 'Tu pantalla principal', x: 'Desde aquí llegas a todo. Arriba ves quién eres y tu rol (' + (USUARIO.backup ? 'Backup de la coordinación' : (coord ? 'Coordinación' : 'Asesor')) + '), que define lo que puedes hacer.' });
     P.push({ el: function () { return ayEl('hmLive'); }, ic: 'monitor', t: 'Se actualiza sola', x: 'La luz verde indica que la información está en vivo: no necesitas recargar la página. Si se pone ámbar, está reconectando.' });
     P.push({ el: function () { return q('.hm-bc.aps'); }, ic: 'aps', t: 'Generar contrato APS', x: 'Aquí capturas el Aviso de Prestación de Servicios paso a paso. Al terminar lo envías a revisión de la coordinación. «Ver mis registros» abre todos tus contratos y su estado.' });
     P.push({ el: function () { return q('.hm-bc.pld'); }, ic: 'pld', t: 'Generar documento Pre PLD', x: 'Crea el Pre-Aviso PLD de una operación, agrega pagos a una operación que ya existe o consulta los documentos que ya hiciste.' });
     P.push({ el: function () { return q('.hm-kpi'); }, ic: 'lista', t: 'Tus números de un vistazo', x: 'Cuántos contratos tienes en borrador, en revisión y aprobados' + (coord ? ' (de todo el equipo)' : '') + '. Toca cualquier cuadro para ir directo a esa lista, o «Ver todos» para abrirla completa.' + (coord ? ' Aquí también revisas lo pendiente: es tu bandeja de revisión.' : '') });
     P.push({ el: function () { return document.querySelectorAll('#pantalla-inicio .hm-kpi')[1]; }, ic: 'pld', t: 'Pre PLD: su avance', x: 'Lo mismo para Pre PLD. En rojo aparece lo que ' + (coord ? 'ya observaste y espera corrección' : 'la coordinación te regresó con observaciones y debes corregir') + '.' });
     if (coord) {
-      P.push({ el: function () { var b = q('.hm-card [data-ir="revacc"]'); return b && b.parentNode; }, ic: 'revacc', t: 'Accesos del equipo', x: 'Agrega asesores nuevos y activa o desactiva su acceso a toda la plataforma.' });
+      if (!USUARIO.backup) P.push({ el: function () { var b = q('.hm-card [data-ir="revacc"]'); return b && b.parentNode; }, ic: 'revacc', t: 'Accesos del equipo', x: 'Agrega asesores nuevos y activa o desactiva su acceso a toda la plataforma.' });
       P.push({ el: function () { var b = q('.hm-card [data-ir="tablero"]'); return b && b.parentNode; }, ic: 'tablero', t: 'Tablero Hipoo', x: 'Indicadores de la actividad inmobiliaria.' });
     }
     P.push({ el: function () { return ayEl('hmSide'); }, fijo: true, antes: function () { if (!novAbierto()) novAbre(true, false); }, ic: 'campana', t: 'Novedades en vivo', x: 'Cada vez que un contrato se envía, se aprueba, se cancela o recibe observaciones, aparece aquí al instante, con su historial por día. Las nuevas traen la etiqueta NUEVO. Con el botón de novedades de arriba (se ilumina en naranja cuando hay algo nuevo) lo abres o lo cierras.' });

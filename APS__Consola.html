@@ -236,7 +236,7 @@
 #con-root .cx-tags{display:flex;flex-wrap:wrap;gap:8px}
 #con-root .cx-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font:800 12px 'Inter',sans-serif;background:#eef0fb;color:var(--navy)}
 #con-root .cx-tag svg{width:14px;height:14px}
-#con-root .cx-tag.coord{background:#dff1fb;color:#0b4a6b}#con-root .cx-tag.on{background:var(--ok-bg);color:#0a6b4a}#con-root .cx-tag.off{background:var(--err-bg);color:#8f1b29}#con-root .cx-tag.you{background:#fff1d6;color:#7a5200}
+#con-root .cx-tag.coord{background:#dff1fb;color:#0b4a6b}#con-root .cx-tag.bk{background:#ece6fb;color:#4a2f9a}#con-root .cx-tag.on{background:var(--ok-bg);color:#0a6b4a}#con-root .cx-tag.off{background:var(--err-bg);color:#8f1b29}#con-root .cx-tag.you{background:#fff1d6;color:#7a5200}
 #con-root .cx-last{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted)}
 #con-root .cx-last svg{width:17px;height:17px;color:#8792b5}
 #con-root .cx-pa{display:flex;gap:10px;align-items:stretch}
@@ -253,7 +253,7 @@
 #con-root .cx-fld input:focus,#con-root .cx-fld select:focus{outline:none;background:#fff;box-shadow:0 0 0 5px rgba(53,183,197,.22),inset 0 0 0 2px var(--primary)}
 #con-root .cx-fld input:disabled{opacity:.65}
 #con-root .cx-seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px;border-radius:18px;background:var(--soft);box-shadow:inset 0 0 0 2px #dbe2ef}
-#con-root .cx-seg button{min-height:48px;border:0;border-radius:13px;background:transparent;color:var(--muted);font:800 14.5px 'Montserrat',sans-serif;cursor:pointer;transition:background .2s,color .2s}
+#con-root .cx-seg.tres{grid-template-columns:repeat(3,1fr);gap:6px;padding:5px}#con-root .cx-seg.tres button{padding:0 4px;font-size:13.5px}#con-root .cx-seg button{min-height:48px;border:0;border-radius:13px;background:transparent;color:var(--muted);font:800 14.5px 'Montserrat',sans-serif;cursor:pointer;transition:background .2s,color .2s}
 #con-root .cx-seg button.on{background:linear-gradient(135deg,#4256c4,#2b377a);color:#fff;box-shadow:0 8px 16px -8px rgba(54,68,148,.8)}
 #con-root .cx-hint{margin:7px 2px 0;font-size:12.5px;line-height:1.5;color:#7a85a8}
 #con-root .cx-warnbar{display:flex;gap:12px;align-items:flex-start;margin:0 0 18px;padding:14px 18px;border-radius:16px;background:var(--warn-bg);color:#7a5200;font:600 14px/1.55 'Inter',sans-serif}
@@ -618,11 +618,12 @@
   /* ── Encabezado, tarjetas de números y pestañas ── */
   function eligeIcono(k) { return I[k] || ''; }
   function abrir(seccion, filtro) {
+    if (seccion === 'acc' && window.USUARIO && window.USUARIO.backup) seccion = 'aps';      // el rol Backup no administra accesos (el servidor también lo rechaza)
     st.seccion = seccion; st.vista = SECCIONES[seccion].tabs[0][0];
     if (seccion === 'aps' && filtro) st.fa = filtro;
     if (seccion === 'pld' && filtro) st.fp = filtro;
     if (seccion === 'acc') { st.eq = st.eq || []; }
-    if ((seccion === 'aps' || seccion === 'pld') && !st.nomCargados) { st.nomCargados = 1; srv('ASESORES_listar', [], function (res) { st.eq = res.equipo || []; if (!q('chips')) return; if (st.vista === 'aps' && st.aps) pintaAps(false); else if (st.vista === 'pld' && st.pld) pintaPld(false); }, null, 'silencio'); }
+    if ((seccion === 'aps' || seccion === 'pld') && !st.nomCargados) { st.nomCargados = 1; srv('ASESORES_nombres', [], function (res) { st.eq = res.equipo || []; if (!q('chips')) return; if (st.vista === 'aps' && st.aps) pintaAps(false); else if (st.vista === 'pld' && st.pld) pintaPld(false); }, null, 'silencio'); }
     var S = SECCIONES[seccion];
     q('eyebrow').innerHTML = I.sparkle + esc(S.eyebrow); q('titulo').innerHTML = esc(S.t1) + '<em>' + esc(S.t2) + '</em>'; q('sub').textContent = S.sub;
     q('icoRef').innerHTML = I.ref;
@@ -862,7 +863,7 @@
   var CORONA = '<svg viewBox="0 0 34 26"><defs><linearGradient id="cxOro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe27a"/><stop offset="1" stop-color="#f5a623"/></linearGradient></defs><path d="M3 22 1 7l8 6 8-11 8 11 8-6-2 15z" fill="url(#cxOro)" stroke="#b8750a" stroke-width="1.400" stroke-linejoin="round"/><rect x="3" y="22" width="28" height="3.400" rx="1.400" fill="#f5a623" stroke="#b8750a" stroke-width="1.200"/><circle cx="1.500" cy="6.500" r="2" fill="#ff6b9a"/><circle cx="17" cy="2.500" r="2.200" fill="#35B7C5"/><circle cx="32.500" cy="6.500" r="2" fill="#ff6b9a"/><circle cx="17" cy="17" r="2" fill="#fff" fill-opacity=".85"/></svg>';
   function tarjetaAcc(x) {
     var yo = x.correo === st.yo, bloqueado = yo || x.dueno;
-    var tags = '<span class="cx-tag ' + (x.coordinador ? 'coord' : '') + '">' + (x.coordinador ? I.pld.replace('<svg', '<svg width="14" height="14"') + 'Coordinación' : I.user.replace('<svg', '<svg width="14" height="14"') + 'Asesor') + '</span>' +
+    var tags = '<span class="cx-tag ' + (x.coordinador ? 'coord' : (x.backup ? 'bk' : '')) + '">' + (x.coordinador ? I.pld.replace('<svg', '<svg width="14" height="14"') + 'Coordinación' : (x.backup ? I.pld.replace('<svg', '<svg width="14" height="14"') + 'Backup' : I.user.replace('<svg', '<svg width="14" height="14"') + 'Asesor')) + '</span>' +
       '<span class="cx-tag ' + (x.activo ? 'on' : 'off') + '">' + (x.activo ? 'Con acceso' : 'Sin acceso') + '</span>' + (yo ? '<span class="cx-tag you">Tu cuenta</span>' : (x.dueno ? '<span class="cx-tag you">Cuenta dueña del sistema</span>' : ''));
     var reina = REINAS.indexOf(x.correo) >= 0, av = '<span class="cx-av">' + esc(ini(x.nombre || x.correo)) + '</span>';
     if (reina) av = '<span class="cx-avw" title="La reina de la coordinación">' + av + '<span class="cx-crown" aria-hidden="true">' + CORONA + '</span></span>';
@@ -876,7 +877,7 @@
     if (!q('lista')) armaAccBase();
     var av = q('aviso'); av.style.display = st.bloqueoActivo ? 'none' : ''; av.innerHTML = st.bloqueoActivo ? '' : I.alertas + '<span><b>El bloqueo de acceso está apagado</b> (BLOQUEO_ACCESO en false en la configuración). Mientras esté así, dar de baja a alguien aquí NO le impide entrar a Pre PLD ni a la consola.</span>';
     var t = st.textoE.toLowerCase().trim(), base = (st.eq || []).filter(function (x) { return !t || (x.nombre + ' ' + x.correo).toLowerCase().indexOf(t) >= 0; });
-    var F = { todos: function () { return true; }, activos: function (x) { return x.activo; }, coords: function (x) { return x.activo && x.coordinador; }, baja: function (x) { return !x.activo; } };
+    var F = { todos: function () { return true; }, activos: function (x) { return x.activo; }, coords: function (x) { return x.activo && (x.coordinador || x.backup); }, baja: function (x) { return !x.activo; } };
     var rows = base.filter(F[st.fe] || F.todos);
     q('chips').innerHTML = FE.map(function (c) { return '<button type="button" class="cx-chip' + (st.fe === c[0] ? ' on' : '') + '" data-fe="' + c[0] + '">' + c[1] + '<span class="n">' + base.filter(F[c[0]]).length + '</span></button>'; }).join('');
     q('cnt').textContent = rows.length ? rows.length + (rows.length === 1 ? ' persona' : ' personas') : '';
@@ -885,19 +886,19 @@
     L.innerHTML = rows.length ? rows.map(tarjetaAcc).join('') : vacio('equipo', t ? 'Sin coincidencias' : 'Nadie en esta vista', t ? 'Ninguna persona coincide con «' + st.textoE + '».' : 'Cuando agregues o desactives personas, aparecerán aquí.');
   }
   function formAsesor(x) {
-    var nuevo = !x, v = x || { correo: '', nombre: '', genero: '', coordinador: false, activo: true };
+    var nuevo = !x, v = x || { correo: '', nombre: '', genero: '', coordinador: false, backup: false, activo: true };
     var c = q('dlgC'); dlgCb = null;
     c.innerHTML = '<div class="ic">' + (nuevo ? I.userplus : I.lapiz) + '</div><h3>' + (nuevo ? 'Agregar asesor' : 'Editar persona') + '</h3><p>' + (nuevo ? 'Podrá entrar a la plataforma con su cuenta de Google en cuanto la agregues.' : 'Los cambios aplican en su siguiente acción dentro de la plataforma.') + '</p>' +
       '<div class="cx-fld"><label for="cxN">Nombre completo</label><input id="cxN" type="text" maxlength="80" placeholder="Ej. Ana Pérez" value="' + esc(v.nombre) + '" autocomplete="off"></div>' +
       '<div class="cx-fld"><label for="cxC">Correo de Google</label><input id="cxC" type="email" placeholder="nombre@hipoo.mx" value="' + esc(v.correo) + '"' + (nuevo ? '' : ' disabled') + ' autocomplete="off" inputmode="email"></div>' +
       '<div class="cx-fld"><label for="cxG">Para saludarle (Bienvenido / Bienvenida)</label><select id="cxG"><option value="">Que el sistema lo deduzca del nombre</option><option value="f"' + (v.genero === 'f' ? ' selected' : '') + '>Mujer: «Bienvenida»</option><option value="m"' + (v.genero === 'm' ? ' selected' : '') + '>Hombre: «Bienvenido»</option></select></div>' +
-      '<div class="cx-fld"><label>Rol</label><div class="cx-seg" data-r="seg"><button type="button" data-rol="0" class="' + (v.coordinador ? '' : 'on') + '">Asesor</button><button type="button" data-rol="1" class="' + (v.coordinador ? 'on' : '') + '">Coordinación</button></div><div class="cx-hint">La coordinación revisa y aprueba contratos y Pre PLD, y administra estos accesos.</div></div>' +
+      '<div class="cx-fld"><label>Rol</label><div class="cx-seg tres" data-r="seg"><button type="button" data-rol="0" class="' + (v.coordinador || v.backup ? '' : 'on') + '">Asesor</button><button type="button" data-rol="1" class="' + (v.coordinador ? 'on' : '') + '">Coordinación</button><button type="button" data-rol="2" class="' + (v.backup ? 'on' : '') + '">Backup</button></div><div class="cx-hint">La coordinación revisa y aprueba contratos y Pre PLD, y administra estos accesos. <b>Backup</b> hace lo mismo que la coordinación (revisar, aprobar, observar, cancelar), pero no ve ni cambia los accesos del equipo.</div></div>' +
       '<div class="cx-derr" data-r="derr"></div><div class="cx-dbtn"><button type="button" class="cx-btn" data-a="dlgNo">Cancelar</button><button type="button" class="cx-btn pri" data-a="dlgSi">' + I.check + (nuevo ? 'Agregar' : 'Guardar') + '</button></div>';
     c._o = { valida: function () {
       var nombre = c.querySelector('#cxN').value.trim(), correo = c.querySelector('#cxC').value.trim().toLowerCase(), e = c.querySelector('[data-r="derr"]');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { e.textContent = 'Escribe un correo válido (ej. nombre@hipoo.mx).'; e.classList.add('on'); c.querySelector('#cxC').focus(); return null; }
       if (nuevo && !nombre) { e.textContent = 'Escribe el nombre de la persona.'; e.classList.add('on'); c.querySelector('#cxN').focus(); return null; }
-      return { correo: correo, nombre: nombre, genero: c.querySelector('#cxG').value, coordinador: c.querySelector('[data-rol="1"]').classList.contains('on'), activo: v.activo !== false };
+      return { correo: correo, nombre: nombre, genero: c.querySelector('#cxG').value, rol: c.querySelector('[data-rol="2"]').classList.contains('on') ? 'backup' : (c.querySelector('[data-rol="1"]').classList.contains('on') ? 'coordinador' : 'asesor'), activo: v.activo !== false };
     } };
     dlgCb = function (acc) {
       srv('ASESORES_guardar', [acc], function (r) { toast(r.nuevo ? 'Asesor agregado: ya puede entrar.' : 'Cambios guardados.'); vAcc(false, true); }, 'Guardando…');
@@ -906,7 +907,7 @@
   }
   function cambiaAcceso(correo) {
     var x = (st.eq || []).filter(function (y) { return y.correo === correo; })[0]; if (!x) return;
-    var aplica = function () { srv('ASESORES_guardar', [{ correo: x.correo, nombre: x.nombre, genero: x.genero, coordinador: x.coordinador, activo: !x.activo }], function () { toast(x.activo ? 'Acceso desactivado: ' + (x.nombre || x.correo) : 'Acceso activado: ' + (x.nombre || x.correo)); vAcc(false, true); }, x.activo ? 'Desactivando acceso…' : 'Activando acceso…'); };
+    var aplica = function () { srv('ASESORES_guardar', [{ correo: x.correo, nombre: x.nombre, genero: x.genero, rol: x.backup ? 'backup' : (x.coordinador ? 'coordinador' : 'asesor'), activo: !x.activo }], function () { toast(x.activo ? 'Acceso desactivado: ' + (x.nombre || x.correo) : 'Acceso activado: ' + (x.nombre || x.correo)); vAcc(false, true); }, x.activo ? 'Desactivando acceso…' : 'Activando acceso…'); };
     if (!x.activo) return aplica();
     dialogo({ titulo: '¿Desactivar el acceso?', icono: 'candado', tono: 'bad', texto: '<b>' + esc(x.nombre || x.correo) + '</b> verá la pantalla de acceso restringido en su siguiente acción y no podrá usar nada de la plataforma. Sus contratos y documentos se conservan, y puedes reactivarlo cuando quieras.', boton: 'Sí, desactivar', btnIcono: 'candado', btnClase: 'dgsolid' }, aplica);
   }

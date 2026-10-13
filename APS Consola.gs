@@ -18,6 +18,12 @@ function APS_requiereAdmin_() {
   if (u.rol !== 'coordinador') throw new Error('Esta función es solo para la coordinación.');
   return u;
 }
+/** Solo la coordinación COMPLETA (no el rol Backup): altas, bajas y cambios de rol del equipo. */
+function APS_requiereAccesos_() {
+  var u = APS_requiereAdmin_();
+  if (u.backup) throw new Error('Esta función no está disponible para el rol Backup.');
+  return u;
+}
 function APS_hoy_() { return Utilities.formatDate(new Date(), APS_CONFIG.ZONA, 'yyyy-MM-dd'); }
 function APS_sumaDias_(iso, n) {
   var p = iso.split('-'), d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n));
@@ -131,7 +137,7 @@ function PLD_enviarRevision(id) {
       APS_coordinadores_().forEach(function (c) { try { DriveApp.getFileById(b.id).addCommenter(c); } catch (err) { Logger.log('No se pudo compartir con ' + c + ': ' + err.message); } });
     }
     APS_audit_('PLD', 'ENVIAR_REVISION', b.id, b.operacion);
-    APS_notificar_(APS_coordinadores_(), 'Pre PLD por revisar — ' + b.nombre, '<b>' + APS_escHtml_(APS_nombreDe_(u.email)) + '</b> envió a revisión un Pre PLD. Ábrelo desde el sistema para revisarlo.',
+    APS_notificar_(APS_coordinadores_(true), 'Pre PLD por revisar — ' + b.nombre, '<b>' + APS_escHtml_(APS_nombreDe_(u.email)) + '</b> envió a revisión un Pre PLD. Ábrelo desde el sistema para revisarlo.',
       { params: { modulo: 'revpld' }, sistema: 'Pre PLD', titulo: 'Hay un Pre PLD esperando tu revisión', etiqueta: 'Por revisar', tono: 'warn', boton: 'Ir a la revisión de Pre PLD',
         datos: [['Documento', b.nombre], ['Operación', b.operacion], ['Asociados', it.asociados], ['Enviado por', APS_nombreDe_(u.email) + ' · ' + u.email], ['Enviado', reg.fechaEnvio]] });
     return PLD_item_(b, R.mapa[b.id], null);
@@ -254,13 +260,14 @@ function CONSOLA_config() {
 
 /** Últimos 300 movimientos de la bitácora de auditoría (opcionalmente filtrados por texto y por módulo: 'APS' o 'PLD'). */
 function CONSOLA_auditoria(texto, modulo) {
-  APS_requiereAdmin_();
+  var uAud = APS_requiereAdmin_();
   var sh = APS_hojaAux_('Auditoria', APS_AUD_COLS);
   if (sh.getLastRow() < 2) return [];
   var q = String(texto || '').toLowerCase().trim(), ult = sh.getLastRow(), desde = (q || modulo) ? 2 : Math.max(2, ult - 999);      // sin filtros: lo más reciente; con filtros: toda la bitácora
   var filas = sh.getRange(desde, 1, ult - desde + 1, 6).getValues().map(function (v) {
     return { fecha: String(v[0]), usuario: String(v[1]), modulo: String(v[2]), accion: String(v[3]), ref: String(v[4]), detalle: String(v[5]) };
   }).reverse();
+  if (uAud.backup) filas = filas.filter(function (x) { return x.modulo !== 'ACCESO' && x.modulo !== 'ACCESOS'; });      // el Backup no ve las altas, bajas ni intentos bloqueados
   return filas.filter(function (x) { return (!modulo || x.modulo === modulo || (modulo === 'ACC' && (x.modulo === 'ACCESO' || x.modulo === 'ACCESOS'))) && (!q || [x.usuario, x.modulo, x.accion, x.ref, x.detalle].join(' ').toLowerCase().indexOf(q) >= 0); }).slice(0, 300);
 }
 
@@ -303,23 +310,24 @@ function ASES_hoja_() {
   return { sh: sh, C: C };
 }
 function ASES_esCoord_(v) { return /coord|admin|^(si|sí|s|x|1|true|yes)$/.test(String(v).trim().toLowerCase()); }
+function ASES_esBackup_(v) { return /backup|respaldo/.test(String(v).trim().toLowerCase()); }
 /** Equipo completo para la pantalla: filas de la pestaña + cuentas que entran por otra vía (arreglo fijo de coordinadores, archivo externo). */
 function ASESORES_listar() {
-  APS_requiereAdmin_();
+  APS_requiereAccesos_();
   var H = ASES_hoja_(), sh = H.sh, C = H.C, n = Math.max(0, sh.getLastRow() - 1), rows = n ? sh.getRange(2, 1, n, sh.getLastColumn()).getValues() : [];
   var vistos = {}, lista = [];
   rows.forEach(function (r, i) {
     var em = String(r[C.correo - 1] || '').toLowerCase().trim(); if (!APS_RE_CORREO_.test(em) || vistos[em]) return; vistos[em] = 1;
     var act = r[C.activo - 1], g = String(r[C.genero - 1] || '').trim().toLowerCase();
     lista.push({ correo: em, nombre: String(r[C.nombre - 1] || '').trim(), genero: /^(f|mujer|fem|sra|srita|señora)/.test(g) ? 'f' : (/^(m|h|masc|hombre|sr|señor)/.test(g) ? 'm' : ''),
-      coordinador: ASES_esCoord_(r[C.rol - 1]), activo: !(String(act).trim() !== '' && ASES_RE_NO_.test(String(act).trim())), fila: i + 2, fuente: 'hoja', dueno: APS_esAdminTecnico_(em) });
+      coordinador: ASES_esCoord_(r[C.rol - 1]) && !ASES_esBackup_(r[C.rol - 1]), backup: ASES_esBackup_(r[C.rol - 1]), activo: !(String(act).trim() !== '' && ASES_RE_NO_.test(String(act).trim())), fila: i + 2, fuente: 'hoja', dueno: APS_esAdminTecnico_(em) });
   });
   (APS_CONFIG.COORDINADORES || []).forEach(function (c) {
     var em = String(c).toLowerCase().trim(); if (!APS_RE_CORREO_.test(em) || vistos[em]) return; vistos[em] = 1;
     lista.push({ correo: em, nombre: '', genero: '', coordinador: true, activo: true, fila: 0, fuente: 'fijo', dueno: APS_esAdminTecnico_(em) });
   });
   var activos = {}; try { activos = APS_asesores_(); } catch (e) { }
-  Object.keys(activos).forEach(function (em) { if (vistos[em]) return; vistos[em] = 1; lista.push({ correo: em, nombre: activos[em].nombre || '', genero: activos[em].genero || '', coordinador: !!activos[em].coordinador, activo: true, fila: 0, fuente: 'externo', dueno: APS_esAdminTecnico_(em) }); });
+  Object.keys(activos).forEach(function (em) { if (vistos[em]) return; vistos[em] = 1; lista.push({ correo: em, nombre: activos[em].nombre || '', genero: activos[em].genero || '', coordinador: !!activos[em].coordinador && !activos[em].backup, backup: !!activos[em].backup, activo: true, fila: 0, fuente: 'externo', dueno: APS_esAdminTecnico_(em) }); });
   // Último movimiento conocido de cada cuenta (para ver quién ya no usa la plataforma)
   var ult = {};
   try {
@@ -330,15 +338,23 @@ function ASESORES_listar() {
   lista.sort(function (a, b) { return (b.activo - a.activo) || (b.coordinador - a.coordinador) || String(a.nombre || a.correo).localeCompare(String(b.nombre || b.correo)); });
   return { equipo: lista, yo: APS_correo_(), bloqueoActivo: APS_CONFIG.BLOQUEO_ACCESO !== false };
 }
+/** Solo nombres (sin roles ni estados) para mostrar «Ana Pérez» en vez del correo en las pantallas de revisión. Disponible para toda la coordinación, incluido el Backup. */
+function ASESORES_nombres() {
+  APS_requiereAdmin_();
+  var m = {}; try { m = APS_asesores_(); } catch (e) { m = {}; }
+  return { equipo: Object.keys(m).map(function (k) { return { correo: k, nombre: (m[k] && m[k].nombre) || '' }; }) };
+}
 /** Alta o cambio de una cuenta. acc = { correo, nombre, genero ('m'|'f'|''), coordinador (bool), activo (bool) }. */
 function ASESORES_guardar(acc) {
-  var u = APS_requiereAdmin_();
+  var u = APS_requiereAccesos_();
   acc = acc || {};
   var correo = String(acc.correo || '').toLowerCase().trim();
   if (!APS_RE_CORREO_.test(correo)) throw new Error('Escribe un correo válido (ej. nombre@hipoo.mx).');
-  var nombre = APS_textoCelda_(acc.nombre, 80), activo = acc.activo !== false, coord = !!acc.coordinador, g = acc.genero === 'f' ? 'F' : (acc.genero === 'm' ? 'M' : '');
+  var rolNuevo = acc.rol === 'backup' ? 'backup' : ((acc.rol === 'coordinador' || (acc.rol == null && acc.coordinador)) ? 'coordinador' : 'asesor');      // 'asesor' | 'coordinador' | 'backup' (acc.coordinador sigue valiendo para compatibilidad)
+  var nombre = APS_textoCelda_(acc.nombre, 80), activo = acc.activo !== false, coord = rolNuevo === 'coordinador', g = acc.genero === 'f' ? 'F' : (acc.genero === 'm' ? 'M' : '');
   if (correo === u.email && !activo) throw new Error('No puedes dar de baja tu propia cuenta desde aquí.');
   if (correo === u.email && !coord) throw new Error('No puedes quitarte a ti mismo el rol de coordinación desde aquí.');
+  if (APS_esAdminTecnico_(correo) && rolNuevo === 'backup') throw new Error('Una cuenta de administración técnica no puede quedar como Backup desde la pantalla.');
   if (APS_esAdminTecnico_(correo) && !activo) throw new Error('Esa es una cuenta de administración técnica del sistema: no se puede dar de baja desde la pantalla.');
   return APS_conLock_(function () {
     var H = ASES_hoja_(), sh = H.sh, C = H.C, n = Math.max(0, sh.getLastRow() - 1), fila = 0, nuevo = false, antes = '';
@@ -348,13 +364,13 @@ function ASESORES_guardar(acc) {
     if (n) sh.getRange(2, C.activo, n, 1).getValues().some(function (v) { if (typeof v[0] === 'boolean') { usaBool = true; return true; } return String(v[0]).trim() !== ''; });
     var valAct = usaBool ? activo : (activo ? 'SI' : 'NO');
     if (!fila) { fila = Math.max(2, sh.getLastRow() + 1); nuevo = true; sh.getRange(fila, C.correo).setValue(correo); }
-    else antes = (ASES_RE_NO_.test(String(sh.getRange(fila, C.activo).getValue()).trim()) ? 'baja' : 'activo') + (ASES_esCoord_(sh.getRange(fila, C.rol).getValue()) ? '/coordinador' : '');
+    else antes = (ASES_RE_NO_.test(String(sh.getRange(fila, C.activo).getValue()).trim()) ? 'baja' : 'activo') + (ASES_esBackup_(sh.getRange(fila, C.rol).getValue()) ? '/backup' : (ASES_esCoord_(sh.getRange(fila, C.rol).getValue()) ? '/coordinador' : ''));
     sh.getRange(fila, C.nombre).setValue(nombre || sh.getRange(fila, C.nombre).getValue());
     if (g || nuevo || acc.genero === '') sh.getRange(fila, C.genero).setValue(g);
-    sh.getRange(fila, C.rol).setValue(coord ? 'Coordinador' : '');
+    sh.getRange(fila, C.rol).setValue(rolNuevo === 'backup' ? 'Backup' : (coord ? 'Coordinador' : ''));
     sh.getRange(fila, C.activo).setValue(valAct);
     SpreadsheetApp.flush(); APS_invalidaAsesores_();
-    APS_audit_('ACCESOS', nuevo ? 'ALTA_ACCESO' : (activo ? 'ACCESO_ACTIVO' : 'ACCESO_BAJA'), correo, (nuevo ? 'Alta' : 'Antes: ' + antes) + ' · ahora: ' + (activo ? 'activo' : 'baja') + (coord ? '/coordinador' : ''));
+    APS_audit_('ACCESOS', nuevo ? 'ALTA_ACCESO' : (activo ? 'ACCESO_ACTIVO' : 'ACCESO_BAJA'), correo, (nuevo ? 'Alta' : 'Antes: ' + antes) + ' · ahora: ' + (activo ? 'activo' : 'baja') + (rolNuevo === 'backup' ? '/backup' : (coord ? '/coordinador' : '')));
     return { ok: true, nuevo: nuevo, correo: correo };
   });
 }
