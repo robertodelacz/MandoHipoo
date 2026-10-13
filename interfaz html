@@ -1618,26 +1618,32 @@
     .hm-kpi .hm-cell.t-bad:not(.cero) { border: 1.5px solid #f08a96; background: linear-gradient(160deg, #fde8ea, #fff6f7); box-shadow: 0 14px 24px -16px rgba(217, 45, 63, .55); }
     .hm-kpi .hm-cell.t-bad:not(.cero) .n, .hm-kpi .hm-cell.t-bad:not(.cero) .l { color: #a3192a; }
 
+    .hm-kh .hm-vt { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px; border: none; border-radius: 16px; cursor: pointer; background: #edf1fa; color: #364494; font: 700 13px 'Inter', sans-serif; transition: background .15s, transform .15s; }
+    .hm-kh .hm-vt svg { width: 14px; height: 14px; transition: transform .15s; }
+    .hm-kh .hm-vt:hover { background: #e0e7f8; } .hm-kh .hm-vt:hover svg { transform: translateX(3px); }
+    .hm-kpi.pld .hm-vt { background: #ddf3f6; color: #0b6f7c; } .hm-kpi.pld .hm-vt:hover { background: #cbeaee; }
+    @media (max-width: 560px) { .hm-kh .hm-vt { height: 30px; padding: 0 12px; font-size: 12px; } }
+
     /* Coordinación */
     #inicioTarjetas h2 { display: flex; align-items: center; gap: 16px; margin: 36px 0 16px; font-size: 12px; letter-spacing: 3.2px; }
     #inicioTarjetas h2::after { content: ""; flex: 1; height: 1px; background: #dbe2ef; }
-    .hm-acc.dos { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+    .hm-acc.dos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
     .hm-card.coord { border-radius: 26px; border: 1px solid #f0dfb0; background: linear-gradient(160deg, #fff6dd 0%, #fff 62%); box-shadow: 0 2px 4px rgba(26, 34, 74, .03), 0 22px 36px -28px rgba(26, 34, 74, .35); }
     .hm-card.coord.k-revacc { border-color: #d5dcf3; background: linear-gradient(160deg, #e7ebfc 0%, #fff 62%); }
     .hm-card.coord.k-tablero { border-color: #c5e6ec; background: linear-gradient(160deg, #ddf3f6 0%, #fff 62%); }
-    .hm-card.coord .hm-card-main { flex-direction: column; align-items: stretch; gap: 0; min-height: 200px; height: 100%; padding: 22px; position: relative; }
+    .hm-card.coord .hm-card-main { flex-direction: row; align-items: center; gap: 18px; min-height: 130px; height: 100%; padding: 0 26px; position: relative; }
     .hm-card.coord .hm-card-main > * { position: relative; }
-    .hm-card.coord .hm-card-main > .hm-wm { position: absolute; right: -18px; top: -14px; width: 130px; height: 130px; opacity: .14; color: #9a6700; pointer-events: none; }
+    .hm-card.coord .hm-card-main > .hm-wm { position: absolute; right: 70px; top: -20px; width: 150px; height: 150px; opacity: .12; color: #9a6700; pointer-events: none; }
     .hm-card.coord.k-revacc .hm-card-main > .hm-wm { color: #364494; opacity: .12; } .hm-card.coord.k-tablero .hm-card-main > .hm-wm { color: #0f8594; opacity: .12; }
     .hm-wm svg { width: 100%; height: 100%; display: block; }
-    .hm-card.coord .hm-ico { width: 48px; height: 48px; border-radius: 15px; color: #3a2200; background: linear-gradient(145deg, #ffc25a, #ff9f1c); box-shadow: 0 10px 18px -8px rgba(255, 159, 28, .8); }
+    .hm-card.coord .hm-ico { flex: none; width: 56px; height: 56px; border-radius: 17px; color: #3a2200; background: linear-gradient(145deg, #ffc25a, #ff9f1c); box-shadow: 0 10px 18px -8px rgba(255, 159, 28, .8); }
     .hm-card.coord.k-revacc .hm-ico { color: #fff; background: linear-gradient(145deg, #5367d6, #364494); box-shadow: 0 10px 18px -8px rgba(54, 68, 148, .8); }
     .hm-card.coord.k-tablero .hm-ico { color: #fff; background: linear-gradient(145deg, #35b7c5, #0f8594); box-shadow: 0 10px 18px -8px rgba(15, 133, 148, .8); }
-    .hm-card.coord .hm-card-t { flex: 1; margin-top: 16px; }
-    .hm-card.coord .hm-card-t b { font-size: 17px; line-height: 1.15; margin-bottom: 0; }
-    .hm-card.coord .hm-card-t > span:not(.aviso) { margin-top: 5px; font-size: 12.5px; color: #5a6488; }
-    .hm-dk-f { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 14px; min-height: 36px; }
-    .hm-dk-f .hm-go { margin-left: auto; width: 36px; height: 36px; background: #edf1fa; }
+    .hm-card.coord .hm-card-t { flex: 1; min-width: 0; margin-top: 0; }
+    .hm-card.coord .hm-card-t b { font-size: 19px; line-height: 1.15; margin-bottom: 0; }
+    .hm-card.coord .hm-card-t > span:not(.aviso) { margin-top: 4px; font-size: 13px; color: #5a6488; }
+    .hm-dk-f { display: flex; align-items: center; gap: 12px; flex: none; margin-left: auto; }
+    .hm-dk-f .hm-go { margin-left: 0; width: 40px; height: 40px; background: #edf1fa; }
     .hm-dk-f .hm-go svg { width: 16px; height: 16px; }
     .hm-dk-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 11px; border-radius: 13px; background: #ffb938; color: #3a2200; font-size: 12px; font-weight: 700; }
     .hm-dk-chip i { width: 7px; height: 7px; border-radius: 50%; background: #3a2200; }
@@ -1654,7 +1660,7 @@
       .hm-kpi .hm-cell { padding: 12px; } .hm-kpi.pld .hm-cell { padding: 12px 14px; }
       .hm-kpi .hm-cell .n { font-size: 38px; } .hm-kpi .hm-cell .l { font-size: 11.5px; line-height: 1.15; }
     }
-    @media (max-width: 1000px) { .hm-acc.dos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 760px) { .hm-acc.dos { grid-template-columns: 1fr; gap: 12px; } }
     #hmAviso { container-type: inline-size; container-name: hmav; }
     @container hmav (max-width: 1040px) {
       .hm-pend { flex-wrap: wrap; }
@@ -1694,17 +1700,14 @@
       .hm-kpi .hm-cell .n { font-size: 38px; } .hm-kpi.pld .hm-cell .n { font-size: 36px; }
       .hm-kpi .hm-cell .l { font-size: 11.5px; line-height: 1.15; }
       #inicioTarjetas h2 { margin: 28px 0 14px; font-size: 11.5px; letter-spacing: 3px; }
-      .hm-acc.dos { gap: 12px; }
-      .hm-card.coord { border-radius: 22px; }
-      .hm-card.coord .hm-card-main { min-height: 178px; padding: 16px; }
-      .hm-card.coord .hm-ico { width: 42px; height: 42px; border-radius: 13px; }
-      .hm-card.coord .hm-card-t { margin-top: 12px; }
-      .hm-card.coord .hm-card-t b { font-size: 15px; }
-      .hm-card.coord .hm-card-t > span:not(.aviso) { display: none; }
-      .hm-card.coord .hm-card-main > .hm-wm { width: 100px; height: 100px; right: -16px; top: -12px; }
-      .hm-dk-f { margin-top: 10px; } .hm-dk-f .hm-go { width: 32px; height: 32px; }
-      .hm-dk-chip { height: 24px; padding: 0 10px; font-size: 11.5px; } .hm-dk-chip i { display: none; }
-      .hm-dk-nota { font-size: 10.5px; letter-spacing: .6px; }
+      .hm-card.coord { border-radius: 24px; }
+      .hm-card.coord .hm-card-main { min-height: 104px; padding: 0 18px; gap: 14px; }
+      .hm-card.coord .hm-ico { width: 46px; height: 46px; border-radius: 14px; }
+      .hm-card.coord .hm-card-t b { font-size: 16px; }
+      .hm-card.coord .hm-card-t > span:not(.aviso) { font-size: 12px; }
+      .hm-card.coord .hm-card-main > .hm-wm { width: 110px; height: 110px; right: 40px; top: -16px; }
+      .hm-dk-f .hm-go { width: 34px; height: 34px; }
+      .hm-dk-nota { display: none; }
     }
   </style>
 </head>
@@ -2682,8 +2685,6 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     var h = '';
     if (coord && hayPantalla('revaps')) {
       h += '<h2>Coordinación</h2><div class="hm-acc dos">' +
-        tarjeta('revaps', 'Revisión de contratos APS', 'Estatus, PDF, alertas y auditoría.', { coord: true, badge: pAps }) +
-        tarjeta('revpld', 'Revisión de Pre PLD', 'Observaciones y bitácora de modificaciones.', { coord: true, badge: pPld }) +
         tarjeta('revacc', 'Accesos del equipo', 'Altas y bajas de asesores en toda la plataforma.', { coord: true }) +
         (hayPantalla('tablero') ? tarjeta('tablero', 'Tablero Hipoo', 'Indicadores de la actividad inmobiliaria.', { coord: true, externo: !!TABLERO_URL, nota: TABLERO_URL ? 'Otra pestaña' : '' }) : '') + '</div>';
     }
@@ -2700,7 +2701,7 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     return '<button type="button" class="hm-cell t-' + tono + (caliente && num > 0 ? ' hot' : '') + ((cargando || num === 0) ? ' cero' : '') + (cargando ? ' hm-sk' : '') + '" title="' + hmEsc(DEF[clave] || '') + '" data-kir="' + destino + '" data-k="' + clave + '"><span class="n" data-n="' + (cargando ? '' : num) + '">' + (cargando ? '0' : num) + '</span><span class="l">' + etiqueta + '</span></button>';
   }
   function tarjetaKpi(icono, titulo, sub, celdas, cls) {
-    return '<div class="hm-kpi ' + (cls || '') + '"><div class="hm-kh"><span class="hm-ico">' + icono + '</span><div><b>' + titulo + '</b><small>' + sub + '</small></div></div><div class="hm-cells">' + celdas + '</div></div>';
+    return '<div class="hm-kpi ' + (cls || '') + '"><div class="hm-kh"><span class="hm-ico">' + icono + '</span><div><b>' + titulo + '</b><small>' + sub + '</small></div><button type="button" class="hm-vt" data-vt="' + (cls || '') + '">Ver todos' + IC.go + '</button></div><div class="hm-cells">' + celdas + '</div></div>';
   }
   function pintaKpis() {
     var host = document.getElementById('hmKpis'); if (!USUARIO.email) { host.innerHTML = ''; host.__h = ''; return; }
@@ -2874,6 +2875,8 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
   document.addEventListener('visibilitychange', function () { if (!document.hidden) refrescarPanel(); });
 
   function clicInicio(e) {
+    var vt = e.target.closest('[data-vt]');
+    if (vt) { var dv = vt.getAttribute('data-vt'); if (USUARIO.rol === 'coordinador' && hayPantalla('rev' + dv)) irA('rev' + dv, 'todos'); else irMisRegistros(dv); return; }
     var k = e.target.closest('[data-kir]');
     if (k) { var d = k.getAttribute('data-kir'), kf = KIR[k.getAttribute('data-k')];      // cada número abre SU lista (Aprobados → aprobados, Observados → observados…)
       if (USUARIO.rol === 'coordinador' && hayPantalla('rev' + d)) irA('rev' + d, kf && kf[0]); else irMisRegistros(d, kf && kf[1]); return; }
@@ -2944,11 +2947,10 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     P.push({ el: function () { return ayEl('hmLive'); }, ic: 'monitor', t: 'Se actualiza sola', x: 'La luz verde indica que la información está en vivo: no necesitas recargar la página. Si se pone ámbar, está reconectando.' });
     P.push({ el: function () { return q('.hm-bc.aps'); }, ic: 'aps', t: 'Generar contrato APS', x: 'Aquí capturas el Aviso de Prestación de Servicios paso a paso. Al terminar lo envías a revisión de la coordinación. «Ver mis registros» abre todos tus contratos y su estado.' });
     P.push({ el: function () { return q('.hm-bc.pld'); }, ic: 'pld', t: 'Generar documento Pre PLD', x: 'Crea el Pre-Aviso PLD de una operación, agrega pagos a una operación que ya existe o consulta los documentos que ya hiciste.' });
-    P.push({ el: function () { return q('.hm-kpi'); }, ic: 'lista', t: 'Tus números de un vistazo', x: 'Cuántos contratos tienes en borrador, en revisión y aprobados' + (coord ? ' (de todo el equipo)' : '') + '. Toca cualquier cuadro para ir directo a esa lista.' });
+    P.push({ el: function () { return q('.hm-kpi'); }, ic: 'lista', t: 'Tus números de un vistazo', x: 'Cuántos contratos tienes en borrador, en revisión y aprobados' + (coord ? ' (de todo el equipo)' : '') + '. Toca cualquier cuadro para ir directo a esa lista, o «Ver todos» para abrirla completa.' + (coord ? ' Aquí también revisas lo pendiente: es tu bandeja de revisión.' : '') });
     P.push({ el: function () { return document.querySelectorAll('#pantalla-inicio .hm-kpi')[1]; }, ic: 'pld', t: 'Pre PLD: su avance', x: 'Lo mismo para Pre PLD. En rojo aparece lo que ' + (coord ? 'ya observaste y espera corrección' : 'la coordinación te regresó con observaciones y debes corregir') + '.' });
     if (coord) {
-      P.push({ el: function () { var b = q('.hm-card [data-ir="revaps"]'); return b && b.parentNode; }, ic: 'revaps', t: 'Revisión de contratos APS', x: 'Tu bandeja: revisas cada contrato, corriges lo necesario y lo apruebas. La etiqueta naranja indica cuántos esperan revisión.' });
-      P.push({ el: function () { var b = q('.hm-card [data-ir="revpld"]'); return b && b.parentNode; }, ic: 'revpld', t: 'Revisión de Pre PLD', x: 'Aquí ves los documentos enviados, puedes marcarlos como revisados o regresarlos con observaciones.' });
+      P.push({ el: function () { var b = q('.hm-card [data-ir="revacc"]'); return b && b.parentNode; }, ic: 'revacc', t: 'Accesos del equipo', x: 'Agrega asesores nuevos y activa o desactiva su acceso a toda la plataforma.' });
       P.push({ el: function () { var b = q('.hm-card [data-ir="tablero"]'); return b && b.parentNode; }, ic: 'tablero', t: 'Tablero Hipoo', x: 'Indicadores de la actividad inmobiliaria.' });
     }
     P.push({ el: function () { return ayEl('hmSide'); }, fijo: true, antes: function () { if (!novAbierto()) novAbre(true, false); }, ic: 'campana', t: 'Novedades en vivo', x: 'Cada vez que un contrato se envía, se aprueba, se cancela o recibe observaciones, aparece aquí al instante, con su historial por día. Las nuevas traen la etiqueta NUEVO. Con el botón de novedades de arriba (se ilumina en naranja cuando hay algo nuevo) lo abres o lo cierras.' });
