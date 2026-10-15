@@ -516,7 +516,7 @@ function APS_cambiosCoord_(id) {
   try {
     var sh = APS_hojaAux_('Versiones', APS_VER_COLS), n = sh.getLastRow() - 1, c = 0;
     if (n < 1) return 0;
-    sh.getRange(2, 2, n, 5).getValues().forEach(function (v) { if (String(v[0]) === String(id) && String(v[4]) === 'EDICION_COORDINACION') c++; });
+    sh.getRange(2, 2, n, 5).getValues().forEach(function (v) { if (String(v[0]) === String(id) && (String(v[4]) === 'EDICION_COORDINACION' || String(v[4]).indexOf('CORRECCION_APROBADO') === 0)) c++; });
     return c;
   } catch (e) { return 0; }
 }
@@ -1065,7 +1065,8 @@ function APS_versiones(id) {
     if (String(ids[i][0]) !== String(id)) continue;
     var v = sh.getRange(i + 2, 1, 1, APS_VER_COLS.length).getValues()[0], datos = null;
     try { datos = JSON.parse(String(v[6])); } catch (e) { datos = null; }
-    out.push({ fecha: String(v[0]), version: Number(v[2]) || 0, usuario: String(v[3]), estado: String(v[4]), accion: String(v[5]), cambios: (prev && datos) ? APS_diff_(prev, datos) : [] });
+    var acc = String(v[5]), bar = acc.indexOf('|');
+    out.push({ fecha: String(v[0]), version: Number(v[2]) || 0, usuario: String(v[3]), estado: String(v[4]), accion: bar < 0 ? acc : acc.slice(0, bar), motivo: bar < 0 ? '' : acc.slice(bar + 1), cambios: (prev && datos) ? APS_diff_(prev, datos) : [] });
     if (datos) prev = datos;
   }
   return out.reverse();
@@ -1170,6 +1171,63 @@ function APS_ajustarHojas(id, nivel) {
     APS_escribir_(f.hoja, f.fila, f.reg);
     APS_audit_('APS', 'PDF_AJUSTE', f.reg.id, 'Reajustó las hojas (' + (nivel === 'auto' ? 'automático' : 'nivel ' + nivel) + ') · ' + APS_resumenHojas_(r) + ' · PDF anterior ' + (anterior.sha || '').slice(0, 16) + ' → nuevo ' + pdfSha.slice(0, 16));
     return { meta: APS_meta_(f.reg), hojas: r.hojas, nota: r.nota, nivel: r.nivel };
+  });
+}
+
+/**
+ * SOLO COORDINACIÓN: corrige los datos de un contrato YA APROBADO directamente en la plataforma (un apellido mal escrito, un dato que no se vio).
+ * Un contrato aprobado queda "congelado" con dos huellas (datos y PDF); por eso esta corrección NO es un guardado normal:
+ *   · exige un motivo (queda en Auditoría y en el Historial del contrato) y que los datos estén completos;
+ *   · genera un PDF NUEVO con los datos corregidos; el PDF anterior se conserva en Drive, renombrado «(anterior …)»;
+ *   · recalcula las dos huellas y sube la versión; guarda la versión completa (Historial de cambios muestra qué cambió);
+ *   · NO manda aviso al asesor (decisión de la coordinación): la huella queda en el mismo contrato (Historial de cambios, con motivo y qué cambió) y en Auditoría; manda la nueva evidencia a Cumplimiento solo si está activada.
+ * El contrato sigue APROBADO. Se aplica la misma separación de funciones que al aprobar (no corrige el contrato quien lo creó, salvo PERMITIR_AUTOAPROBACION).
+ */
+function APS_corregirAprobado(datos, id, versionBase, motivo) {
+  var u = APS_requiereAdmin_(), N = APS_nucleo_();
+  motivo = String(motivo || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 300);
+  if (motivo.length < 5) throw new Error('Escribe el motivo de la corrección (mínimo 5 caracteres).');
+  var o = APS_limpiarDatos_(datos), res = APS_resumen_(o), pend = N.D.validar(o);
+  if (pend.length) throw new Error('Faltan ' + pend.length + ' dato(s): ' + pend.slice(0, 3).map(function (p) { return p.msg; }).join('; '));
+  var snap = APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f) throw new Error('No se encontró el registro.');
+    if (f.reg.estado !== 'APROBADO') throw new Error('Solo se corrige con este botón un contrato aprobado (estado actual: ' + f.reg.estado + ').');
+    if (!APS_CONFIG.PERMITIR_AUTOAPROBACION && f.reg.asesor === u.email) throw new Error('Este contrato lo creaste tú: debe corregirlo otra persona de la coordinación.');
+    if (versionBase != null && Number(versionBase) !== (f.reg.version || 1)) throw new Error('Este contrato cambió mientras lo tenías abierto. Ábrelo de nuevo desde el registro para ver los cambios y no perderlos.');
+    if (JSON.stringify(o) === f.reg.json) throw new Error('No hay cambios que guardar: los datos son los mismos que los del contrato aprobado.');
+    if (f.reg.datosHash && APS_sha256_(APS_estable_(JSON.parse(f.reg.json))) !== f.reg.datosHash) {
+      APS_audit_('APS', 'PDF_NO_COINCIDE', f.reg.id, 'Corrección rechazada: los datos guardados ya no coinciden con la huella de la aprobación');
+      throw new Error('Los datos de este contrato ya no coinciden con lo que se aprobó. No se corrige; avisa a quien administra el sistema.');
+    }
+    return { version: f.reg.version || 1, reg: f.reg };
+  });
+  var datosHash = APS_sha256_(APS_estable_(o)), ahora = APS_ahora_();
+  var pdfAj = APS_pdfAjustado_(o, APS_nombrePdf_(snap.reg, o), false, 'auto'), blob = pdfAj.blob;
+  var pdfSha = APS_sha256_(blob.getBytes());
+  var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(blob);
+  var coord = APS_coordinadores_();
+  return APS_conLock_(function () {
+    var f = APS_buscar_(id);
+    if (!f || f.reg.estado !== 'APROBADO' || (f.reg.version || 1) !== snap.version) {
+      try { archivo.setTrashed(true); } catch (e) {}
+      throw new Error('El contrato cambió mientras se generaba el PDF. Ábrelo de nuevo, revisa y vuelve a corregir.');
+    }
+    coord.forEach(function (c) { try { archivo.addViewer(c); } catch (e) { Logger.log('No se pudo compartir el PDF con ' + c + ': ' + e.message); } });
+    var anterior = { id: f.reg.pdfId, sha: f.reg.pdfSha, datos: f.reg.datosHash };
+    if (anterior.id) { try { var viejo = DriveApp.getFileById(anterior.id); viejo.setName(viejo.getName().replace(/\.pdf$/i, '') + ' (anterior ' + ahora + ').pdf'); } catch (e) { Logger.log('No se pudo renombrar el PDF anterior: ' + e.message); } }
+    f.reg.tipo = res.tipo; f.reg.propietarios = res.propietarios; f.reg.inmueble = res.inmueble; f.reg.json = JSON.stringify(o); f.reg.pendientes = 0;
+    f.reg.pdfUrl = archivo.getUrl(); f.reg.pdfId = archivo.getId(); f.reg.pdfSha = pdfSha; f.reg.datosHash = datosHash;
+    f.reg.revisadoPor = u.email; f.reg.aprobadoEn = ahora; f.reg.actualizado = ahora; f.reg.version = snap.version + 1;
+    APS_escribir_(f.hoja, f.fila, f.reg);
+    APS_snapshot_(f.reg, u, 'CORRECCION_APROBADO|' + motivo);       // el motivo viaja en la misma versión: el Historial del contrato lo muestra
+    APS_audit_('APS', 'CORREGIR_APROBADO', f.reg.id, motivo + ' · v' + f.reg.version + ' · PDF ' + (anterior.sha || '').slice(0, 16) + ' → ' + pdfSha.slice(0, 16) + ' · datos ' + (anterior.datos || '').slice(0, 16) + ' → ' + datosHash.slice(0, 16) + ' · ' + APS_resumenHojas_(pdfAj));
+    if ((APS_CONFIG.EVIDENCIA_CORREOS || []).length) {
+      APS_notificar_(APS_CONFIG.EVIDENCIA_CORREOS, 'Evidencia de corrección — ' + f.reg.id, 'Constancia automática de una corrección a un contrato aprobado. Conserva este correo: reemplaza las huellas del correo de aprobación anterior.',
+        { sistema: 'APS Hipoo · Evidencia', titulo: 'Constancia de corrección', etiqueta: 'Evidencia', tono: 'info', sinBoton: true, firma: 'Corregido por ' + (u.nombre || u.email),
+          datos: [['Folio', f.reg.id], ['Versión', String(f.reg.version)], ['Corregido', ahora], ['Corrigió', u.email], ['Motivo', motivo], ['Huella de los datos (SHA-256)', datosHash], ['Huella del PDF (SHA-256)', pdfSha], ['ID del PDF en Drive', f.reg.pdfId]] });
+    }
+    return { meta: APS_meta_(f.reg), hojas: pdfAj.hojas };
   });
 }
 

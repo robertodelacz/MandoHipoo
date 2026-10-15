@@ -173,7 +173,7 @@ var APS_DOCX = (function (D, U) {
       hijos(tr, 'td').forEach(function (td) {
         var sola = tiene(td, 'one'), sangria = sola ? Math.round((TW - (mitad - 400)) / 2) : 200, cont = '';      // la firma sola mide lo mismo que las demás
         td.hijos.forEach(function (h) {
-          if (tiene(h, 'fl')) cont += par('', { before: 560, bordeInf: { sz: 8, color: '222222', space: 1 }, left: sangria, right: sangria, keepNext: true });
+          if (tiene(h, 'fl')) cont += par('', { before: 860, bordeInf: { sz: 8, color: '222222', space: 1 }, left: sangria, right: sangria, keepNext: true });
           else if (tiene(h, 'fe')) cont += par(run(texto(h), { b: true, sz: 18, color: pal.tit }), { jc: 'center', before: 50, keepNext: true });
           else if (tiene(h, 'fs')) cont += par(runsDe(h.hijos, { sz: 18, color: '333333' }, pal), { jc: 'center' });
         });
@@ -194,7 +194,7 @@ var APS_DOCX = (function (D, U) {
     var d = pngDims(b64), cy = 609600, cx = Math.round(cy * d.w / d.h);
     return '<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="' + cx + '" cy="' + cy + '"/><wp:docPr id="1" name="Logo hipoo"/><wp:cNvGraphicFramePr/>' +
       '<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
-      '<pic:nvPicPr><pic:cNvPr id="0" name="logo.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdLogo"><a:grayscl/></a:blip><a:stretch><a:fillRect/></a:stretch></pic:blipFill>' +
+      '<pic:nvPicPr><pic:cNvPr id="0" name="logo.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>' +
       '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
   }
   var NS = 'xmlns:w="' + W_NS + '" xmlns:r="' + R_NS + '" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"';

@@ -548,7 +548,7 @@ var APS_DOC = (function (U, T) {
   }
   function anexo(d) {
     var lugar = String(d.lugar || '').trim(), f = U.fechaLarga(d.fecha);
-    var lf = (lugar ? esc(lugar) : blank()) + ', el día ' + (f ? esc(f) : blank());
+    var lf = (lugar ? esc(lugar) : blank()) + ', el día ' + (f ? '<b>' + esc(f) + '</b>' : blank());      // la fecha final de firma va en negritas
     return '<div class="anx"><div class="h2">' + esc(T.anexoTitulo) + '</div><div class="kt"><p class="j">' + esc(T.anexo) + '</p><p class="lf">' + lf + '</p><div class="sig">' + bloqueFirmas(d, !CFG.anexoFirmanTodos) + '</div></div></div>';
   }
 
@@ -725,7 +725,7 @@ var APS_DOC = (function (U, T) {
     '.aps-doc .sheet{width:100%}',
     '.aps-doc .sheet>thead>tr>td{padding:%mt%mm %ml%mm 0}.aps-doc .sheet>tbody>tr>td{padding:0 %ml%mm}.aps-doc .sheet>tfoot>tr>td{padding:0}',
     '.aps-doc .hd{width:100%;text-align:center;border-bottom:2pt solid %acento%;margin-bottom:11pt;padding-bottom:6pt}',
-    '.aps-doc .lg{height:48pt;width:auto;display:inline-block;vertical-align:bottom;filter:grayscale(1) contrast(1.08);-webkit-filter:grayscale(1) contrast(1.08)}',
+    '.aps-doc .lg{height:48pt;width:auto;display:inline-block;vertical-align:bottom;background:#fff}      /* logo a color, sin filtros (el filtro de grises hacía que el conversor a PDF dibujara un recuadro con sombra) */',
     '.aps-doc .wm1{font-size:26pt;font-weight:bold;color:%wm1%;letter-spacing:-.4pt}',
     '.aps-doc .wm2{font-size:26pt;font-weight:bold;color:%wm2%;letter-spacing:-.4pt}',
     '.aps-doc .fsp{height:%fsp%mm}',
@@ -756,9 +756,9 @@ var APS_DOC = (function (U, T) {
     '.aps-doc .fr tr{page-break-inside:avoid;break-inside:avoid}',
     '.aps-doc .fr{width:100%}',
     '.aps-doc .sig{padding-top:26pt}',
-    '.aps-doc .fr td{width:50%;text-align:center;vertical-align:top;padding:0 8pt 10pt}',
+    '.aps-doc .fr td{width:50%;text-align:center;vertical-align:top;padding:0 8pt 16pt}',
     '.aps-doc .fr td.one .fl{width:calc(50% - 28pt);margin:0 auto}',
-    '.aps-doc .fl{height:26pt;border-bottom:1pt solid #222;margin:0 10pt}',
+    '.aps-doc .fl{height:42pt;border-bottom:1pt solid #222;margin:0 10pt}',
     '.aps-doc .fe{font-weight:bold;margin-top:3.5pt;font-size:9pt;color:%tit%}',
     '.aps-doc .fs{font-size:9pt;color:#333;line-height:1.35}',
     '.aps-doc .nt{font-size:9pt;color:%muted%;font-style:italic;text-align:center;margin:8pt 12pt 0;line-height:1.45}',
@@ -777,13 +777,13 @@ var APS_DOC = (function (U, T) {
     '.aps-doc .wmk{position:fixed;top:36%;left:0;right:0;text-align:center;font-size:92pt;font-weight:bold;letter-spacing:10pt;color:%marca%;transform:rotate(-28deg);pointer-events:none;z-index:5}',
     '.aps-doc.dens1,.aps-doc.dens1 .cl{line-height:1.29}',
     '.aps-doc.dens1 .cl .j{margin-bottom:3.5pt}.aps-doc.dens1 .cl .ct{margin:8pt 0 3pt}.aps-doc.dens1 .cl .h2{margin:11pt 0 5pt}.aps-doc.dens1 .cl table.it{margin-bottom:3pt}',
-    '.aps-doc.dens1 .cs td{padding-top:2.9pt;padding-bottom:2.9pt}.aps-doc.dens1 .cs{margin-bottom:7pt}.aps-doc.dens1 .fl{height:22pt}.aps-doc.dens1 .fr td{padding-bottom:7pt}.aps-doc.dens1 .sig{padding-top:22pt}',
+    '.aps-doc.dens1 .cs td{padding-top:2.9pt;padding-bottom:2.9pt}.aps-doc.dens1 .cs{margin-bottom:7pt}.aps-doc.dens1 .fl{height:34pt}.aps-doc.dens1 .fr td{padding-bottom:11pt}.aps-doc.dens1 .sig{padding-top:22pt}',
     '.aps-doc.dens2,.aps-doc.dens2 .cl{line-height:1.23}',
     '.aps-doc.dens2 .cl .j{margin-bottom:3pt}.aps-doc.dens2 .cl .ct{margin:6pt 0 2.5pt}.aps-doc.dens2 .cl .h2{margin:9pt 0 4pt}.aps-doc.dens2 .cl table.it{margin-bottom:2.5pt}',
-    '.aps-doc.dens2 .cs td{padding-top:2.4pt;padding-bottom:2.4pt}.aps-doc.dens2 .cs{margin-bottom:6pt}.aps-doc.dens2 .fl{height:20pt}.aps-doc.dens2 .fr td{padding-bottom:5pt}.aps-doc.dens2 .sig{padding-top:19pt}',
+    '.aps-doc.dens2 .cs td{padding-top:2.4pt;padding-bottom:2.4pt}.aps-doc.dens2 .cs{margin-bottom:6pt}.aps-doc.dens2 .fl{height:28pt}.aps-doc.dens2 .fr td{padding-bottom:8pt}.aps-doc.dens2 .sig{padding-top:19pt}',
     '.aps-doc.dens3,.aps-doc.dens3 .cl{line-height:1.18}',
     '.aps-doc.dens3 .cl .j{margin-bottom:2.5pt}.aps-doc.dens3 .cl .ct{margin:5pt 0 2pt}.aps-doc.dens3 .cl .h2{margin:7pt 0 3pt}.aps-doc.dens3 .cl table.it{margin-bottom:2pt}',
-    '.aps-doc.dens3 .cs td{padding-top:1.9pt;padding-bottom:1.9pt}.aps-doc.dens3 .cs{margin-bottom:5pt}.aps-doc.dens3 .fl{height:18pt}.aps-doc.dens3 .fr td{padding-bottom:4pt}.aps-doc.dens3 .sig{padding-top:16pt}',
+    '.aps-doc.dens3 .cs td{padding-top:1.9pt;padding-bottom:1.9pt}.aps-doc.dens3 .cs{margin-bottom:5pt}.aps-doc.dens3 .fl{height:24pt}.aps-doc.dens3 .fr td{padding-bottom:6pt}.aps-doc.dens3 .sig{padding-top:16pt}',
     '@media print{.aps-doc{-webkit-print-color-adjust:exact;print-color-adjust:exact}.aps-doc thead{display:table-header-group}.aps-doc tfoot{display:table-footer-group}}'
   ].join('\n');
   function css(nombre, opciones) {

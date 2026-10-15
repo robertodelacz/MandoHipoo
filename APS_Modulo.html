@@ -550,8 +550,11 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     return '';
   }
   function puedeImprimir() { return !IN_GAS || USER.rol === 'coordinador'; }      // el PDF y su vista de impresión: solo coordinación
+  var CORR = '';                        // folio del contrato APROBADO que la coordinación está corrigiendo ('' = ninguno)
+  function corrigiendo() { return !!(REG && CORR && CORR === REG.id && REG.estado === 'APROBADO' && USER.rol === 'coordinador'); }
   function ro() {                       // solo lectura (el servidor también lo valida)
     if (!REG) return false;
+    if (corrigiendo()) return false;     // corrección de un aprobado: se edita, pero se guarda por su propio camino (APS_corregirAprobado)
     if (REG.estado === 'APROBADO' || REG.estado === 'CANCELADO') return true;
     if (USER.rol === 'coordinador') return false;
     return !(REG.asesor === USER.email && REG.estado === 'BORRADOR');   // enviado ya solo lo maneja la coordinación
@@ -566,6 +569,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
   function guiaEstado() {
     var e = REG.estado, coord = USER.rol === 'coordinador';
     if (e === 'CANCELADO') return 'Cancelado' + (REG.comentario ? ': ' + esc(REG.comentario) : '.');
+    if (e === 'APROBADO' && corrigiendo()) return '\u270f\ufe0f <b>Estás corrigiendo un contrato aprobado.</b> Al guardar se genera un PDF nuevo (el anterior se conserva) y queda en el Historial del contrato y en Auditoría.';
     if (e === 'APROBADO') return (coord ? 'Aprobado: el PDF definitivo ya est\u00e1 generado.' : 'Aprobado por la coordinaci\u00f3n. Ya puedes descargar el PDF definitivo.') + (REG.aprobadoEn ? '<br>Aprob\u00f3 ' + esc(REG.revisadoPor) + ' el ' + esc(REG.aprobadoEn) + (REG.huella ? ' \u00b7 huella de los datos ' + esc(REG.huella) : '') : '');
     if (e === 'EN_REVISION') return coord ? 'Revisa los datos, corrige lo que haga falta y aprueba para generar el PDF.' : 'La coordinaci\u00f3n lo est\u00e1 revisando: puede ajustar datos y aprobarlo. Te avisamos por correo cuando est\u00e9 listo.';
     if (ro()) return '';
@@ -599,7 +603,8 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     stop: '<circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".12"/><path d="M5.600 5.600l12.800 12.800"/>',
     trash: '<path d="M4 7h16M10 3.500h4M6.500 7l.8 12a1.500 1.500 0 001.500 1.400h6.400a1.500 1.500 0 001.500-1.400l.8-12M10 11v6M14 11v6"/>',
     lock: '<rect x="5" y="11" width="14" height="9" rx="2" fill="currentColor" fill-opacity=".14"/><path d="M8 11V8a4 4 0 018 0v3"/>',
-    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    edit: '<path d="M4 20h4L19 9l-4-4L4 16z" fill="currentColor" fill-opacity=".14"/><path d="M13.500 6.500l4 4M4 20h4"/>'
   };
   function acIc(k, sz, sw) { return '<svg width="' + (sz || 18) + '" height="' + (sz || 18) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 1.9) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + AC_I[k] + '</svg>'; }
   function acItem(k, tone, label, attrs, titulo) {      // botón dentro de un grupo
@@ -612,16 +617,21 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     var st = REG ? REG.estado : null, coord = USER.rol === 'coordinador', hay = ISS.length > 0;
     var pri = '', izq = '', doc = [], rev = [], extra = '', menu = '', nota = '';
     if (IN_GAS) {
-      if (!ro()) izq += '<button type="button" class="ac-ghost" data-act="save"><span class="ac-ci">' + acIc('save', 17, 2) + '</span>Guardar borrador</button>';
+      if (!ro() && !corrigiendo()) izq += '<button type="button" class="ac-ghost" data-act="save"><span class="ac-ci">' + acIc('save', 17, 2) + '</span>Guardar borrador</button>';
       if (!ro() && (!st || st === 'BORRADOR'))
         pri += '<button type="button" class="ac-pri indigo" data-act="submit"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>Enviar a revisión<span class="ac-go">' + acIc('send', 17, 2.1) + '</span></button>';
       if (coord && st === 'EN_REVISION')
         pri += '<button type="button" class="ac-pri green" data-act="approve"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>Aprobar y generar PDF<span class="ac-go">' + acIc('check', 17, 2.6) + '</span></button>';
-      if (st === 'APROBADO') {
+      if (corrigiendo()) {
+        pri += '<button type="button" class="ac-pri green" data-act="corrsave"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>Guardar corrección y regenerar PDF<span class="ac-go">' + acIc('check', 17, 2.6) + '</span></button>';
+        izq += '<button type="button" class="ac-ghost" data-act="corrcancel" data-keep="1"><span class="ac-ci">' + acIc('arrow', 17, 2) + '</span>Salir sin guardar</button>';
+        nota += '<div class="ac-nota">' + acIc('lock', 16, 2) + '<span>Modo corrección: al guardar se genera un PDF nuevo y el anterior se conserva en Drive.</span></div>';
+      } else if (st === 'APROBADO') {
         // Regla: el coordinador siempre puede descargar. El asesor SOLO si es dueño de este contrato en particular
         // (y éste ya está APROBADO, por eso basta estar dentro de "st === 'APROBADO'"; antes de eso el botón ni existe).
         if (coord || REG.asesor === USER.email) pri += '<button type="button" class="ac-pri indigo" data-act="download" data-keep="1">Descargar PDF aprobado<span class="ac-go">' + acIc('dl', 17, 2.1) + '</span></button>';
         else nota += '<div class="ac-nota ok">' + acIc('check', 16, 2.2) + '<span>Aprobado por la coordinación. El contrato definitivo lo entrega la coordinación.</span></div>';
+        if (coord) izq += '<button type="button" class="ac-ghost" data-act="corregir" data-keep="1"><span class="ac-ci">' + acIc('edit', 17, 2) + '</span>Corregir datos</button>';
         izq += '<button type="button" class="ac-ghost" data-act="clone" data-keep="1"><span class="ac-ci">' + acIc('copy', 17, 2) + '</span>Usar como base de uno nuevo</button>';
       }
     }
@@ -1026,7 +1036,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     if (!Array.isArray(o.ajustes)) o.ajustes = [];
     return o;
   }
-  function conRegistro(meta) { REG = meta; SUCIO = false; GUARDADO = horaAhora(); renderStep(); renderPend(); renderPreview(); }
+  function conRegistro(meta) { REG = meta; CORR = ''; SUCIO = false; GUARDADO = horaAhora(); renderStep(); renderPend(); renderPreview(); }
   function horaAhora() { var d = new Date(); return 'a las ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
   function guardar(despues, intento) {
     if (OCUPADO && (intento || 0) < 40) { setTimeout(function () { guardar(despues, (intento || 0) + 1); }, 400); return; }      // espera a que termine un autoguardado en curso
@@ -1161,7 +1171,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
         .withFailureHandler(function (err) { clearTimeout(vencido); if (!IAE.cargando) return; IAE.cargando = false; if (window.HIPOO_acceso && HIPOO_acceso(err)) return; IAE.err = String((err && err.message) || err).replace(/^Error:\s*/, ''); pintaRevision(); })
         .APS_revisarIA(id);
     };
-    if (SUCIO && !ro()) guardar(ir); else ir();
+    if (SUCIO && !ro() && !corrigiendo()) guardar(ir); else ir();
   }
   var SEV = { error: 'Error', revisar: 'Revisar', estilo: 'Estilo' };
   function pintaRevision() {
@@ -1201,7 +1211,8 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     if (!REG) return;
     srv('APS_versiones', [REG.id], function (v) {
       $('aps_hisBody').innerHTML = v.length ? v.map(function (x) {
-        return '<div class="his-i"><b>Versi\u00f3n ' + x.version + ' \u00b7 ' + esc(x.accion.replace(/_/g, ' ').toLowerCase()) + '</b> <span class="help">' + esc(x.fecha) + ' \u00b7 ' + esc(x.usuario) + '</span>' +
+        return '<div class="his-i"><b>Versi\u00f3n ' + x.version + ' \u00b7 ' + esc(x.accion === 'CORRECCION_APROBADO' ? 'corrección del contrato aprobado' : x.accion.replace(/_/g, ' ').toLowerCase()) + '</b> <span class="help">' + esc(x.fecha) + ' \u00b7 ' + esc(x.usuario) + '</span>' +
+          (x.motivo ? '<div class="help"><b>Motivo:</b> ' + esc(x.motivo) + '</div>' : '') +
           (x.cambios.length ? '<ul>' + x.cambios.map(function (c) { return '<li>' + esc(etiquetaCampo(c.campo)) + ': <span>' + esc(c.antes || '(vac\u00edo)') + '</span> \u2192 <span>' + esc(c.despues || '(vac\u00edo)') + '</span></li>'; }).join('') + '</ul>' : '<div class="help">' + (x.accion === 'ENVIO' ? 'Lo que envi\u00f3 el asesor.' : 'Sin diferencias respecto a la anterior.') + '</div>') + '</div>'; }).join('')
         : '<div class="help">Todav\u00eda no hay versiones guardadas (se guardan desde que el asesor lo env\u00eda).</div>';
       $('aps_hisModal').classList.add('open');
@@ -1232,6 +1243,34 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
         toast('PDF regenerado' + (r.hojas ? ': ' + r.hojas + (r.hojas === 1 ? ' hoja' : ' hojas') : '') + '. Descárgalo de nuevo para verlo.');
       }, 'Regenerando el PDF… (puede tardar unos segundos)');
     });
+  }
+  /* Solo coordinación: corregir datos de un contrato YA aprobado, directo en la plataforma (genera PDF nuevo, avisa al asesor y queda en Auditoría). */
+  function iniciaCorreccion() {
+    if (!REG || REG.estado !== 'APROBADO' || USER.rol !== 'coordinador') return;
+    confirma({ titulo: 'Corregir un contrato aprobado', icono: 'doc', tono: 'warn', ok: 'Sí, corregir', cancelar: 'Volver',
+      texto: 'Vas a modificar un contrato que ya está aprobado. Al guardar: se genera un PDF nuevo con los datos corregidos (el anterior se conserva en Drive), se te pedirá el motivo y todo queda en el Historial de cambios del contrato y en Auditoría.\nSi ya habías generado un Google Docs de este contrato, tendrás que generarlo de nuevo.' }, function () {
+      CORR = REG.id; GUARDADO = ''; SUCIO = false; showErr = {}; STEP = 'operacion'; refresh(true); toast('Modo corrección: haz los cambios y guarda al terminar.');
+    });
+  }
+  function guardaCorreccion() {
+    if (!corrigiendo()) return;
+    if (ISS.length) { toast('Completa los datos pendientes antes de guardar.', true); return; }
+    if (!SUCIO) { toast('No hay cambios que guardar.', true); return; }
+    var idc = REG.id, vb = REG.version;
+    confirma({ titulo: 'Guardar la corrección y regenerar el PDF', icono: 'doc', tono: 'warn', ok: 'Guardar y regenerar PDF', cancelar: 'Volver',
+      texto: 'Se genera un PDF nuevo con estos datos. El PDF anterior se conserva en Drive y la corrección queda en el Historial del contrato.',
+      campo: { etiqueta: 'Motivo de la corrección', min: 5, ph: 'Ej. Se corrigió el apellido de la propietaria' } }, function (m) {
+      srv('APS_corregirAprobado', [S, idc, vb, m], function (r) {
+        conRegistro(r.meta); toast('Corrección guardada: PDF nuevo generado' + (r.hojas ? ' (' + r.hojas + (r.hojas === 1 ? ' hoja' : ' hojas') + ')' : '') + '. Descárgalo para verlo.');
+      }, 'Guardando la corrección y regenerando el PDF… (puede tardar unos segundos)');
+    });
+  }
+  function salirCorreccion() {
+    if (!corrigiendo()) return;
+    var idc = REG.id;
+    function hazlo() { CORR = ''; srv('APS_abrir', [idc], function (r) { S = normaliza(r.datos); REG = r.meta; SUCIO = false; GUARDADO = ''; showErr = {}; STEP = 'firma'; refresh(true); toast('Corrección cancelada: el contrato sigue como estaba.'); }, 'Abriendo…'); }
+    if (SUCIO) { confirma({ titulo: '¿Salir sin guardar?', texto: 'Tienes cambios sin guardar. Si sales, se descartan y el contrato aprobado queda como estaba.', ok: 'Sí, salir', cancelar: 'Seguir corrigiendo', tono: 'warn', icono: 'aviso' }, hazlo); return; }
+    hazlo();
   }
   function copiaDocs() {
     function crear(id) {
@@ -1411,6 +1450,9 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     else if (a === 'approve') aprobar();
     else if (a === 'download') descargar();
     else if (a === 'hojas') ajustarHojas();
+    else if (a === 'corregir') iniciaCorreccion();
+    else if (a === 'corrsave') guardaCorreccion();
+    else if (a === 'corrcancel') salirCorreccion();
     else if (a === 'clone') clonar();
     else if (a === 'docs') copiaDocs();
     else if (a === 'eliminar') eliminar();
