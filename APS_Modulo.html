@@ -107,7 +107,7 @@
 #aps-root .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 #aps-root .acciones .nota{flex:1 1 100%;font-size:12.5px;color:var(--muted)}
 /* ── barra de acciones del contrato (ac2) ── */
-#aps-root .ac2{width:100%;border-radius:20px;background:#fff;border:1px solid #dbe2ef;box-shadow:0 2px 4px rgba(26,34,74,.04),0 22px 38px -30px rgba(26,34,74,.4);overflow:hidden}
+#aps-root .ac2{width:100%;border-radius:20px;background:#fff;border:1px solid #dbe2ef;box-shadow:0 2px 4px rgba(26,34,74,.04),0 22px 38px -30px rgba(26,34,74,.4);overflow:visible}#aps-root .ac2-main{border-radius:19px 19px 0 0}
 #aps-root .ac2 *{box-sizing:border-box}
 #aps-root .ac2-main{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid #e4e9f4;background:linear-gradient(90deg,#eef3ff,#f8faff)}
 #aps-root .ac2.st-EN_REVISION .ac2-main{background:linear-gradient(90deg,#fff6dc,#fffbf0);border-bottom-color:#f5e3b0}
@@ -148,7 +148,7 @@
 #aps-root .ac-menu{position:absolute;right:0;bottom:calc(100% + 8px);z-index:30;min-width:230px;background:#fff;border:1px solid #dce3f2;border-radius:16px;padding:6px;box-shadow:0 18px 40px -12px rgba(26,34,74,.35)}
 #aps-root .ac-mi{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0 12px 0 6px;border:0;border-radius:11px;background:transparent;color:#2a3566;font:700 13.5px 'Inter',sans-serif;cursor:pointer;text-align:left}
 #aps-root .ac-mi:hover{background:#eef2fc}
-#aps-root .ac-mi.danger{color:#b4233a}
+#aps-root a.ac-mi{text-decoration:none;box-sizing:border-box}#aps-root .ac-sep{height:1px;background:#e7ecf7;margin:4px 6px}#aps-root .ac-mi.danger{color:#b4233a}
 #aps-root .ac-mi.danger .ac-ci{background:#fde8ea;color:#c0263a}
 #aps-root .ac-mi.danger:hover{background:#fdeff1}
 #aps-root .ac-nota{display:flex;align-items:center;gap:10px;margin:0 20px 18px;padding:11px 14px;border-radius:14px;background:#f0f2f8;color:#4a5578;font:500 13px/1.4 'Inter',sans-serif}
@@ -550,6 +550,8 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     return '';
   }
   function puedeImprimir() { return !IN_GAS || USER.rol === 'coordinador'; }      // el PDF y su vista de impresión: solo coordinación
+  /* Contrato PROPIO de la coordinación (o del rol Backup): no necesita enviarse a revisión ni aprobarse por otra persona; se «genera» directo. */
+  function propioCoord() { return IN_GAS && USER.rol === 'coordinador' && (!REG || (REG.estado === 'BORRADOR' && REG.asesor === USER.email)); }
   var CORR = '';                        // folio del contrato APROBADO que la coordinación está corrigiendo ('' = ninguno)
   function corrigiendo() { return !!(REG && CORR && CORR === REG.id && REG.estado === 'APROBADO' && USER.rol === 'coordinador'); }
   function ro() {                       // solo lectura (el servidor también lo valida)
@@ -573,7 +575,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     if (e === 'APROBADO') return (coord ? 'Aprobado: el PDF definitivo ya est\u00e1 generado.' : 'Aprobado por la coordinaci\u00f3n. Ya puedes descargar el PDF definitivo.') + (REG.aprobadoEn ? '<br>Aprob\u00f3 ' + esc(REG.revisadoPor) + ' el ' + esc(REG.aprobadoEn) + (REG.huella ? ' \u00b7 huella de los datos ' + esc(REG.huella) : '') : '');
     if (e === 'EN_REVISION') return coord ? 'Revisa los datos, corrige lo que haga falta y aprueba para generar el PDF.' : 'La coordinaci\u00f3n lo est\u00e1 revisando: puede ajustar datos y aprobarlo. Te avisamos por correo cuando est\u00e9 listo.';
     if (ro()) return '';
-    return ISS.length ? 'Se guarda como borrador. Completa los datos pendientes para poder enviarlo a revisi\u00f3n.' : 'Datos completos. Rev\u00edsalo en la vista previa y env\u00edalo a revisi\u00f3n.';
+    return ISS.length ? (propioCoord() ? 'Se guarda como borrador. Completa los datos pendientes para poder generar el contrato.' : 'Se guarda como borrador. Completa los datos pendientes para poder enviarlo a revisi\u00f3n.') : (propioCoord() ? 'Datos completos. Rev\u00edsalo en la vista previa y genera el contrato.' : 'Datos completos. Rev\u00edsalo en la vista previa y env\u00edalo a revisi\u00f3n.');
   }
   function textoBanner() { var g = guiaEstado(); return indicadorGuardado() + '\ud83d\udcc4 <b>' + esc(REG.id) + '</b> \u00b7 ' + etiquetaEstado() + (ro() && REG.estado === 'BORRADOR' ? ' \u00b7 solo lectura' : '') + (g ? '<small>' + g + '</small>' : ''); }
   function banner() {
@@ -613,16 +615,26 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
   function acLink(k, tone, label, href, titulo) {
     return '<a class="ac-it ' + tone + '" href="' + href + '" target="_blank" rel="noopener"' + (titulo ? ' title="' + titulo + '"' : '') + '><span class="ac-ci">' + acIc(k, 15, 2) + '</span><span class="ac-tx">' + label + '</span></a>';
   }
+  function acMi(k, label, attrs, danger) { return '<button type="button" class="ac-mi' + (danger ? ' danger' : '') + '" ' + attrs + '><span class="ac-ci">' + acIc(k, 16, 2) + '</span>' + label + '</button>'; }
+  function acMiLink(k, label, href) { return '<a class="ac-mi" href="' + href + '" target="_blank" rel="noopener"><span class="ac-ci">' + acIc(k, 16, 2) + '</span>' + label + '</a>'; }
+  /* Orden de los botones (para no abrumar a la coordinación):
+       · Arriba SOLO lo que se hace ahora en este estado (guardar, generar / aprobar / descargar, corregir).
+       · «Documento»: ver, imprimir y Google Docs.  «Revisión»: la revisión automática (con IA adentro), solo mientras se revisa.
+       · «Más»: lo que casi no se usa (Drive, ajustar hojas, verificar, historial, usar como base) y, al final en rojo, lo delicado. */
   function accionesHtml() {
-    var st = REG ? REG.estado : null, coord = USER.rol === 'coordinador', hay = ISS.length > 0;
-    var pri = '', izq = '', doc = [], rev = [], extra = '', menu = '', nota = '';
+    var st = REG ? REG.estado : null, coord = USER.rol === 'coordinador', hay = ISS.length > 0, corr = corrigiendo();
+    var pri = '', izq = '', doc = [], rev = [], extra = '', mas = [], peligro = [], nota = '';
     if (IN_GAS) {
-      if (!ro() && !corrigiendo()) izq += '<button type="button" class="ac-ghost" data-act="save"><span class="ac-ci">' + acIc('save', 17, 2) + '</span>Guardar borrador</button>';
-      if (!ro() && (!st || st === 'BORRADOR'))
-        pri += '<button type="button" class="ac-pri indigo" data-act="submit"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>Enviar a revisión<span class="ac-go">' + acIc('send', 17, 2.1) + '</span></button>';
+      if (!ro() && !corr) izq += '<button type="button" class="ac-ghost" data-act="save"><span class="ac-ci">' + acIc('save', 17, 2) + '</span>' + (st && st !== 'BORRADOR' ? 'Guardar cambios' : 'Guardar borrador') + '</button>';
+      if (!ro() && (!st || st === 'BORRADOR')) {
+        if (propioCoord())      // la coordinación genera su propio contrato: sin enviar a revisión ni aprobar
+          pri += '<button type="button" class="ac-pri green" data-act="approve"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>Generar contrato<span class="ac-go">' + acIc('check', 17, 2.6) + '</span></button>';
+        else
+          pri += '<button type="button" class="ac-pri indigo" data-act="submit"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>Enviar a revisión<span class="ac-go">' + acIc('send', 17, 2.1) + '</span></button>';
+      }
       if (coord && st === 'EN_REVISION')
         pri += '<button type="button" class="ac-pri green" data-act="approve"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>Aprobar y generar PDF<span class="ac-go">' + acIc('check', 17, 2.6) + '</span></button>';
-      if (corrigiendo()) {
+      if (corr) {
         pri += '<button type="button" class="ac-pri green" data-act="corrsave"' + (hay ? ' disabled title="Completa los datos pendientes"' : '') + '>Guardar corrección y regenerar PDF<span class="ac-go">' + acIc('check', 17, 2.6) + '</span></button>';
         izq += '<button type="button" class="ac-ghost" data-act="corrcancel" data-keep="1"><span class="ac-ci">' + acIc('arrow', 17, 2) + '</span>Salir sin guardar</button>';
         nota += '<div class="ac-nota">' + acIc('lock', 16, 2) + '<span>Modo corrección: al guardar se genera un PDF nuevo y el anterior se conserva en Drive.</span></div>';
@@ -632,24 +644,28 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
         if (coord || REG.asesor === USER.email) pri += '<button type="button" class="ac-pri indigo" data-act="download" data-keep="1">Descargar PDF aprobado<span class="ac-go">' + acIc('dl', 17, 2.1) + '</span></button>';
         else nota += '<div class="ac-nota ok">' + acIc('check', 16, 2.2) + '<span>Aprobado por la coordinación. El contrato definitivo lo entrega la coordinación.</span></div>';
         if (coord) izq += '<button type="button" class="ac-ghost" data-act="corregir" data-keep="1"><span class="ac-ci">' + acIc('edit', 17, 2) + '</span>Corregir datos</button>';
-        izq += '<button type="button" class="ac-ghost" data-act="clone" data-keep="1"><span class="ac-ci">' + acIc('copy', 17, 2) + '</span>Usar como base de uno nuevo</button>';
+        else izq += '<button type="button" class="ac-ghost" data-act="clone" data-keep="1"><span class="ac-ci">' + acIc('copy', 17, 2) + '</span>Usar como base de uno nuevo</button>';
       }
     }
-    // Documento: ver, imprimir, Docs, PDF
+    // Documento: ver, imprimir, Google Docs
     doc.push(acItem('eye', 'blue', 'Ver contrato completo', 'data-act="zoom" data-keep="1"'));
-    if (puedeImprimir()) doc.push(acItem('print', 'slate', IN_GAS ? 'Imprimir (revisión)' : 'Imprimir / Guardar PDF', 'data-act="print" data-keep="1"', 'Solo para revisión: el contrato definitivo es el PDF aprobado'));
+    if (puedeImprimir()) doc.push(acItem('print', 'slate', IN_GAS ? (st === 'APROBADO' ? 'Imprimir' : 'Imprimir (revisión)') : 'Imprimir / Guardar PDF', 'data-act="print" data-keep="1"', st === 'APROBADO' ? 'Imprime el contrato definitivo' : 'Solo para revisión: el contrato definitivo es el PDF aprobado'));
     else if (IN_GAS && st !== 'APROBADO') nota += '<div class="ac-nota">' + acIc('lock', 16, 2) + '<span>El PDF definitivo se habilita cuando la coordinación apruebe el contrato.</span></div>';
     if (IN_GAS && coord) doc.push(acItem('doc', 'gdocs', 'Descargar en Google Docs', 'data-act="docs" data-keep="1"', 'Descarga el contrato en Google Docs'));
-    if (IN_GAS && st === 'APROBADO' && coord && REG.pdfUrl) doc.push(acLink('drive', 'pdf', 'Ver PDF aprobado en Drive', esc(REG.pdfUrl)));
-    if (IN_GAS && st === 'APROBADO' && coord) doc.push(acItem('pages', 'teal', 'Ajustar hojas del PDF', 'data-act="hojas" data-keep="1"', 'Si una firma o unas líneas quedaron solas en una hoja'));
-    if (IN_GAS && REG && st === 'APROBADO') doc.push(acItem('shield', 'green', 'Verificar', 'data-act="verificar" data-keep="1"', 'Comprueba folio, quién aprobó y que los datos no hayan cambiado'));
-    // Revisión: IA e historial
-    if (coord && st !== 'APROBADO' && st !== 'CANCELADO') rev.push(acItem('spark', 'ia', 'Revisión automática', 'data-act="revisar" data-keep="1"', 'Busca errores de dedo y datos que no cuadran'));
-    if (IN_GAS && coord && REG && st !== 'BORRADOR' && REG.cambiosCoord > 0) rev.push(acItem('hist', 'blue', 'Historial de cambios', 'data-act="historial" data-keep="1"', 'La coordinación corrigió este contrato después de que el asesor lo envió'));
-    // Lo delicado va dentro de «Más»
-    if (IN_GAS && coord && REG && (st === 'EN_REVISION' || st === 'APROBADO')) menu += '<button type="button" class="ac-mi danger" data-act="cancelar" data-keep="1"><span class="ac-ci">' + acIc('stop', 16, 2) + '</span>Cancelar contrato</button>';
-    if (IN_GAS && coord && REG && st === 'BORRADOR') menu += '<button type="button" class="ac-mi danger" data-act="eliminar" data-keep="1"><span class="ac-ci">' + acIc('trash', 16, 2) + '</span>Eliminar borrador</button>';
-    if (IN_GAS && !coord && REG && st === 'BORRADOR' && !ro()) menu += '<button type="button" class="ac-mi danger" data-act="descartar"><span class="ac-ci">' + acIc('trash', 16, 2) + '</span>Descartar borrador</button>';
+    // Revisión (solo mientras se revisa)
+    if (coord && st !== 'APROBADO' && st !== 'CANCELADO') rev.push(acItem('spark', 'ia', 'Revisión automática', 'data-act="revisar" data-keep="1"', 'Busca errores de dedo y datos que no cuadran (con IA si está activa)'));
+    // «Más»: lo poco usado
+    if (IN_GAS && !corr) {
+      if (st === 'APROBADO' && coord && REG.pdfUrl) mas.push(acMiLink('drive', 'Ver PDF aprobado en Drive', esc(REG.pdfUrl)));
+      if (st === 'APROBADO' && coord) mas.push(acMi('pages', 'Ajustar hojas del PDF', 'data-act="hojas" data-keep="1" title="Si una firma o unas líneas quedaron solas en una hoja"'));
+      if (REG && st === 'APROBADO') mas.push(acMi('shield', 'Verificar', 'data-act="verificar" data-keep="1" title="Comprueba folio, quién aprobó y que los datos no hayan cambiado"'));
+      if (coord && REG && st !== 'BORRADOR' && REG.cambiosCoord > 0) mas.push(acMi('hist', 'Historial de cambios', 'data-act="historial" data-keep="1" title="Cada versión guardada del contrato, con quién la hizo y qué cambió"'));
+      if (coord && REG && st === 'APROBADO') mas.push(acMi('copy', 'Usar como base de uno nuevo', 'data-act="clone" data-keep="1"'));
+      if (coord && REG && (st === 'EN_REVISION' || st === 'APROBADO')) peligro.push(acMi('stop', 'Cancelar contrato', 'data-act="cancelar" data-keep="1"', true));
+      if (coord && REG && st === 'BORRADOR') peligro.push(acMi('trash', 'Eliminar borrador', 'data-act="eliminar" data-keep="1"', true));
+      if (!coord && REG && st === 'BORRADOR' && !ro()) peligro.push(acMi('trash', 'Descartar borrador', 'data-act="descartar"', true));
+    }
+    var menu = mas.join('') + (mas.length && peligro.length ? '<div class="ac-sep"></div>' : '') + peligro.join('');
     var tono = !st ? 'nuevo' : st;
     var h = '<div class="ac2 st-' + tono + '">';
     if (pri || izq) h += '<div class="ac2-main"><div class="ac2-l">' + izq + '</div><div class="ac2-r">' + pri + '</div></div>';
@@ -823,8 +839,8 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
       '<div class="grid2">' + fText('lugar', 'Lugar de firma', { ph: 'Ciudad de México' }) + fText('fecha', 'Fecha de firma', { type: 'date' }) + '</div>' +
       note('Firmas que llevará el documento: ' + firm + ' del cliente (según los propietarios y representantes capturados) y 1 de "EL PROFESIONAL".')) +
       card('✅', 'Revisión final', n ? 'Todavía faltan datos' : 'Todo listo',
-        (n ? '<div class="msg-step">Faltan ' + n + ' dato' + (n === 1 ? '' : 's') + '. Mientras falten no se puede enviar a revisión. Toca cada uno en la lista de pendientes para ir directo al campo.</div>'
-           : '<div class="info-note"><span>🎉</span><span>' + (IN_GAS && USER.rol !== 'coordinador' ? 'Datos completos. Revisa la vista previa (botón «Ver contrato completo») y, si todo está bien, envíalo a revisión. La coordinación lo revisará y aprobará; el PDF se habilita al aprobarse.' : 'Datos completos. Revisa la vista previa (botón «Ver contrato completo») y, si todo está bien, continúa.') + '</span></div>') +
+        (n ? '<div class="msg-step">Faltan ' + n + ' dato' + (n === 1 ? '' : 's') + '. Mientras falten no se puede ' + (propioCoord() ? 'generar el contrato' : 'enviar a revisión') + '. Toca cada uno en la lista de pendientes para ir directo al campo.</div>'
+           : '<div class="info-note"><span>🎉</span><span>' + (IN_GAS && USER.rol !== 'coordinador' ? 'Datos completos. Revisa la vista previa (botón «Ver contrato completo») y, si todo está bien, envíalo a revisión. La coordinación lo revisará y aprobará; el PDF se habilita al aprobarse.' : (propioCoord() ? 'Datos completos. Revisa la vista previa (botón «Ver contrato completo») y, si todo está bien, pulsa «Generar contrato»: sale el PDF de una vez, sin enviarlo a revisión.' : 'Datos completos. Revisa la vista previa (botón «Ver contrato completo») y, si todo está bien, continúa.')) + '</span></div>') +
         '<div class="acciones">' + accionesHtml() + '</div>' +
         (IN_GAS ? '' : '<div class="integ">Al integrarse al sistema, aquí aparecerán «Guardar borrador» y «Enviar a revisión».</div>'));
   }
@@ -1093,9 +1109,10 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     aprobarYa();
   }
   function aprobarYa() {
-    confirma({ titulo: '¿Aprobar y generar el PDF?', texto: 'Se generará el PDF definitivo. Después ya no se puede editar.', ok: 'Sí, aprobar', tono: 'ok', icono: 'ok' }, function () {
+    var propioCoord0 = propioCoord();      // se evalúa antes de guardar: después de guardar ya hay REG
+    confirma(propioCoord() ? { titulo: '¿Generar el contrato?', texto: 'Se guarda y se genera el PDF definitivo de una vez. Como lo creó la coordinación, no necesita enviarse a revisión ni aprobarse. Queda registrado en Auditoría.', ok: 'Sí, generar', tono: 'ok', icono: 'ok' } : { titulo: '¿Aprobar y generar el PDF?', texto: 'Se generará el PDF definitivo. Después solo la coordinación puede corregirlo (queda registrado).', ok: 'Sí, aprobar', tono: 'ok', icono: 'ok' }, function () {
       guardar(function (meta) {
-        avisoDuplicados(meta.id, 'aprobarlo', function () { srv('APS_aprobar', [meta.id], function (m) { conRegistro(m); toast('Aprobado · PDF generado'); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Generando PDF… (puede tardar hasta un minuto)', 150000); });
+        avisoDuplicados(meta.id, propioCoord0 ? 'generarlo' : 'aprobarlo', function () { srv('APS_aprobar', [meta.id], function (m) { conRegistro(m); toast(propioCoord0 ? 'Contrato generado · PDF listo' : 'Aprobado · PDF generado'); if (window.APS_refrescarPendientes) window.APS_refrescarPendientes(); }, 'Generando PDF… (puede tardar hasta un minuto)', 150000); });
       });
     });
   }
@@ -1422,9 +1439,15 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     if (t.getAttribute && t.getAttribute('data-fmt') === 'money') {
       var n = U.parseNum(t.value); if (!isNaN(n)) { t.value = U.formatoNum(n); setP(t.getAttribute('data-k'), t.value); toca(); refresh(false); } }
   });
+  document.addEventListener('toggle', function (e) {      // el menú «Más» se abre hacia arriba; si arriba no hay lugar (barra pegada al encabezado), se abre hacia abajo
+    var d = e.target; if (!d || !d.matches || !d.matches('details.ac-more') || !d.open) return;
+    var m = d.querySelector('.ac-menu'); if (!m) return;
+    m.style.top = ''; m.style.bottom = '';
+    if (d.getBoundingClientRect().top < m.offsetHeight + 110) { m.style.bottom = 'auto'; m.style.top = 'calc(100% + 8px)'; }
+  }, true);
   document.addEventListener('click', function (e) {      // cierra el menú «Más» al tocar fuera o al elegir una opción
     var ds = ROOT.querySelectorAll('details.ac-more[open]');
-    for (var q = 0; q < ds.length; q++) if (!ds[q].contains(e.target) || e.target.closest('.ac-menu button')) ds[q].removeAttribute('open');
+    for (var q = 0; q < ds.length; q++) if (!ds[q].contains(e.target) || e.target.closest('.ac-menu button, .ac-menu a')) ds[q].removeAttribute('open');
   });
   host.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;

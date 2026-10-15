@@ -134,7 +134,7 @@ function PLD_enviarRevision(id) {
       enviadoPor: u.email, fechaEnvio: APS_ahora_(), revisadoPor: '', fechaRevision: '', comentario: '' };
     PLD_escribirRev_(R, e, reg);
     if (APS_CONFIG.PLD_COMPARTIR_REVISOR) {
-      APS_coordinadores_().forEach(function (c) { try { DriveApp.getFileById(b.id).addCommenter(c); } catch (err) { Logger.log('No se pudo compartir con ' + c + ': ' + err.message); } });
+      APS_coordinadores_().forEach(function (c) { APS_compartir_(b.id, c, 'commenter'); });
     }
     APS_audit_('PLD', 'ENVIAR_REVISION', b.id, b.operacion);
     APS_notificar_(APS_coordinadores_(), 'Pre PLD por revisar — ' + b.nombre, '<b>' + APS_escHtml_(APS_nombreDe_(u.email)) + '</b> envió a revisión un Pre PLD. Ábrelo desde el sistema para revisarlo.',

@@ -383,6 +383,21 @@ function ACCESO_diagnostico() {
     .concat(['', 'Seguirán entrando (' + ok.length + '):'], ok.length ? ok : ['  (ninguna)']).join('\n');
   Logger.log(txt); return txt;
 }
+/**
+ * Comparte un archivo de Drive SIN que Google mande el correo «X te compartió un archivo» (DriveApp.addViewer / addEditor / addCommenter
+ * SIEMPRE lo mandan, y salía uno por cada PDF generado, ajustado o corregido). Usa el servicio avanzado «Drive API» (el mismo que ya se
+ * necesita para Google Docs) con sendNotificationEmail = false. rol: 'reader' | 'commenter' | 'writer'.
+ * Si el servicio no está o falla, NO se cae a DriveApp (mandaría el correo): se anota en el registro de ejecución y se sigue;
+ * la coordinación igual descarga el PDF desde la plataforma, que no depende de este permiso.
+ */
+function APS_compartir_(archivo, correo, rol) {
+  var id = (archivo && archivo.getId) ? archivo.getId() : String(archivo);
+  try {
+    if (typeof Drive === 'undefined' || !Drive.Permissions) throw new Error('el servicio avanzado Drive API no está activado');
+    Drive.Permissions.create({ type: 'user', role: rol || 'reader', emailAddress: String(correo) }, id, { sendNotificationEmail: false, supportsAllDrives: true });
+    return true;
+  } catch (e) { Logger.log('No se pudo compartir en silencio con ' + correo + ': ' + e.message); return false; }
+}
 function APS_puedeVer_(reg, u) { return u.rol === 'coordinador' || reg.asesor === u.email; }
 function APS_puedeEditar_(reg, u) {
   if (reg.estado === 'APROBADO') return false;
@@ -779,6 +794,7 @@ function APS_panel() {
         if (acc === 'ENVIAR_REVISION') e = adm ? { tono: vigente ? 'warn' : 'info', titulo: vigente ? 'Contrato por revisar' : 'Contrato enviado a revisión', texto: APS_nombreDe_(dueno) + ' envió el contrato de ' + titulo + '.', accionable: vigente }
                                               : { tono: 'info', titulo: 'Enviaste un contrato a revisión', texto: titulo + (vigente ? ' está en revisión; te avisamos cuando se apruebe.' : ' fue enviado a revisión.') };
         else if (acc === 'APROBAR') e = { tono: 'ok', titulo: 'Contrato aprobado', texto: adm ? quien + ' aprobó el contrato de ' + titulo + '.' : 'El contrato de ' + titulo + ' ya fue aprobado. Ya puedes descargar el PDF.', accionable: !adm };
+        else if (acc === 'GENERAR_DIRECTO') e = { tono: 'ok', titulo: 'Contrato generado', texto: quien + ' generó el contrato de ' + titulo + '.', accionable: false };
         else if (acc === 'CANCELAR') e = { tono: 'bad', titulo: 'Contrato cancelado', texto: 'El contrato de ' + titulo + ' se canceló. Motivo: ' + motivo, accionable: !adm };
       } else {
         if (acc === 'ENVIAR_REVISION') e = adm ? { tono: vigente ? 'warn' : 'info', titulo: vigente ? 'Pre PLD por revisar' : 'Pre PLD enviado a revisión', texto: APS_nombreDe_(dueno) + ' envió «' + titulo + '».', accionable: vigente }
@@ -953,11 +969,12 @@ function APS_aprobar(id) {
     var f = APS_buscar_(id);
     if (!f) throw new Error('No se encontró el registro.');
     if (f.reg.estado === 'APROBADO') return { yaAprobado: true, meta: APS_meta_(f.reg) };
-    if (f.reg.estado !== 'EN_REVISION') throw new Error('Solo se puede aprobar un registro en revisión (estado actual: ' + f.reg.estado + ').');
+    var directo = f.reg.estado === 'BORRADOR' && f.reg.asesor === u.email && APS_CONFIG.PERMITIR_AUTOAPROBACION;      // la coordinación genera SU PROPIO contrato: no pasa por «enviar a revisión»
+    if (f.reg.estado !== 'EN_REVISION' && !directo) throw new Error('Solo se puede aprobar un registro en revisión (estado actual: ' + f.reg.estado + ').');
     if (!APS_CONFIG.PERMITIR_AUTOAPROBACION && f.reg.asesor === u.email) throw new Error('Este contrato lo creaste tú: debe aprobarlo otra persona de la coordinación.');
     var datos = JSON.parse(f.reg.json), pend = N.D.validar(datos);
     if (pend.length) throw new Error('Faltan ' + pend.length + ' dato(s): ' + pend.slice(0, 3).map(function (p) { return p.msg; }).join('; '));
-    return { json: f.reg.json, version: f.reg.version || 1, reg: f.reg };
+    return { json: f.reg.json, version: f.reg.version || 1, reg: f.reg, estado: f.reg.estado, directo: directo };
   });
   if (snap.yaAprobado) return snap.meta;
 
@@ -971,23 +988,23 @@ function APS_aprobar(id) {
     var f = APS_buscar_(id);
     if (!f) { try { archivo.setTrashed(true); } catch (e) {} throw new Error('El contrato ya no existe.'); }
     if (f.reg.estado === 'APROBADO') { try { archivo.setTrashed(true); } catch (e) {} return APS_meta_(f.reg); }          // otra persona lo aprobó en ese lapso
-    if (f.reg.estado !== 'EN_REVISION' || (f.reg.version || 1) !== snap.version) {
+    if (f.reg.estado !== snap.estado || (f.reg.version || 1) !== snap.version) {
       try { archivo.setTrashed(true); } catch (e) {}
       throw new Error('El contrato cambió mientras se generaba el PDF. Ábrelo de nuevo, revisa y vuelve a aprobar.');
     }
-    coord.forEach(function (c) { try { archivo.addViewer(c); } catch (e) { Logger.log('No se pudo compartir el PDF con ' + c + ': ' + e.message); } });   // para poder verlo en Drive
+    coord.forEach(function (c) { APS_compartir_(archivo, c, 'reader'); });   // para poder verlo en Drive
     f.reg.estado = 'APROBADO'; f.reg.pdfUrl = archivo.getUrl(); f.reg.pdfId = archivo.getId(); f.reg.revisadoPor = u.email; f.reg.actualizado = ahora;
     f.reg.version = snap.version + 1; f.reg.pdfSha = pdfSha; f.reg.datosHash = datosHash; f.reg.aprobadoEn = ahora;
     APS_escribir_(f.hoja, f.fila, f.reg);
-    APS_snapshot_(f.reg, u, 'APROBACION');
-    APS_audit_('APS', 'APROBAR', f.reg.id, 'PDF ' + f.reg.pdfId + ' · SHA ' + pdfSha.slice(0, 16) + ' · datos ' + datosHash.slice(0, 16) + ' · ' + APS_resumenHojas_(pdfAj));
+    APS_snapshot_(f.reg, u, snap.directo ? 'GENERACION_DIRECTA' : 'APROBACION');
+    APS_audit_('APS', snap.directo ? 'GENERAR_DIRECTO' : 'APROBAR', f.reg.id, (snap.directo ? 'Contrato propio de la coordinación, generado sin enviar a revisión · ' : '') + 'PDF ' + f.reg.pdfId + ' · SHA ' + pdfSha.slice(0, 16) + ' · datos ' + datosHash.slice(0, 16) + ' · ' + APS_resumenHojas_(pdfAj));
     // Evidencia fuera de la hoja: huellas completas por correo al buzón de Cumplimiento (solo si EVIDENCIA_CORREOS tiene direcciones). Sin datos personales.
     if ((APS_CONFIG.EVIDENCIA_CORREOS || []).length) {
       APS_notificar_(APS_CONFIG.EVIDENCIA_CORREOS, 'Evidencia de aprobación — ' + f.reg.id, 'Constancia automática de una aprobación. Conserva este correo: las huellas permiten comprobar después que el contrato y su PDF no cambiaron.',
         { sistema: 'APS Hipoo · Evidencia', titulo: 'Constancia de aprobación', etiqueta: 'Evidencia', tono: 'info', sinBoton: true, firma: 'Aprobado por ' + (u.nombre || u.email),
           datos: [['Folio', f.reg.id], ['Versión', String(f.reg.version)], ['Aprobado', ahora], ['Aprobó', u.email], ['Huella de los datos (SHA-256)', datosHash], ['Huella del PDF (SHA-256)', pdfSha], ['ID del PDF en Drive', f.reg.pdfId]] });
     }
-    APS_notificar_([f.reg.asesor], 'Contrato aprobado — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
+    if (f.reg.asesor !== u.email) APS_notificar_([f.reg.asesor], 'Contrato aprobado — ' + f.reg.propietarios + ' (' + f.reg.id + ')',
       'La coordinación aprobó tu contrato. Ya puedes entrar al sistema y descargar el PDF definitivo.',
       { params: { modulo: 'aps', id: f.reg.id }, firma: u.nombre ? ('Aprobado por ' + u.nombre) : 'Aprobado por la coordinación', titulo: 'Tu contrato fue aprobado', etiqueta: 'Aprobado', tono: 'ok', boton: 'Descargar el PDF',
         datos: APS_datosCorreo_(f.reg, [['Aprobado', ahora], ['Versión', String(f.reg.version)], ['Huella de los datos', datosHash.slice(0, 16)]]) });
@@ -1164,7 +1181,7 @@ function APS_ajustarHojas(id, nivel) {
       try { archivo.setTrashed(true); } catch (e) {}
       throw new Error('El contrato cambió mientras se generaba el PDF. Ábrelo de nuevo y vuelve a intentarlo.');
     }
-    coord.forEach(function (c) { try { archivo.addViewer(c); } catch (e) { Logger.log('No se pudo compartir el PDF con ' + c + ': ' + e.message); } });
+    coord.forEach(function (c) { APS_compartir_(archivo, c, 'reader'); });
     var anterior = { id: f.reg.pdfId, sha: f.reg.pdfSha };
     if (anterior.id) { try { var viejo = DriveApp.getFileById(anterior.id); viejo.setName(viejo.getName().replace(/\.pdf$/i, '') + ' (anterior ' + APS_ahora_() + ').pdf'); } catch (e) { Logger.log('No se pudo renombrar el PDF anterior: ' + e.message); } }
     f.reg.pdfUrl = archivo.getUrl(); f.reg.pdfId = archivo.getId(); f.reg.pdfSha = pdfSha; f.reg.actualizado = APS_ahora_();
@@ -1213,7 +1230,7 @@ function APS_corregirAprobado(datos, id, versionBase, motivo) {
       try { archivo.setTrashed(true); } catch (e) {}
       throw new Error('El contrato cambió mientras se generaba el PDF. Ábrelo de nuevo, revisa y vuelve a corregir.');
     }
-    coord.forEach(function (c) { try { archivo.addViewer(c); } catch (e) { Logger.log('No se pudo compartir el PDF con ' + c + ': ' + e.message); } });
+    coord.forEach(function (c) { APS_compartir_(archivo, c, 'reader'); });
     var anterior = { id: f.reg.pdfId, sha: f.reg.pdfSha, datos: f.reg.datosHash };
     if (anterior.id) { try { var viejo = DriveApp.getFileById(anterior.id); viejo.setName(viejo.getName().replace(/\.pdf$/i, '') + ' (anterior ' + ahora + ').pdf'); } catch (e) { Logger.log('No se pudo renombrar el PDF anterior: ' + e.message); } }
     f.reg.tipo = res.tipo; f.reg.propietarios = res.propietarios; f.reg.inmueble = res.inmueble; f.reg.json = JSON.stringify(o); f.reg.pendientes = 0;
@@ -1240,7 +1257,7 @@ function APS_docEditable(id) {
   if (!f) throw new Error('No se encontró el registro.');
   var datos = JSON.parse(f.reg.json);
   var archivo = APS_docDesdeDocx_(datos, APS_nombrePdf_(f.reg, datos), '');
-  try { archivo.addEditor(u.email); } catch (e) { Logger.log('No se pudo compartir el documento: ' + e.message); }
+  APS_compartir_(archivo, u.email, 'writer');
   APS_audit_('APS', 'COPIA_DOCS', f.reg.id, archivo.getUrl());
   var url = archivo.getUrl();
   APS_conLock_(function () {                                     // se anota en el registro: la coordinación ve "Docs generado"
