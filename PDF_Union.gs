@@ -101,3 +101,21 @@ function APS_pdfUnir_(bytesContrato, bytesAnexo) {
   var out = K.run(a.save({ objectsPerTick: Infinity }));
   return { bytes: out, paginasContrato: nA, paginasAnexo: nB };
 }
+
+/**
+ * PRUEBA RÁPIDA (ejecutar desde el editor de Apps Script, elegir «APS_probarUnion» y pulsar Ejecutar; luego abrir «Registro de ejecución»):
+ * crea dos PDF de prueba en memoria, los une y comprueba el resultado. Dice «OK» o el error exacto.
+ */
+function APS_probarUnion() {
+  try {
+    var K = APS_pdfLib_();
+    var crea = function (n) { var d = K.run(K.L.PDFDocument.create()); for (var i = 0; i < n; i++) d.addPage(); return K.run(d.save({ objectsPerTick: Infinity })); };
+    var r = APS_pdfUnir_(crea(2), crea(3));
+    var blob = Utilities.newBlob(APS_deU8_(r.bytes), 'application/pdf', 'prueba.pdf');
+    var info = APS_pdfInfo_(APS_aU8_(blob.getBytes()));
+    if (info.paginas !== 5) throw new Error('Se esperaban 5 hojas y salieron ' + info.paginas);
+    Logger.log('OK: la unión de PDF funciona (2 + 3 = ' + info.paginas + ' hojas, ' + blob.getBytes().length + ' bytes).');
+  } catch (e) {
+    Logger.log('FALLÓ: ' + e.message + (e.stack ? '\n' + e.stack : ''));
+  }
+}
