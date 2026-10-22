@@ -908,6 +908,12 @@ function APS_limpiarDatos_(datos) {
 
 /* ═════════════ ANEXO: INVENTARIO FOTOGRÁFICO (PDF que se une al final del contrato) ═════════════ */
 
+/** Avisa con palabras claras si falta el archivo PDF_Union.gs en el proyecto (en vez de un «ReferenceError» técnico). */
+function APS_requierePdfUnion_() {
+  if (typeof APS_pdfInfo_ !== 'function' || typeof APS_pdfUnir_ !== 'function') {
+    throw new Error('Falta el archivo «PDF_Union» en el proyecto de Apps Script (o no se guardó completo). Créalo con «+ > Script», pega ahí todo el contenido de PDF_Union.gs, guarda y publica una versión nueva.');
+  }
+}
 function APS_nombreAnexo_(n) {
   var t = String(n || 'inventario.pdf').replace(/[\\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim();
   t = t.replace(/\.pdf$/i, '').slice(0, 100).trim();
@@ -924,6 +930,7 @@ function APS_esPdf_(u8) { return u8.length > 8 && u8[0] === 0x25 && u8[1] === 0x
  */
 function APS_anexoSubir(base64, nombre) {
   var u = APS_requiereAps_();
+  APS_requierePdfUnion_();
   if (!base64 || typeof base64 !== 'string') throw new Error('No llegó ningún archivo.');
   var bytes = Utilities.base64Decode(base64), max = (APS_CONFIG.ANEXO_MAX_MB || 10) * 1024 * 1024;
   if (bytes.length > max) throw new Error('El PDF pesa ' + (bytes.length / 1048576).toFixed(1) + ' MB y el máximo es ' + APS_CONFIG.ANEXO_MAX_MB + ' MB. Reduce su tamaño (por ejemplo guárdalo con menor calidad de imagen) y vuelve a subirlo.');
@@ -946,6 +953,7 @@ function APS_anexoSubir(base64, nombre) {
 function APS_anexoValida_(pedido, previo, u) {
   if (!pedido || !pedido.id) return null;
   if (previo && previo.id === pedido.id) return previo;
+  APS_requierePdfUnion_();
   var archivo;
   try { archivo = DriveApp.getFileById(pedido.id); } catch (e) { throw new Error('No se encontró el PDF del inventario. Súbelo de nuevo.'); }
   var desc = {};
@@ -963,6 +971,7 @@ function APS_anexoValida_(pedido, previo, u) {
 function APS_pdfConAnexo_(datos, nombre, nivel) {
   var r = APS_pdfAjustado_(datos, nombre, false, nivel);
   if (!datos.anexo || !datos.anexo.id) return r;
+  APS_requierePdfUnion_();
   var archivo = DriveApp.getFileById(datos.anexo.id), bytesA = APS_bytesPdfDrive_(archivo);
   if (datos.anexo.sha && APS_sha256_(bytesA) !== datos.anexo.sha) throw new Error('El PDF del inventario guardado ya no coincide con el que se subió. Súbelo de nuevo.');
   var un = APS_pdfUnir_(r.blob.getBytes(), bytesA);
