@@ -86,6 +86,9 @@ var APS_CONFIG = {
   CORREO_NO_RESPONDER: true,
   // ¿Puede una coordinadora aprobar un contrato que ella misma creó? true = sí (como estaba). false = no: lo debe aprobar otra persona de coordinación.
   PERMITIR_AUTOAPROBACION: true,
+  // Inventario fotográfico (anexo PDF que se une al final del contrato): tamaño máximo en MB y número máximo de hojas.
+  ANEXO_MAX_MB: 10,
+  ANEXO_MAX_PAGINAS: 80,
   // A quién le llegan los reportes de fallas que los usuarios envían con el botón de ayuda («?») de la pantalla principal.
   REPORTES_CORREOS: ['lizbethserrato@hipoo.mx', 'robertodelacruz@cualli.mx'],
   ZONA: 'America/Mexico_City'
@@ -845,6 +848,7 @@ function APS_diff_(a, b) {
   var A = APS_aplana_(a || {}, '', {}), B = APS_aplana_(b || {}, '', {}), cambios = [], vistos = {};
   Object.keys(A).concat(Object.keys(B)).forEach(function (k) {
     if (vistos[k]) return; vistos[k] = 1;
+    if (/^anexo\.(id|sha|bytes|subidoPor|subidoEn)$/.test(k)) return;     // datos técnicos del inventario: en el historial solo se ve el nombre y las hojas
     if ((A[k] || '') !== (B[k] || '')) cambios.push({ campo: k, antes: A[k] || '', despues: B[k] || '' });
   });
   return cambios.slice(0, 80);
@@ -884,6 +888,7 @@ function APS_limpiarDatos_(datos) {
   var o = JSON.parse(JSON.stringify(datos));
   if (!Array.isArray(o.propietarios) || o.propietarios.length < 1 || o.propietarios.length > 4) throw new Error('Debe haber de 1 a 4 propietarios.');
   if (Array.isArray(o.ajustes) && o.ajustes.length > 15) throw new Error('Máximo 15 ajustes de precio.');
+  var anexoCliente = o.anexo; delete o.anexo;                    // el anexo NO se confía a lo que manda la pantalla: se valida aparte contra el archivo real en Drive
   var libres = { inmDomicilio: 1, instalaciones: 1 };           // los únicos campos donde se permiten saltos de línea
   function limpia(v, llave) {
     if (typeof v === 'string') {
@@ -896,8 +901,92 @@ function APS_limpiarDatos_(datos) {
     return v;
   }
   o = limpia(o, '');
+  if (anexoCliente && typeof anexoCliente === 'object' && typeof anexoCliente.id === 'string' && anexoCliente.id) o.anexo = { id: anexoCliente.id.slice(0, 100), nombre: String(anexoCliente.nombre || '').slice(0, 150) };
   if (JSON.stringify(o).length > 40000) throw new Error('El registro es demasiado grande.');
   return o;
+}
+
+/* ═════════════ ANEXO: INVENTARIO FOTOGRÁFICO (PDF que se une al final del contrato) ═════════════ */
+
+function APS_nombreAnexo_(n) {
+  var t = String(n || 'inventario.pdf').replace(/[\\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim();
+  t = t.replace(/\.pdf$/i, '').slice(0, 100).trim();
+  return (t || 'inventario') + '.pdf';
+}
+/** Lee los bytes (Uint8Array) de un PDF guardado en Drive y confirma que sea PDF. */
+function APS_bytesPdfDrive_(archivo) { return APS_aU8_(archivo.getBlob().getBytes()); }
+function APS_esPdf_(u8) { return u8.length > 8 && u8[0] === 0x25 && u8[1] === 0x50 && u8[2] === 0x44 && u8[3] === 0x46 && u8[4] === 0x2d; }
+
+/**
+ * Asesor o coordinación: sube el PDF del inventario fotográfico (base64). Se guarda en la carpeta de contratos en Drive (sin compartirlo:
+ * se ve desde la plataforma). Todavía NO queda ligado a ningún contrato: la pantalla manda después los datos con este anexo y entonces se asigna.
+ * Valida que sea un PDF legible, sin contraseña, de tamaño y hojas razonables. Devuelve los datos del anexo calculados AQUÍ (no los de la pantalla).
+ */
+function APS_anexoSubir(base64, nombre) {
+  var u = APS_requiereAps_();
+  if (!base64 || typeof base64 !== 'string') throw new Error('No llegó ningún archivo.');
+  var bytes = Utilities.base64Decode(base64), max = (APS_CONFIG.ANEXO_MAX_MB || 10) * 1024 * 1024;
+  if (bytes.length > max) throw new Error('El PDF pesa ' + (bytes.length / 1048576).toFixed(1) + ' MB y el máximo es ' + APS_CONFIG.ANEXO_MAX_MB + ' MB. Reduce su tamaño (por ejemplo guárdalo con menor calidad de imagen) y vuelve a subirlo.');
+  var u8 = APS_aU8_(bytes);
+  if (!APS_esPdf_(u8)) throw new Error('Ese archivo no es un PDF. Sube el inventario fotográfico guardado como PDF.');
+  var info = APS_pdfInfo_(u8);
+  if (info.paginas > (APS_CONFIG.ANEXO_MAX_PAGINAS || 80)) throw new Error('El PDF tiene ' + info.paginas + ' hojas y el máximo es ' + APS_CONFIG.ANEXO_MAX_PAGINAS + '.');
+  var nom = APS_nombreAnexo_(nombre), ahora = APS_ahora_();
+  var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(Utilities.newBlob(APS_deU8_(u8), 'application/pdf', 'Inventario (anexo) - ' + nom));
+  try { archivo.setDescription(JSON.stringify({ tipo: 'anexo-aps', por: u.email, en: ahora })); } catch (e) { Logger.log('Sin descripción: ' + e.message); }
+  var sha = APS_sha256_(bytes);
+  APS_audit_('APS', 'ANEXO_SUBIR', archivo.getId(), nom + ' · ' + info.paginas + ' hojas · ' + (bytes.length / 1048576).toFixed(1) + ' MB · SHA ' + sha.slice(0, 16));
+  return { id: archivo.getId(), nombre: nom, paginas: info.paginas, bytes: bytes.length, sha: sha, subidoPor: u.email, subidoEn: ahora };
+}
+/**
+ * Valida el anexo que viene en los datos y lo regresa completo, con datos calculados en el servidor. previo = el anexo ya guardado en el contrato.
+ *  · si es el mismo archivo que ya tenía el contrato → se respeta tal cual;
+ *  · si es nuevo → debe ser un archivo subido con APS_anexoSubir por la misma persona, estar en la carpeta de contratos y seguir siendo un PDF válido.
+ */
+function APS_anexoValida_(pedido, previo, u) {
+  if (!pedido || !pedido.id) return null;
+  if (previo && previo.id === pedido.id) return previo;
+  var archivo;
+  try { archivo = DriveApp.getFileById(pedido.id); } catch (e) { throw new Error('No se encontró el PDF del inventario. Súbelo de nuevo.'); }
+  var desc = {};
+  try { desc = JSON.parse(archivo.getDescription() || '{}'); } catch (e) { desc = {}; }
+  if (desc.tipo !== 'anexo-aps' || desc.por !== u.email) throw new Error('Ese PDF de inventario no se puede usar en este contrato. Súbelo de nuevo.');
+  var enCarpeta = false, padres = archivo.getParents(), carpeta = APS_ids_().carpeta;
+  while (padres.hasNext()) { if (padres.next().getId() === carpeta) enCarpeta = true; }
+  if (!enCarpeta) throw new Error('El PDF del inventario no está en la carpeta de contratos. Súbelo de nuevo.');
+  var bytes = APS_bytesPdfDrive_(archivo);
+  if (!APS_esPdf_(bytes) || bytes.length > (APS_CONFIG.ANEXO_MAX_MB || 10) * 1048576 + 1024) throw new Error('El PDF del inventario no es válido. Súbelo de nuevo.');
+  var info = APS_pdfInfo_(bytes);
+  return { id: pedido.id, nombre: APS_nombreAnexo_(pedido.nombre), paginas: info.paginas, bytes: bytes.length, sha: APS_sha256_(bytes), subidoPor: desc.por, subidoEn: desc.en || '' };
+}
+/** Une el contrato con su anexo (si lo tiene). Devuelve lo mismo que APS_pdfAjustado_ con el PDF ya unido; hojas = hojas del contrato; anexoPaginas = las del inventario. */
+function APS_pdfConAnexo_(datos, nombre, nivel) {
+  var r = APS_pdfAjustado_(datos, nombre, false, nivel);
+  if (!datos.anexo || !datos.anexo.id) return r;
+  var archivo = DriveApp.getFileById(datos.anexo.id), bytesA = APS_bytesPdfDrive_(archivo);
+  if (datos.anexo.sha && APS_sha256_(bytesA) !== datos.anexo.sha) throw new Error('El PDF del inventario guardado ya no coincide con el que se subió. Súbelo de nuevo.');
+  var un = APS_pdfUnir_(r.blob.getBytes(), bytesA);
+  r.blob = Utilities.newBlob(APS_deU8_(un.bytes), 'application/pdf', nombre + '.pdf');
+  r.anexoPaginas = un.paginasAnexo;
+  r.nota = (r.nota ? r.nota + ' · ' : '') + 'con inventario (' + un.paginasAnexo + ' hojas)';
+  return r;
+}
+/** Para ver el inventario desde la plataforma (borrador o aprobado): {nombre, base64}. Solo quien ve el contrato, o quien subió ese archivo. */
+function APS_anexoObtener(id, anexoId) {
+  var u = APS_requiereAps_(), ok = false;
+  if (id) {
+    var f = APS_buscar_(id);
+    if (f && APS_puedeVer_(f.reg, u)) { try { var d = JSON.parse(f.reg.json); ok = !!(d.anexo && d.anexo.id === anexoId); } catch (e) { ok = false; } }
+  }
+  var archivo;
+  try { archivo = DriveApp.getFileById(anexoId); } catch (e) { throw new Error('No se encontró el PDF del inventario.'); }
+  if (!ok) {
+    var desc = {}; try { desc = JSON.parse(archivo.getDescription() || '{}'); } catch (e) { desc = {}; }
+    ok = desc.tipo === 'anexo-aps' && desc.por === u.email;
+  }
+  if (!ok) throw new Error('No tienes acceso a ese PDF.');
+  var bytes = archivo.getBlob().getBytes();
+  return { nombre: String(archivo.getName()).replace(/^Inventario \(anexo\) - /, ''), base64: Utilities.base64Encode(bytes) };
 }
 
 /** Crea (id vacío) o actualiza un borrador. versionBase: la versión que la pantalla tenía abierta; si otra persona guardó antes, avisa en vez de pisar sus cambios. */
@@ -908,23 +997,28 @@ function APS_guardar(datos, id, versionBase) {
     if (!id) {
       var tomados = {};
       APS_todos_().forEach(function (r) { tomados[r.id] = 1; });
+      var anx = APS_anexoValida_(o.anexo, null, u); if (anx) o.anexo = anx; else delete o.anexo;
       var reg = { id: APS_nuevoId_(tomados), creado: ahora, actualizado: ahora, asesor: u.email, estado: 'BORRADOR', tipo: res.tipo,
         propietarios: res.propietarios, inmueble: res.inmueble, json: JSON.stringify(o), pdfUrl: '', pdfId: '', comentario: '', revisadoPor: '', pendientes: pend, docUrl: '', docFecha: '', version: 1 };
       var sh = APS_hoja_(), fila = sh.getLastRow() + 1;
       if (fila > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), 200);   // la hoja crece sola
       APS_escribir_(sh, fila, reg);
       APS_audit_('APS', 'CREAR', reg.id, res.propietarios);
+      if (o.anexo) APS_audit_('APS', 'ANEXO_ASIGNAR', reg.id, o.anexo.nombre + ' · ' + o.anexo.paginas + ' hojas · SHA ' + String(o.anexo.sha).slice(0, 16));
       return APS_meta_(reg);
     }
     var f = APS_buscar_(id);
     if (!f) throw new Error('No existe el registro ' + id + '.');
     if (!APS_puedeEditar_(f.reg, u)) throw new Error('No puedes editar este registro (estado: ' + f.reg.estado + ').');
     if (versionBase != null && Number(versionBase) !== f.reg.version) throw new Error('Este contrato lo modificó otra persona mientras lo tenías abierto. Ábrelo de nuevo desde «Mis contratos» para ver los cambios y no perderlos.');
+    var previoAnexo = null; try { previoAnexo = JSON.parse(f.reg.json).anexo || null; } catch (e) {}
+    var anx2 = APS_anexoValida_(o.anexo, previoAnexo, u); if (anx2) o.anexo = anx2; else delete o.anexo;
     var nuevoJson = JSON.stringify(o);
     if (nuevoJson === f.reg.json) return APS_meta_(f.reg);               // nada cambió: no se escribe, no se sube la versión
     f.reg.actualizado = ahora; f.reg.tipo = res.tipo; f.reg.propietarios = res.propietarios; f.reg.inmueble = res.inmueble; f.reg.json = nuevoJson; f.reg.pendientes = pend; f.reg.version = (f.reg.version || 1) + 1;
     APS_escribir_(f.hoja, f.fila, f.reg);
     if (f.reg.estado !== 'BORRADOR') APS_snapshot_(f.reg, u, 'EDICION_COORDINACION');       // desde que se envía, cada cambio de la coordinación queda guardado completo
+    if ((o.anexo && o.anexo.id) !== (previoAnexo && previoAnexo.id)) APS_audit_('APS', 'ANEXO_ASIGNAR', f.reg.id, o.anexo ? o.anexo.nombre + ' · ' + o.anexo.paginas + ' hojas · SHA ' + String(o.anexo.sha).slice(0, 16) : 'Se quitó el inventario');
     APS_audit_('APS', 'EDITAR', f.reg.id, 'Estado: ' + f.reg.estado + ' · v' + f.reg.version);
     return APS_meta_(f.reg);
   });
@@ -979,7 +1073,7 @@ function APS_aprobar(id) {
   if (snap.yaAprobado) return snap.meta;
 
   var datos = JSON.parse(snap.json), datosHash = APS_sha256_(APS_estable_(datos)), ahora = APS_ahora_();
-  var pdfAj = APS_pdfAjustado_(datos, APS_nombrePdf_(snap.reg, datos), false, 'auto'), blob = pdfAj.blob;
+  var pdfAj = APS_pdfConAnexo_(datos, APS_nombrePdf_(snap.reg, datos), 'auto'), blob = pdfAj.blob;
   var pdfSha = APS_sha256_(blob.getBytes());
   var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(blob);
   var coord = APS_coordinadores_();
@@ -1171,7 +1265,7 @@ function APS_ajustarHojas(id, nivel) {
     APS_audit_('APS', 'PDF_NO_COINCIDE', snap.reg.id, 'Reajuste de hojas rechazado: los datos ya no coinciden con la huella de la aprobación');
     throw new Error('Los datos de este contrato ya no coinciden con lo que se aprobó. No se regenera el PDF; avisa a quien administra el sistema.');
   }
-  var r = APS_pdfAjustado_(datos, APS_nombrePdf_(snap.reg, datos), false, nivel === 'auto' ? 'auto' : Number(nivel));
+  var r = APS_pdfConAnexo_(datos, APS_nombrePdf_(snap.reg, datos), nivel === 'auto' ? 'auto' : Number(nivel));
   var pdfSha = APS_sha256_(r.blob.getBytes());
   var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(r.blob);
   var coord = APS_coordinadores_();
@@ -1212,6 +1306,8 @@ function APS_corregirAprobado(datos, id, versionBase, motivo) {
     if (f.reg.estado !== 'APROBADO') throw new Error('Solo se corrige con este botón un contrato aprobado (estado actual: ' + f.reg.estado + ').');
     if (!APS_CONFIG.PERMITIR_AUTOAPROBACION && f.reg.asesor === u.email) throw new Error('Este contrato lo creaste tú: debe corregirlo otra persona de la coordinación.');
     if (versionBase != null && Number(versionBase) !== (f.reg.version || 1)) throw new Error('Este contrato cambió mientras lo tenías abierto. Ábrelo de nuevo desde el registro para ver los cambios y no perderlos.');
+    var previoAnexo = null; try { previoAnexo = JSON.parse(f.reg.json).anexo || null; } catch (e) {}
+    var anx = APS_anexoValida_(o.anexo, previoAnexo, u); if (anx) o.anexo = anx; else delete o.anexo;
     if (JSON.stringify(o) === f.reg.json) throw new Error('No hay cambios que guardar: los datos son los mismos que los del contrato aprobado.');
     if (f.reg.datosHash && APS_sha256_(APS_estable_(JSON.parse(f.reg.json))) !== f.reg.datosHash) {
       APS_audit_('APS', 'PDF_NO_COINCIDE', f.reg.id, 'Corrección rechazada: los datos guardados ya no coinciden con la huella de la aprobación');
@@ -1220,7 +1316,7 @@ function APS_corregirAprobado(datos, id, versionBase, motivo) {
     return { version: f.reg.version || 1, reg: f.reg };
   });
   var datosHash = APS_sha256_(APS_estable_(o)), ahora = APS_ahora_();
-  var pdfAj = APS_pdfAjustado_(o, APS_nombrePdf_(snap.reg, o), false, 'auto'), blob = pdfAj.blob;
+  var pdfAj = APS_pdfConAnexo_(o, APS_nombrePdf_(snap.reg, o), 'auto'), blob = pdfAj.blob;
   var pdfSha = APS_sha256_(blob.getBytes());
   var archivo = DriveApp.getFolderById(APS_ids_().carpeta).createFile(blob);
   var coord = APS_coordinadores_();

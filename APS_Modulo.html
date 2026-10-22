@@ -82,7 +82,7 @@
 #aps-root .row-item .field-group:last-child{margin-bottom:0}
 #aps-root .btn-mini{background:#fff;border:1px solid #c4cde0;color:var(--navy);border-radius:8px;padding:8px 12px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:12px}
 #aps-root .btn-mini:hover{border-color:var(--primary);background:var(--tint)}
-#aps-root .btn-add{background:#fff;border:1px dashed var(--primary);color:var(--teal);border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif}
+#aps-root .anx{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:1px solid #dbe2ef;border-radius:14px;background:#f8faff;padding:14px 16px}#aps-root .anx-i{flex:none;width:42px;height:42px;border-radius:12px;background:#fff;border:1px solid #dbe2ef;display:flex;align-items:center;justify-content:center;font-size:20px}#aps-root .anx-t{flex:1;min-width:180px}#aps-root .anx-t b{display:block;font-size:14px;color:var(--ink);word-break:break-word}#aps-root .anx-t span{font-size:12.5px;color:var(--muted)}#aps-root .anx-b{display:flex;gap:8px;flex-wrap:wrap}#aps-root .anx-b .btn-mini{margin:0}#aps-root .btn-add{background:#fff;border:1px dashed var(--primary);color:var(--teal);border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif}
 #aps-root .btn-add:hover{background:var(--tint)}
 #aps-root .info-note{display:flex;gap:10px;background:var(--tint);border:1px solid #bfe6ec;border-radius:10px;padding:12px 14px;font-size:13px;color:#16465a;line-height:1.5;margin-top:16px}
 #aps-root .tenga{background:#fff;border:1px solid var(--line);border-left:4px solid var(--primary);border-radius:10px;padding:14px 16px;margin-bottom:18px;box-shadow:var(--shadow)}
@@ -834,11 +834,54 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
         fSeg('ivaRenta', 'Honorarios profesionales: ¿más IVA o IVA incluido?', [['mas', 'Más IVA'], ['incluido', 'IVA incluido']], 'El monto (1 mes de renta, etc.) ya viene fijo en el documento; esto solo define cómo se redacta el IVA.') +
         note('Los honorarios profesionales y la cuenta bancaria son fijos: ya vienen en el documento.'));
   }
+  /* Inventario fotográfico: un solo PDF que el servidor une al final del contrato al aprobarlo/generarlo (el contrato no cambia). */
+  function anexoHtml() {
+    var a = S.anexo, bloqueado = ro();
+    var kb = function (n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; };
+    if (!a) {
+      return bloqueado ? '<div class="help">Este contrato no lleva inventario fotográfico.</div>'
+        : '<div class="anx"><div class="anx-i">📎</div><div class="anx-t"><b>Sin inventario</b><span>Adjunta el PDF y saldrá junto al contrato, en un solo archivo.</span></div>' +
+          '<div class="anx-b"><button type="button" class="btn-mini" data-act="anxadd">Adjuntar PDF</button></div></div>' +
+          '<input type="file" id="aps_anxFile" accept="application/pdf,.pdf" style="display:none" data-keep>' +
+          note('Máximo 10 MB. Si pesa más, guárdalo con menor calidad de imagen. Se une al final del PDF al aprobarlo; la coordinación puede verlo antes de aprobar.');
+    }
+    var aprobado = REG && REG.estado === 'APROBADO' && !corrigiendo();
+    return '<div class="anx"><div class="anx-i">📄</div><div class="anx-t"><b>' + esc(a.nombre) + '</b><span>' + a.paginas + (a.paginas === 1 ? ' hoja' : ' hojas') + ' · ' + kb(a.bytes) + (a.subidoPor ? ' · lo subió ' + esc(a.subidoPor) : '') + '</span></div>' +
+      '<div class="anx-b"><button type="button" class="btn-mini" data-act="anxver" data-keep>Ver</button>' +
+      (bloqueado ? '' : '<button type="button" class="btn-mini" data-act="anxadd">Cambiar</button><button type="button" class="btn-mini" data-act="anxdel">Quitar</button>') + '</div></div>' +
+      (bloqueado ? '' : '<input type="file" id="aps_anxFile" accept="application/pdf,.pdf" style="display:none" data-keep>') +
+      note(aprobado ? 'Ya va incluido al final del PDF aprobado (después de las hojas del contrato).' : 'Se une al final del contrato al aprobarlo o generarlo. «Ver contrato completo» e «Imprimir» muestran solo el contrato; el inventario se ve con «Ver».');
+  }
+  function anexoAgregar() { var f = $('aps_anxFile'); if (f) { f.value = ''; f.click(); } }
+  function anexoElegido(file) {
+    if (!file) return;
+    if (!/pdf$/i.test(file.name) && file.type !== 'application/pdf') { toast('Elige un archivo PDF.', true); return; }
+    if (file.size > 10 * 1048576) { toast('El PDF pesa ' + (file.size / 1048576).toFixed(1) + ' MB y el máximo es 10 MB. Guárdalo con menor calidad de imagen y vuelve a subirlo.', true); return; }
+    var fr = new FileReader();
+    fr.onload = function () {
+      var b64 = String(fr.result).split(',')[1] || '';
+      srv('APS_anexoSubir', [b64, file.name], function (meta) { S.anexo = meta; toca(); renderStep(); toast('Inventario adjuntado (' + meta.paginas + (meta.paginas === 1 ? ' hoja' : ' hojas') + '). Recuerda guardar el borrador.'); }, 'Subiendo el inventario… (puede tardar unos segundos)', 120000);
+    };
+    fr.onerror = function () { toast('No se pudo leer el archivo. Inténtalo de nuevo.', true); };
+    fr.readAsDataURL(file);
+  }
+  function anexoVer() {
+    if (!S.anexo) return;
+    srv('APS_anexoObtener', [REG ? REG.id : null, S.anexo.id], function (r) {
+      var a = document.createElement('a'); a.href = 'data:application/pdf;base64,' + r.base64; a.download = r.nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      toast('Descarga iniciada: ' + r.nombre);
+    }, 'Preparando el inventario…', 90000);
+  }
+  function anexoQuitar() {
+    if (!S.anexo || ro()) return;
+    confirma({ titulo: '¿Quitar el inventario fotográfico?', texto: 'El contrato saldrá sin inventario. Podrás adjuntar otro PDF cuando quieras.', ok: 'Sí, quitar', cancelar: 'Volver', tono: 'warn', icono: 'basura' }, function () { delete S.anexo; toca(); renderStep(); toast('Inventario quitado. Recuerda guardar el borrador.'); });
+  }
   function stepFirma() {
     var n = ISS.length, firm = D.firmantes(S).length;
     return card('✍️', 'Lugar y fecha de firma', 'Se imprime en la carátula y en el Anexo 1',
       '<div class="grid2">' + fText('lugar', 'Lugar de firma', { ph: 'Ciudad de México' }) + fText('fecha', 'Fecha de firma', { type: 'date' }) + '</div>' +
       note('Firmas que llevará el documento: ' + firm + ' del cliente (según los propietarios y representantes capturados) y 1 de "EL PROFESIONAL".')) +
+      (IN_GAS ? card('📎', 'Inventario fotográfico', 'Opcional · un PDF que se une al final del contrato', anexoHtml()) : '') +
       card('✅', 'Revisión final', n ? 'Todavía faltan datos' : 'Todo listo',
         (n ? '<div class="msg-step">Faltan ' + n + ' dato' + (n === 1 ? '' : 's') + '. Mientras falten no se puede ' + (propioCoord() ? 'generar el contrato' : 'enviar a revisión') + '. Toca cada uno en la lista de pendientes para ir directo al campo.</div>'
            : '<div class="info-note"><span>🎉</span><span>' + (IN_GAS && USER.rol !== 'coordinador' ? 'Datos completos. Revisa la vista previa (botón «Ver contrato completo») y, si todo está bien, envíalo a revisión. La coordinación lo revisará y aprobará; el PDF se habilita al aprobarse.' : (propioCoord() ? 'Datos completos. Revisa la vista previa (botón «Ver contrato completo») y, si todo está bien, pulsa «Generar contrato»: sale el PDF de una vez, sin enviarlo a revisión.' : 'Datos completos. Revisa la vista previa (botón «Ver contrato completo») y, si todo está bien, continúa.')) + '</span></div>') +
@@ -1150,6 +1193,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     if (p[0] === 'propietarios') pre = 'Propietario ' + (parseInt(p[1], 10) + 1) + ' \u00b7 ';
     else if (p[0] === 'ajustes') pre = 'Ajuste ' + (parseInt(p[1], 10) + 1) + ' \u00b7 ';
     else if (p[0] === 'contactoDir') pre = 'Domicilio de contacto \u00b7 ';
+    else if (p[0] === 'anexo') return k === 'paginas' ? 'Inventario fotogr\u00e1fico (hojas)' : 'Inventario fotogr\u00e1fico';
     return pre + (ETQ[k] || k);
   }
   /* ── Revisión automática (solo coordinación): reglas fijas de APS_REV, calculadas aquí mismo con lo que hay en pantalla ── */
@@ -1297,7 +1341,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     if (REG) { crear(REG.id); return; }
     guardar(function (meta) { crear(meta.id); });          // registro nuevo: se guarda como borrador y de inmediato se crea la copia
   }
-  function clonar() { REG = null; S.fecha = M.hoyISO(); SUCIO = true; GUARDADO = ''; showErr = {}; STEP = 'operacion'; refresh(true); toast('Nuevo contrato basado en el anterior (aún sin guardar).'); }
+  function clonar() { REG = null; delete S.anexo; S.fecha = M.hoyISO(); SUCIO = true; GUARDADO = ''; showErr = {}; STEP = 'operacion'; refresh(true); toast('Nuevo contrato basado en el anterior (aún sin guardar).'); }
   function eliminar() {
     if (!REG) return;
     var ide = REG.id;
@@ -1428,6 +1472,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     campo.value = n; toca(); ROOT.querySelector('.adj-box').innerHTML = ajustesRows(); refresh(false);
   }
   host.addEventListener('change', function (e) {
+    var t = e.target; if (t && t.id === 'aps_anxFile') { if (!ro()) anexoElegido(t.files && t.files[0]); return; }
     var t = e.target; if (!t.getAttribute || !t.getAttribute('data-nadj') || ro()) return;
     setAjustes(Math.max(0, Math.min(15, parseInt(t.value, 10) || 0)), t);
   });
@@ -1478,6 +1523,9 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     else if (a === 'corrsave') guardaCorreccion();
     else if (a === 'corrcancel') salirCorreccion();
     else if (a === 'clone') clonar();
+    else if (a === 'anxadd') anexoAgregar();
+    else if (a === 'anxver') anexoVer();
+    else if (a === 'anxdel') anexoQuitar();
     else if (a === 'docs') copiaDocs();
     else if (a === 'eliminar') eliminar();
     else if (a === 'cancelar') cancelar();
