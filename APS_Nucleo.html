@@ -299,7 +299,7 @@ var APS_MODELO = (function () {
     return { tipo: 'venta', propietarios: [newProp()], contactoDir: newDir(), telFijo: '', telMovil: '', correo: '',
       inmDomicilio: '', escrituraNum: '', escrituraFecha: '', notarioNombre: '', notariaNumDe: '', folioReal: '', instalaciones: '',
       precio: '', ajustes: [], vigenciaVentaMeses: '', honorariosPct: '', ivaVenta: '', modalidadVenta: '',
-      rentaMonto: '', mantenimiento: '', vigenciaRentaMeses: '', duracion: '', duracionOtro: '', garantias: [], deposito: '', rentasAdelantadas: '',
+      rentaMonto: '', mantenimiento: '', mantenimientoMonto: '', vigenciaRentaMeses: '', duracion: '', duracionOtro: '', garantias: [], deposito: '', rentasAdelantadas: '',
       destino: '', menores: '', mascotas: '', modalidadRenta: '', ivaRenta: '', lugar: 'Ciudad de México', fecha: hoyISO() };
   }
   function P(o) { return Object.assign(newProp(), o); }
@@ -315,12 +315,12 @@ var APS_MODELO = (function () {
       contactoDir: { calle: 'Calle Amsterdam', numExt: '78', numInt: '5', colonia: 'Condesa', alcaldia: 'Cuauhtémoc', cp: '06100', estado: 'Ciudad de México' }, telMovil: '5587654321', correo: 'ricardo.mendoza@correo.example',
       inmDomicilio: 'Calle Durango No. 120, Interior 802, Colonia Roma Norte, Alcaldía Cuauhtémoc, C.P. 06700, Ciudad de México', escrituraNum: '58,730', escrituraFecha: '2015-03-19', notarioNombre: 'Lic. Héctor Ramos Cervantes', notariaNumDe: '203 de la Ciudad de México', folioReal: '2210987',
       precio: '6,200,000', ajustes: [{ fecha: '2026-11-20', monto: '6,000,000' }], vigenciaVentaMeses: '4', honorariosPct: '3.5', ivaVenta: 'incluido', modalidadVenta: 'no_exclusiva',
-      rentaMonto: '28,000', mantenimiento: 'incluido', vigenciaRentaMeses: '3', duracion: '2', garantias: ['poliza', 'fiador'], deposito: '28,000', rentasAdelantadas: '1', destino: 'habitacional', menores: 'SI', mascotas: 'NO', modalidadRenta: 'exclusiva', ivaRenta: 'mas' }); return d; },
+      rentaMonto: '28,000', mantenimiento: 'incluido', mantenimientoMonto: '1,500', vigenciaRentaMeses: '3', duracion: '2', garantias: ['poliza', 'fiador'], deposito: '28,000', rentasAdelantadas: '1', destino: 'habitacional', menores: 'SI', mascotas: 'NO', modalidadRenta: 'exclusiva', ivaRenta: 'mas' }); return d; },
     C: function () { var d = defaults(); Object.assign(d, { tipo: 'renta',
       propietarios: [P({ nombre: 'Gabriela Núñez Cárdenas', rfc: 'NUCG850922L58', idDoc: 'Pasaporte G12345678', idAutoridad: 'Secretaría de Relaciones Exteriores' })],
       contactoDir: { calle: 'Av. Universidad', numExt: '1330', numInt: '', colonia: 'Del Carmen', alcaldia: 'Coyoacán', cp: '04100', estado: 'Ciudad de México' }, telMovil: '5544332211', correo: 'gabriela.nunez@correo.example',
       inmDomicilio: 'Avenida Coyoacán No. 1450, Local 3, Colonia Del Valle Centro, Alcaldía Benito Juárez, C.P. 03100, Ciudad de México', escrituraNum: '22,118', escrituraFecha: '2019-11-27', notarioNombre: 'Lic. Sergio Paniagua Luna', notariaNumDe: '15 de la Ciudad de México', folioReal: '7712345',
-      rentaMonto: '9,500', mantenimiento: 'no_incluido', vigenciaRentaMeses: '2', duracion: 'otro', duracionOtro: '3 años', garantias: ['fiador'], deposito: '9,500', rentasAdelantadas: '0', destino: 'comercial', menores: 'SI', mascotas: 'SI', modalidadRenta: 'no_exclusiva', ivaRenta: 'incluido' }); return d; },
+      rentaMonto: '9,500', mantenimiento: 'no_incluido', mantenimientoMonto: '800', vigenciaRentaMeses: '2', duracion: 'otro', duracionOtro: '3 años', garantias: ['fiador'], deposito: '9,500', rentasAdelantadas: '0', destino: 'comercial', menores: 'SI', mascotas: 'SI', modalidadRenta: 'no_exclusiva', ivaRenta: 'incluido' }); return d; },
     D: function () { var d = defaults(); Object.assign(d, { tipo: 'venta',
       propietarios: [P({ nombre: 'Alberto Fuentes Lara', rfc: 'FULA700604TR2', idDoc: 'INE 3344556677889', idAutoridad: 'Instituto Nacional Electoral' }),
                      P({ nombre: 'Mariana Lara Espinosa', rfc: 'LAEM720130HB6', idDoc: 'INE 9988776655443', idAutoridad: 'Instituto Nacional Electoral' }),
@@ -505,7 +505,7 @@ var APS_DOC = (function (U, T) {
     var hon = 'Contrato de 1 año: 1 mes de arrendamiento ' + ivaR + '.<br>Contrato de 2 años: 1 mes y medio de arrendamiento ' + ivaR + '.<br>Contrato de 3 años o más: 2 meses de arrendamiento ' + ivaR + '.<br>Tarifa Mínima (si el arrendamiento es &lt; a $10,000.00 M.N.): $10,000.00 M.N. ' + ivaR + ', al igual que las gestiones por renovación con el mismo inquilino.';
     return seccion(5, 'Condiciones comerciales y de corretaje — Arrendamiento',
       fila('A', 'Arrendamiento base mensual', monto(d.rentaMonto)) +
-      fila('B', 'Mantenimiento mensual', d.mantenimiento === 'incluido' ? 'Incluido' : (d.mantenimiento === 'no_incluido' ? 'No incluido' : blank())) +
+      fila('B', 'Mantenimiento mensual', (d.mantenimiento === 'incluido' ? 'Incluido en la renta' : (d.mantenimiento === 'no_incluido' ? 'No incluido en la renta' : blank())) + '<br>' + k('Monto mensual: ') + monto(d.mantenimientoMonto)) +
       fila('C', 'Vigencia Forzosa', meses(d.vigenciaRentaMeses) + ' a partir de la firma. Sin renovación automática.' + nota('Al término de este plazo, se requiere obligatoriamente un nuevo acuerdo escrito (APS).')) +
       fila('D', 'Duración Mínima del arrendamiento', dur) +
       fila('E', 'Garantías Requeridas', gar.length ? esc(U.unir(gar)) : blank()) +
@@ -659,6 +659,8 @@ var APS_DOC = (function (U, T) {
       var rm = num(d.rentaMonto), dp = num(d.deposito), ra = num(d.rentasAdelantadas), vr = num(d.vigenciaRentaMeses);
       need('renta', 'rentaMonto', 'Renta mensual', isNaN(rm) || rm <= 0);
       need('renta', 'mantenimiento', 'Mantenimiento incluido o no', !d.mantenimiento);
+      var mm = num(d.mantenimientoMonto);
+      need('renta', 'mantenimientoMonto', 'Monto mensual del mantenimiento', isNaN(mm) || mm <= 0);
       need('renta', 'vigenciaRentaMeses', 'Vigencia en meses (arrendamiento)', isNaN(vr) || vr < 1);
       need('renta', 'duracion', 'Duración mínima del arrendamiento', !d.duracion);
       need('renta', 'duracionOtro', 'Especifica el otro plazo', d.duracion === 'otro' && vacio(d.duracionOtro));
@@ -705,6 +707,8 @@ var APS_DOC = (function (U, T) {
       var rm2 = num(d.rentaMonto), dp2 = num(d.deposito), ra2 = num(d.rentasAdelantadas), vr2 = num(d.vigenciaRentaMeses);
       if (!isNaN(rm2) && rm2 > 0) need('renta', 'rentaMonto', 'La renta mensual parece incorrecta (mínimo $' + LIM.rentaMin.toLocaleString('en-US') + ' y máximo $' + LIM.rentaMax.toLocaleString('en-US') + '): revísala', rm2 < LIM.rentaMin || rm2 > LIM.rentaMax);
       if (!isNaN(rm2) && rm2 > 0 && !isNaN(dp2) && dp2 > 0) need('renta', 'deposito', 'El depósito parece incorrecto (más de ' + LIM.depositoMeses + ' rentas): revísalo', dp2 > rm2 * LIM.depositoMeses);
+      var mm2 = num(d.mantenimientoMonto);
+      if (!isNaN(mm2) && mm2 > 0 && !isNaN(rm2) && rm2 > 0) need('renta', 'mantenimientoMonto', 'El mantenimiento parece incorrecto (mayor que la renta): revísalo', mm2 > rm2);
       if (!isNaN(ra2) && ra2 >= 0) need('renta', 'rentasAdelantadas', 'Las rentas adelantadas parecen incorrectas (máximo ' + LIM.rentasAdelMax + ')', ra2 > LIM.rentasAdelMax);
       if (!isNaN(vr2) && vr2 >= 1) need('renta', 'vigenciaRentaMeses', 'La vigencia parece incorrecta (máximo ' + LIM.mesesMax + ' meses)', vr2 > LIM.mesesMax);
     }

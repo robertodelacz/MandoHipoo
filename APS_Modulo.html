@@ -819,7 +819,8 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
   function stepRenta() {
     return card('🔑', 'Condiciones de arrendamiento', 'Apartado 5 de la carátula',
       fUnit('rentaMonto', 'Renta mensual base', 'money', 'M.N.', { ph: 'Ej. 18,000.00' }) +
-      fSeg('mantenimiento', 'Mantenimiento mensual', [['incluido', 'Incluido'], ['no_incluido', 'No incluido']]) +
+      fSeg('mantenimiento', 'Mantenimiento mensual', [['incluido', 'Incluido en la renta'], ['no_incluido', 'No incluido en la renta']]) +
+      fUnit('mantenimientoMonto', 'Monto mensual del mantenimiento', 'money', 'M.N.', { ph: 'Ej. 1,500.00' }) +
       '<div class="grid2">' + fUnit('vigenciaRentaMeses', 'Vigencia del acuerdo', 'meses', 'meses', { ph: 'Ej. 3' }) +
       fUnit('rentasAdelantadas', 'Rentas adelantadas', 'meses', 'meses', { ph: 'Ej. 1 (o 0)' }) + '</div>' +
       fSeg('duracion', 'Duración mínima del arrendamiento', [['1', '1 año forzoso'], ['2', '2 años'], ['otro', 'Otro plazo']]) +
@@ -1140,7 +1141,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
       toast('Folio ' + v.id + ' \u00b7 versi\u00f3n ' + v.version + ' \u00b7 aprob\u00f3 ' + v.aprobadoPor + ' el ' + v.aprobadoEn + (v.datosCoincidenConHuella === false ? ' \u00b7 \u26a0 LOS DATOS YA NO COINCIDEN CON LA HUELLA' : ' \u00b7 datos \u00edntegros (huella ' + String(v.huellaDatos).slice(0, 12) + ')'), v.datosCoincidenConHuella === false);
     }, 'Verificando…');
   }
-  var ETQ = { tipo: 'Tipo de operaci\u00f3n', precio: 'Precio de venta', honorariosPct: 'Honorarios venta (%)', vigenciaVentaMeses: 'Vigencia venta (meses)', ivaVenta: 'IVA venta', modalidadVenta: 'Modalidad venta', rentaMonto: 'Renta mensual',
+  var ETQ = { tipo: 'Tipo de operaci\u00f3n', precio: 'Precio de venta', honorariosPct: 'Honorarios venta (%)', vigenciaVentaMeses: 'Vigencia venta (meses)', ivaVenta: 'IVA venta', modalidadVenta: 'Modalidad venta', rentaMonto: 'Renta mensual', mantenimiento: 'Mantenimiento', mantenimientoMonto: 'Monto del mantenimiento',
     deposito: 'Dep\u00f3sito', rentasAdelantadas: 'Rentas adelantadas', vigenciaRentaMeses: 'Vigencia renta (meses)', inmDomicilio: 'Domicilio del inmueble', escrituraNum: 'N\u00fam. de escritura', escrituraFecha: 'Fecha de escritura', notarioNombre: 'Notario',
     notariaNumDe: 'Notar\u00eda', folioReal: 'Folio real', instalaciones: 'Instalaciones', telMovil: 'Tel\u00e9fono m\u00f3vil', telFijo: 'Tel\u00e9fono fijo', correo: 'Correo', lugar: 'Lugar de firma', fecha: 'Fecha de firma', nombre: 'Nombre', rfc: 'RFC',
     idDoc: 'Identificaci\u00f3n', idAutoridad: 'Autoridad', calle: 'Calle', numExt: 'N\u00fam. exterior', numInt: 'N\u00fam. interior', colonia: 'Colonia', cp: 'C.P.', estado: 'Estado', alcaldia: 'Alcald\u00eda/Municipio', monto: 'Nuevo precio' };
