@@ -847,7 +847,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     }
     var aprobado = REG && REG.estado === 'APROBADO' && !corrigiendo();
     return '<div class="anx"><div class="anx-i">📄</div><div class="anx-t"><b>' + esc(a.nombre) + '</b><span>' + a.paginas + (a.paginas === 1 ? ' hoja' : ' hojas') + ' · ' + kb(a.bytes) + (a.subidoPor ? ' · lo subió ' + esc(a.subidoPor) : '') + '</span></div>' +
-      '<div class="anx-b"><button type="button" class="btn-mini" data-act="anxver" data-keep>Ver</button>' +
+      '<div class="anx-b"><button type="button" class="btn-mini" data-act="anxver" data-keep>Ver</button>' + (USER.rol === 'coordinador' && !aprobado ? '<button type="button" class="btn-mini" data-act="anxpdf" data-keep>Ver PDF completo (borrador)</button>' : '') +
       (bloqueado ? '' : '<button type="button" class="btn-mini" data-act="anxadd">Cambiar</button><button type="button" class="btn-mini" data-act="anxdel">Quitar</button>') + '</div></div>' +
       (bloqueado ? '' : '<input type="file" id="aps_anxFile" accept="application/pdf,.pdf" style="display:none" data-keep>') +
       note(aprobado ? 'Ya va incluido al final del PDF aprobado (después de las hojas del contrato).' : 'Se une al final del contrato al aprobarlo o generarlo. «Ver contrato completo» e «Imprimir» muestran solo el contrato; el inventario se ve con «Ver».');
@@ -860,7 +860,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     var fr = new FileReader();
     fr.onload = function () {
       var b64 = String(fr.result).split(',')[1] || '';
-      srv('APS_anexoSubir', [b64, file.name], function (meta) { S.anexo = meta; toca(); renderStep(); toast('Inventario adjuntado (' + meta.paginas + (meta.paginas === 1 ? ' hoja' : ' hojas') + '). Recuerda guardar el borrador.'); }, 'Subiendo el inventario… (puede tardar unos segundos)', 120000);
+      srv('APS_anexoSubir', [b64, file.name], function (meta) { S.anexo = meta; toca(); renderStep(); renderPreview(); toast('Inventario adjuntado (' + meta.paginas + (meta.paginas === 1 ? ' hoja' : ' hojas') + '). Recuerda guardar el borrador.'); }, 'Subiendo el inventario… (puede tardar unos segundos)', 120000);
     };
     fr.onerror = function () { toast('No se pudo leer el archivo. Inténtalo de nuevo.', true); };
     fr.readAsDataURL(file);
@@ -872,9 +872,17 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
       toast('Descarga iniciada: ' + r.nombre);
     }, 'Preparando el inventario…', 90000);
   }
+  function anexoPdfBorrador() {
+    if (!S.anexo || USER.rol !== 'coordinador') return;
+    if (ISS.length) { toast('Completa los datos pendientes para armar el PDF completo.', true); return; }
+    srv('APS_pdfBorrador', [S, REG ? REG.id : null], function (r) {
+      var a = document.createElement('a'); a.href = 'data:application/pdf;base64,' + r.base64; a.download = r.nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      toast('PDF en borrador descargado: ' + (r.hojasContrato + r.hojasAnexo) + ' hojas (contrato ' + r.hojasContrato + ' + inventario ' + r.hojasAnexo + '). Es solo para revisar: el definitivo se genera al aprobar.');
+    }, 'Armando el PDF completo… (puede tardar unos segundos)', 120000);
+  }
   function anexoQuitar() {
     if (!S.anexo || ro()) return;
-    confirma({ titulo: '¿Quitar el inventario fotográfico?', texto: 'El contrato saldrá sin inventario. Podrás adjuntar otro PDF cuando quieras.', ok: 'Sí, quitar', cancelar: 'Volver', tono: 'warn', icono: 'basura' }, function () { delete S.anexo; toca(); renderStep(); toast('Inventario quitado. Recuerda guardar el borrador.'); });
+    confirma({ titulo: '¿Quitar el inventario fotográfico?', texto: 'El contrato saldrá sin inventario. Podrás adjuntar otro PDF cuando quieras.', ok: 'Sí, quitar', cancelar: 'Volver', tono: 'warn', icono: 'basura' }, function () { delete S.anexo; toca(); renderStep(); renderPreview(); toast('Inventario quitado. Recuerda guardar el borrador.'); });
   }
   function stepFirma() {
     var n = ISS.length, firm = D.firmantes(S).length;
@@ -949,7 +957,17 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
   /* En pantalla (vista previa y «Ver contrato completo»): el coordinador ve el contrato limpio; el asesor lo ve con la marca BORRADOR mientras no esté aprobado; aprobado se ve completo para todos.
      Lo que se imprime conserva la marca BORRADOR mientras el contrato no esté aprobado. */
   function marcaPantalla() { return (IN_GAS && USER.rol === 'coordinador') ? false : marcaBorrador(); }
-  function docHtml(pantalla) { return D.render(S, { borrador: pantalla ? marcaPantalla() : marcaBorrador() }); }
+  function docHtml(pantalla) { return D.render(S, { borrador: pantalla ? marcaPantalla() : marcaBorrador() }) + (pantalla ? anexoMarcador() : ''); }
+  /* Al final de la vista previa (no de la impresión): dónde va el inventario y cuántas hojas lleva. */
+  function anexoMarcador() {
+    var a = S.anexo; if (!IN_GAS || !a) return '';
+    var aprobado = REG && REG.estado === 'APROBADO' && !corrigiendo();
+    return '<div style="margin:26px 40px 96px;border:2px dashed #35B7C5;border-radius:12px;background:#f2fbfc;padding:22px 26px;text-align:center;font-family:Arial,sans-serif;color:#1A224A;page-break-before:always">' +
+      '<div style="font-size:11px;letter-spacing:2px;font-weight:bold;color:#0F8594">ANEXO · INVENTARIO FOTOGRÁFICO</div>' +
+      '<div style="font-size:15px;font-weight:bold;margin:8px 0 4px;word-break:break-word">' + esc(a.nombre) + '</div>' +
+      '<div style="font-size:13px;color:#4a5578">' + a.paginas + (a.paginas === 1 ? ' hoja' : ' hojas') + '</div>' +
+      '<div style="font-size:12.5px;color:#4a5578;margin-top:10px;line-height:1.5">' + (aprobado ? 'Ya va incluido al final del PDF aprobado, después de las hojas del contrato.' : 'El PDF final llevará las hojas del contrato seguidas de estas ' + a.paginas + (a.paginas === 1 ? ' hoja' : ' hojas') + ' del inventario.') + '</div></div>';
+  }
   function renderPreview() {
     var h = docHtml(true);
     $('aps_pvPaper').innerHTML = h; 
@@ -1526,6 +1544,7 @@ body:has(#aps-root .modal.open) #ayMenu,body:has(#aps-root .modal.open) #ayNota,
     else if (a === 'anxadd') anexoAgregar();
     else if (a === 'anxver') anexoVer();
     else if (a === 'anxdel') anexoQuitar();
+    else if (a === 'anxpdf') anexoPdfBorrador();
     else if (a === 'docs') copiaDocs();
     else if (a === 'eliminar') eliminar();
     else if (a === 'cancelar') cancelar();

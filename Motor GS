@@ -448,14 +448,14 @@ function APS_pdfBlob_(datos, nombre, servidor) { return APS_pdfAjustado_(datos, 
  * Genera el PDF y dice qué hizo con las hojas. nivel: 'auto' (compacta lo mínimo necesario SOLO si así se ahorra una hoja) o
  * 0 normal · 1 · 2 · 3 muy compacto (fijo). Devuelve { blob, hojas, hojasNormal, nivel, nota }; hojas = 0 si no se pudo contar.
  */
-function APS_pdfAjustado_(datos, nombre, servidor, nivel) {
+function APS_pdfAjustado_(datos, nombre, servidor, nivel, marca) {
   if (APS_CONFIG.PDF_METODO === 'docx') {
     var doc = APS_docDesdeDocx_(datos, nombre + ' (temporal)', '');
     var pdf = doc.getAs('application/pdf').setName(nombre + '.pdf');
     try { doc.setTrashed(true); } catch (e) { Logger.log('No se pudo borrar el Doc temporal: ' + e.message); }
     return { blob: pdf, hojas: APS_paginasPdf_(pdf), hojasNormal: 0, nivel: 0, nota: 'método Word: sin ajuste de hojas' };
   }
-  var conv = function (dens) { return Utilities.newBlob(APS_htmlDocumento_(datos, servidor, '', dens), 'text/html', nombre + '.html').getAs('application/pdf').setName(nombre + '.pdf'); };
+  var conv = function (dens) { return Utilities.newBlob(APS_htmlDocumento_(datos, servidor, marca || '', dens), 'text/html', nombre + '.html').getAs('application/pdf').setName(nombre + '.pdf'); };
   if (nivel !== 'auto' && nivel !== undefined && nivel !== null) {                       // elegido a mano
     var fijo = conv(Number(nivel) || 0);
     return { blob: fijo, hojas: APS_paginasPdf_(fijo), hojasNormal: 0, nivel: Number(nivel) || 0, nota: 'nivel elegido a mano' };
@@ -968,8 +968,8 @@ function APS_anexoValida_(pedido, previo, u) {
   return { id: pedido.id, nombre: APS_nombreAnexo_(pedido.nombre), paginas: info.paginas, bytes: bytes.length, sha: APS_sha256_(bytes), subidoPor: desc.por, subidoEn: desc.en || '' };
 }
 /** Une el contrato con su anexo (si lo tiene). Devuelve lo mismo que APS_pdfAjustado_ con el PDF ya unido; hojas = hojas del contrato; anexoPaginas = las del inventario. */
-function APS_pdfConAnexo_(datos, nombre, nivel) {
-  var r = APS_pdfAjustado_(datos, nombre, false, nivel);
+function APS_pdfConAnexo_(datos, nombre, nivel, marca) {
+  var r = APS_pdfAjustado_(datos, nombre, false, nivel, marca);
   if (!datos.anexo || !datos.anexo.id) return r;
   APS_requierePdfUnion_();
   var archivo = DriveApp.getFileById(datos.anexo.id), bytesA = APS_bytesPdfDrive_(archivo);
@@ -979,6 +979,23 @@ function APS_pdfConAnexo_(datos, nombre, nivel) {
   r.anexoPaginas = un.paginasAnexo;
   r.nota = (r.nota ? r.nota + ' · ' : '') + 'con inventario (' + un.paginasAnexo + ' hojas)';
   return r;
+}
+/**
+ * SOLO COORDINACIÓN: «Ver PDF completo (borrador)». Arma, con los datos que se están viendo en pantalla, el PDF unido (contrato + inventario) tal como
+ * saldría al aprobar, con una banda de BORRADOR – SIN VALIDEZ. NO se guarda en Drive, NO genera huella ni cambia el contrato; solo queda en Auditoría.
+ */
+function APS_pdfBorrador(datos, id) {
+  var u = APS_requiereAdmin_(), N = APS_nucleo_();
+  var o = APS_limpiarDatos_(datos), previo = null;
+  if (id) { var f = APS_buscar_(id); if (!f) throw new Error('No se encontró el registro.'); try { previo = JSON.parse(f.reg.json).anexo || null; } catch (e) {} }
+  var anx = APS_anexoValida_(o.anexo, previo, u); if (anx) o.anexo = anx; else delete o.anexo;
+  var pend = N.D.validar(o);
+  if (pend.length) throw new Error('Faltan ' + pend.length + ' dato(s) para armar el PDF: ' + pend.slice(0, 3).map(function (p) { return p.msg; }).join('; '));
+  var nom = 'BORRADOR - ' + APS_nombrePdf_({ id: id || 'sin folio' }, o);
+  var r = APS_pdfConAnexo_(o, nom, 'auto', 'BORRADOR – SIN VALIDEZ · No es el contrato definitivo');
+  var bytes = r.blob.getBytes();
+  APS_audit_('APS', 'PDF_BORRADOR', id || '(sin guardar)', 'Vista del PDF completo en borrador · contrato ' + (r.hojas || '¿?') + ' hojas' + (r.anexoPaginas ? ' + inventario ' + r.anexoPaginas : ''));
+  return { nombre: nom + '.pdf', base64: Utilities.base64Encode(bytes), hojasContrato: r.hojas || 0, hojasAnexo: r.anexoPaginas || 0 };
 }
 /** Para ver el inventario desde la plataforma (borrador o aprobado): {nombre, base64}. Solo quien ve el contrato, o quien subió ese archivo. */
 function APS_anexoObtener(id, anexoId) {
