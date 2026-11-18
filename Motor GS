@@ -66,6 +66,12 @@ var APS_CONFIG = {
   TABLERO_URL: 'https://script.google.com/a/macros/cualli.mx/s/AKfycbyAcu60En08nsL68IWT1sPNEXcOC-KD8B6C6mMYbuzD4yNFI7LJG1lqo8JtT0BUYn5M8Q/exec',
   // Al enviar un Pre PLD a revisión, ¿se comparte el archivo con la coordinación como "comentarista"?
   PLD_COMPARTIR_REVISOR: true,
+  // ── PAUSA POR ACTUALIZACIÓN ──  true = NADIE entra (ni asesores, ni coordinación, ni administración): se ve la pantalla «Estamos actualizando el sitio».
+  // Para reabrir: pon false, guarda y publica una versión nueva.  (Atajo sin publicar, una vez que esta versión ya esté publicada: ejecuta a mano MANTENIMIENTO_activar / MANTENIMIENTO_desactivar.)
+  MANTENIMIENTO: true,
+  MANTENIMIENTO_MENSAJE: 'Estamos actualizando el sitio',
+  MANTENIMIENTO_DETALLE: 'Volvemos en unos minutos. No necesitas hacer nada: esta pantalla te avisa cuando ya puedas entrar.',
+  MANTENIMIENTO_PASAN_ADMINS: false,      // false = ni siquiera la administración técnica entra (pausa total). true = solo ADMINISTRADORES_TECNICOS pueden entrar a probar.
   BLOQUEO_ACCESO: true,      // true = la pestaña «Asesores» manda sobre TODA la plataforma (APS, Pre PLD, consola, tablero): quien no esté, o esté con Activo = NO, ve la pantalla de acceso restringido. false = apaga el bloqueo.
   PLD_DESDE: '2026-10-08 18:45',      // «Corte» del Pre PLD: solo cuentan los documentos generados desde esta fecha y hora (aaaa-mm-dd hh:mm). Vacío ('') = cuenta toda la bitácora.
   // Logo "Logo Hipo.png" en Drive (se lee desde el servidor, no depende de enlaces públicos).
@@ -344,6 +350,7 @@ function APS_esAdminTecnico_(email) {
  */
 function APS_acceso_() {
   var email = APS_correo_();
+  if (APS_mantenimientoActivo_() && !(APS_CONFIG.MANTENIMIENTO_PASAN_ADMINS === true && email && APS_esAdminTecnico_(email))) return { ok: false, email: email, motivo: 'mantenimiento' };      // pausa total: gana sobre todo lo demás
   if (APS_CONFIG.BLOQUEO_ACCESO === false) return { ok: true, email: email };
   if (!email) return { ok: false, email: '', motivo: 'identidad' };
   if (APS_esAdminTecnico_(email) && !APS_inactivos_()[email]) return { ok: true, email: email };
@@ -353,8 +360,28 @@ function APS_acceso_() {
 /** Lanza error (con la marca ACCESO_DENEGADO, que la pantalla reconoce) si la cuenta no tiene acceso. */
 function APS_requiereAcceso_() {
   var a = APS_acceso_();
+  if (!a.ok && a.motivo === 'mantenimiento') throw new Error('ACCESO_DENEGADO: MANTENIMIENTO · ' + APS_CONFIG.MANTENIMIENTO_MENSAJE + '.');
   if (!a.ok) throw new Error('ACCESO_DENEGADO: ' + (a.motivo === 'identidad' ? 'No se pudo identificar tu cuenta de Google.' : 'Tu acceso a la plataforma está desactivado. Solicítalo a la coordinación.'));
   return a;
+}
+/** ¿La plataforma está en pausa por actualización? Sí si MANTENIMIENTO es true en la configuración O si se activó con MANTENIMIENTO_activar (propiedad del script, no requiere publicar). */
+function APS_mantenimientoActivo_() {
+  if (APS_CONFIG.MANTENIMIENTO === true) return true;
+  try { return PropertiesService.getScriptProperties().getProperty('APS_MANTENIMIENTO') === '1'; } catch (e) { return false; }
+}
+/** La pantalla la consulta sola cada ~30 s para avisar cuando ya se puede entrar. Solo responde sí/no (no revela nada). */
+function APS_estadoMantenimiento() { return { activo: APS_mantenimientoActivo_() }; }
+/** Atajo SIN publicar: ejecútala a mano (Ejecutar) para cerrar la plataforma. Requiere que esta versión ya esté publicada. */
+function MANTENIMIENTO_activar() { APS_soloMantenimiento_(); PropertiesService.getScriptProperties().setProperty('APS_MANTENIMIENTO', '1'); APS_audit_('MANTENIMIENTO', 'ACTIVAR', APS_correo_(), 'Pausa por actualización activada'); Logger.log('Pausa ACTIVADA: nadie entra hasta que ejecutes MANTENIMIENTO_desactivar (y MANTENIMIENTO sea false en la configuración).'); }
+/** Reabre la plataforma (solo quita el atajo; si MANTENIMIENTO está en true en la configuración, ponlo en false y publica). */
+function MANTENIMIENTO_desactivar() { APS_soloMantenimiento_(); PropertiesService.getScriptProperties().deleteProperty('APS_MANTENIMIENTO'); APS_audit_('MANTENIMIENTO', 'DESACTIVAR', APS_correo_(), 'Pausa por actualización desactivada'); Logger.log(APS_CONFIG.MANTENIMIENTO === true ? 'Quitado el atajo, PERO MANTENIMIENTO sigue en true en la configuración: ponlo en false y publica una versión nueva.' : 'Pausa DESACTIVADA: la plataforma ya está abierta.'); }
+/** Pantalla de pausa (archivo Mantenimiento.html): la misma de bienvenida, con el aviso. No registra nada en Auditoría. */
+function APS_paginaMantenimiento_() {
+  var t = HtmlService.createTemplateFromFile('Mantenimiento');
+  t.mensaje = APS_CONFIG.MANTENIMIENTO_MENSAJE || 'Estamos actualizando el sitio'; t.detalle = APS_CONFIG.MANTENIMIENTO_DETALLE || '';
+  t.url = ''; try { t.url = ScriptApp.getService().getUrl() || ''; } catch (e) { t.url = ''; }
+  t.logo = ''; try { t.logo = APS_logoDataUri_(); } catch (e) { t.logo = ''; }
+  return t.evaluate().setTitle('Estamos actualizando el sitio').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL).addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 /** Página «Acceso restringido» (archivo Bloqueo.html). Registra el intento en Auditoría (máx. uno cada 10 min por cuenta). */
 function APS_paginaBloqueo_(a) {

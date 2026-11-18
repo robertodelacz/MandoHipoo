@@ -199,6 +199,7 @@ var CONFIG = {
 
 function doGet() {
   var acceso = APS_acceso_();      // la pestaña «Asesores» (Motor GS) decide quién entra a TODA la plataforma
+  if (!acceso.ok && acceso.motivo === 'mantenimiento') return APS_paginaMantenimiento_();      // pausa por actualización: la pantalla del logo con el aviso
   if (!acceso.ok) return APS_paginaBloqueo_(acceso);
   return HtmlService.createTemplateFromFile('Interfaz').evaluate()
     .setTitle('Generador de Documentos Hipoo')

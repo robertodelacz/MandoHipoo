@@ -1262,6 +1262,25 @@
     #bloqueoVivo p { margin: 0 0 22px; font-size: 15px; line-height: 1.6; color: #4a5479; }
     #bloqueoVivo .bv-b { display: flex; align-items: center; justify-content: center; min-height: 52px; margin-top: 10px; border-radius: 14px; background: #364494; color: #fff; text-decoration: none; font: 800 15.5px 'Montserrat', sans-serif; border-bottom: 4px solid #35B7C5; }
     #bloqueoVivo .bv-b.sec { background: #eef2fb; color: #364494; border-bottom: 0; }
+    /* Pausa por actualización con la página ya abierta: misma pantalla del splash, encima de todo y sin salida */
+    #mantoVivo { position: fixed; inset: 0; z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px; text-align: center; font-family: 'Inter', sans-serif;
+      background: radial-gradient(120% 90% at 50% 0%, #364494 0%, #232d61 48%, #11163a 100%); }
+    #mantoVivo.on { display: flex; animation: scrIn .5s both; }
+    #mantoVivo::before { content: ""; position: absolute; inset: 0; opacity: .5; pointer-events: none; background-image: linear-gradient(rgba(53, 183, 197, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(53, 183, 197, .07) 1px, transparent 1px); background-size: 46px 46px; -webkit-mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 70%); mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 70%); }
+    #mantoVivo .mv-logo { position: relative; background: #fff; border-radius: 22px; padding: 22px 48px; box-shadow: 0 24px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(255, 255, 255, .5); }
+    #mantoVivo .mv-logo img { display: block; height: 96px; width: auto; max-width: min(300px, 70vw); object-fit: contain; }
+    #mantoVivo .mv-logo b { display: block; font: 700 56px 'Fraunces', Georgia, serif; color: #364494; letter-spacing: -.5px; }
+    #mantoVivo .mv-tag { position: relative; font: 800 12px 'Montserrat', sans-serif; letter-spacing: 6px; text-transform: uppercase; color: #bff3f8; }
+    #mantoVivo .mv-bar { position: relative; width: 190px; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .14); overflow: hidden; }
+    #mantoVivo .mv-bar::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, #35B7C5, #fff); transform: translateX(-100%); animation: mvBar 1.7s cubic-bezier(.5, 0, .2, 1) infinite; }
+    @keyframes mvBar { to { transform: translateX(100%); } }
+    #mantoVivo .mv-pill { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: rgba(255, 185, 56, .14); border: 1px solid rgba(255, 185, 56, .45); color: #FFB938; font: 800 11px 'Montserrat', sans-serif; letter-spacing: 2.2px; text-transform: uppercase; }
+    #mantoVivo .mv-pill i { width: 8px; height: 8px; border-radius: 50%; background: #FFB938; }
+    #mantoVivo h1 { position: relative; margin: 0; max-width: 560px; font: 600 clamp(28px, 6.4vw, 42px)/1.12 'Fraunces', Georgia, serif; color: #fff; letter-spacing: -.3px; }
+    #mantoVivo p { position: relative; margin: 0; max-width: 460px; font-size: 15px; line-height: 1.6; color: #a9bfe0; }
+    #mantoVivo .mv-ya { position: relative; display: none; align-items: center; justify-content: center; min-height: 52px; padding: 0 30px; border-radius: 14px; background: #35B7C5; color: #11163a; text-decoration: none; font: 800 15.5px 'Montserrat', sans-serif; border-bottom: 4px solid #0F8594; }
+    #mantoVivo.listo .mv-ya { display: inline-flex; }
+    body.manto { overflow: hidden; }
     body.bloqueado { overflow: hidden; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } .sp-p { display: none; } }
 
@@ -1872,6 +1891,12 @@
     <ul class="hm-fl" id="hmFeed"></ul>
     <div class="hm-ff"><span id="hmFeedPie">Se actualiza sola</span><button type="button" id="hmLeer" disabled>Marcar como leídas</button></div>
   </aside>
+</div>
+<div id="mantoVivo" role="alertdialog" aria-modal="true" aria-labelledby="mvT">
+  <div class="mv-logo"><b>hipoo<span style="color:#0f8594">.mx</span></b></div><div class="mv-tag">Mesa de control</div><div class="mv-bar"></div>
+  <span class="mv-pill"><i></i><span id="mvPill">Pausa por actualización</span></span>
+  <h1 id="mvT">Estamos actualizando el sitio</h1><p id="mvP">Volvemos en unos minutos. Lo que ya tenías guardado está a salvo. Esta pantalla te avisa cuando ya puedas entrar.</p>
+  <a class="mv-ya" id="mvYa" href="#" target="_top">Ya puedes entrar</a>
 </div>
 <div id="bloqueoVivo" role="alertdialog" aria-modal="true" aria-labelledby="bvT">
   <div class="bv-c"><div class="bv-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.500" y="10.500" width="15" height="10" rx="2.500"/><path d="M8 10.500V8a4 4 0 0 1 8 0v2.500"/><path d="M12 14.500v2.500"/></svg></div>
@@ -2926,8 +2951,22 @@ function logoListo() { if (window.LOGO_OK) return; window.LOGO_OK = true; try { 
     google.script.run.withSuccessHandler(function (r) { HM.cargando = false; aplicaPanel(r); })
       .withFailureHandler(function (e) { HM.cargando = false; if (window.HIPOO_acceso && HIPOO_acceso(e)) return; HM.errores++; pintaLive(); }).APS_panel();
   }
+  function muestraMantenimiento() {
+    var o = document.getElementById('mantoVivo'); if (!o || o.classList.contains('on')) return;
+    var lg = o.querySelector('.mv-logo'); if (lg && HM_LOGO) { var im = document.createElement('img'); im.alt = 'Hipoo'; im.src = HM_LOGO; lg.innerHTML = ''; lg.appendChild(im); }
+    var ya = document.getElementById('mvYa'), u = <?!= JSON.stringify(ScriptApp.getService().getUrl() || '') ?>; if (ya) { if (u) ya.href = u; else ya.style.display = 'none'; }
+    o.classList.add('on'); document.body.classList.add('manto');
+    function pregunta() {      // cada 30 s: ¿ya se reabrió? Entonces aparece «Ya puedes entrar» (no recarga sola, para no tirar nada de golpe)
+      if (document.hidden) return;
+      google.script.run.withSuccessHandler(function (r) {
+        if (r && r.activo === false) { o.classList.add('listo'); document.getElementById('mvPill').textContent = 'Listo'; document.getElementById('mvT').textContent = 'Ya terminamos'; document.getElementById('mvP').textContent = 'La plataforma volvió a abrir. Toca el botón para entrar.'; if (HM.mantTimer) clearInterval(HM.mantTimer); }
+      }).withFailureHandler(function () { }).APS_estadoMantenimiento();
+    }
+    HM.mantTimer = setInterval(pregunta, 30000);
+  }
   window.HIPOO_acceso = function (e) {      // el servidor responde ACCESO_DENEGADO cuando la cuenta fue dada de baja con la página abierta
     var m = String((e && e.message) || e || ''); if (!/ACCESO_DENEGADO/.test(m)) return false;
+    if (/MANTENIMIENTO/.test(m)) { HM.bloqueado = true; HM.mantenimiento = true; muestraMantenimiento(); return true; }      // pausa por actualización: pantalla del splash, sin salida
     HM.bloqueado = true; var o = document.getElementById('bloqueoVivo'); if (!o) return true;
     var sol = document.getElementById('bvSol'); if (sol) sol.href = 'mailto:' + <?!= JSON.stringify((APS_CONFIG.REPORTES_CORREOS || []).join(',')) ?> + '?subject=' + encodeURIComponent('Solicitud de acceso a la plataforma Hipoo') + '&body=' + encodeURIComponent('Hola, solicito que reactiven mi acceso. Mi cuenta es ' + (USUARIO.email || '') + '.');
     var rec = document.getElementById('bvRec'); if (rec) rec.href = <?!= JSON.stringify(ScriptApp.getService().getUrl() || '') ?> || '#';

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estamos actualizando el sitio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&display=swap" rel="stylesheet">
+  <style>
+    /* Pausa por actualización de la plataforma Hipoo. Es la misma pantalla de bienvenida (splash), con el aviso y sin salida:
+       se muestra a TODAS las cuentas mientras MANTENIMIENTO esté activo (Motor GS). */
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body { font-family: 'Inter', Arial, sans-serif; overflow: hidden; }
+    #splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 24px; text-align: center;
+      background: radial-gradient(120% 90% at 50% 0%, #364494 0%, #232d61 48%, #11163a 100%); }
+    #splash::before { content: ""; position: absolute; inset: 0; opacity: .5; background-image: linear-gradient(rgba(53, 183, 197, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(53, 183, 197, .07) 1px, transparent 1px); background-size: 46px 46px; -webkit-mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 70%); mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 70%); }
+    .sp-logo { position: relative; overflow: hidden; background: #fff; border-radius: 22px; padding: 22px 48px; box-shadow: 0 24px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(255, 255, 255, .5); animation: spIn .9s cubic-bezier(.2, .9, .25, 1) both; }
+    .sp-logo img { display: block; height: 110px; width: auto; max-width: min(320px, 70vw); object-fit: contain; }
+    .sp-logo b { display: block; font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: 64px; color: #364494; letter-spacing: -.5px; }
+    .sp-logo b i { color: #0f8594; font-style: normal; }
+    .sp-logo::after { content: ""; position: absolute; top: 0; bottom: 0; left: -70%; width: 45%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .9), transparent); transform: skewX(-20deg); animation: spBrillo 4.5s 1s ease-in-out infinite; }
+    .sp-tag { position: relative; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 6px; text-transform: uppercase; color: #bff3f8; animation: spUp .8s .45s both; }
+    .sp-bar { position: relative; width: 190px; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .14); overflow: hidden; animation: spUp .6s .6s both; }
+    .sp-bar::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, #35B7C5, #fff); transform: translateX(-100%); animation: spBar 1.7s cubic-bezier(.5, 0, .2, 1) infinite; }
+    .pausa { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; animation: spUp .8s .8s both; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: rgba(255, 185, 56, .14); border: 1px solid rgba(255, 185, 56, .45); color: #FFB938; font: 800 11px 'Montserrat', sans-serif; letter-spacing: 2.2px; text-transform: uppercase; }
+    .pill i { width: 8px; height: 8px; border-radius: 50%; background: #FFB938; animation: latido 1.6s ease-in-out infinite; }
+    h1 { margin: 0; max-width: 560px; font: 600 clamp(28px, 6.4vw, 42px)/1.12 'Fraunces', Georgia, serif; color: #fff; letter-spacing: -.3px; }
+    .det { margin: 0; max-width: 460px; font-size: 15px; line-height: 1.6; color: #a9bfe0; }
+    .ya { display: none; align-items: center; justify-content: center; min-height: 52px; padding: 0 30px; margin-top: 4px; border-radius: 14px; background: #35B7C5; color: #11163a; text-decoration: none; font: 800 15.5px 'Montserrat', sans-serif; border-bottom: 4px solid #0F8594; box-shadow: 0 14px 30px rgba(0, 0, 0, .3); }
+    .listo .ya { display: inline-flex; animation: spUp .5s both; }
+    .listo .pill { background: rgba(53, 183, 197, .16); border-color: rgba(53, 183, 197, .6); color: #8fe1ea; }
+    .listo .pill i { background: #35B7C5; animation: none; }
+    .listo .sp-bar { opacity: .35; }
+    .sp-p { position: absolute; bottom: -12px; border-radius: 50%; background: rgba(143, 225, 234, .55); pointer-events: none; animation: spSube linear infinite; }
+    @keyframes spIn { from { opacity: 0; transform: translateY(18px) scale(.94); } to { opacity: 1; transform: none; } }
+    @keyframes spUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes spBar { to { transform: translateX(100%); } }
+    @keyframes spBrillo { 0% { left: -70%; } 35%, 100% { left: 140%; } }
+    @keyframes latido { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
+    @keyframes spSube { from { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } to { transform: translateY(-105vh); opacity: 0; } }
+    @media (max-width: 480px) { .sp-logo { padding: 18px 30px; } .sp-logo img { height: 84px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
+  </style>
+</head>
+<body>
+  <main id="splash" role="status" aria-live="polite">
+    <div class="sp-logo"><? if (logo) { ?><img src="<?!= logo ?>" alt="Hipoo"><? } else { ?><b>hipoo<i>.mx</i></b><? } ?></div>
+    <div class="sp-tag">Mesa de control</div>
+    <div class="sp-bar"></div>
+    <div class="pausa" id="pausa">
+      <span class="pill"><i></i><span id="pillT">Pausa por actualización</span></span>
+      <h1 id="tit"><?= mensaje ?></h1>
+      <p class="det" id="det"><?= detalle ?></p>
+      <? if (url) { ?><a class="ya" id="ya" href="<?= url ?>" target="_top" rel="noopener">Ya puedes entrar</a><? } ?>
+    </div>
+  </main>
+  <script>
+    (function () {
+      var sp = document.getElementById('splash');
+      if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        for (var k = 0; k < 16; k++) { var p = document.createElement('i'); p.className = 'sp-p'; p.style.cssText = 'left:' + (Math.random() * 100) + '%;animation-delay:' + (Math.random() * 2).toFixed(2) + 's;animation-duration:' + (3 + Math.random() * 3).toFixed(2) + 's;width:' + (3 + Math.random() * 5).toFixed(1) + 'px;height:' + (3 + Math.random() * 5).toFixed(1) + 'px'; sp.appendChild(p); }
+      }
+      // Cada 30 s pregunta al servidor si ya se reabrió; cuando sí, aparece el botón «Ya puedes entrar» (no entra solo: así nadie pierde la pantalla de golpe).
+      function revisa() {
+        if (document.hidden || !(window.google && google.script && google.script.run)) return;
+        try {
+          google.script.run.withSuccessHandler(function (r) {
+            if (r && r.activo === false) {
+              document.body.classList.add('listo');
+              document.getElementById('pillT').textContent = 'Listo';
+              document.getElementById('tit').textContent = 'Ya terminamos';
+              document.getElementById('det').textContent = 'La plataforma volvió a abrir. Toca el botón para entrar.';
+            }
+          }).withFailureHandler(function () { /* sin red o sin respuesta: se vuelve a intentar en 30 s */ }).APS_estadoMantenimiento();
+        } catch (e) { /* se reintenta */ }
+      }
+      setInterval(revisa, 30000);
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) revisa(); });
+    })();
+  </script>
+</body>
+</html>
